@@ -1,0 +1,257 @@
+@model DynamicForms.RazorPages.Models.ModalDisplayViewModel
+
+<div class="modal fade" id="modal_@Model.Field.Id" tabindex="-1" aria-labelledby="modal_label_@Model.Field.Id" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal_label_@Model.Field.Id">
+                    @Model.Field.Text.Description.ToString(Model.Language)
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <form id="modalForm_@Model.Field.Id" class="modal-form">
+                <div class="modal-body">
+                    @if (Model.ModalFields?.Any() == true)
+                    {
+                        @foreach (var field in Model.ModalFields.Where(f => f.IsVisible).OrderBy(f => f.Order))
+                        {
+                            var fieldModel = new DynamicForms.RazorPages.Models.DynamicFieldViewModel
+                            {
+                                Field = field,
+                                Language = Model.Language,
+                                IsReadOnly = Model.IsReadOnly
+                            };
+                            
+                            @await Html.PartialAsync("_DynamicField", fieldModel)
+                        }
+                    }
+                    
+                    @* Hidden fields for modal context *@
+                    <input type="hidden" name="ModalId" value="@Model.Field.Modal?.Id" />
+                    <input type="hidden" name="RecordId" value="" />
+                    <input type="hidden" name="Action" value="Save" />
+                </div>
+                
+                <div class="modal-footer">
+                    @if (!Model.IsReadOnly)
+                    {
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            @(Model.Language == "FR" ? "Annuler" : "Cancel")
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            @(Model.Language == "FR" ? "Sauvegarder" : "Save")
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            @(Model.Language == "FR" ? "Fermer" : "Close")
+                        </button>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@* Table display for existing records *@
+<div class="table-container" id="table_@Model.Field.Id">
+    @if (!Model.IsReadOnly && Model.CanAdd)
+    {
+        <div class="mb-3">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal_@Model.Field.Id" 
+                    onclick="clearModalForm('@Model.Field.Id')">
+                <i class="fas fa-plus me-1"></i>
+                @(Model.Language == "FR" ? "Ajouter" : "Add") @Model.Field.Text.Description.ToString(Model.Language)
+            </button>
+        </div>
+    }
+    
+    @if (Model.Records?.Any() == true)
+    {
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        @if (Model.ModalFields?.Any() == true)
+                        {
+                            @foreach (var field in Model.ModalFields.Where(f => f.IsVisibleInDisplay).OrderBy(f => f.Order))
+                            {
+                                <th>@field.Text.Description.ToString(Model.Language)</th>
+                            }
+                        }
+                        
+                        @if (!Model.IsReadOnly && (Model.CanEdit || Model.CanDelete))
+                        {
+                            <th class="text-center" style="width: 120px;">
+                                @(Model.Language == "FR" ? "Actions" : "Actions")
+                            </th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var record in Model.Records)
+                    {
+                        <tr data-record-id="@record.Id">
+                            @if (Model.ModalFields?.Any() == true)
+                            {
+                                @foreach (var field in Model.ModalFields.Where(f => f.IsVisibleInDisplay).OrderBy(f => f.Order))
+                                {
+                                    var fieldValue = record.Values?.FirstOrDefault(v => v.Id == field.Id);
+                                    <td>
+                                        @if (fieldValue != null)
+                                        {
+                                            @fieldValue.GetDisplayValue(Model.Language)
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                }
+                            }
+                            
+                            @if (!Model.IsReadOnly && (Model.CanEdit || Model.CanDelete))
+                            {
+                                <td class="text-center">
+                                    @if (Model.CanEdit)
+                                    {
+                                        <button type="button" class="btn btn-sm btn-outline-primary me-1" 
+                                                data-bs-toggle="modal" data-bs-target="#modal_@Model.Field.Id"
+                                                onclick="editModalRecord('@Model.Field.Id', '@record.Id')"
+                                                title="@(Model.Language == "FR" ? "Modifier" : "Edit")">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    }
+                                    
+                                    @if (Model.CanDelete)
+                                    {
+                                        <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                onclick="deleteModalRecord('@Model.Field.Id', '@record.Id')"
+                                                title="@(Model.Language == "FR" ? "Supprimer" : "Delete")">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    }
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            @if (Model.Language == "FR")
+            {
+                <text>Aucun enregistrement trouvé. Cliquez sur "Ajouter" pour créer le premier enregistrement.</text>
+            }
+            else
+            {
+                <text>No records found. Click "Add" to create the first record.</text>
+            }
+        </div>
+    }
+</div>
+
+<script>
+// Modal form management functions
+function clearModalForm(fieldId) {
+    const modal = document.getElementById(`modal_${fieldId}`);
+    const form = modal.querySelector('form');
+    if (form) {
+        form.reset();
+        form.querySelector('[name="RecordId"]').value = '';
+        form.querySelector('[name="Action"]').value = 'Save';
+    }
+    
+    // Update modal title
+    const title = modal.querySelector('.modal-title');
+    const fieldName = '@Model.Field.Text.Description.ToString(Model.Language)';
+    const addText = '@(Model.Language == "FR" ? "Ajouter" : "Add")';
+    title.textContent = `${addText} ${fieldName}`;
+}
+
+function editModalRecord(fieldId, recordId) {
+    const modal = document.getElementById(`modal_${fieldId}`);
+    const form = modal.querySelector('form');
+    
+    if (form) {
+        form.querySelector('[name="RecordId"]').value = recordId;
+        form.querySelector('[name="Action"]').value = 'Edit';
+        
+        // Load record data (this would typically be an AJAX call)
+        loadModalRecordData(fieldId, recordId);
+    }
+    
+    // Update modal title
+    const title = modal.querySelector('.modal-title');
+    const fieldName = '@Model.Field.Text.Description.ToString(Model.Language)';
+    const editText = '@(Model.Language == "FR" ? "Modifier" : "Edit")';
+    title.textContent = `${editText} ${fieldName}`;
+}
+
+function deleteModalRecord(fieldId, recordId) {
+    const deleteText = '@(Model.Language == "FR" ? "Êtes-vous sûr de vouloir supprimer cet enregistrement ?" : "Are you sure you want to delete this record?")';
+    const confirmText = '@(Model.Language == "FR" ? "Supprimer" : "Delete")';
+    const cancelText = '@(Model.Language == "FR" ? "Annuler" : "Cancel")';
+    
+    if (confirm(deleteText)) {
+        // This would typically be an AJAX call to delete the record
+        deleteModalRecordAjax(fieldId, recordId);
+    }
+}
+
+function loadModalRecordData(fieldId, recordId) {
+    // Implementation would load record data via AJAX
+    // and populate the modal form fields
+    console.log(`Loading record ${recordId} for field ${fieldId}`);
+}
+
+function deleteModalRecordAjax(fieldId, recordId) {
+    // Implementation would delete record via AJAX
+    // and refresh the table display
+    console.log(`Deleting record ${recordId} for field ${fieldId}`);
+    
+    // Remove the row from the table
+    const row = document.querySelector(`[data-record-id="${recordId}"]`);
+    if (row) {
+        row.remove();
+    }
+}
+
+// Modal form submission
+document.addEventListener('DOMContentLoaded', function() {
+    const modalForm = document.getElementById('modalForm_@Model.Field.Id');
+    if (modalForm) {
+        modalForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validate form
+            if (!this.checkValidity()) {
+                e.stopPropagation();
+                this.classList.add('was-validated');
+                return;
+            }
+            
+            // Submit form data (implement AJAX submission)
+            submitModalForm('@Model.Field.Id', this);
+        });
+    }
+});
+
+function submitModalForm(fieldId, form) {
+    // Implementation would submit form data via AJAX
+    // and refresh the table display
+    console.log(`Submitting modal form for field ${fieldId}`);
+    
+    // Close modal on success
+    const modal = bootstrap.Modal.getInstance(document.getElementById(`modal_${fieldId}`));
+    if (modal) {
+        modal.hide();
+    }
+}
+</script>

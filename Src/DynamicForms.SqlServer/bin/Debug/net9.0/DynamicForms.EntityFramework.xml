@@ -1,0 +1,391 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>DynamicForms.EntityFramework</name>
+    </assembly>
+    <members>
+        <member name="T:DynamicForms.EntityFramework.Data.DynamicFormsDbContext">
+            <summary>
+            Entity Framework DbContext for DynamicForms
+            Provides data persistence for JSON form schemas and submitted data
+            </summary>
+        </member>
+        <member name="P:DynamicForms.EntityFramework.Data.DynamicFormsDbContext.ModuleSchemas">
+            <summary>
+            Form module schemas
+            </summary>
+        </member>
+        <member name="P:DynamicForms.EntityFramework.Data.DynamicFormsDbContext.FormSubmissions">
+            <summary>
+            Form submissions/applications
+            </summary>
+        </member>
+        <member name="P:DynamicForms.EntityFramework.Data.DynamicFormsDbContext.FieldData">
+            <summary>
+            Individual field data entries
+            </summary>
+        </member>
+        <member name="P:DynamicForms.EntityFramework.Data.DynamicFormsDbContext.ModalData">
+            <summary>
+            Modal/table data entries
+            </summary>
+        </member>
+        <member name="P:DynamicForms.EntityFramework.Data.DynamicFormsDbContext.FileUploads">
+            <summary>
+            File upload metadata
+            </summary>
+        </member>
+        <member name="P:DynamicForms.EntityFramework.Data.DynamicFormsDbContext.AuditLogs">
+            <summary>
+            Audit trail for all changes
+            </summary>
+        </member>
+        <member name="P:DynamicForms.EntityFramework.Data.DynamicFormsDbContext.Drafts">
+            <summary>
+            Temporary drafts for form editor (server-side storage)
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Data.DynamicFormsDbContext.SaveChangesAsync(System.Threading.CancellationToken)">
+            <summary>
+            Save changes with automatic audit logging
+            </summary>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Data.DynamicFormsDbContextFactory">
+            <summary>
+            Design-time factory for DynamicFormsDbContext
+            Used by EF Core tools to create migrations
+            </summary>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Data.ModuleSchema">
+            <summary>
+            Entity models for Entity Framework persistence
+            These map to database tables for storing form schemas and data
+            </summary>
+            <summary>
+            Database entity for storing JSON module schemas
+            </summary>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Data.FormSubmission">
+            <summary>
+            Database entity for form submissions/applications
+            </summary>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Data.FieldData">
+            <summary>
+            Database entity for individual field data
+            </summary>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Data.ModalData">
+            <summary>
+            Database entity for modal/table data
+            </summary>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Data.FileUpload">
+            <summary>
+            Database entity for file upload metadata
+            </summary>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Data.AuditLog">
+            <summary>
+            Database entity for audit logging
+            </summary>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Data.AuditEntry">
+            <summary>
+            Helper class for audit trail generation
+            </summary>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Extensions.ServiceCollectionExtensions">
+            <summary>
+            Service collection extensions for Entity Framework integration
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Extensions.ServiceCollectionExtensions.AddDynamicFormsEntityFramework(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Microsoft.EntityFrameworkCore.DbContextOptionsBuilder},Microsoft.Extensions.DependencyInjection.ServiceLifetime,Microsoft.Extensions.DependencyInjection.ServiceLifetime)">
+            <summary>
+            Add Entity Framework integration for DynamicForms
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Extensions.ServiceCollectionExtensions.AddDynamicFormsEntityFramework(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String,System.Action{Microsoft.EntityFrameworkCore.DbContextOptionsBuilder})">
+            <summary>
+            Add Entity Framework integration with SQL Server
+            Requires Microsoft.EntityFrameworkCore.SqlServer package
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Extensions.ServiceCollectionExtensions.AddDynamicFormsEntityFramework(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,System.String)">
+            <summary>
+            Add Entity Framework integration with configuration
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Extensions.ServiceCollectionExtensions.AddDynamicFormsEntityFrameworkInMemory(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String)">
+            <summary>
+            Add Entity Framework integration with in-memory database (for testing)
+            Requires Microsoft.EntityFrameworkCore.InMemory package
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Extensions.ServiceCollectionExtensions.AddDynamicFormsEntityFrameworkSQLite(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String)">
+            <summary>
+            Add Entity Framework integration with SQLite (for development/testing)
+            Requires Microsoft.EntityFrameworkCore.Sqlite package
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Extensions.ServiceCollectionExtensions.AddDynamicFormsEntityFrameworkSqlServer(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,System.String)">
+            <summary>
+            Add Entity Framework integration with SQL Server using configuration
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Extensions.ServiceCollectionExtensions.AddDynamicFormsEntityFrameworkSqlServer(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String,System.Action{Microsoft.EntityFrameworkCore.DbContextOptionsBuilder})">
+            <summary>
+            Add Entity Framework integration with SQL Server (explicit method)
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Extensions.ServiceCollectionExtensions.AddDynamicFormsEntityFrameworkPostgreSQL(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String)">
+            <summary>
+            Add Entity Framework integration with PostgreSQL 
+            NOTE: Requires manual installation of Npgsql.EntityFrameworkCore.PostgreSQL package
+            Install with: dotnet add package Npgsql.EntityFrameworkCore.PostgreSQL
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Extensions.ServiceCollectionExtensions.AddDynamicFormsEntityFrameworkOracle(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String)">
+            <summary>
+            Add Entity Framework integration with Oracle
+            NOTE: Requires manual installation of Oracle.EntityFrameworkCore package
+            Install with: dotnet add package Oracle.EntityFrameworkCore
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Extensions.ServiceCollectionExtensions.AddDynamicFormsEntityFrameworkMySQL(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String)">
+            <summary>
+            Add Entity Framework integration with MySQL
+            NOTE: Requires manual installation of Pomelo.EntityFrameworkCore.MySql package
+            Install with: dotnet add package Pomelo.EntityFrameworkCore.MySql
+            </summary>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Extensions.NpgsqlDbContextOptionsExtensions">
+            <summary>
+            Placeholder class for reflection when Npgsql package is not available
+            </summary>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Migrations.AddDraftsTable">
+            <inheritdoc />
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Migrations.AddDraftsTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Migrations.AddDraftsTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Migrations.AddDraftsTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Repositories.EfFormDataRepository">
+            <summary>
+            Entity Framework implementation of IFormDataRepository
+            Provides database persistence for form submission data
+            </summary>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Repositories.EfFormModuleRepository">
+            <summary>
+            Entity Framework implementation of IFormModuleRepository
+            Provides database persistence for JSON form schemas
+            Works directly with FormModule without conversion layers
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Repositories.EfFormModuleRepository.GetAllModulesAsync(System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Get all modules for listing purposes
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Repositories.EfFormModuleRepository.CloneField(DynamicForms.Core.Entities.FormField,System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>
+            Clone a field for module cloning
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Repositories.EfFormModuleRepository.OptimizeFieldOrdering(DynamicForms.Core.Entities.FormField)">
+            <summary>
+            Optimize field ordering within a parent
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Repositories.EfFormModuleRepository.GetFieldTypePriority(System.String)">
+            <summary>
+            Get priority for field type ordering (lower = higher priority)
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Repositories.EfFormModuleRepository.ValidateAndFixRelationships(DynamicForms.Core.Entities.FormModule)">
+            <summary>
+            Validate and fix relationships in the module
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Repositories.EfFormModuleRepository.PassesComplexityFilter(DynamicForms.Core.Entities.ModuleStatistics,DynamicForms.Core.Interfaces.ModuleSearchCriteria,DynamicForms.Core.Entities.FormModule)">
+            <summary>
+            Check if module statistics pass the complexity filter
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Repositories.EfFormModuleRepository.ApplySortingAndPagination(System.Collections.Generic.List{DynamicForms.Core.Interfaces.ModuleSearchResult},DynamicForms.Core.Interfaces.ModuleSearchCriteria)">
+            <summary>
+            Apply sorting and pagination to search results
+            </summary>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Repositories.EfFormWorkflowRepository">
+            <summary>
+            Entity Framework implementation of IFormWorkflowRepository with single document storage
+            Provides database persistence for FormWorkflow entities with optimized storage modes
+            Supports both single document and multi-document storage patterns
+            </summary>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Services.DraftCleanupService">
+            <summary>
+            Background service that periodically cleans up expired drafts
+            Runs every hour to remove drafts that have passed their expiration time
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Services.DraftCleanupService.#ctor(System.IServiceProvider,Microsoft.Extensions.Logging.ILogger{DynamicForms.EntityFramework.Services.DraftCleanupService})">
+            <summary>
+            Initializes a new instance of DraftCleanupService
+            </summary>
+            <param name="serviceProvider">Service provider for creating scopes</param>
+            <param name="logger">Logger instance</param>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Services.DraftCleanupService.ExecuteAsync(System.Threading.CancellationToken)">
+            <summary>
+            Executes the background task
+            Runs continuously, cleaning up expired drafts every hour
+            </summary>
+            <param name="stoppingToken">Cancellation token</param>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Services.DraftService">
+            <summary>
+            Implementation of IDraftService using SQL Server for storage
+            Provides server-side draft management for FormEditorV5
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Services.DraftService.#ctor(DynamicForms.EntityFramework.Data.DynamicFormsDbContext,Microsoft.Extensions.Logging.ILogger{DynamicForms.EntityFramework.Services.DraftService})">
+            <summary>
+            Initializes a new instance of DraftService
+            </summary>
+            <param name="context">Database context</param>
+            <param name="logger">Logger instance</param>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Services.DraftService.SaveDraftAsync(System.String,DynamicForms.Core.Entities.FormModule)">
+            <inheritdoc />
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Services.DraftService.GetDraftAsync(System.String,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Services.DraftService.DeleteDraftAsync(System.String,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Services.DraftService.CleanupExpiredDraftsAsync">
+            <inheritdoc />
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Services.IDraftService">
+            <summary>
+            Service for managing server-side form module drafts
+            Provides temporary storage for modules being edited in FormEditorV5
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Services.IDraftService.SaveDraftAsync(System.String,DynamicForms.Core.Entities.FormModule)">
+            <summary>
+            Save or update a draft for a specific user and module
+            Creates new draft if none exists, updates existing draft otherwise
+            Automatically extends expiration to 24 hours from now
+            </summary>
+            <param name="userId">User ID who owns the draft</param>
+            <param name="module">FormModule to save as draft</param>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Services.IDraftService.GetDraftAsync(System.String,System.Int32)">
+            <summary>
+            Retrieve a draft for a specific user and module
+            Returns null if no draft exists or if draft has expired
+            </summary>
+            <param name="userId">User ID who owns the draft</param>
+            <param name="moduleId">Module ID of the draft</param>
+            <returns>FormModule if found and not expired, otherwise null</returns>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Services.IDraftService.DeleteDraftAsync(System.String,System.Int32)">
+            <summary>
+            Delete a specific draft for a user and module
+            Typically called when user explicitly saves the module (converts draft to permanent)
+            </summary>
+            <param name="userId">User ID who owns the draft</param>
+            <param name="moduleId">Module ID of the draft to delete</param>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Services.IDraftService.CleanupExpiredDraftsAsync">
+            <summary>
+            Remove all expired drafts from the database
+            Called by DraftCleanupService background task every hour
+            </summary>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Services.IModuleService">
+            <summary>
+            Service for managing form modules with business logic
+            Handles CRUD operations, multi-tenant filtering, and draft cleanup
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Services.IModuleService.GetModulesAsync(System.String,System.Nullable{System.Int32})">
+            <summary>
+            Get all modules for a specific opportunity (multi-tenant filtered)
+            </summary>
+            <param name="userId">User ID for authorization</param>
+            <param name="opportunityId">Opportunity ID filter (optional)</param>
+            <returns>List of modules with summary information</returns>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Services.IModuleService.GetModuleAsync(System.String,System.Int32)">
+            <summary>
+            Get a single module with all fields
+            </summary>
+            <param name="userId">User ID for authorization</param>
+            <param name="moduleId">Module ID</param>
+            <returns>Full FormModule or null if not found or unauthorized</returns>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Services.IModuleService.CreateModuleAsync(System.String,DynamicForms.Core.Entities.FormModule)">
+            <summary>
+            Create a new module
+            </summary>
+            <param name="userId">User ID creating the module</param>
+            <param name="module">Module to create</param>
+            <returns>Created module with assigned ID</returns>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Services.IModuleService.UpdateModuleAsync(System.String,DynamicForms.Core.Entities.FormModule)">
+            <summary>
+            Update an existing module
+            Also deletes the draft for this module after successful save
+            </summary>
+            <param name="userId">User ID updating the module</param>
+            <param name="module">Module with updated data</param>
+            <returns>Updated module</returns>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Services.IModuleService.DeleteModuleAsync(System.String,System.Int32)">
+            <summary>
+            Delete a module
+            Also deletes the draft for this module
+            </summary>
+            <param name="userId">User ID deleting the module</param>
+            <param name="moduleId">Module ID to delete</param>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Services.ModuleService">
+            <summary>
+            Implementation of IModuleService with business logic
+            Handles CRUD operations, multi-tenant filtering, and draft cleanup
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Services.ModuleService.#ctor(DynamicForms.Core.Interfaces.IFormModuleRepository,DynamicForms.EntityFramework.Services.IDraftService,Microsoft.Extensions.Logging.ILogger{DynamicForms.EntityFramework.Services.ModuleService})">
+            <summary>
+            Initializes a new instance of ModuleService
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Services.ModuleService.GetModulesAsync(System.String,System.Nullable{System.Int32})">
+            <inheritdoc />
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Services.ModuleService.GetModuleAsync(System.String,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Services.ModuleService.CreateModuleAsync(System.String,DynamicForms.Core.Entities.FormModule)">
+            <inheritdoc />
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Services.ModuleService.UpdateModuleAsync(System.String,DynamicForms.Core.Entities.FormModule)">
+            <inheritdoc />
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Services.ModuleService.DeleteModuleAsync(System.String,System.Int32)">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>

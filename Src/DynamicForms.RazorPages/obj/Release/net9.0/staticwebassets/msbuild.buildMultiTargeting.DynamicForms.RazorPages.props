@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\DynamicForms.RazorPages.props" />
+</Project>

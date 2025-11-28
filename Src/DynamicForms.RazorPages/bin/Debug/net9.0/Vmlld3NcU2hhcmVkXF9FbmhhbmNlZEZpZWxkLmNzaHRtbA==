@@ -1,0 +1,365 @@
+@model DynamicForms.Core.Entities.FormField
+@using DynamicForms.Core.Entities
+@using DynamicForms.Core.Enums
+@{
+    var formData = ViewData["FormData"] as Dictionary<string, object> ?? new Dictionary<string, object>();
+    var level = (int)(ViewData["Level"] ?? 0);
+    var showHierarchyInfo = (bool)(ViewData["ShowHierarchyInfo"] ?? false);
+    
+    if (Model == null) return;
+    
+    var fieldId = $"FormData[{Model.Id}]";
+    var fieldValue = formData.TryGetValue(Model.Id, out var value) ? value : null;
+    
+    // Build CSS classes with enhanced hierarchy support
+    var cssClasses = new List<string>
+    {
+        "form-group",
+        "mb-3",
+        $"field-level-{level}",
+        $"relationship-{Model.RelationshipType.ToString().ToLowerInvariant()}",
+        $"field-type-{Model.FieldType.Type.ToLowerInvariant()}"
+    };
+    
+    if (Model.Parent != null)
+    {
+        cssClasses.Add("field-child");
+        cssClasses.Add($"parent-{Model.Parent.Id}");
+    }
+    else
+    {
+        cssClasses.Add("field-root");
+    }
+    
+    if (!string.IsNullOrEmpty(Model.CssClasses))
+    {
+        cssClasses.Add(Model.CssClasses);
+    }
+
+    // Determine if field should have special conditional classes
+    if (Model.RelationshipType == ParentChildRelationshipType.ConditionalShow ||
+        Model.RelationshipType == ParentChildRelationshipType.ConditionalHide)
+    {
+        cssClasses.Add("conditional-field");
+        if (Model.Parent != null)
+        {
+            cssClasses.Add($"conditional-depends-on-{Model.Parent.Id}");
+        }
+    }
+    
+    if (Model.RelationshipType == ParentChildRelationshipType.Cascade && Model.Parent != null)
+    {
+        cssClasses.Add("cascade-field");
+        cssClasses.Add($"cascade-depends-on-{Model.Parent.Id}");
+    }
+}
+
+<div class="@string.Join(" ", cssClasses)" 
+     data-field-id="@Model.Id" 
+     data-field-type="@Model.FieldType.Type" 
+     data-relationship="@Model.RelationshipType"
+     data-level="@level"
+     @if (Model.Parent != null) {
+         <text>data-parent-id="@Model.Parent.Id"</text>
+     }>
+
+    @* Debug Information *@
+    @if (showHierarchyInfo)
+    {
+        <div class="hierarchy-debug-info mb-2">
+            <span class="badge bg-secondary">ID: @Model.Id</span>
+            <span class="badge bg-info">Level: @level</span>
+            <span class="badge bg-warning">Type: @Model.RelationshipType</span>
+            @if (Model.Parent != null)
+            {
+                <span class="badge bg-primary">Parent: @Model.Parent.Id</span>
+            }
+            <span class="badge bg-success">Path: @Model.HierarchicalPath</span>
+        </div>
+    }
+
+    @* Field Label and Header (for Section/Group types) *@
+    @if (Model.FieldType.Type == "Section")
+    {
+        <div class="field-section section-header">
+            <h4>
+                @(Model.Text?.Description?.EN ?? Model.Id)
+                @if (Model.IsRequired)
+                {
+                    <span class="text-danger">*</span>
+                }
+            </h4>
+            @if (!string.IsNullOrEmpty(Model.Text?.Help?.EN))
+            {
+                <p class="section-help">@Model.Text.Help.EN</p>
+            }
+        </div>
+    }
+    else if (Model.FieldType.Type == "Group")
+    {
+        <div class="field-group group-header">
+            <h5>
+                @(Model.Text?.Description?.EN ?? Model.Id)
+                @if (Model.IsRequired)
+                {
+                    <span class="text-danger">*</span>
+                }
+            </h5>
+            @if (!string.IsNullOrEmpty(Model.Text?.Help?.EN))
+            {
+                <small class="form-text text-muted">@Model.Text.Help.EN</small>
+            }
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(Model.Text?.Description?.EN))
+    {
+        <label for="@fieldId" class="form-label">
+            @Model.Text.Description.EN
+            @if (Model.IsRequired)
+            {
+                <span class="text-danger">*</span>
+            }
+            
+            @* Relationship indicator *@
+            @if (showHierarchyInfo && Model.RelationshipType != ParentChildRelationshipType.GroupContainer)
+            {
+                <small class="text-muted ms-2">
+                    (@GetRelationshipTypeDisplay(Model.RelationshipType))
+                </small>
+            }
+        </label>
+    }
+
+    @* Help Text *@
+    @if (!string.IsNullOrEmpty(Model.Text?.Help?.EN) && Model.FieldType.Type != "Section" && Model.FieldType.Type != "Group")
+    {
+        <small class="form-text text-muted mb-2 d-block">
+            <i class="fas fa-info-circle me-1"></i>
+            @Model.Text.Help.EN
+        </small>
+    }
+
+    @* Field Input Based on Type *@
+    @if (Model.FieldType.Type != "Section" && Model.FieldType.Type != "Group")
+    {
+        @switch (Model.FieldType.Type)
+        {
+            case "TextBox":
+            case "Password":
+                <input type="@(Model.FieldType.Type == "Password" ? "password" : "text")"
+                       class="form-control @(Model.WidthClass != null ? $"col-md-{Model.WidthClass}" : "")"
+                       id="@fieldId"
+                       name="@fieldId"
+                       value="@fieldValue"
+                       maxlength="@Model.MaximumLength"
+                       @(Model.IsRequired ? "required" : "")
+                       @(Model.ReadOnly ? "readonly" : "")
+                       @if (Model.RelationshipType == ParentChildRelationshipType.ConditionalShow || 
+                            Model.RelationshipType == ParentChildRelationshipType.ConditionalHide) {
+                           <text>data-conditional="true"</text>
+                       }
+                       @if (Model.RelationshipType == ParentChildRelationshipType.Cascade) {
+                           <text>data-cascade="true"</text>
+                       } />
+                break;
+
+            case "NumberTextBox":
+                <input type="number"
+                       class="form-control @(Model.WidthClass != null ? $"col-md-{Model.WidthClass}" : "")"
+                       id="@fieldId"
+                       name="@fieldId"
+                       value="@fieldValue"
+                       @(Model.IsRequired ? "required" : "")
+                       @(Model.ReadOnly ? "readonly" : "") />
+                break;
+
+            case "TextArea":
+                <textarea class="form-control @(Model.WidthClass != null ? $"col-md-{Model.WidthClass}" : "")"
+                          id="@fieldId"
+                          name="@fieldId"
+                          rows="4"
+                          maxlength="@Model.MaximumLength"
+                          @(Model.IsRequired ? "required" : "")
+                          @(Model.ReadOnly ? "readonly" : "")>@fieldValue</textarea>
+                break;
+
+            case "CheckBox":
+                <div class="form-check">
+                    <input type="checkbox"
+                           class="form-check-input"
+                           id="@fieldId"
+                           name="@fieldId"
+                           value="true"
+                           @(Convert.ToBoolean(fieldValue) ? "checked" : "")
+                           @(Model.ReadOnly ? "disabled" : "")
+                           @if (Model.RelationshipType == ParentChildRelationshipType.ConditionalShow || 
+                                Model.RelationshipType == ParentChildRelationshipType.ConditionalHide) {
+                               <text>data-conditional-trigger="true"</text>
+                           } />
+                    <input type="hidden" name="@fieldId" value="false" />
+                </div>
+                break;
+
+            case "DropDownList":
+                <select class="form-select @(Model.WidthClass != null ? $"col-md-{Model.WidthClass}" : "")"
+                        id="@fieldId"
+                        name="@fieldId"
+                        @(Model.IsRequired ? "required" : "")
+                        @(Model.ReadOnly ? "disabled" : "")
+                        @if (Model.RelationshipType == ParentChildRelationshipType.Cascade) {
+                            <text>data-cascade-trigger="true"</text>
+                        }
+                        @if (Model.RelationshipType == ParentChildRelationshipType.ConditionalShow || 
+                             Model.RelationshipType == ParentChildRelationshipType.ConditionalHide) {
+                            <text>data-conditional-trigger="true"</text>
+                        }>
+                    
+                    @if (!Model.IsRequired)
+                    {
+                        <option value="">-- Please Select --</option>
+                    }
+                    
+                    @if (Model.Options != null)
+                    {
+                        @foreach (var option in Model.Options.Where(o => o.IsActive).OrderBy(o => o.Order))
+                        {
+                            var isSelected = fieldValue?.ToString() == option.Value;
+                            <option value="@option.Value" selected="@(isSelected ? "selected" : null)">
+                                @(option.EN ?? option.Value)
+                            </option>
+                        }
+                    }
+                </select>
+                break;
+
+            case "RadioButtonList":
+                <div class="radio-group">
+                    @if (Model.Options != null)
+                    {
+                        @foreach (var option in Model.Options.Where(o => o.IsActive).OrderBy(o => o.Order))
+                        {
+                            <div class="form-check">
+                                <input type="radio"
+                                       class="form-check-input"
+                                       id="@(fieldId)_@option.Value"
+                                       name="@fieldId"
+                                       value="@option.Value"
+                                       @(fieldValue?.ToString() == option.Value ? "checked" : "")
+                                       @(Model.ReadOnly ? "disabled" : "")
+                                       @if (Model.RelationshipType == ParentChildRelationshipType.ConditionalShow || 
+                                            Model.RelationshipType == ParentChildRelationshipType.ConditionalHide) {
+                                           <text>data-conditional-trigger="true"</text>
+                                       } />
+                                <label class="form-check-label" for="@(fieldId)_@option.Value">
+                                    @(option.EN ?? option.Value)
+                                </label>
+                            </div>
+                        }
+                    }
+                </div>
+                break;
+
+            case "DatePicker":
+                <input type="date"
+                       class="form-control @(Model.WidthClass != null ? $"col-md-{Model.WidthClass}" : "")"
+                       id="@fieldId"
+                       name="@fieldId"
+                       value="@(fieldValue != null && DateTime.TryParse(fieldValue.ToString(), out var dateValue) ? dateValue.ToString("yyyy-MM-dd") : "")"
+                       @(Model.IsRequired ? "required" : "")
+                       @(Model.ReadOnly ? "readonly" : "") />
+                break;
+
+            case "DateRangePicker":
+                {
+                    var dateRangeConfig = new DynamicForms.RazorPages.Models.DateRangePickerConfiguration
+                    {
+                        IncludeTime = false,
+                        ShowPresets = true,
+                        ShowClearButton = true,
+                        AllowSameDay = true,
+                        DateFormat = "yyyy-MM-dd"
+                    };
+                    
+                    // Parse existing value if any
+                    DynamicForms.RazorPages.Models.DateRangeData? dateRangeValue = null;
+                    if (fieldValue != null)
+                    {
+                        dateRangeValue = DynamicForms.RazorPages.Models.DateRangeData.FromIsoString(fieldValue.ToString() ?? string.Empty);
+                    }
+                
+                <date-range-picker config="@dateRangeConfig"
+                                 value="@dateRangeValue"
+                                 name="@fieldId"
+                                 field-id="@Model.Id"
+                                 language="EN"
+                                 required="@Model.IsRequired"
+                                 readonly="@Model.ReadOnly" />
+                }
+                break;
+
+            default:
+                <input type="text"
+                       class="form-control @(Model.WidthClass != null ? $"col-md-{Model.WidthClass}" : "")"
+                       id="@fieldId"
+                       name="@fieldId"
+                       value="@fieldValue"
+                       @(Model.IsRequired ? "required" : "")
+                       @(Model.ReadOnly ? "readonly" : "") />
+                break;
+        }
+
+        @* Field Validation Messages *@
+        <span asp-validation-for="@fieldId" class="field-validation-error"></span>
+    }
+
+    @* Render Child Fields Recursively *@
+    @if (Model.ChildFields.Any())
+    {
+        <div class="child-fields mt-3" data-parent-field="@Model.Id">
+            @foreach (var childField in Model.ChildFields.OrderBy(c => c.Order ?? int.MaxValue))
+            {
+                @await Html.PartialAsync("_EnhancedField", childField, new ViewDataDictionary(ViewData) 
+                { 
+                    ["FormData"] = formData,
+                    ["Level"] = level + 1,
+                    ["ShowHierarchyInfo"] = showHierarchyInfo
+                })
+            }
+        </div>
+    }
+
+    @* Relationship Information for Debugging *@
+    @if (showHierarchyInfo && Model.RelationshipType != ParentChildRelationshipType.GroupContainer)
+    {
+        <div class="hierarchy-debug-info mt-2">
+            <small>
+                <i class="fas fa-link me-1"></i>
+                <strong>Relationship:</strong> @GetRelationshipTypeDisplay(Model.RelationshipType)
+                @if (Model.Parent != null)
+                {
+                    <span> | <strong>Parent:</strong> @Model.Parent.Id (@Model.Parent.FieldType.Type)</span>
+                }
+                @if (Model.ChildFields.Any())
+                {
+                    <span> | <strong>Children:</strong> @Model.ChildFields.Count</span>
+                }
+            </small>
+        </div>
+    }
+</div>
+
+@{
+    string GetRelationshipTypeDisplay(ParentChildRelationshipType relationshipType)
+    {
+        return relationshipType switch
+        {
+            ParentChildRelationshipType.GroupContainer => "Container",
+            ParentChildRelationshipType.ConditionalShow => "Show When",
+            ParentChildRelationshipType.ConditionalHide => "Hide When",
+            ParentChildRelationshipType.Cascade => "Depends On",
+            ParentChildRelationshipType.Validation => "Validates",
+            ParentChildRelationshipType.Repeater => "Repeater",
+            _ => "None"
+        };
+    }
+}

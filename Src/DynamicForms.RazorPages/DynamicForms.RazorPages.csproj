@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <PackageId>DynamicForms.RazorPages</PackageId>
+    <Description>Razor Pages integration for DynamicForms. Provides view models, HTML helpers, page models, and Razor views for building dynamic forms in ASP.NET Core Razor Pages applications with government-grade features.</Description>
+    <PackageTags>$(BasePackageTags);razorpages;asp.net;mvc;accessibility</PackageTags>
+    <IsPackable>true</IsPackable>
+    <OutputType>Library</OutputType>
+    <!-- Disable default content items to avoid duplicates when packaging -->
+    <EnableDefaultContentItems>false</EnableDefaultContentItems>
+    <!-- Disable default compile items to avoid duplicates -->
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Html.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DynamicForms.Core\DynamicForms.Core.csproj" />
+  </ItemGroup>
+
+  <!-- Explicitly include content files for NuGet packaging -->
+  <ItemGroup>
+    <!-- Include all C# source files -->
+    <Compile Include="**/*.cs" Exclude="bin/**;obj/**" />
+    
+    <!-- Include Views for NuGet package -->
+    <Content Include="Views/**/*.cshtml">
+      <Pack>true</Pack>
+      <PackagePath>contentFiles/any/any/Views/</PackagePath>
+      <BuildAction>Content</BuildAction>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    
+    <!-- Include wwwroot files for NuGet package -->
+    <Content Include="wwwroot/**/*">
+      <Pack>true</Pack>
+      <PackagePath>contentFiles/any/any/wwwroot/</PackagePath>
+      <BuildAction>Content</BuildAction>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <!-- Ensure build actions are set correctly -->
+  <ItemGroup>
+    <None Include="Views/_ViewImports.cshtml" />
+    <None Include="Views/_ViewStart.cshtml" />
+  </ItemGroup>
+
+</Project>

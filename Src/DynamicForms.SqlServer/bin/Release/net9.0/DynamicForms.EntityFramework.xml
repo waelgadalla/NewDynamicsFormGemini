@@ -1,0 +1,207 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>DynamicForms.EntityFramework</name>
+    </assembly>
+    <members>
+        <member name="T:DynamicForms.EntityFramework.Data.DynamicFormsDbContext">
+            <summary>
+            Entity Framework DbContext for DynamicForms
+            Provides data persistence for JSON form schemas and submitted data
+            </summary>
+        </member>
+        <member name="P:DynamicForms.EntityFramework.Data.DynamicFormsDbContext.ModuleSchemas">
+            <summary>
+            Form module schemas
+            </summary>
+        </member>
+        <member name="P:DynamicForms.EntityFramework.Data.DynamicFormsDbContext.FormSubmissions">
+            <summary>
+            Form submissions/applications
+            </summary>
+        </member>
+        <member name="P:DynamicForms.EntityFramework.Data.DynamicFormsDbContext.FieldData">
+            <summary>
+            Individual field data entries
+            </summary>
+        </member>
+        <member name="P:DynamicForms.EntityFramework.Data.DynamicFormsDbContext.ModalData">
+            <summary>
+            Modal/table data entries
+            </summary>
+        </member>
+        <member name="P:DynamicForms.EntityFramework.Data.DynamicFormsDbContext.FileUploads">
+            <summary>
+            File upload metadata
+            </summary>
+        </member>
+        <member name="P:DynamicForms.EntityFramework.Data.DynamicFormsDbContext.AuditLogs">
+            <summary>
+            Audit trail for all changes
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Data.DynamicFormsDbContext.SaveChangesAsync(System.Threading.CancellationToken)">
+            <summary>
+            Save changes with automatic audit logging
+            </summary>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Data.ModuleSchema">
+            <summary>
+            Entity models for Entity Framework persistence
+            These map to database tables for storing form schemas and data
+            </summary>
+            <summary>
+            Database entity for storing JSON module schemas
+            </summary>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Data.FormSubmission">
+            <summary>
+            Database entity for form submissions/applications
+            </summary>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Data.FieldData">
+            <summary>
+            Database entity for individual field data
+            </summary>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Data.ModalData">
+            <summary>
+            Database entity for modal/table data
+            </summary>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Data.FileUpload">
+            <summary>
+            Database entity for file upload metadata
+            </summary>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Data.AuditLog">
+            <summary>
+            Database entity for audit logging
+            </summary>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Data.AuditEntry">
+            <summary>
+            Helper class for audit trail generation
+            </summary>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Extensions.ServiceCollectionExtensions">
+            <summary>
+            Service collection extensions for Entity Framework integration
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Extensions.ServiceCollectionExtensions.AddDynamicFormsEntityFramework(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Microsoft.EntityFrameworkCore.DbContextOptionsBuilder},Microsoft.Extensions.DependencyInjection.ServiceLifetime,Microsoft.Extensions.DependencyInjection.ServiceLifetime)">
+            <summary>
+            Add Entity Framework integration for DynamicForms
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Extensions.ServiceCollectionExtensions.AddDynamicFormsEntityFramework(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String,System.Action{Microsoft.EntityFrameworkCore.DbContextOptionsBuilder})">
+            <summary>
+            Add Entity Framework integration with SQL Server
+            Requires Microsoft.EntityFrameworkCore.SqlServer package
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Extensions.ServiceCollectionExtensions.AddDynamicFormsEntityFramework(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,System.String)">
+            <summary>
+            Add Entity Framework integration with configuration
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Extensions.ServiceCollectionExtensions.AddDynamicFormsEntityFrameworkInMemory(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String)">
+            <summary>
+            Add Entity Framework integration with in-memory database (for testing)
+            Requires Microsoft.EntityFrameworkCore.InMemory package
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Extensions.ServiceCollectionExtensions.AddDynamicFormsEntityFrameworkSQLite(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String)">
+            <summary>
+            Add Entity Framework integration with SQLite (for development/testing)
+            Requires Microsoft.EntityFrameworkCore.Sqlite package
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Extensions.ServiceCollectionExtensions.AddDynamicFormsEntityFrameworkSqlServer(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,System.String)">
+            <summary>
+            Add Entity Framework integration with SQL Server using configuration
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Extensions.ServiceCollectionExtensions.AddDynamicFormsEntityFrameworkSqlServer(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String,System.Action{Microsoft.EntityFrameworkCore.DbContextOptionsBuilder})">
+            <summary>
+            Add Entity Framework integration with SQL Server (explicit method)
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Extensions.ServiceCollectionExtensions.AddDynamicFormsEntityFrameworkPostgreSQL(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String)">
+            <summary>
+            Add Entity Framework integration with PostgreSQL 
+            NOTE: Requires manual installation of Npgsql.EntityFrameworkCore.PostgreSQL package
+            Install with: dotnet add package Npgsql.EntityFrameworkCore.PostgreSQL
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Extensions.ServiceCollectionExtensions.AddDynamicFormsEntityFrameworkOracle(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String)">
+            <summary>
+            Add Entity Framework integration with Oracle
+            NOTE: Requires manual installation of Oracle.EntityFrameworkCore package
+            Install with: dotnet add package Oracle.EntityFrameworkCore
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Extensions.ServiceCollectionExtensions.AddDynamicFormsEntityFrameworkMySQL(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String)">
+            <summary>
+            Add Entity Framework integration with MySQL
+            NOTE: Requires manual installation of Pomelo.EntityFrameworkCore.MySql package
+            Install with: dotnet add package Pomelo.EntityFrameworkCore.MySql
+            </summary>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Extensions.NpgsqlDbContextOptionsExtensions">
+            <summary>
+            Placeholder class for reflection when Npgsql package is not available
+            </summary>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Repositories.EfFormDataRepository">
+            <summary>
+            Entity Framework implementation of IFormDataRepository
+            Provides database persistence for form submission data
+            </summary>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Repositories.EfFormModuleRepository">
+            <summary>
+            Entity Framework implementation of IFormModuleRepository
+            Provides database persistence for JSON form schemas
+            Works directly with FormModule without conversion layers
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Repositories.EfFormModuleRepository.CloneField(DynamicForms.Core.Entities.FormField,System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>
+            Clone a field for module cloning
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Repositories.EfFormModuleRepository.OptimizeFieldOrdering(DynamicForms.Core.Entities.FormField)">
+            <summary>
+            Optimize field ordering within a parent
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Repositories.EfFormModuleRepository.GetFieldTypePriority(System.String)">
+            <summary>
+            Get priority for field type ordering (lower = higher priority)
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Repositories.EfFormModuleRepository.ValidateAndFixRelationships(DynamicForms.Core.Entities.FormModule)">
+            <summary>
+            Validate and fix relationships in the module
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Repositories.EfFormModuleRepository.PassesComplexityFilter(DynamicForms.Core.Entities.ModuleStatistics,DynamicForms.Core.Interfaces.ModuleSearchCriteria,DynamicForms.Core.Entities.FormModule)">
+            <summary>
+            Check if module statistics pass the complexity filter
+            </summary>
+        </member>
+        <member name="M:DynamicForms.EntityFramework.Repositories.EfFormModuleRepository.ApplySortingAndPagination(System.Collections.Generic.List{DynamicForms.Core.Interfaces.ModuleSearchResult},DynamicForms.Core.Interfaces.ModuleSearchCriteria)">
+            <summary>
+            Apply sorting and pagination to search results
+            </summary>
+        </member>
+        <member name="T:DynamicForms.EntityFramework.Repositories.EfFormWorkflowRepository">
+            <summary>
+            Entity Framework implementation of IFormWorkflowRepository with single document storage
+            Provides database persistence for FormWorkflow entities with optimized storage modes
+            Supports both single document and multi-document storage patterns
+            </summary>
+        </member>
+    </members>
+</doc>

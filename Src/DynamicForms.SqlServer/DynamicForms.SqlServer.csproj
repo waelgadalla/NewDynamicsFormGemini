@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>DynamicForms.SqlServer</PackageId>
+    <Description>SQL Server optimized implementation for DynamicForms. Provides high-performance repository implementations for storing JSON form schemas and data in SQL Server databases with advanced features like JSON columns and bulk operations.</Description>
+    <PackageTags>$(BasePackageTags);sqlserver;database;repository;performance</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0" />
+    <PackageReference Include="Dapper" Version="2.1.35" />
+    <PackageReference Include="System.Text.Json" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="8.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DynamicForms.Core\DynamicForms.Core.csproj" />
+    <ProjectReference Include="..\DynamicForms.EntityFramework\DynamicForms.EntityFramework.csproj" />
+  </ItemGroup>
+
+</Project>

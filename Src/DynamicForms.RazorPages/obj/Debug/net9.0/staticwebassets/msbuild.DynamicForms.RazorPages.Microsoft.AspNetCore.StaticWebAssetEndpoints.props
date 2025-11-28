@@ -1,0 +1,28 @@
+﻿<Project>
+  <ItemGroup>
+    <StaticWebAssetEndpoint Include="_content/DynamicForms.RazorPages/css/dynamic-forms.css">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\dynamic-forms.css'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-nP5UJNX5ZgueSCohSThXAbluSsAlVDJFhG5rlR5L9N4="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"11895"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022nP5UJNX5ZgueSCohSThXAbluSsAlVDJFhG5rlR5L9N4=\u0022"},{"Name":"Last-Modified","Value":"Sun, 12 Oct 2025 21:27:07 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DynamicForms.RazorPages/css/dynamic-forms.s6rbfpfdtg.css">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\dynamic-forms.css'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"s6rbfpfdtg"},{"Name":"integrity","Value":"sha256-nP5UJNX5ZgueSCohSThXAbluSsAlVDJFhG5rlR5L9N4="},{"Name":"label","Value":"_content/DynamicForms.RazorPages/css/dynamic-forms.css"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"11895"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022nP5UJNX5ZgueSCohSThXAbluSsAlVDJFhG5rlR5L9N4=\u0022"},{"Name":"Last-Modified","Value":"Sun, 12 Oct 2025 21:27:07 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DynamicForms.RazorPages/js/dynamic-forms.crztiyw4ly.js">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\dynamic-forms.js'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"crztiyw4ly"},{"Name":"integrity","Value":"sha256-uIsLrFxrOdmZByXhmCgPpfJ6AbRzz4z8OURDZBHDiYU="},{"Name":"label","Value":"_content/DynamicForms.RazorPages/js/dynamic-forms.js"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"23725"},{"Name":"Content-Type","Value":"text/javascript"},{"Name":"ETag","Value":"\u0022uIsLrFxrOdmZByXhmCgPpfJ6AbRzz4z8OURDZBHDiYU=\u0022"},{"Name":"Last-Modified","Value":"Sun, 12 Oct 2025 21:27:07 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DynamicForms.RazorPages/js/dynamic-forms.js">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\dynamic-forms.js'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-uIsLrFxrOdmZByXhmCgPpfJ6AbRzz4z8OURDZBHDiYU="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"23725"},{"Name":"Content-Type","Value":"text/javascript"},{"Name":"ETag","Value":"\u0022uIsLrFxrOdmZByXhmCgPpfJ6AbRzz4z8OURDZBHDiYU=\u0022"},{"Name":"Last-Modified","Value":"Sun, 12 Oct 2025 21:27:07 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+  </ItemGroup>
+</Project>

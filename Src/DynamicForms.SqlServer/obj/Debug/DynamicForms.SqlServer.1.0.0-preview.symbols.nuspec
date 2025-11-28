@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>DynamicForms.SqlServer</id>
+    <version>1.0.0-preview</version>
+    <authors>Wael M</authors>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <projectUrl>https://github.com/waelgadalla/DynamicForms</projectUrl>
+    <description>SQL Server optimized implementation for DynamicForms. Provides high-performance repository implementations for storing JSON form schemas and data in SQL Server databases with advanced features like JSON columns and bulk operations.</description>
+    <copyright>Copyright � Government Solutions 2025</copyright>
+    <tags>json forms dynamic validation multilingual government enterprise dotnet9 sqlserver database repository performance</tags>
+    <repository type="git" url="https://github.com/waelgadalla/DynamicForms" commit="7dad5644859b929311cb6c539e26543caaf3d4cf" />
+    <dependencies>
+      <group targetFramework="net9.0">
+        <dependency id="DynamicForms.Core" version="1.0.0-preview" exclude="Build,Analyzers" />
+        <dependency id="DynamicForms.EntityFramework" version="1.0.0-preview" exclude="Build,Analyzers" />
+        <dependency id="AspNetCore.HealthChecks.SqlServer" version="8.0.2" exclude="Build,Analyzers" />
+        <dependency id="Dapper" version="2.1.35" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Data.SqlClient" version="5.2.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.EntityFrameworkCore.SqlServer" version="9.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Diagnostics.HealthChecks" version="9.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" version="9.0.0" exclude="Build,Analyzers" />
+        <dependency id="System.Text.Json" version="9.0.0" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="C:\Users\waelm\source\repos\waelgadalla\DynamicForms\src\DynamicForms.SqlServer\bin\Debug\net9.0\DynamicForms.SqlServer.pdb" target="lib\net9.0\DynamicForms.SqlServer.pdb" />
+  </files>
+</package>

@@ -1,0 +1,89 @@
+@model DynamicForms.RazorPages.Models.ValidationSummaryViewModel
+
+@if (Model?.Errors?.Any() == true)
+{
+    var title = Model.Language == "FR" ? "Erreurs de validation" : "Validation Errors";
+    
+    <div class="alert alert-danger validation-summary" role="alert">
+        <div class="d-flex align-items-center mb-2">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <h5 class="alert-heading mb-0">@title</h5>
+        </div>
+        
+        <ul class="mb-0 list-unstyled">
+            @foreach (var error in Model.Errors)
+            {
+                <li class="mb-1">
+                    @if (Model.ShowFieldNames && !string.IsNullOrEmpty(error.FieldName))
+                    {
+                        <strong>@error.FieldName:</strong> @error.Message
+                    }
+                    else
+                    {
+                        @error.Message
+                    }
+                    
+                    @if (!string.IsNullOrEmpty(error.FieldId))
+                    {
+                        <button type="button" class="btn btn-link btn-sm p-0 ms-2" 
+                                onclick="scrollToField('@error.FieldId')"
+                                title="@(Model.Language == "FR" ? "Aller au champ" : "Go to field")">
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    }
+                </li>
+            }
+        </ul>
+    </div>
+}
+
+@if (Model?.Warnings?.Any() == true)
+{
+    var warningTitle = Model.Language == "FR" ? "Avertissements" : "Warnings";
+    
+    <div class="alert alert-warning validation-warnings" role="alert">
+        <div class="d-flex align-items-center mb-2">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <h6 class="alert-heading mb-0">@warningTitle</h6>
+        </div>
+        
+        <ul class="mb-0 list-unstyled">
+            @foreach (var warning in Model.Warnings)
+            {
+                <li class="mb-1">
+                    @if (Model.ShowFieldNames && !string.IsNullOrEmpty(warning.FieldName))
+                    {
+                        <strong>@warning.FieldName:</strong> @warning.Message
+                    }
+                    else
+                    {
+                        @warning.Message
+                    }
+                </li>
+            }
+        </ul>
+    </div>
+}
+
+<script>
+function scrollToField(fieldId) {
+    const field = document.querySelector(`[data-field-id="${fieldId}"]`);
+    if (field) {
+        field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Highlight the field briefly
+        field.style.transition = 'background-color 0.3s ease';
+        field.style.backgroundColor = '#fff3cd';
+        
+        setTimeout(() => {
+            field.style.backgroundColor = '';
+        }, 2000);
+        
+        // Focus on the input if possible
+        const input = field.querySelector('input, select, textarea');
+        if (input && !input.disabled && !input.readOnly) {
+            setTimeout(() => input.focus(), 300);
+        }
+    }
+}
+</script>

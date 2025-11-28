@@ -1,0 +1,918 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>DynamicForms.RazorPages</name>
+    </assembly>
+    <members>
+        <member name="T:DynamicForms.RazorPages.Extensions.HtmlHelperExtensions">
+            <summary>
+            HTML helper extensions for rendering dynamic form fields
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Extensions.HtmlHelperExtensions.DynamicField(Microsoft.AspNetCore.Mvc.Rendering.IHtmlHelper,DynamicForms.RazorPages.Models.DynamicFieldViewModel)">
+            <summary>
+            Render a dynamic form field based on its type
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Extensions.HtmlHelperExtensions.RenderTextBox(Microsoft.AspNetCore.Mvc.Rendering.IHtmlHelper,DynamicForms.RazorPages.Models.DynamicFieldViewModel)">
+            <summary>
+            Render a text input field
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Extensions.HtmlHelperExtensions.RenderTextArea(Microsoft.AspNetCore.Mvc.Rendering.IHtmlHelper,DynamicForms.RazorPages.Models.DynamicFieldViewModel)">
+            <summary>
+            Render a textarea field
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Extensions.HtmlHelperExtensions.RenderDropDown(Microsoft.AspNetCore.Mvc.Rendering.IHtmlHelper,DynamicForms.RazorPages.Models.DynamicFieldViewModel)">
+            <summary>
+            Render a dropdown/select field
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Extensions.HtmlHelperExtensions.RenderCheckBox(Microsoft.AspNetCore.Mvc.Rendering.IHtmlHelper,DynamicForms.RazorPages.Models.DynamicFieldViewModel)">
+            <summary>
+            Render a checkbox field
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Extensions.HtmlHelperExtensions.RenderCheckBoxList(Microsoft.AspNetCore.Mvc.Rendering.IHtmlHelper,DynamicForms.RazorPages.Models.DynamicFieldViewModel)">
+            <summary>
+            Render a checkbox list field
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Extensions.ServiceCollectionExtensions">
+            <summary>
+            Service collection extensions for Razor Pages integration
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Extensions.ServiceCollectionExtensions.AddDynamicFormsRazorPages(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Add DynamicForms Razor Pages integration
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Extensions.ServiceCollectionExtensions.AddDynamicFormsRazorPagesWithRuntimeCompilation(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Add DynamicForms Razor Pages with runtime compilation (for development)
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Extensions.DynamicFormsViewLocationExpander">
+            <summary>
+            View location expander for DynamicForms views
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Filters.EnhancedFormActionFilter">
+            <summary>
+            Action filter to handle enhanced form operations with proper error handling and logging
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Models.DateRangeData">
+            <summary>
+            Data structure for date range values
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.Models.DateRangeData.TotalDays">
+            <summary>
+            Get total days in the range
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.Models.DateRangeData.TotalHours">
+            <summary>
+            Get total hours in the range (if time is included)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.Models.DateRangeData.FormattedRange">
+            <summary>
+            Get formatted date range string
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.DateRangeData.GetFormattedRange(System.String,System.String)">
+            <summary>
+            Get localized formatted range
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.Models.DateRangeData.IsValid">
+            <summary>
+            Check if the date range is valid
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.Models.DateRangeData.HasValue">
+            <summary>
+            Check if the range has any value
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.DateRangeData.ToIsoString">
+            <summary>
+            Get ISO 8601 formatted range for JSON serialization
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.DateRangeData.FromIsoString(System.String)">
+            <summary>
+            Parse from ISO 8601 string
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Models.DateRangePickerConfiguration">
+            <summary>
+            Configuration for DateRangePicker control
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.DateRangePickerConfiguration.GetPresets(System.String)">
+            <summary>
+            Get localized preset options
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.DateRangePickerConfiguration.GetPresetRange(System.String)">
+            <summary>
+            Calculate date range for preset
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Models.StepInfo">
+            <summary>
+            Information about a step in the progress stepper
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.StepInfo.GetLabel(System.String)">
+            <summary>
+            Get the step label for the specified language
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.StepInfo.GetDescription(System.String)">
+            <summary>
+            Get the step description for the specified language
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Models.ProgressStepperConfig">
+            <summary>
+            Configuration for the progress stepper
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.ProgressStepperConfig.GetProgressPercentage">
+            <summary>
+            Get progress percentage
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.ProgressStepperConfig.GetCurrentStep">
+            <summary>
+            Get current step info
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.ProgressStepperConfig.UpdateStepStates">
+            <summary>
+            Update step states based on current step
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Models.DynamicFormViewModel">
+            <summary>
+            View model for displaying dynamic forms in Razor Pages using  Enhanced architecture
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.Models.DynamicFormViewModel.Module">
+            <summary>
+            The JSON module schema defining the form structure
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.Models.DynamicFormViewModel.ApplicationId">
+            <summary>
+            Application ID for data persistence
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.Models.DynamicFormViewModel.OpportunityId">
+            <summary>
+            Opportunity ID for context
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.Models.DynamicFormViewModel.Language">
+            <summary>
+            Current language for localization (EN/FR)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.Models.DynamicFormViewModel.IsReadOnly">
+            <summary>
+            Whether the form is in read-only mode
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.Models.DynamicFormViewModel.EnableAutoSave">
+            <summary>
+            Whether to enable auto-save functionality
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.Models.DynamicFormViewModel.AutoSaveInterval">
+            <summary>
+            Auto-save interval in milliseconds
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.Models.DynamicFormViewModel.ExistingData">
+            <summary>
+            Existing data for form fields (for editing)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.Models.DynamicFormViewModel.ValidationErrors">
+            <summary>
+            Field-level validation errors
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.Models.DynamicFormViewModel.Metadata">
+            <summary>
+            Additional metadata for the form
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.Models.DynamicFormViewModel.CurrentStep">
+            <summary>
+            Current step in multi-step forms
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.Models.DynamicFormViewModel.TotalSteps">
+            <summary>
+            Total steps in multi-step forms
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.Models.DynamicFormViewModel.CssClasses">
+            <summary>
+            CSS classes to apply to the form container
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.DynamicFormViewModel.GetExistingValue(System.String)">
+            <summary>
+            Get existing value for a field
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.DynamicFormViewModel.GetFieldErrors(System.String)">
+            <summary>
+            Get validation errors for a field
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.DynamicFormViewModel.HasFieldErrors(System.String)">
+            <summary>
+            Check if field has validation errors
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.DynamicFormViewModel.GetVisibleFields">
+            <summary>
+            Get visible fields for current step using enhanced capabilities
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.DynamicFormViewModel.GetRootFields">
+            <summary>
+            Get root fields for hierarchical rendering
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.DynamicFormViewModel.GetRequiredFieldIds">
+            <summary>
+            Get required field IDs
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.DynamicFormViewModel.GetCompletionPercentage">
+            <summary>
+            Calculate form completion percentage
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.DynamicFormViewModel.GetModuleStatistics">
+            <summary>
+            Get module statistics for enhanced features
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.DynamicFormViewModel.GetMaxHierarchyDepth">
+            <summary>
+            Get field hierarchy depth for the module
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.DynamicFormViewModel.HasHierarchicalFields">
+            <summary>
+            Check if the module supports hierarchy features
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Models.DynamicFieldViewModel">
+            <summary>
+            View model for individual dynamic fields using  Enhanced architecture
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.Models.DynamicFieldViewModel.Field">
+            <summary>
+            The field definition from JSON schema
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.Models.DynamicFieldViewModel.Value">
+            <summary>
+            Current value/data for the field
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.Models.DynamicFieldViewModel.Language">
+            <summary>
+            Language for localization
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.Models.DynamicFieldViewModel.Index">
+            <summary>
+            Field index in the form (for naming)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.Models.DynamicFieldViewModel.IsReadOnly">
+            <summary>
+            Whether the field is read-only
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.Models.DynamicFieldViewModel.ValidationErrors">
+            <summary>
+            Validation errors for this field
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.Models.DynamicFieldViewModel.HtmlAttributes">
+            <summary>
+            Additional HTML attributes
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.DynamicFieldViewModel.GetLabel">
+            <summary>
+            Get field label/description
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.DynamicFieldViewModel.GetHelpText">
+            <summary>
+            Get field help text
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.DynamicFieldViewModel.GetPlaceholder">
+            <summary>
+            Get field placeholder text
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.DynamicFieldViewModel.GetValidationError">
+            <summary>
+            Get validation error message
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.Models.DynamicFieldViewModel.HasValidationErrors">
+            <summary>
+            Check if field has validation errors
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.DynamicFieldViewModel.GetStringValue">
+            <summary>
+            Get field value as string
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.DynamicFieldViewModel.GetCssClasses">
+            <summary>
+            Get CSS classes for the field including hierarchy-aware classes
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.DynamicFieldViewModel.GetHierarchicalPath">
+            <summary>
+            Get hierarchical path for debugging
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.DynamicFieldViewModel.ShouldBeVisible(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Check if field should be visible based on enhanced logic
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.DynamicFieldViewModel.GetChildFields">
+            <summary>
+            Get child fields for container types
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Models.FormSubmissionModel">
+            <summary>
+            View model for form submission
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Models.FieldSubmissionModel">
+            <summary>
+            Model for individual field submission
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Models.ModalSubmissionModel">
+            <summary>
+            Model for modal data submission
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Models.ModalRecordSubmissionModel">
+            <summary>
+            Model for individual modal record submission
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Models.ModalDisplayViewModel">
+            <summary>
+            View model for modal/table displays using  Enhanced architecture
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Models.FileUploadViewModel">
+            <summary>
+            View model for file upload fields using  Enhanced architecture
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Models.ValidationSummaryViewModel">
+            <summary>
+            View model for validation summary
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Models.ModuleStatisticsViewModel">
+            <summary>
+            View model for enhanced module statistics display
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.ModuleStatisticsViewModel.GetFormattedComplexityScore">
+            <summary>
+            Get formatted complexity score
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.ModuleStatisticsViewModel.GetFieldTypePercentages">
+            <summary>
+            Get field type distribution as percentages
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Models.ModuleStatisticsViewModel.GetComplexityAssessment">
+            <summary>
+            Get complexity assessment text
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Security.InputSanitizationService">
+            <summary>
+            Input sanitization service for form data security
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Security.InputSanitizationService.SanitizeFormData(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Sanitize form data dictionary
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Security.InputSanitizationService.SanitizeValue(System.Object,System.String)">
+            <summary>
+            Sanitize individual value based on context
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Security.InputSanitizationService.HtmlEncode(System.String)">
+            <summary>
+            HTML encode for display purposes
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Security.InputSanitizationService.CreateSafeHtml(System.String)">
+            <summary>
+            Create safe HTML string for Razor rendering
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Security.InputSanitizationService.ValidateInput(System.String,System.String)">
+            <summary>
+            Validate input against security policies
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Security.FieldSanitizationType">
+            <summary>
+            Field sanitization types
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Security.ValidationResult">
+            <summary>
+            Validation result for input checking
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Services.RazorPagesService">
+            <summary>
+             Razor Pages service for working with modules
+            Uses only * classes without any inheritance or conversion dependencies
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.RazorPagesService.GetModuleAsync(System.Int32,System.Nullable{System.Int32})">
+            <summary>
+            Load a module for Razor Pages with built hierarchy
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.RazorPagesService.SaveModuleAsync(DynamicForms.Core.Entities.FormModule)">
+            <summary>
+            Save a module back to the repository
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.RazorPagesService.GetFieldsForRazorPageRendering(DynamicForms.Core.Entities.FormModule,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Get fields for rendering in a Razor Page with proper hierarchy
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.RazorPagesService.GetRootFields(DynamicForms.Core.Entities.FormModule)">
+            <summary>
+            Get root fields only (for rendering the top level)
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.RazorPagesService.GetChildFields(DynamicForms.Core.Entities.FormField,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Get child fields for a parent (for rendering nested structures)
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.RazorPagesService.ShouldRenderField(DynamicForms.Core.Entities.FormField,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Check if a field should be rendered in the current context
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.RazorPagesService.GetFieldCssClasses(DynamicForms.Core.Entities.FormField)">
+            <summary>
+            Get CSS classes for field rendering with hierarchy context
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.RazorPagesService.ValidateFormData(DynamicForms.Core.Entities.FormModule,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Validate form data using validation
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.RazorPagesService.GetFieldValidationErrors(DynamicForms.Core.Entities.FormField,System.Object,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Get validation errors for a specific field
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.RazorPagesService.AddFieldToModule(DynamicForms.Core.Entities.FormModule,DynamicForms.Core.Entities.FormField,System.String)">
+            <summary>
+            Add a new field to a module with automatic hierarchy integration
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.RazorPagesService.RemoveFieldFromModule(DynamicForms.Core.Entities.FormModule,System.String)">
+            <summary>
+            Remove a field from a module with cleanup of relationships
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.RazorPagesService.MoveField(DynamicForms.Core.Entities.FormModule,System.String,System.String)">
+            <summary>
+            Move a field to a different parent with validation
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.RazorPagesService.GetModuleStatistics(DynamicForms.Core.Entities.FormModule)">
+            <summary>
+            Get module statistics for Razor Pages display
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.RazorPagesService.GetCascadeOptions(DynamicForms.Core.Entities.FormField,System.String,System.String)">
+            <summary>
+            Get cascade options for a field based on parent value
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Services.RazorPageValidationResult">
+            <summary>
+            Validation result tailored for Razor Pages ( version)
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Services.HierarchyUpdateResult">
+            <summary>
+            Result of hierarchy update operations ( version)
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Services.WorkflowRazorPagesService">
+            <summary>
+            Razor Pages service for working with multi-module workflows
+            Enhanced with single document storage support for optimal performance
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.WorkflowRazorPagesService.GetWorkflowAsync(System.Int32,System.Nullable{System.Int32})">
+            <summary>
+            Load a complete workflow for Razor Pages with built hierarchy and navigation
+            Uses smart loading to automatically choose the best storage mode
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.WorkflowRazorPagesService.GetWorkflowWithStorageModeAsync(System.Int32,System.Nullable{System.Int32},DynamicForms.Core.Entities.WorkflowStorageMode)">
+            <summary>
+            Load workflow with specified storage mode preference
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.WorkflowRazorPagesService.SaveWorkflowAsync(DynamicForms.Core.Entities.FormWorkflow)">
+            <summary>
+            Save a workflow back to the repository using optimal storage mode
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.WorkflowRazorPagesService.SaveWorkflowWithStorageModeAsync(DynamicForms.Core.Entities.FormWorkflow,DynamicForms.Core.Entities.WorkflowStorageMode)">
+            <summary>
+            Save workflow with specific storage mode
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.WorkflowRazorPagesService.GetWorkflowStorageInfoAsync(System.Int32,System.Nullable{System.Int32})">
+            <summary>
+            Get workflow storage information for admin/debugging purposes
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.WorkflowRazorPagesService.MigrateWorkflowStorageModeAsync(System.Int32,System.Nullable{System.Int32},DynamicForms.Core.Entities.WorkflowStorageMode)">
+            <summary>
+            Migrate workflow between storage modes
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.WorkflowRazorPagesService.GetWorkflowModules(DynamicForms.Core.Entities.FormWorkflow)">
+            <summary>
+            Get all modules in a workflow for rendering
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.WorkflowRazorPagesService.GetWorkflowModule(DynamicForms.Core.Entities.FormWorkflow,System.Int32)">
+            <summary>
+            Get a specific module from a workflow
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.WorkflowRazorPagesService.GetModulesForStep(DynamicForms.Core.Entities.FormWorkflow,System.Int32)">
+            <summary>
+            Get modules for a specific step in the workflow
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.WorkflowRazorPagesService.ShouldRenderModule(DynamicForms.Core.Entities.FormModule,System.Collections.Generic.Dictionary{System.Int32,System.Collections.Generic.Dictionary{System.String,System.Object}})">
+            <summary>
+            Check if a module should be rendered in the current workflow context
+            Enhanced with storage mode awareness
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.WorkflowRazorPagesService.GetModuleCssClasses(DynamicForms.Core.Entities.FormModule,DynamicForms.Core.Entities.FormWorkflow,System.Int32)">
+            <summary>
+            Get CSS classes for module rendering in workflow context
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.WorkflowRazorPagesService.GetModuleStep(DynamicForms.Core.Entities.FormModule,DynamicForms.Core.Entities.FormWorkflow)">
+            <summary>
+            Get the current step number for a module in the workflow
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.WorkflowRazorPagesService.GetNavigationInfo(DynamicForms.Core.Entities.FormWorkflow,System.Int32)">
+            <summary>
+            Get navigation information for workflow stepper
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.WorkflowRazorPagesService.CanNavigateToModule(DynamicForms.Core.Entities.FormWorkflow,System.Int32,System.Collections.Generic.Dictionary{System.Int32,System.Collections.Generic.Dictionary{System.String,System.Object}})">
+            <summary>
+            Check if navigation to a specific module is allowed
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.WorkflowRazorPagesService.ValidateWorkflowData(DynamicForms.Core.Entities.FormWorkflow,System.Collections.Generic.Dictionary{System.Int32,System.Collections.Generic.Dictionary{System.String,System.Object}})">
+            <summary>
+            Validate workflow data using enhanced validation
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.WorkflowRazorPagesService.GetModuleValidationErrors(DynamicForms.Core.Entities.FormModule,System.Collections.Generic.Dictionary{System.String,System.Object},DynamicForms.Core.Entities.FormWorkflow,System.Collections.Generic.Dictionary{System.Int32,System.Collections.Generic.Dictionary{System.String,System.Object}})">
+            <summary>
+            Get validation errors for a specific module in workflow context
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.WorkflowRazorPagesService.AddModuleToWorkflowAsync(DynamicForms.Core.Entities.FormWorkflow,DynamicForms.Core.Entities.FormModule,System.Nullable{System.Int32})">
+            <summary>
+            Add a module to an existing workflow
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.WorkflowRazorPagesService.RemoveModuleFromWorkflowAsync(DynamicForms.Core.Entities.FormWorkflow,System.Int32)">
+            <summary>
+            Remove a module from a workflow
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.WorkflowRazorPagesService.OptimizeWorkflowStorageModeAsync(System.Int32,System.Nullable{System.Int32})">
+            <summary>
+            Optimize workflow storage mode based on usage patterns and size
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.WorkflowRazorPagesService.GetWorkflowStatisticsAsync(System.Int32,System.Nullable{System.Int32})">
+            <summary>
+            Get workflow statistics for display
+            Enhanced with storage information
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.WorkflowRazorPagesService.GetWorkflowStatistics(DynamicForms.Core.Entities.FormWorkflow)">
+            <summary>
+            Get workflow statistics for a loaded workflow
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.WorkflowRazorPagesService.GetWorkflowCompletionPercentage(DynamicForms.Core.Entities.FormWorkflow,System.Collections.Generic.Dictionary{System.Int32,System.Collections.Generic.Dictionary{System.String,System.Object}})">
+            <summary>
+            Calculate completion percentage for the entire workflow
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.WorkflowRazorPagesService.GetModuleCompletionStatuses(DynamicForms.Core.Entities.FormWorkflow,System.Collections.Generic.Dictionary{System.Int32,System.Collections.Generic.Dictionary{System.String,System.Object}})">
+            <summary>
+            Get completion status for each module in workflow
+            </summary>
+        </member>
+        <member name="M:DynamicForms.RazorPages.Services.WorkflowRazorPagesService.GetStorageRecommendationAsync(System.Int32,System.Nullable{System.Int32})">
+            <summary>
+            Get storage recommendations for workflow optimization
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Services.WorkflowNavigationInfo">
+            <summary>
+            Navigation information for workflow display
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Services.WorkflowUpdateResult">
+            <summary>
+            Result of workflow update operations
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Services.ModuleCompletionStatus">
+            <summary>
+            Completion status for a module within a workflow
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.Services.WorkflowStorageRecommendation">
+            <summary>
+            Storage mode recommendation for workflow optimization
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.TagHelpers.DateRangePickerTagHelper">
+            <summary>
+            TagHelper for DateRangePicker control
+            Usage: <date-range-picker config="@Model.DateRangeConfig" value="@Model.DateRange" />
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.DateRangePickerTagHelper.Config">
+            <summary>
+            Configuration for the date range picker
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.DateRangePickerTagHelper.Value">
+            <summary>
+            Current date range value
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.DateRangePickerTagHelper.Name">
+            <summary>
+            Field name for form submission
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.DateRangePickerTagHelper.FieldId">
+            <summary>
+            Field ID
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.DateRangePickerTagHelper.Language">
+            <summary>
+            Language for localization
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.DateRangePickerTagHelper.Required">
+            <summary>
+            Whether the field is required
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.DateRangePickerTagHelper.ReadOnly">
+            <summary>
+            Whether the field is read-only
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.DateRangePickerTagHelper.CssClass">
+            <summary>
+            CSS classes to add
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.DateRangePickerTagHelper.Label">
+            <summary>
+            Label text
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.DateRangePickerTagHelper.HelpText">
+            <summary>
+            Help text
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.DateRangePickerTagHelper.ErrorMessage">
+            <summary>
+            Validation error message
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.TagHelpers.DynamicFieldTagHelper">
+            <summary>
+            Tag helper for rendering dynamic form fields using  Enhanced architecture
+            Usage: <dynamic-field field="@field" value="@value" language="EN" />
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.DynamicFieldTagHelper.Field">
+            <summary>
+            The field view model containing FormField
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.DynamicFieldTagHelper.Language">
+            <summary>
+            Language for localization
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.DynamicFieldTagHelper.Index">
+            <summary>
+            Field index for form naming
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.DynamicFieldTagHelper.IsReadOnly">
+            <summary>
+            Whether the field is read-only
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.DynamicFieldTagHelper.CssClass">
+            <summary>
+            Additional CSS classes
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.DynamicFieldTagHelper.FormData">
+            <summary>
+            Form data for conditional rendering
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.DynamicFieldTagHelper.ShowHierarchyDebug">
+            <summary>
+            Show hierarchy debug information
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.TagHelpers.ValidationSummaryTagHelper">
+            <summary>
+            Enhanced Tag helper for rendering validation summary with  Enhanced features
+            Usage: <validation-summary errors="@Model.ValidationErrors" language="EN" />
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.TagHelpers.FormProgressTagHelper">
+            <summary>
+            Enhanced Tag helper for rendering form progress indicator with  Enhanced features
+            Usage: <form-progress current="2" total="5" />
+            </summary>
+        </member>
+        <member name="T:DynamicForms.RazorPages.TagHelpers.ProgressStepperTagHelper">
+            <summary>
+            Enhanced progress stepper for multi-step forms
+            Usage: <progress-stepper config="@Model.StepperConfig" />
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.ProgressStepperTagHelper.Config">
+            <summary>
+            Progress stepper configuration
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.ProgressStepperTagHelper.Steps">
+            <summary>
+            List of steps (alternative to config)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.ProgressStepperTagHelper.Current">
+            <summary>
+            Current active step (1-based)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.ProgressStepperTagHelper.Language">
+            <summary>
+            Language for localization
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.ProgressStepperTagHelper.Style">
+            <summary>
+            Display style: "horizontal", "vertical", "compact"
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.ProgressStepperTagHelper.ShowNumbers">
+            <summary>
+            Show step numbers
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.ProgressStepperTagHelper.ShowPercentage">
+            <summary>
+            Show progress percentage
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.ProgressStepperTagHelper.Clickable">
+            <summary>
+            Enable clickable steps (for navigation)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.ProgressStepperTagHelper.ShowDescriptions">
+            <summary>
+            Show step descriptions
+            </summary>
+        </member>
+        <member name="P:DynamicForms.RazorPages.TagHelpers.ProgressStepperTagHelper.CssClass">
+            <summary>
+            CSS class for the container
+            </summary>
+        </member>
+        <member name="T:Microsoft.Extensions.DependencyInjection.SecurityServiceExtensions">
+            <summary>
+            Extension methods for registering DynamicForms security services
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.SecurityServiceExtensions.AddDynamicFormsSecurity(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Add DynamicForms security services to the service collection
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.SecurityServiceExtensions.AddDynamicFormsSecurity(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Microsoft.Extensions.DependencyInjection.SecurityOptions})">
+            <summary>
+            Add DynamicForms security services with configuration
+            </summary>
+        </member>
+        <member name="T:Microsoft.Extensions.DependencyInjection.SecurityOptions">
+            <summary>
+            Configuration options for DynamicForms security
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.DependencyInjection.SecurityOptions.MaxInputLength">
+            <summary>
+            Maximum allowed input length per field
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.DependencyInjection.SecurityOptions.LogSecurityViolations">
+            <summary>
+            Whether to log security violations
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.DependencyInjection.SecurityOptions.BlockMaliciousRequests">
+            <summary>
+            Whether to block requests with security violations
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.DependencyInjection.SecurityOptions.AllowedHtmlTags">
+            <summary>
+            Allowed HTML tags for rich text fields
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.DependencyInjection.SecurityOptions.AllowedUrlSchemes">
+            <summary>
+            Allowed URL schemes
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,33 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\waelm\\source\\repos\\waelgadalla\\DynamicForms\\src\\DynamicForms.RazorPages\\wwwroot\\css\\dynamic-forms.css",
+      "PackagePath": "staticwebassets\\css\\dynamic-forms.css"
+    },
+    {
+      "Id": "C:\\Users\\waelm\\source\\repos\\waelgadalla\\DynamicForms\\src\\DynamicForms.RazorPages\\wwwroot\\js\\dynamic-forms.js",
+      "PackagePath": "staticwebassets\\js\\dynamic-forms.js"
+    },
+    {
+      "Id": "obj\\Release\\net9.0\\staticwebassets\\msbuild.DynamicForms.RazorPages.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssetEndpoints.props"
+    },
+    {
+      "Id": "obj\\Release\\net9.0\\staticwebassets\\msbuild.DynamicForms.RazorPages.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Release\\net9.0\\staticwebassets\\msbuild.build.DynamicForms.RazorPages.props",
+      "PackagePath": "build\\DynamicForms.RazorPages.props"
+    },
+    {
+      "Id": "obj\\Release\\net9.0\\staticwebassets\\msbuild.buildMultiTargeting.DynamicForms.RazorPages.props",
+      "PackagePath": "buildMultiTargeting\\DynamicForms.RazorPages.props"
+    },
+    {
+      "Id": "obj\\Release\\net9.0\\staticwebassets\\msbuild.buildTransitive.DynamicForms.RazorPages.props",
+      "PackagePath": "buildTransitive\\DynamicForms.RazorPages.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

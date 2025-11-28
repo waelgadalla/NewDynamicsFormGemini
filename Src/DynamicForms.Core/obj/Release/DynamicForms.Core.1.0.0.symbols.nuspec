@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>DynamicForms.Core</id>
+    <version>1.0.0</version>
+    <authors>Wael M</authors>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <projectUrl>https://github.com/waelgadalla/DynamicForms</projectUrl>
+    <description>Core entities and interfaces for JSON-based dynamic form processing. Enables building flexible, multilingual forms for government and enterprise applications.</description>
+    <copyright>Copyright � Government Solutions 2025</copyright>
+    <tags>json forms dynamic validation multilingual government enterprise dotnet9 core interfaces entities</tags>
+    <repository type="git" url="https://github.com/waelgadalla/DynamicForms" commit="e514329fa49ed9aefc2ecb5dc17c4c7729beb4f3" />
+    <dependencies>
+      <group targetFramework="net9.0">
+        <dependency id="Microsoft.Extensions.Caching.Abstractions" version="9.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Caching.Memory" version="9.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Configuration.Abstractions" version="9.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Configuration.Binder" version="9.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="9.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Logging.Abstractions" version="9.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Options" version="9.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Options.ConfigurationExtensions" version="9.0.0" exclude="Build,Analyzers" />
+        <dependency id="System.ComponentModel.Annotations" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="System.Text.Json" version="9.0.0" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="C:\Users\waelm\source\repos\waelgadalla\DynamicForms\src\DynamicForms.Core\bin\Release\net9.0\DynamicForms.Core.pdb" target="lib\net9.0\DynamicForms.Core.pdb" />
+  </files>
+</package>

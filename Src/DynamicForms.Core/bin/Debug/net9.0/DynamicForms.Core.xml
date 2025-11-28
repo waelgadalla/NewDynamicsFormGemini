@@ -1,0 +1,2662 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>DynamicForms.Core</name>
+    </assembly>
+    <members>
+        <member name="T:DynamicForms.Core.Entities.ConditionalRuleV4">
+            <summary>
+            Conditional rule for visual rules builder
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.RuleCondition">
+            <summary>
+            Condition in a conditional rule
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.RuleAction">
+            <summary>
+            Action to perform when rule conditions are met
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.RuleOperator">
+            <summary>
+            Operators for rule conditions
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.LogicOperator">
+            <summary>
+            Logic operators for combining conditions
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.ActionType">
+            <summary>
+            Action types for conditional rules
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.Data.Draft">
+            <summary>
+            Represents a temporary draft of a form module being edited
+            Stored server-side for enterprise security compliance (no client-side storage)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.Draft.Id">
+            <summary>
+            Unique identifier for the draft
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.Draft.UserId">
+            <summary>
+            User ID who owns this draft (references AspNetUsers)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.Draft.ModuleId">
+            <summary>
+            Form module ID being edited
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.Draft.DraftData">
+            <summary>
+            JSON serialized FormModule data
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.Draft.CreatedAt">
+            <summary>
+            When this draft was created (UTC)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.Draft.ExpiresAt">
+            <summary>
+            When this draft expires and can be deleted (UTC)
+            Default: 24 hours from creation
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.Data.FormDataItem">
+            <summary>
+            Represents user-entered data for a JSON field
+            Independent implementation for the reusable DynamicForms library
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.FormDataItem.Id">
+            <summary>
+            GUID ID linking back to json metadata field
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.FormDataItem.Name">
+            <summary>
+            Display name for the field data
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.FormDataItem.Value">
+            <summary>
+            Simple field value (text, number, etc.)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.FormDataItem.OriginalValue">
+            <summary>
+            Original value before any modifications (for audit trail)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.FormDataItem.Values">
+            <summary>
+            Collection of values for multi-select fields (checkboxes, multi-dropdown)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.FormDataItem.SpeciesAutoCompleteData">
+            <summary>
+            Complex data for specialized controls
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.FormDataItem.ModalRecords">
+            <summary>
+            Data for modal/popup forms
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.FormDataItem.FileUploadData">
+            <summary>
+            File upload information
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.FormDataItem.AddressData">
+            <summary>
+            Address data for address lookup fields
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.FormDataItem.Metadata">
+            <summary>
+            Additional metadata for extensibility
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.FormDataItem.DateCreated">
+            <summary>
+            When this data item was created
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.FormDataItem.DateUpdated">
+            <summary>
+            When this data item was last updated
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.FormDataItem.CreatedBy">
+            <summary>
+            User who created this data
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.FormDataItem.UpdatedBy">
+            <summary>
+            User who last updated this data
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.FormDataItem.IsValid">
+            <summary>
+            Validation status of this data item
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.FormDataItem.ValidationErrors">
+            <summary>
+            Validation error messages
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.Data.FormDataItem.StringifyValues">
+            <summary>
+            Returns comma-separated values for multi-select controls
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.Data.FormDataItem.GetDisplayValue(System.String)">
+            <summary>
+            Get display value based on field type and language
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.Data.FormDataItem.HasValue">
+            <summary>
+            Check if the data item has any value
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.Data.FormDataItem.UpdateValue(System.String,System.String)">
+            <summary>
+            Update the data and track changes
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.Data.FormDataItem.AddValidationError(System.String)">
+            <summary>
+            Add validation error
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.Data.FormDataItem.ClearValidationErrors">
+            <summary>
+            Clear validation errors
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.Data.ModalRecord">
+            <summary>
+            Modal record containing multiple field values
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.Data.ModalRecord.GetFieldValue(System.String,System.String)">
+            <summary>
+            Get display value for a specific field in this record
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.Data.TextClass">
+            <summary>
+            Multilingual text class using the architecture
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.Data.ControlValue">
+            <summary>
+            Control value for selections
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.Data.SpeciesAutoCompleteData">
+            <summary>
+            Species autocomplete data structure
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.Data.SpeciesLabel">
+            <summary>
+            Species label for classification data
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.Data.FileUploadData">
+            <summary>
+            File upload data structure
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.Data.AddressData">
+            <summary>
+            Address data structure for address lookup fields
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.Data.ModuleFormData">
+            <summary>
+            Represents complete module data including fields and modal data
+            Independent implementation for the DynamicForms library
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.ModuleFormData.OpportunityId">
+            <summary>
+            Associated opportunity/program identifier
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.ModuleFormData.ModuleId">
+            <summary>
+            Module identifier this data belongs to
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.ModuleFormData.ApplicationId">
+            <summary>
+            Application/submission identifier
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.ModuleFormData.DataItems">
+            <summary>
+            Collection of field data items
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.ModuleFormData.Modals">
+            <summary>
+            Collection of modal/popup data
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.ModuleFormData.Metadata">
+            <summary>
+            Additional metadata for the module data
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.ModuleFormData.SchemaVersion">
+            <summary>
+            Version of the module schema this data was created with
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.ModuleFormData.Status">
+            <summary>
+            Current status of the data submission
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.ModuleFormData.DateCreated">
+            <summary>
+            When this module data was created
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.ModuleFormData.DateUpdated">
+            <summary>
+            When this module data was last updated
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.ModuleFormData.CreatedBy">
+            <summary>
+            User who created this data
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.ModuleFormData.UpdatedBy">
+            <summary>
+            User who last updated this data
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.ModuleFormData.Language">
+            <summary>
+            Language the data was entered in
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.ModuleFormData.IsComplete">
+            <summary>
+            Whether the module data is complete
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.ModuleFormData.IsValid">
+            <summary>
+            Whether the module data is valid
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.ModuleFormData.ValidationErrors">
+            <summary>
+            Module-level validation errors
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.Data.ModuleFormData.GetDataItem(System.String)">
+            <summary>
+            Get data item by field ID
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.Data.ModuleFormData.GetFieldValue(System.String,System.String)">
+            <summary>
+            Get field value as string
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.Data.ModuleFormData.SetFieldValue(System.String,System.String,System.String)">
+            <summary>
+            Set field value
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.Data.ModuleFormData.HasRequiredFieldValue(System.String)">
+            <summary>
+            Check if a required field has a value
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.Data.ModuleFormData.GetAllFieldValues">
+            <summary>
+            Get all field values as dictionary
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.Data.ModuleFormData.GetModalData(System.String)">
+            <summary>
+            Get modal data by modal ID
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.Data.ModuleFormData.GetCompletionPercentage(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Calculate completion percentage
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.Data.ModuleFormData.AddValidationError(System.String)">
+            <summary>
+            Add validation error
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.Data.ModuleFormData.ClearValidationErrors">
+            <summary>
+            Clear validation errors
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.Data.ModuleFormData.GetAllValidationErrors">
+            <summary>
+            Get all validation errors (module and field level)
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.Data.ModuleFormData.ToDictionary">
+            <summary>
+            Export data to dictionary for serialization
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.Data.ModuleFormData.GetSummary">
+            <summary>
+            Create a summary for reporting
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.Data.ModalFormData">
+            <summary>
+            Represents data for modal/popup forms within a module
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.ModalFormData.Id">
+            <summary>
+            Unique identifier for this modal data record
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.ModalFormData.OpportunityId">
+            <summary>
+            Associated opportunity identifier
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.ModalFormData.ModuleId">
+            <summary>
+            Module identifier
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.ModalFormData.ModalId">
+            <summary>
+            Modal/popup identifier from the schema
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.ModalFormData.ApplicationId">
+            <summary>
+            Application identifier
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.ModalFormData.DataItems">
+            <summary>
+            Collection of field data for this modal record
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.ModalFormData.Order">
+            <summary>
+            Display order within the modal
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.ModalFormData.IsDeleted">
+            <summary>
+            Whether this modal record is deleted (soft delete)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.ModalFormData.Metadata">
+            <summary>
+            Record-level metadata
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.ModalFormData.DateCreated">
+            <summary>
+            When this modal data was created
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.ModalFormData.CreatedBy">
+            <summary>
+            User who created this modal data
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.Data.ModalFormData.GetFieldValue(System.String,System.String)">
+            <summary>
+            Get field value from this modal record
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.Data.ModalFormData.GetSummary(System.String,System.String)">
+            <summary>
+            Get a summary representation of this modal record
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.Data.ModuleDataSummary">
+            <summary>
+            Summary information for module data (for reporting and lists)
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.Data.WorkflowStorageInfo">
+            <summary>
+            Information about how a workflow is stored in the database
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowStorageInfo.WorkflowId">
+            <summary>
+            Workflow identifier
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowStorageInfo.OpportunityId">
+            <summary>
+            Associated opportunity identifier
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowStorageInfo.CurrentStorageMode">
+            <summary>
+            Current storage mode
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowStorageInfo.SizeInBytes">
+            <summary>
+            Size of the workflow in bytes
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowStorageInfo.IsCompressed">
+            <summary>
+            Whether the workflow is compressed
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowStorageInfo.RecordCount">
+            <summary>
+            Number of database records used for storage
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowStorageInfo.CompressionRatio">
+            <summary>
+            Compression ratio if compressed (original size / compressed size)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowStorageInfo.LastAccessed">
+            <summary>
+            Last time the workflow was accessed
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowStorageInfo.Performance">
+            <summary>
+            Performance metrics for this storage configuration
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.Data.WorkflowStoragePerformance">
+            <summary>
+            Performance metrics for workflow storage
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowStoragePerformance.AverageLoadTimeMs">
+            <summary>
+            Average load time in milliseconds
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowStoragePerformance.AverageSaveTimeMs">
+            <summary>
+            Average save time in milliseconds
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowStoragePerformance.LoadCount">
+            <summary>
+            Number of times this workflow has been loaded
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowStoragePerformance.SaveCount">
+            <summary>
+            Number of times this workflow has been saved
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowStoragePerformance.IsOptimal">
+            <summary>
+            Whether this storage mode is optimal for this workflow
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowStoragePerformance.RecommendedMode">
+            <summary>
+            Recommended storage mode based on usage patterns
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.Data.WorkflowSearchCriteria">
+            <summary>
+            Criteria for searching workflows by complexity and characteristics
+            Enhanced with storage mode filtering
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchCriteria.MinModuleCount">
+            <summary>
+            Minimum number of modules
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchCriteria.MaxModuleCount">
+            <summary>
+            Maximum number of modules
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchCriteria.MinFieldCount">
+            <summary>
+            Minimum total field count
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchCriteria.MaxFieldCount">
+            <summary>
+            Maximum total field count
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchCriteria.MinComplexity">
+            <summary>
+            Minimum complexity score
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchCriteria.MaxComplexity">
+            <summary>
+            Maximum complexity score
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchCriteria.StorageMode">
+            <summary>
+            Filter by storage mode
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchCriteria.IsCompressed">
+            <summary>
+            Filter by compression status
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchCriteria.MinSize">
+            <summary>
+            Minimum workflow size in bytes
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchCriteria.MaxSize">
+            <summary>
+            Maximum workflow size in bytes
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchCriteria.OpportunityId">
+            <summary>
+            Opportunity identifier filter
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchCriteria.CreatedBy">
+            <summary>
+            Created by filter
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchCriteria.CreatedAfter">
+            <summary>
+            Created after date filter
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchCriteria.CreatedBefore">
+            <summary>
+            Created before date filter
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchCriteria.PageNumber">
+            <summary>
+            Page number for pagination (1-based)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchCriteria.PageSize">
+            <summary>
+            Page size for pagination
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchCriteria.SortDescending">
+            <summary>
+            Sort results in descending order
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.Data.WorkflowSearchResult">
+            <summary>
+            Search result for workflow queries
+            Enhanced with storage information
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchResult.WorkflowId">
+            <summary>
+            Workflow identifier
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchResult.OpportunityId">
+            <summary>
+            Associated opportunity identifier
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchResult.Title">
+            <summary>
+            Workflow title
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchResult.Description">
+            <summary>
+            Workflow description
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchResult.Version">
+            <summary>
+            Workflow version
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchResult.ModuleCount">
+            <summary>
+            Number of modules
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchResult.TotalFields">
+            <summary>
+            Total number of fields
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchResult.ComplexityScore">
+            <summary>
+            Complexity score
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchResult.DateCreated">
+            <summary>
+            Creation date
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchResult.CreatedBy">
+            <summary>
+            Created by
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchResult.FieldTypeDistribution">
+            <summary>
+            Field type distribution
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchResult.ModuleTypeDistribution">
+            <summary>
+            Module type distribution
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowSearchResult.StorageInfo">
+            <summary>
+            Storage information
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.Data.WorkflowVersionInfo">
+            <summary>
+            Version information for workflows
+            Enhanced with storage details
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowVersionInfo.WorkflowId">
+            <summary>
+            Workflow identifier
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowVersionInfo.OpportunityId">
+            <summary>
+            Associated opportunity identifier
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowVersionInfo.Version">
+            <summary>
+            Version number
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowVersionInfo.Title">
+            <summary>
+            Version title/name
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowVersionInfo.ModuleCount">
+            <summary>
+            Number of modules in this version
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowVersionInfo.TotalFields">
+            <summary>
+            Total fields in this version
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowVersionInfo.ComplexityScore">
+            <summary>
+            Complexity score for this version
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowVersionInfo.DateCreated">
+            <summary>
+            Creation date for this version
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowVersionInfo.CreatedBy">
+            <summary>
+            Created by
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowVersionInfo.IsCurrent">
+            <summary>
+            Whether this is the current version
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowVersionInfo.StorageMode">
+            <summary>
+            Storage mode for this version
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowVersionInfo.SizeInBytes">
+            <summary>
+            Size of this version in bytes
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.Data.WorkflowExportOptions">
+            <summary>
+            Options for exporting workflows
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowExportOptions.Format">
+            <summary>
+            Export format (JSON, XML, Excel, etc.)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowExportOptions.IncludeModuleData">
+            <summary>
+            Include module data in export
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowExportOptions.IncludeHierarchy">
+            <summary>
+            Include field hierarchy information
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowExportOptions.IncludeStatistics">
+            <summary>
+            Include workflow statistics
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowExportOptions.CompressOutput">
+            <summary>
+            Compress exported data
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowExportOptions.IncludeVersionHistory">
+            <summary>
+            Include version history
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowExportOptions.Language">
+            <summary>
+            Export language (for multilingual content)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowExportOptions.CustomSettings">
+            <summary>
+            Custom export settings
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.Data.WorkflowExportFormat">
+            <summary>
+            Export formats supported for workflows
+            </summary>
+        </member>
+        <member name="F:DynamicForms.Core.Entities.Data.WorkflowExportFormat.Json">
+            <summary>
+            JSON format
+            </summary>
+        </member>
+        <member name="F:DynamicForms.Core.Entities.Data.WorkflowExportFormat.Xml">
+            <summary>
+            XML format
+            </summary>
+        </member>
+        <member name="F:DynamicForms.Core.Entities.Data.WorkflowExportFormat.Excel">
+            <summary>
+            Excel format
+            </summary>
+        </member>
+        <member name="F:DynamicForms.Core.Entities.Data.WorkflowExportFormat.Csv">
+            <summary>
+            CSV format (flattened)
+            </summary>
+        </member>
+        <member name="F:DynamicForms.Core.Entities.Data.WorkflowExportFormat.Pdf">
+            <summary>
+            PDF documentation
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.Data.WorkflowExportResult">
+            <summary>
+            Result of workflow export operation
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowExportResult.IsSuccessful">
+            <summary>
+            Whether the export was successful
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowExportResult.Data">
+            <summary>
+            Exported data
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowExportResult.ContentType">
+            <summary>
+            Content type/MIME type of exported data
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowExportResult.FileName">
+            <summary>
+            Suggested filename for the export
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowExportResult.SizeInBytes">
+            <summary>
+            Size of exported data in bytes
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowExportResult.Format">
+            <summary>
+            Export format used
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowExportResult.WorkflowCount">
+            <summary>
+            Number of workflows exported
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowExportResult.Errors">
+            <summary>
+            Export errors if any
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowExportResult.Warnings">
+            <summary>
+            Export warnings if any
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.Data.WorkflowImportData">
+            <summary>
+            Data for importing workflows
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowImportData.Data">
+            <summary>
+            Raw import data
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowImportData.Format">
+            <summary>
+            Format of the import data
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowImportData.TargetOpportunityId">
+            <summary>
+            Target opportunity ID for imported workflows
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowImportData.OverwriteExisting">
+            <summary>
+            Whether to overwrite existing workflows
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowImportData.ValidateBeforeImport">
+            <summary>
+            Whether to validate workflows before import
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowImportData.PreferredStorageMode">
+            <summary>
+            Preferred storage mode for imported workflows
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowImportData.CustomSettings">
+            <summary>
+            Custom import settings
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.Data.WorkflowImportResult">
+            <summary>
+            Result of workflow import operation
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowImportResult.IsSuccessful">
+            <summary>
+            Whether the import was successful
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowImportResult.ImportedCount">
+            <summary>
+            Number of workflows successfully imported
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowImportResult.FailedCount">
+            <summary>
+            Number of workflows that failed to import
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowImportResult.ImportedWorkflowIds">
+            <summary>
+            IDs of successfully imported workflows
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowImportResult.Errors">
+            <summary>
+            Import errors if any
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowImportResult.Warnings">
+            <summary>
+            Import warnings if any
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowImportResult.ItemResults">
+            <summary>
+            Detailed results for each workflow
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.Data.WorkflowImportItemResult">
+            <summary>
+            Import result for individual workflow
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowImportItemResult.OriginalWorkflowId">
+            <summary>
+            Original workflow ID from import data
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowImportItemResult.NewWorkflowId">
+            <summary>
+            New workflow ID after import
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowImportItemResult.Title">
+            <summary>
+            Workflow title
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowImportItemResult.IsSuccessful">
+            <summary>
+            Whether this item was successfully imported
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowImportItemResult.StorageMode">
+            <summary>
+            Storage mode used for this workflow
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowImportItemResult.Errors">
+            <summary>
+            Errors specific to this workflow
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.Data.WorkflowImportItemResult.Warnings">
+            <summary>
+            Warnings specific to this workflow
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.FieldTemplate">
+            <summary>
+            Pre-built field template for quick insertion
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.TemplateCategory">
+            <summary>
+            Template categories
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.FormField">
+            <summary>
+             Enhanced FormField with robust parent-child relationship management
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.Version">
+            <summary>
+            Schema version for field compatibility
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.Id">
+            <summary>
+            Unique field identifier (8-character alphanumeric)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.ModuleId">
+            <summary>
+            Parent module identifier
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.OpportunityId">
+            <summary>
+            Associated opportunity identifier
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.Order">
+            <summary>
+            Display order within the form (1-based)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.FieldType">
+            <summary>
+            Field type configuration
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.IsActive">
+            <summary>
+            Whether the field is active in the system
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.IsVisible">
+            <summary>
+            Whether the field is visible to users
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.IsVisibleInEditor">
+            <summary>
+            Whether the field appears in edit/input forms
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.IsVisibleInDisplay">
+            <summary>
+            Whether the field appears in display/read-only views
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.ReadOnly">
+            <summary>
+            Whether the field is read-only
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.IsRequired">
+            <summary>
+            Whether the field is required for form submission
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.IsRequiredInParent">
+            <summary>
+            Whether the field is required when in a parent-child relationship
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.ParentId">
+            <summary>
+            Parent field ID for hierarchical relationships
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.MaximumLength">
+            <summary>
+            Maximum character length for text inputs
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.MinimumLength">
+            <summary>
+            Minimum character length for text inputs
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.IsConditionallyRequired">
+            <summary>
+            Whether the field has conditional validation rules
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.ValidatingFields">
+            <summary>
+            Fields that affect this field's validation
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.ConditionalRules">
+            <summary>
+            Complex conditional validation rules
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.CodeSetId">
+            <summary>
+            Code set ID for dropdown/selection options
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.Options">
+            <summary>
+            Predefined options for selection controls
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.SpeciesAutoCompleteFields">
+            <summary>
+            Species autocomplete configuration
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.WidthClass">
+            <summary>
+            CSS width class (e.g., 1-12 for Bootstrap grid)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.CssClasses">
+            <summary>
+            CSS classes to apply to the field container
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.InlineStyles">
+            <summary>
+            Inline styles to apply
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.Modal">
+            <summary>
+            Modal/popup configuration for table fields
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.FileUpload">
+            <summary>
+            File upload configuration
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.Text">
+            <summary>
+            Multilingual text resources
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.Database">
+            <summary>
+            Database configuration
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.CustomProperties">
+            <summary>
+            Custom metadata for extensibility
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.Parent">
+            <summary>
+            Reference to the parent field object (populated at runtime)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.ChildFields">
+            <summary>
+            Collection of direct child fields
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.RelationshipType">
+            <summary>
+            Type of relationship with parent
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.DependentFields">
+            <summary>
+            Fields that depend on this field's value
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.HierarchicalLevel">
+            <summary>
+            Calculated hierarchical level (0 = root, 1 = first level child, etc.)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.HierarchicalPath">
+            <summary>
+            Full path from root to this field (e.g., "section1.group1.field1")
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormField.GetAllDescendants">
+            <summary>
+            Get all descendant fields (children, grandchildren, etc.)
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormField.GetAllAncestors">
+            <summary>
+            Get all ancestor fields (parent, grandparent, etc.)
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormField.GetRoot">
+            <summary>
+            Get root field (field with no parent)
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormField.GetSiblings">
+            <summary>
+            Get sibling fields (fields with same parent)
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormField.FindDescendant(System.String)">
+            <summary>
+            Find a descendant field by ID
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormField.FindAncestor(System.String)">
+            <summary>
+            Find an ancestor field by ID
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormField.AddChildField(DynamicForms.Core.Entities.FormField)">
+            <summary>
+            Add a child field with relationship validation
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormField.RemoveChildField(System.String)">
+            <summary>
+            Remove a child field by ID
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormField.MoveTo(DynamicForms.Core.Entities.FormField)">
+            <summary>
+            Move this field to a new parent
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormField.EnsureInitialized">
+            <summary>
+            Ensure all required nested objects are initialized after deserialization
+            This is necessary because JSON deserialization bypasses constructors
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormField.CanHaveChildren">
+            <summary>
+            Check if this field type can have children
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormField.ValidateHierarchy">
+            <summary>
+            Validate the current field hierarchy
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormField.ShouldBeVisibleEnhanced(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Enhanced visibility check considering parent-child relationships
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormField.ValidateFieldEnhanced(System.Object,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Enhanced validation that considers hierarchy
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormField.GetDisplayLabel(System.String)">
+            <summary>
+            Get display label with language fallback chain
+            ONLY uses field.Text.Label (no Description fallback)
+            If Label missing in requested language ? try English fallback
+            If no Label exists ? display "[No Label]"
+            </summary>
+            <param name="language">Language code (EN or FR)</param>
+            <returns>Display label text</returns>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormField.ValidateLabels">
+            <summary>
+            Validate field labels for completeness
+            </summary>
+            <returns>Validation result with errors and warnings</returns>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormField.ShouldBeVisible(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Check if field should be visible based on conditions
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormField.GetValidationRules">
+            <summary>
+            Get validation rules for this field
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormField.GenerateFieldId">
+            <summary>
+            Generate a unique field ID
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.FormField.TextResource">
+            <summary>
+            Multilingual text resources for field metadata
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.FieldType">
+            <summary>
+             field type configuration
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.FieldDatabase">
+            <summary>
+             database mapping configuration
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.ValidatingField">
+            <summary>
+             field validation dependency
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.ConditionalRule">
+            <summary>
+             complex conditional validation rule
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.Modal">
+            <summary>
+             modal/popup form configuration
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.FileUploadConfiguration">
+            <summary>
+             file upload configuration
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.Option">
+            <summary>
+             selection option for dropdowns, radio buttons, etc.
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.SpeciesAutoCompleteField">
+            <summary>
+             species autocomplete field configuration
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.FieldHierarchyValidationResult">
+            <summary>
+            Result of field hierarchy validation
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.ValidationResult">
+            <summary>
+            Enhanced validation result with field-specific errors
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.FieldLabelValidationResult">
+            <summary>
+            Result of field label validation
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.FormModule">
+            <summary>
+             Enhanced FormModule with improved field hierarchy management
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormModule.DateGenerated">
+            <summary>
+            UTC timestamp when the module schema was generated
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormModule.DateUpdated">
+            <summary>
+            UTC timestamp when the module schema was last updated
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormModule.Version">
+            <summary>
+            Schema version for backwards compatibility
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormModule.Id">
+            <summary>
+            Unique module identifier
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormModule.OpportunityId">
+            <summary>
+            Associated opportunity/program identifier
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormModule.Text">
+            <summary>
+            Multilingual text resources for the module
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormModule.Database">
+            <summary>
+            Database configuration for data persistence
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormModule.Validations">
+            <summary>
+            Module-level validation rules
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormModule.Fields">
+            <summary>
+            Collection of enhanced form fields in this module
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormModule.ConditionalRulesV4">
+            <summary>
+            Conditional rules for visual rules builder (Phase 4)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormModule.FieldHierarchy">
+            <summary>
+            Field hierarchy information (calculated at runtime)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormModule.ComplexityMetrics">
+            <summary>
+            Module complexity metrics
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormModule.AddEnhancedField(DynamicForms.Core.Entities.FormField)">
+            <summary>
+            Add an enhanced field to the module with automatic relationship building
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormModule.RemoveEnhancedField(System.String)">
+            <summary>
+            Remove a field and its descendants from the module
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormModule.GetEnhancedField(System.String)">
+            <summary>
+            Get enhanced field by ID
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormModule.RebuildFieldHierarchy">
+            <summary>
+            Rebuild field hierarchy from current field collection
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormModule.EnsureInitialized">
+            <summary>
+            Ensure all required nested objects are initialized after deserialization
+            This is necessary because JSON deserialization bypasses constructors
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormModule.GetRootFields">
+            <summary>
+            Get all root fields (fields without parents)
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormModule.GetVisibleFields(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Get all visible fields in proper display order (depth-first traversal)
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormModule.ValidateModuleEnhanced(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Validate the entire module hierarchy
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormModule.GetModuleStatistics">
+            <summary>
+            Get module statistics
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.FormModule.Validation">
+            <summary>
+            Validation configuration for the entire module
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.FormModule.TextResource">
+            <summary>
+            Multilingual text resources for module metadata
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.FieldHierarchyInfo">
+            <summary>
+            Information about field hierarchy structure
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.FieldHierarchyBuildResult">
+            <summary>
+            Result of building field hierarchy
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.ModuleComplexityMetrics">
+            <summary>
+            Module complexity metrics
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.ModuleValidationResult">
+            <summary>
+            Module validation result with enhanced error reporting
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.FieldValidationError">
+            <summary>
+            Field-specific validation error
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.ModuleStatistics">
+            <summary>
+            Module statistics for analysis
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.ModuleDatabase">
+            <summary>
+            Database configuration for module data storage
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.FormWorkflow">
+            <summary>
+            Container for multiple FormModules representing a complete workflow or application process
+            Supports multi-module forms, wizards, and complex business workflows
+            Enhanced with single document storage capabilities for improved performance
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.WorkflowId">
+            <summary>
+            Unique workflow identifier
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.OpportunityId">
+            <summary>
+            Associated opportunity/program identifier
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.Version">
+            <summary>
+            Workflow schema version for backwards compatibility
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.DateGenerated">
+            <summary>
+            UTC timestamp when the workflow schema was generated
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.DateUpdated">
+            <summary>
+            UTC timestamp when the workflow schema was last updated
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.Text">
+            <summary>
+            Multilingual text resources for the workflow
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.Modules">
+            <summary>
+            Collection of modules in this workflow
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.Settings">
+            <summary>
+            Workflow-specific settings and configuration
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.Navigation">
+            <summary>
+            Navigation configuration between modules
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.WorkflowHierarchy">
+            <summary>
+            Workflow hierarchy information (calculated at runtime)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.TotalFieldCount">
+            <summary>
+            Total number of fields across all modules
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.ModuleCount">
+            <summary>
+            Total number of modules in workflow
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.EstimatedSize">
+            <summary>
+            Estimated serialized size in bytes (calculated when needed)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.PreferSingleDocumentStorage">
+            <summary>
+            Whether this workflow should use single document storage
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormWorkflow.AddModule(DynamicForms.Core.Entities.FormModule,System.Nullable{System.Int32})">
+            <summary>
+            Add a module to the workflow
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormWorkflow.RemoveModule(System.Int32)">
+            <summary>
+            Remove a module from the workflow
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormWorkflow.GetModule(System.Int32)">
+            <summary>
+            Get a module by ID
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormWorkflow.GetModulesForStep(System.Int32)">
+            <summary>
+            Get modules for a specific step/stage
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormWorkflow.RebuildWorkflowHierarchy">
+            <summary>
+            Rebuild workflow hierarchy and navigation
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormWorkflow.ValidateWorkflow(System.Collections.Generic.Dictionary{System.Int32,System.Collections.Generic.Dictionary{System.String,System.Object}})">
+            <summary>
+            Validate the entire workflow
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormWorkflow.GetWorkflowStatistics">
+            <summary>
+            Get workflow statistics
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormWorkflow.GetCompletionPercentage(System.Collections.Generic.Dictionary{System.Int32,System.Collections.Generic.Dictionary{System.String,System.Object}})">
+            <summary>
+            Calculate completion percentage across all modules
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormWorkflow.DetermineOptimalStorageMode">
+            <summary>
+            Determine the optimal storage mode for this workflow
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormWorkflow.EstimateSerializedSize">
+            <summary>
+            Estimate the serialized size of this workflow
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormWorkflow.ToOptimizedJson(System.Boolean)">
+            <summary>
+            Create an optimized JSON representation for single document storage
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.FormWorkflow.FromOptimizedJson(System.String,System.Boolean)">
+            <summary>
+            Create workflow from optimized JSON string
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.FormWorkflow.WorkflowSettings">
+            <summary>
+            Workflow settings and configuration with single document storage options
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.WorkflowSettings.RequireAllModulesComplete">
+            <summary>
+            Whether all modules must be completed before workflow submission
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.WorkflowSettings.AllowModuleSkipping">
+            <summary>
+            Allow users to skip optional modules
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.WorkflowSettings.AutoSaveIntervalSeconds">
+            <summary>
+            Auto-save interval in seconds (0 = disabled)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.WorkflowSettings.ShowOverallProgress">
+            <summary>
+            Whether to show progress across all modules
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.WorkflowSettings.StorageMode">
+            <summary>
+            Storage mode for this workflow
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.WorkflowSettings.SingleDocumentThreshold">
+            <summary>
+            Maximum fields for single document storage (default: 100)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.WorkflowSettings.SingleDocumentModuleThreshold">
+            <summary>
+            Maximum modules for single document storage (default: 5)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.WorkflowSettings.MultiDocumentThreshold">
+            <summary>
+            Minimum fields to force multi-document storage (default: 500)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.WorkflowSettings.MultiDocumentModuleThreshold">
+            <summary>
+            Minimum modules to force multi-document storage (default: 20)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.WorkflowSettings.SingleDocumentSizeThreshold">
+            <summary>
+            Maximum size in bytes for single document (default: 1MB)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.WorkflowSettings.CompressionThreshold">
+            <summary>
+            Minimum size in bytes to enable compression (default: 50KB)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.WorkflowSettings.CustomSettings">
+            <summary>
+            Custom workflow behavior settings
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.FormWorkflow.NavigationConfig">
+            <summary>
+            Navigation configuration for workflow
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.NavigationConfig.NavigationPaths">
+            <summary>
+            Navigation paths between modules
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.NavigationConfig.ShowStepNumbers">
+            <summary>
+            Whether to show step numbers
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.NavigationConfig.AllowStepJumping">
+            <summary>
+            Whether steps are clickable (allow jumping)
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.FormWorkflow.NavigationConfig.CustomNavigationSettings">
+            <summary>
+            Custom navigation settings
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.FormWorkflow.NavigationPath">
+            <summary>
+            Navigation path between modules
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.FormWorkflow.TextResource">
+            <summary>
+            Multilingual text resources for workflow metadata
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.WorkflowStorageMode">
+            <summary>
+            Storage mode options for FormWorkflow
+            </summary>
+        </member>
+        <member name="F:DynamicForms.Core.Entities.WorkflowStorageMode.SingleDocument">
+            <summary>
+            Store as single JSON document (optimal for small-medium workflows)
+            </summary>
+        </member>
+        <member name="F:DynamicForms.Core.Entities.WorkflowStorageMode.MultiDocument">
+            <summary>
+            Store as multiple documents (optimal for large/complex workflows)
+            </summary>
+        </member>
+        <member name="F:DynamicForms.Core.Entities.WorkflowStorageMode.Adaptive">
+            <summary>
+            System automatically chooses based on size and complexity
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.WorkflowHierarchyInfo">
+            <summary>
+            Information about workflow hierarchy structure
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.WorkflowHierarchyBuildResult">
+            <summary>
+            Result of building workflow hierarchy
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.WorkflowValidationResult">
+            <summary>
+            Workflow validation result with module-specific results
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.WorkflowStatistics">
+            <summary>
+            Workflow statistics for analysis and reporting
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.TextBase">
+            <summary>
+            Base class for multilingual text support in the architecture
+            Provides consistent multilingual text handling across all components
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.TextBase.EN">
+            <summary>
+            English text content
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Entities.TextBase.FR">
+            <summary>
+            French text content
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.TextBase.ToString(System.String)">
+            <summary>
+            Get text in the specified language with fallback logic
+            </summary>
+            <param name="language">Language code (EN/FR)</param>
+            <returns>Text in requested language or fallback</returns>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.TextBase.HasText(System.String)">
+            <summary>
+            Check if text is available in the specified language
+            </summary>
+            <param name="language">Language code (EN/FR)</param>
+            <returns>True if text is available in the specified language</returns>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.TextBase.HasAnyText">
+            <summary>
+            Check if any text content is available
+            </summary>
+            <returns>True if either EN or FR text is available</returns>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.TextBase.ToString">
+            <summary>
+            Get the default text (preferring EN, then FR)
+            </summary>
+            <returns>Default text content</returns>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.TextBase.Clone">
+            <summary>
+            Create a copy of this text instance
+            </summary>
+            <returns>New instance with same content</returns>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.TextBase.SetText(System.String,System.String)">
+            <summary>
+            Set text for both languages
+            </summary>
+            <param name="en">English text</param>
+            <param name="fr">French text (optional, defaults to EN if not provided)</param>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.TextBase.Clear">
+            <summary>
+            Clear all text content
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.TextClass">
+            <summary>
+            Concrete implementation of multilingual text for the architecture
+            Used throughout the system for consistent text handling
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.TextClass.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.TextClass.#ctor(System.String)">
+            <summary>
+            Constructor with initial English text
+            </summary>
+            <param name="englishText">Initial English text</param>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.TextClass.#ctor(System.String,System.String)">
+            <summary>
+            Constructor with both English and French text
+            </summary>
+            <param name="englishText">English text</param>
+            <param name="frenchText">French text</param>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.TextClass.op_Implicit(System.String)~DynamicForms.Core.Entities.TextClass">
+            <summary>
+            Implicit conversion from string to TextClass
+            </summary>
+            <param name="text">Text to convert</param>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.TextClass.op_Implicit(DynamicForms.Core.Entities.TextClass)~System.String">
+            <summary>
+            Implicit conversion from TextClass to string
+            </summary>
+            <param name="textClass">TextClass to convert</param>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.TextClass.Equals(System.Object)">
+            <summary>
+            Equality comparison
+            </summary>
+            <param name="obj">Object to compare</param>
+            <returns>True if content is equal</returns>
+        </member>
+        <member name="M:DynamicForms.Core.Entities.TextClass.GetHashCode">
+            <summary>
+            Get hash code based on content
+            </summary>
+            <returns>Hash code</returns>
+        </member>
+        <member name="T:DynamicForms.Core.Entities.ParentChildRelationshipType">
+            <summary>
+            Defines the type of parent-child relationship between fields
+            </summary>
+        </member>
+        <member name="F:DynamicForms.Core.Entities.ParentChildRelationshipType.GroupContainer">
+            <summary>
+            Simple grouping/container relationship (sections, groups)
+            </summary>
+        </member>
+        <member name="F:DynamicForms.Core.Entities.ParentChildRelationshipType.ConditionalShow">
+            <summary>
+            Conditional relationship where child appears when parent has specific value
+            </summary>
+        </member>
+        <member name="F:DynamicForms.Core.Entities.ParentChildRelationshipType.ConditionalHide">
+            <summary>
+            Conditional relationship where child is hidden when parent has specific value
+            </summary>
+        </member>
+        <member name="F:DynamicForms.Core.Entities.ParentChildRelationshipType.Cascade">
+            <summary>
+            Cascade relationship where child options depend on parent selection
+            </summary>
+        </member>
+        <member name="F:DynamicForms.Core.Entities.ParentChildRelationshipType.Validation">
+            <summary>
+            Validation relationship where parent validates child
+            </summary>
+        </member>
+        <member name="F:DynamicForms.Core.Entities.ParentChildRelationshipType.Repeater">
+            <summary>
+            Repeater relationship where child can repeat based on parent
+            </summary>
+        </member>
+        <member name="F:DynamicForms.Core.Entities.ParentChildRelationshipType.None">
+            <summary>
+            No specific relationship type
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Enums.ElementType">
+            <summary>
+            Available form element types for dynamic form generation
+            Enhanced with additional types for comprehensive form building
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Enums.ButtonAction">
+            <summary>
+            Button actions available in dynamic forms
+            Comprehensive action types for government and enterprise applications
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Enums.FormatType">
+            <summary>
+            Data format types for validation and input formatting
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Enums.ValidationRule">
+            <summary>
+            Validation rule types
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Enums.SelectionOptions">
+            <summary>
+            Options for dropdown and selection controls
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Enums.VisibilityCondition">
+            <summary>
+            Field visibility conditions
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Enums.SubmissionStatus">
+            <summary>
+            Form submission states
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Enums.PermissionLevel">
+            <summary>
+            User permission levels for forms
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Enums.SupportedLanguage">
+            <summary>
+            Language support enumeration
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Enums.ContactFieldType">
+            <summary>
+            Contact field types for specialized government forms
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Interfaces.IFormDataService">
+            <summary>
+            Service for managing form data submissions and persistence
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormDataService.SaveModuleDataAsync(System.Int32,System.Int32,System.Int32,System.Collections.Generic.IEnumerable{DynamicForms.Core.Entities.Data.FormDataItem},System.Threading.CancellationToken)">
+            <summary>
+            Save module data (complete form submission)
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormDataService.SaveDraftAsync(System.Int32,System.Int32,System.Int32,System.Collections.Generic.IEnumerable{DynamicForms.Core.Entities.Data.FormDataItem},System.Threading.CancellationToken)">
+            <summary>
+            Save draft module data (partial form submission)
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormDataService.SaveModalDataAsync(System.Int32,System.Int32,System.Int32,System.String,System.Int32,System.Collections.Generic.IEnumerable{DynamicForms.Core.Entities.Data.FormDataItem},System.Threading.CancellationToken)">
+            <summary>
+            Save modal data
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormDataService.GetModuleDataAsync(System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Get complete module data
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormDataService.GetDataForModulesAsync(System.Int32,System.Int32[],System.Threading.CancellationToken)">
+            <summary>
+            Get data for multiple modules
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormDataService.GetModalDataAsync(System.String,System.Int32,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Get modal data
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormDataService.DeleteModalDataAsync(System.String,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Delete modal data
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormDataService.GetSubmissionStatusAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Get submission status
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormDataService.UpdateSubmissionStatusAsync(System.Int32,System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Update submission status
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormDataService.SearchSubmissionsAsync(DynamicForms.Core.Interfaces.SubmissionSearchCriteria,System.Threading.CancellationToken)">
+            <summary>
+            Search submissions by criteria
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Interfaces.IFormValidationService">
+            <summary>
+            Service for form validation and business rules using  Enhanced architecture
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormValidationService.ValidateModuleAsync(DynamicForms.Core.Entities.FormModule,DynamicForms.Core.Entities.Data.ModuleFormData,System.Threading.CancellationToken)">
+            <summary>
+            Validate entire module data
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormValidationService.ValidateFieldAsync(DynamicForms.Core.Entities.FormField,DynamicForms.Core.Entities.Data.FormDataItem,System.Threading.CancellationToken)">
+            <summary>
+            Validate a single field
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormValidationService.ValidateRequiredFieldsAsync(DynamicForms.Core.Entities.FormModule,DynamicForms.Core.Entities.Data.ModuleFormData,System.Threading.CancellationToken)">
+            <summary>
+            Validate required fields in module
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormValidationService.ValidateConditionalRulesAsync(DynamicForms.Core.Entities.FormModule,DynamicForms.Core.Entities.Data.ModuleFormData,System.Threading.CancellationToken)">
+            <summary>
+            Validate conditional rules in module with hierarchy support
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormValidationService.ValidateBusinessRulesAsync(DynamicForms.Core.Entities.FormModule,DynamicForms.Core.Entities.Data.ModuleFormData,System.Threading.CancellationToken)">
+            <summary>
+            Validate business rules with enhanced hierarchy awareness
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormValidationService.GetFieldValidationRulesAsync(DynamicForms.Core.Entities.FormField,System.Threading.CancellationToken)">
+            <summary>
+            Get validation rules for a field
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormValidationService.ValidateHierarchyAsync(DynamicForms.Core.Entities.FormModule,System.Threading.CancellationToken)">
+            <summary>
+            Validate field hierarchy integrity
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormValidationService.ValidateRelationshipsAsync(DynamicForms.Core.Entities.FormModule,DynamicForms.Core.Entities.Data.ModuleFormData,System.Threading.CancellationToken)">
+            <summary>
+            Validate parent-child relationships
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Interfaces.IFormRenderingService">
+            <summary>
+            Service for rendering forms from JSON schemas using  Enhanced architecture
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormRenderingService.RenderFieldAsync(DynamicForms.Core.Entities.FormField,DynamicForms.Core.Entities.Data.FormDataItem,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Render a single field
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormRenderingService.RenderModuleAsync(DynamicForms.Core.Entities.FormModule,DynamicForms.Core.Entities.Data.ModuleFormData,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Render entire module with hierarchy support
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormRenderingService.RenderModalAsync(DynamicForms.Core.Entities.FormField,System.Collections.Generic.IEnumerable{DynamicForms.Core.Entities.Data.ModalRecord},System.String,System.Threading.CancellationToken)">
+            <summary>
+            Render modal form from field
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormRenderingService.RenderDisplayFieldAsync(DynamicForms.Core.Entities.FormField,DynamicForms.Core.Entities.Data.FormDataItem,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Render field for display (read-only) with hierarchy awareness
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormRenderingService.RenderFieldHierarchyAsync(DynamicForms.Core.Entities.FormField,DynamicForms.Core.Entities.Data.ModuleFormData,System.String,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Render field hierarchy recursively
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormRenderingService.RenderRootFieldsAsync(DynamicForms.Core.Entities.FormModule,DynamicForms.Core.Entities.Data.ModuleFormData,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Render only root fields of a module
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormRenderingService.GetAvailableTemplatesAsync(System.Threading.CancellationToken)">
+            <summary>
+            Get available field templates
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormRenderingService.RegisterFieldRenderer(System.String,DynamicForms.Core.Interfaces.IFieldRenderer)">
+            <summary>
+            Register custom field renderer for fields
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Interfaces.IFormLocalizationService">
+            <summary>
+            Service for managing form localization using  Enhanced architecture
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormLocalizationService.GetSupportedLanguagesAsync(System.Threading.CancellationToken)">
+            <summary>
+            Get supported languages
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormLocalizationService.GetLocalizedTextAsync(System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Get localized text
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormLocalizationService.ValidateModuleLocalizationAsync(DynamicForms.Core.Entities.FormModule,System.String[],System.Threading.CancellationToken)">
+            <summary>
+            Validate module localization
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormLocalizationService.ExportLocalizationAsync(DynamicForms.Core.Entities.FormModule,System.Threading.CancellationToken)">
+            <summary>
+            Export localization data from module
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormLocalizationService.ImportLocalizationAsync(DynamicForms.Core.Entities.FormModule,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.Dictionary{System.String,System.String}},System.Threading.CancellationToken)">
+            <summary>
+            Import localization data to module
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormLocalizationService.GetMissingTranslationsAsync(DynamicForms.Core.Entities.FormModule,System.String[],System.Threading.CancellationToken)">
+            <summary>
+            Get missing translations for a module
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Interfaces.IFormModuleRepository">
+            <summary>
+            Repository interface for form schemas
+            This is the UNIFIED interface for all form schema operations in DynamicForms.
+            Uses FormModule exclusively for enhanced functionality with full hierarchy support.
+            Replaces all legacy repository interfaces for a clean, modern architecture.
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormModuleRepository.GetEnhancedMetadataAsync(System.Int32,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Get module metadata from storage
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormModuleRepository.GetAllModulesAsync(System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Get all modules for listing
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormModuleRepository.GetEnhancedMetadataForModulesAsync(System.Int32,System.Int32[],System.Threading.CancellationToken)">
+            <summary>
+            Get multiple modules metadata
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormModuleRepository.SaveEnhancedModuleAsync(DynamicForms.Core.Entities.FormModule,System.Int32,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Save module to storage
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormModuleRepository.DeleteEnhancedModuleAsync(System.Int32,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Delete module from storage
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormModuleRepository.EnhancedExistsAsync(System.Int32,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Check if module exists
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormModuleRepository.GetEnhancedModuleVersionsAsync(System.Int32,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Get module versions
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormModuleRepository.GetEnhancedMetadataWithHierarchyAsync(System.Int32,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Get module with built hierarchy
+            Automatically calls RebuildFieldHierarchy() on the returned module
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormModuleRepository.SaveEnhancedModuleWithOptimizationAsync(DynamicForms.Core.Entities.FormModule,System.Int32,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Save module with automatic hierarchy optimization
+            Optimizes field ordering and validates relationships before saving
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormModuleRepository.GetModuleStatisticsAsync(System.Int32,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Get module statistics for reporting and analysis
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormModuleRepository.SearchModulesByComplexityAsync(DynamicForms.Core.Interfaces.ModuleSearchCriteria,System.Threading.CancellationToken)">
+            <summary>
+            Search modules by hierarchy depth, complexity, or field count
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormModuleRepository.CloneModuleAsync(System.Int32,System.Nullable{System.Int32},System.Int32,System.Nullable{System.Int32},System.Func{DynamicForms.Core.Entities.FormField,System.Boolean},System.Threading.CancellationToken)">
+            <summary>
+            Clone a module with optional field filtering
+            Useful for creating module templates or variations
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Interfaces.IFormDataRepository">
+            <summary>
+            Repository interface for form data
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormDataRepository.SaveModuleDataAsync(System.Int32,System.Int32,System.Int32,System.Collections.Generic.IEnumerable{DynamicForms.Core.Entities.Data.FormDataItem},System.Threading.CancellationToken)">
+            <summary>
+            Save module data to storage
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormDataRepository.SaveModalDataAsync(System.Int32,System.Int32,System.Int32,System.String,System.Int32,System.Collections.Generic.IEnumerable{DynamicForms.Core.Entities.Data.FormDataItem},System.Threading.CancellationToken)">
+            <summary>
+            Save modal data to storage
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormDataRepository.GetModuleDataAsync(System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Get module data from storage
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormDataRepository.GetDataForModulesAsync(System.Int32,System.Int32[],System.Threading.CancellationToken)">
+            <summary>
+            Get data for multiple modules
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormDataRepository.GetModalDataAsync(System.String,System.Int32,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Get modal data from storage
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormDataRepository.DeleteModalDataAsync(System.String,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Delete modal data from storage
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormDataRepository.SearchAsync(DynamicForms.Core.Interfaces.SubmissionSearchCriteria,System.Threading.CancellationToken)">
+            <summary>
+            Search submissions
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormDataRepository.GetStatisticsAsync(System.Nullable{System.Int32},System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Get submission statistics
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Interfaces.IFieldRenderer">
+            <summary>
+            Interface for custom field renderers using  Enhanced architecture
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Interfaces.IFieldRenderer.SupportedFieldTypes">
+            <summary>
+            Supported field types
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFieldRenderer.RenderAsync(DynamicForms.Core.Entities.FormField,DynamicForms.Core.Entities.Data.FormDataItem,System.String,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Render field HTML with hierarchy support
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFieldRenderer.RenderDisplayAsync(DynamicForms.Core.Entities.FormField,DynamicForms.Core.Entities.Data.FormDataItem,System.String,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Render display-only field HTML with hierarchy support
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFieldRenderer.CanRender(DynamicForms.Core.Entities.FormField)">
+            <summary>
+            Check if this renderer can handle the given field type and relationship
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFieldRenderer.GetFieldCssClasses(DynamicForms.Core.Entities.FormField)">
+            <summary>
+            Get CSS classes for the field based on hierarchy and relationship
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Interfaces.ModuleVersionInfo">
+            <summary>
+            Module version information
+            </summary>
+            <summary>
+             enhanced module version information
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Interfaces.ModuleVersionInfo.TotalFields">
+            <summary>
+            Enhanced version info specific to standalone modules
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Interfaces.ModuleSearchCriteria">
+            <summary>
+            Search criteria for modules
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Interfaces.ModuleSearchResult">
+            <summary>
+            Search result for modules
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Interfaces.SubmissionSearchCriteria">
+            <summary>
+            Search criteria for submissions
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Interfaces.SubmissionStatistics">
+            <summary>
+            Submission statistics
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Interfaces.FieldValidationRule">
+            <summary>
+            Field validation rule
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Interfaces.FieldValidationRule.DependentFields">
+            <summary>
+            Enhanced properties for fields
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Interfaces.LocalizationValidationResult">
+            <summary>
+            Localization validation result
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Interfaces.LocalizationValidationResult.MissingHierarchicalTranslations">
+            <summary>
+            Enhanced properties for hierarchy-aware localization validation
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Interfaces.IFormWorkflowRepository">
+            <summary>
+            Repository interface for managing FormWorkflow entities with multiple modules
+            Extends the existing single-module repository pattern to support workflow scenarios
+            Enhanced with single document storage capabilities
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormWorkflowRepository.GetAllWorkflowsAsync(System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Get all workflows for listing purposes
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormWorkflowRepository.GetWorkflowAsync(System.Int32,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Get a complete workflow with all modules and hierarchy built
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormWorkflowRepository.GetWorkflowsAsync(System.Int32,System.Int32[],System.Threading.CancellationToken)">
+            <summary>
+            Get multiple workflows for an opportunity
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormWorkflowRepository.SaveWorkflowAsync(DynamicForms.Core.Entities.FormWorkflow,System.Threading.CancellationToken)">
+            <summary>
+            Save a complete workflow with all modules
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormWorkflowRepository.DeleteWorkflowAsync(System.Int32,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Delete a workflow and all associated modules
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormWorkflowRepository.WorkflowExistsAsync(System.Int32,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Check if a workflow exists
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormWorkflowRepository.GetWorkflowWithNavigationAsync(System.Int32,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Get workflow with automatically built hierarchy and navigation
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormWorkflowRepository.SaveWorkflowWithOptimizationAsync(DynamicForms.Core.Entities.FormWorkflow,System.Threading.CancellationToken)">
+            <summary>
+            Save workflow with optimization (field ordering, relationship validation)
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormWorkflowRepository.GetWorkflowStatisticsAsync(System.Int32,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Get workflow statistics and analytics
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormWorkflowRepository.SearchWorkflowsByComplexityAsync(DynamicForms.Core.Entities.Data.WorkflowSearchCriteria,System.Threading.CancellationToken)">
+            <summary>
+            Search workflows by complexity and characteristics
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormWorkflowRepository.CloneWorkflowAsync(System.Int32,System.Nullable{System.Int32},System.Int32,System.Nullable{System.Int32},System.Func{DynamicForms.Core.Entities.FormModule,System.Boolean},System.Threading.CancellationToken)">
+            <summary>
+            Clone a workflow with optional module filtering
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormWorkflowRepository.GetWorkflowVersionsAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Get workflow versions with history
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormWorkflowRepository.SaveWorkflowAsSingleDocumentAsync(DynamicForms.Core.Entities.FormWorkflow,System.Threading.CancellationToken)">
+            <summary>
+            Save workflow as a single optimized JSON document (new approach)
+            Automatically determines whether to use compression based on size
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormWorkflowRepository.GetWorkflowSmartAsync(System.Int32,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Get workflow using smart loading (single document or multi-document based on stored format)
+            Handles both storage modes transparently
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormWorkflowRepository.GetWorkflowWithStorageModeAsync(System.Int32,System.Nullable{System.Int32},DynamicForms.Core.Entities.WorkflowStorageMode,System.Threading.CancellationToken)">
+            <summary>
+            Get workflow with specified storage mode preference
+            Falls back to available storage if preferred mode is not available
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormWorkflowRepository.MigrateWorkflowStorageModeAsync(System.Int32,System.Nullable{System.Int32},DynamicForms.Core.Entities.WorkflowStorageMode,System.Threading.CancellationToken)">
+            <summary>
+            Migrate workflow between storage modes (single document -> multi-document)
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormWorkflowRepository.GetWorkflowStorageInfoAsync(System.Int32,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Get workflow storage information (current mode, size, compression status)
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormWorkflowRepository.AddModuleToWorkflowAsync(System.Int32,DynamicForms.Core.Entities.FormModule,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Add a module to an existing workflow
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormWorkflowRepository.RemoveModuleFromWorkflowAsync(System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Remove a module from a workflow
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormWorkflowRepository.UpdateModuleInWorkflowAsync(System.Int32,DynamicForms.Core.Entities.FormModule,System.Threading.CancellationToken)">
+            <summary>
+            Update a specific module within a workflow
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormWorkflowRepository.ReorderWorkflowModulesAsync(System.Int32,System.Int32[],System.Threading.CancellationToken)">
+            <summary>
+            Reorder modules within a workflow
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormWorkflowRepository.GetWorkflowModuleAsync(System.Int32,System.Int32,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Get a specific module from a workflow without loading the entire workflow
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormWorkflowRepository.BulkSaveWorkflowsAsync(System.Collections.Generic.IEnumerable{DynamicForms.Core.Entities.FormWorkflow},System.Threading.CancellationToken)">
+            <summary>
+            Save multiple workflows in a single transaction
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormWorkflowRepository.ExportWorkflowsAsync(System.Int32[],DynamicForms.Core.Entities.Data.WorkflowExportOptions,System.Threading.CancellationToken)">
+            <summary>
+            Export workflows to various formats
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Interfaces.IFormWorkflowRepository.ImportWorkflowsAsync(DynamicForms.Core.Entities.Data.WorkflowImportData,System.Threading.CancellationToken)">
+            <summary>
+            Import workflows from external sources
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Interfaces.WorkflowSearchCriteria">
+            <summary>
+            Search criteria for finding workflows by characteristics
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Interfaces.WorkflowSearchResult">
+            <summary>
+            Search result for workflow queries
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Interfaces.WorkflowVersionInfo">
+            <summary>
+            Version information for workflow history
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Interfaces.WorkflowExportOptions">
+            <summary>
+            Export options for workflows
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Interfaces.WorkflowExportResult">
+            <summary>
+            Export result with file information
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Interfaces.WorkflowImportData">
+            <summary>
+            Import data container
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Interfaces.WorkflowImportResult">
+            <summary>
+            Import result with statistics
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Models.Enhanced.HierarchyTemplate">
+            <summary>
+            Template for creating field hierarchies using  Enhanced architecture
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Models.Enhanced.FieldHierarchyTemplate">
+            <summary>
+            Unified template for field creation - handles both root fields and individual fields
+            Uses FormField for enhanced functionality
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Models.Enhanced.FieldHierarchyTemplate.ToField">
+            <summary>
+            Convert this template to a FormField
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Models.Enhanced.FieldHierarchyTemplate.ToModule(System.Int32,System.Nullable{System.Int32})">
+            <summary>
+            Convert this template hierarchy to a FormModule
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Models.Enhanced.FieldHierarchyTemplate.GetAllFields">
+            <summary>
+            Get all fields in this template hierarchy (including children)
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Models.Enhanced.FieldHierarchyTemplate.AddChild(DynamicForms.Core.Models.Enhanced.FieldHierarchyTemplate)">
+            <summary>
+            Add child template to this template
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Models.Enhanced.FieldHierarchyTemplate.RemoveChild(System.String)">
+            <summary>
+            Remove child template by field ID
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Models.Enhanced.CommonFieldTemplates">
+            <summary>
+            Pre-built field templates for common form patterns
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Models.Enhanced.CommonFieldTemplates.ContactInformation">
+            <summary>
+            Contact information section template
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Models.Enhanced.CommonFieldTemplates.AddressInformation">
+            <summary>
+            Address section template
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Models.Enhanced.CommonFieldTemplates.OrganizationInformation">
+            <summary>
+            Organization information template
+            </summary>
+        </member>
+        <member name="P:DynamicForms.Core.Models.Enhanced.CommonFieldTemplates.CompleteApplicationForm">
+            <summary>
+            Complete application template with conditional fields
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Models.Enhanced.CommonFieldTemplates.GetAllTemplates">
+            <summary>
+            Get all available templates
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Models.Enhanced.CommonFieldTemplates.GetTemplate(System.String)">
+            <summary>
+            Get template by name
+            </summary>
+        </member>
+        <member name="T:DynamicForms.Core.Services.Enhanced.FieldHierarchyManagerService">
+            <summary>
+             service for managing enhanced field relationships and hierarchies
+            Uses only * classes without any inheritance dependencies
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Services.Enhanced.FieldHierarchyManagerService.BuildFieldHierarchy(System.Collections.Generic.IEnumerable{DynamicForms.Core.Entities.FormField})">
+            <summary>
+            Build field hierarchy from a flat collection of fields
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Services.Enhanced.FieldHierarchyManagerService.AnalyzeHierarchy(System.Collections.Generic.IEnumerable{DynamicForms.Core.Entities.FormField})">
+            <summary>
+            Analyze field hierarchy for optimization and reporting
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Services.Enhanced.FieldHierarchyManagerService.MoveFieldToParent(DynamicForms.Core.Entities.FormField,DynamicForms.Core.Entities.FormField,System.Collections.Generic.IEnumerable{DynamicForms.Core.Entities.FormField})">
+            <summary>
+            Safely move a field to a new parent with validation
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Services.Enhanced.FieldHierarchyManagerService.CreateFieldHierarchy(DynamicForms.Core.Services.Enhanced.FieldHierarchyTemplate)">
+            <summary>
+            Create a field hierarchy from a template
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Services.Enhanced.FieldHierarchyManagerService.CloneFieldHierarchy(DynamicForms.Core.Entities.FormField,DynamicForms.Core.Services.Enhanced.CloneOptions)">
+            <summary>
+            Clone a field hierarchy with new IDs
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Services.Enhanced.FieldHierarchyManagerService.ValidateAllRelationships(System.Collections.Generic.IEnumerable{DynamicForms.Core.Entities.FormField})">
+            <summary>
+            Validate all relationships in a field collection
+            </summary>
+        </member>
+        <member name="M:DynamicForms.Core.Services.Enhanced.FieldHierarchyManagerService.FixCommonIssues(System.Collections.Generic.IEnumerable{DynamicForms.Core.Entities.FormField})">
+            <summary>
+            Fix common relationship issues automatically
+            </summary>
+        </member>
+    </members>
+</doc>

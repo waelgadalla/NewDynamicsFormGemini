@@ -1,0 +1,31 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormClaude\\src\\DynamicForms.RazorPages\\DynamicForms.RazorPages.csproj": {}
+  },
+  "projects": {
+    "C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormClaude\\src\\DynamicForms.RazorPages\\DynamicForms.RazorPages.csproj": {
+      "restore": {
+        "projectUniqueName": "C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormClaude\\src\\DynamicForms.RazorPages\\DynamicForms.RazorPages.csproj",
+        "projectPath": "C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormClaude\\src\\DynamicForms.RazorPages\\DynamicForms.RazorPages.csproj",
+        "packagesPath": "C:\\Users\\waelm\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormClaude\\src\\DynamicForms.RazorPages\\obj\\",
+        "projectStyle": "PackageReference",
+        "UsingMicrosoftNETSdk": false,
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\waelm\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Users\\waelm\\source\\repos\\waelgadalla\\DynamicForms\\packages": {},
+          "https://api.nuget.org/v3/index.json": {}
+        }
+      }
+    }
+  }
+}

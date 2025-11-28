@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>DynamicForms.RazorPages</id>
+    <version>1.0.0-preview</version>
+    <authors>Wael M</authors>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <projectUrl>https://github.com/waelgadalla/DynamicForms</projectUrl>
+    <description>Razor Pages integration for DynamicForms. Provides view models, HTML helpers, page models, and Razor views for building dynamic forms in ASP.NET Core Razor Pages applications with government-grade features.</description>
+    <copyright>Copyright � Government Solutions 2025</copyright>
+    <tags>json forms dynamic validation multilingual government enterprise dotnet9 razorpages asp.net mvc accessibility</tags>
+    <repository type="git" url="https://github.com/waelgadalla/DynamicForms" commit="7dad5644859b929311cb6c539e26543caaf3d4cf" />
+    <dependencies>
+      <group targetFramework="net9.0">
+        <dependency id="DynamicForms.Core" version="1.0.0-preview" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.Html.Abstractions" version="2.2.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.Http.Features" version="5.0.17" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.Mvc.Razor" version="2.2.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" version="9.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.Mvc.ViewFeatures" version="2.2.0" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+    <frameworkReferences>
+      <group targetFramework="net9.0">
+        <frameworkReference name="Microsoft.AspNetCore.App" />
+      </group>
+    </frameworkReferences>
+  </metadata>
+  <files>
+    <file src="C:\Users\waelm\source\repos\waelgadalla\DynamicForms\src\DynamicForms.RazorPages\bin\Debug\net9.0\DynamicForms.RazorPages.pdb" target="lib\net9.0\DynamicForms.RazorPages.pdb" />
+  </files>
+</package>

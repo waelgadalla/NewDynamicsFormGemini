@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "dgSpecHash": "3gKZrTnIGT4=",
+  "success": false,
+  "projectFilePath": "C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormClaude\\src\\DynamicForms.SqlServer\\DynamicForms.SqlServer.csproj",
+  "expectedPackageFiles": [],
+  "logs": [
+    {
+      "code": "NU1105",
+      "level": "Error",
+      "message": "Unable to read project information for 'DynamicForms.SqlServer': Invalid framework identifier ''.",
+      "projectPath": "C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormClaude\\src\\DynamicForms.SqlServer\\DynamicForms.SqlServer.csproj",
+      "filePath": "C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormClaude\\src\\DynamicForms.SqlServer\\DynamicForms.SqlServer.csproj",
+      "targetGraphs": []
+    }
+  ]
+}

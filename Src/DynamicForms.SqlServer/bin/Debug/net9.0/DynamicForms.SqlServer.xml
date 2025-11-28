@@ -1,0 +1,110 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>DynamicForms.SqlServer</name>
+    </assembly>
+    <members>
+        <member name="T:DynamicForms.SqlServer.Extensions.ServiceCollectionExtensions">
+            <summary>
+            Service collection extensions for SQL Server optimized implementations
+            </summary>
+        </member>
+        <member name="M:DynamicForms.SqlServer.Extensions.ServiceCollectionExtensions.AddDynamicFormsSqlServer(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String)">
+            <summary>
+            Add SQL Server optimized repositories for DynamicForms
+            Replaces Entity Framework repositories with high-performance Dapper implementations
+            </summary>
+        </member>
+        <member name="M:DynamicForms.SqlServer.Extensions.ServiceCollectionExtensions.AddDynamicFormsSqlServer(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,System.String)">
+            <summary>
+            Add SQL Server optimized repositories with connection string from configuration
+            </summary>
+        </member>
+        <member name="M:DynamicForms.SqlServer.Extensions.ServiceCollectionExtensions.AddDynamicFormsSqlServer(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Add SQL Server optimized repositories (uses default DI to resolve connection string)
+            Call this after AddDynamicFormsEntityFramework to override repositories
+            </summary>
+        </member>
+        <member name="M:DynamicForms.SqlServer.Extensions.ServiceCollectionExtensions.AddDynamicFormsSqlServerMonitoring(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String,System.String)">
+            <summary>
+            Add SQL Server performance monitoring and health checks
+            Requires Microsoft.Extensions.Diagnostics.HealthChecks and AspNetCore.HealthChecks.SqlServer packages
+            </summary>
+        </member>
+        <member name="M:DynamicForms.SqlServer.Extensions.ServiceCollectionExtensions.AddDynamicFormsSqlServerMonitoring(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,System.String,System.String)">
+            <summary>
+            Add SQL Server health checks with configuration
+            </summary>
+        </member>
+        <member name="M:DynamicForms.SqlServer.Extensions.ServiceCollectionExtensions.AddDynamicFormsSqlServerWithMonitoring(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String,System.String)">
+            <summary>
+            Add comprehensive SQL Server integration with repositories and health checks
+            </summary>
+        </member>
+        <member name="M:DynamicForms.SqlServer.Extensions.ServiceCollectionExtensions.AddDynamicFormsSqlServerWithMonitoring(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,System.String,System.String)">
+            <summary>
+            Add comprehensive SQL Server integration with configuration
+            </summary>
+        </member>
+        <member name="T:DynamicForms.SqlServer.Repositories.SqlServerFormDataRepository">
+            <summary>
+            High-performance SQL Server implementation of IFormDataRepository
+            Uses Dapper for optimized SQL operations and bulk operations
+            </summary>
+        </member>
+        <member name="M:DynamicForms.SqlServer.Repositories.SqlServerFormDataRepository.BulkSaveSubmissionsAsync(System.Collections.Generic.IEnumerable{DynamicForms.Core.Entities.Data.ModuleFormData},System.Threading.CancellationToken)">
+            <summary>
+            Bulk save multiple form submissions for high-performance scenarios
+            </summary>
+        </member>
+        <member name="T:DynamicForms.SqlServer.Repositories.SqlServerFormModuleRepository">
+            <summary>
+            High-performance SQL Server implementation of IFormModuleRepository
+            Uses Dapper for optimized SQL operations and leverages SQL Server JSON features
+            Works directly with FormModule without conversion layers
+            </summary>
+        </member>
+        <member name="M:DynamicForms.SqlServer.Repositories.SqlServerFormModuleRepository.GetAllModulesAsync(System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Get all modules for listing purposes
+            </summary>
+        </member>
+        <member name="M:DynamicForms.SqlServer.Repositories.SqlServerFormModuleRepository.BulkSaveEnhancedModulesAsync(System.Collections.Generic.IEnumerable{System.ValueTuple{DynamicForms.Core.Entities.FormModule,System.Int32,System.Nullable{System.Int32}}},System.Threading.CancellationToken)">
+            <summary>
+            Bulk save multiple modules for performance
+            Uses SQL Server Table-Valued Parameters for maximum efficiency
+            </summary>
+        </member>
+        <member name="M:DynamicForms.SqlServer.Repositories.SqlServerFormModuleRepository.CloneField(DynamicForms.Core.Entities.FormField,System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>
+            Clone a field for module cloning
+            </summary>
+        </member>
+        <member name="M:DynamicForms.SqlServer.Repositories.SqlServerFormModuleRepository.OptimizeFieldOrdering(DynamicForms.Core.Entities.FormField)">
+            <summary>
+            Optimize field ordering within a parent
+            </summary>
+        </member>
+        <member name="M:DynamicForms.SqlServer.Repositories.SqlServerFormModuleRepository.GetFieldTypePriority(System.String)">
+            <summary>
+            Get priority for field type ordering (lower = higher priority)
+            </summary>
+        </member>
+        <member name="M:DynamicForms.SqlServer.Repositories.SqlServerFormModuleRepository.ValidateAndFixRelationships(DynamicForms.Core.Entities.FormModule)">
+            <summary>
+            Validate and fix relationships in the module
+            </summary>
+        </member>
+        <member name="M:DynamicForms.SqlServer.Repositories.SqlServerFormModuleRepository.PassesComplexityFilter(DynamicForms.Core.Entities.ModuleStatistics,DynamicForms.Core.Interfaces.ModuleSearchCriteria,DynamicForms.Core.Entities.FormModule)">
+            <summary>
+            Check if module statistics pass the complexity filter
+            </summary>
+        </member>
+        <member name="M:DynamicForms.SqlServer.Repositories.SqlServerFormModuleRepository.ApplySortingAndPagination(System.Collections.Generic.List{DynamicForms.Core.Interfaces.ModuleSearchResult},DynamicForms.Core.Interfaces.ModuleSearchCriteria)">
+            <summary>
+            Apply sorting and pagination to search results
+            </summary>
+        </member>
+    </members>
+</doc>
