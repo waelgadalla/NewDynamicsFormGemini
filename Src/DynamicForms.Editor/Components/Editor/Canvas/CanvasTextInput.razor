@@ -1,0 +1,34 @@
+@using DynamicForms.Core.V4.Runtime
+
+<div class="canvas-input-field">
+    <label class="canvas-label">
+        @(Field.Schema.LabelEn ?? Field.Schema.Id)
+        @if (Field.Schema.Validation?.IsRequired == true)
+        {
+            <span class="required-marker">*</span>
+        }
+    </label>
+    @if (Field.Schema.FieldType == "TextArea")
+    {
+        <textarea class="canvas-input" placeholder="@Field.Schema.PlaceholderEn" disabled></textarea>
+    }
+    else
+    {
+        <input type="@GetInputType()" class="canvas-input" placeholder="@Field.Schema.PlaceholderEn" disabled />
+    }
+    @if (!string.IsNullOrEmpty(Field.Schema.HelpEn))
+    {
+        <div class="canvas-help">@Field.Schema.HelpEn</div>
+    }
+</div>
+
+@code {
+    [Parameter] public FormFieldNode Field { get; set; } = default!;
+    
+    private string GetInputType() => Field.Schema.FieldType switch
+    {
+        "Number" => "number",
+        "Currency" => "text", // Display as text for currency symbol, actual logic in runtime
+        _ => "text"
+    };
+}

@@ -1,0 +1,13 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/Src/DynamicForms.Core.V4/obj
+/Src/DynamicForms.Editor/bin/Debug/net9.0
+/Src/DynamicForms.Editor/obj
+/.vs/NewDynamicFormsGemini/FileContentIndex
+/.vs/NewDynamicFormsGemini/DesignTimeBuild
+/.vs/NewDynamicFormsGemini/v17
+/.vs/NewDynamicsFormGemini/v17
+/Src/DynamicForms.Core.V4/bin/Debug/net9.0
+/.vs/ProjectEvaluation

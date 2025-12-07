@@ -1,0 +1,35 @@
+@using DynamicForms.Editor.Components.Shared
+
+<div class="app-header">
+    <div class="header-left">
+        <IconButton Icon="bi-arrow-left" Title="Back to Workflow" OnClick="NavigateBack" IsSmall="true" />
+        <div class="header-title" style="font-size: 16px;">
+            <i class="bi bi-file-text"></i>
+            <input type="text" class="form-input" value="Module Title" style="border: none; font-size: 16px; font-weight: 600; padding: 4px 8px; width: 200px; background: transparent;">
+        </div>
+        <Badge Variant="info">Step 1 of 4</Badge>
+    </div>
+    <div class="header-actions">
+        <div style="display: flex; background: var(--bg-tertiary); padding: 3px; border-radius: 6px; margin-right: 8px;">
+            <Button Class="btn-sm" Variant="ghost">Design</Button>
+            <Button Class="btn-sm" Variant="ghost">Preview</Button>
+            <Button Class="btn-sm" Variant="ghost">JSON</Button>
+        </div>
+        <IconButton Icon="bi-info-circle" Title="Module Information" OnClick="ShowMetadataModal" />
+        <Button Variant="primary" Icon="bi-check">Save Module</Button>
+    </div>
+</div>
+
+@code {
+    [Inject] private NavigationManager NavManager { get; set; } = default!;
+    
+    private void NavigateBack()
+    {
+        NavManager.NavigateTo("/workflow"); // Placeholder
+    }
+
+    private void ShowMetadataModal()
+    {
+        // Placeholder for metadata modal
+    }
+}

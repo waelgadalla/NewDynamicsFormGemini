@@ -1,0 +1,2996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynamicForms Visual Editor V5</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-dark: #4338CA;
+            --primary-light: #EEF2FF;
+            --success: #10B981;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            --sidebar-width: 300px;
+            --sidebar-min-width: 250px;
+            --sidebar-max-width: 500px;
+            --header-height: 64px;
+            --toolbar-height: 56px;
+
+            /* Light theme colors */
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --bg-tertiary: #F3F4F6;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --border-color: #E5E7EB;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        /* Even lighter dark mode - more gray shades, less black */
+        [data-theme="dark"] {
+            --primary: #818CF8;
+            --primary-dark: #6366F1;
+            --primary-light: #4C1D95;
+
+            /* Lighter, grayer backgrounds - inspired by Notion/Linear */
+            --bg-primary: #3F3F46;
+            --bg-secondary: #36393F;
+            --bg-tertiary: #4A4D55;
+
+            /* Much lighter text for excellent readability */
+            --text-primary: #F4F4F5;
+            --text-secondary: #C7C7CC;
+
+            /* Lighter, subtle borders */
+            --border-color: #52525B;
+
+            /* Softer shadows */
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.15);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.25);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.35);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-secondary);
+            overflow: hidden;
+            height: 100vh;
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* ===== HEADER ===== */
+        .app-header {
+            height: var(--header-height);
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: relative;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--text-primary);
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .form-title-input {
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: background 0.2s;
+            background: transparent;
+        }
+
+        .form-title-input:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .form-title-input:focus {
+            outline: 2px solid var(--primary);
+            background: var(--bg-primary);
+        }
+
+        .header-tabs {
+            display: flex;
+            gap: 4px;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .header-tab {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .header-tab:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .header-tab.active {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        [data-theme="dark"] .header-tab.active {
+            background: var(--bg-tertiary);
+            color: #C7D2FE;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-primary);
+        }
+
+        .btn-ghost:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .btn-outline {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--text-secondary);
+            background: var(--bg-tertiary);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .theme-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 18px;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        /* ===== TOOLBAR ===== */
+        .editor-toolbar {
+            height: var(--toolbar-height);
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            gap: 16px;
+        }
+
+        .toolbar-group {
+            display: flex;
+            gap: 4px;
+            padding-right: 16px;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .toolbar-group:last-child {
+            border-right: none;
+        }
+
+        .toolbar-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .toolbar-btn:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .toolbar-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .toolbar-btn.active {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        /* ===== MAIN LAYOUT ===== */
+        .app-body {
+            display: flex;
+            height: calc(100vh - var(--header-height));
+        }
+
+        .view-designer .app-body {
+            height: calc(100vh - var(--header-height) - var(--toolbar-height));
+        }
+
+        /* ===== LEFT SIDEBAR (Component Library) ===== */
+        .sidebar-left {
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-min-width);
+            max-width: var(--sidebar-max-width);
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .resize-handle-right {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            cursor: ew-resize;
+            background: transparent;
+            z-index: 10;
+            transition: background 0.2s;
+        }
+
+        .resize-handle-right:hover,
+        .resize-handle-right.dragging {
+            background: var(--primary);
+        }
+
+        .resize-handle-right::before {
+            content: '';
+            position: absolute;
+            right: -4px;
+            top: 0;
+            bottom: 0;
+            width: 12px;
+        }
+
+        /* ===== RIGHT SIDEBAR (Properties) - Now Resizable ===== */
+        .sidebar-right {
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-min-width);
+            max-width: var(--sidebar-max-width);
+            background: var(--bg-primary);
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .resize-handle-left {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            cursor: ew-resize;
+            background: transparent;
+            z-index: 10;
+            transition: background 0.2s;
+        }
+
+        .resize-handle-left:hover,
+        .resize-handle-left.dragging {
+            background: var(--primary);
+        }
+
+        .resize-handle-left::before {
+            content: '';
+            position: absolute;
+            left: -4px;
+            top: 0;
+            bottom: 0;
+            width: 12px;
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-title {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            background: var(--bg-secondary);
+            position: relative;
+            color: var(--text-primary);
+        }
+
+        .search-box::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .component-category {
+            margin-bottom: 24px;
+        }
+
+        .category-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            padding: 0 8px;
+        }
+
+        .component-item {
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .component-item:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            transform: translateX(4px);
+        }
+
+        [data-theme="dark"] .component-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .component-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: var(--bg-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .component-item:hover .component-icon {
+            background: var(--primary);
+            color: white;
+        }
+
+        .component-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .component-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .component-desc {
+            font-size: 11px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ===== CENTER CANVAS ===== */
+        .canvas-container {
+            flex: 1;
+            overflow-y: auto;
+            background: var(--bg-secondary);
+            position: relative;
+        }
+
+        .canvas {
+            max-width: 900px;
+            margin: 40px auto;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+            min-height: calc(100vh - 200px);
+            position: relative;
+        }
+
+        .canvas-header {
+            padding: 40px 60px 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .canvas-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            border: 2px solid transparent;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: text;
+        }
+
+        .canvas-title:hover {
+            border-color: var(--border-color);
+        }
+
+        .canvas-description {
+            font-size: 15px;
+            color: var(--text-secondary);
+            border: 2px solid transparent;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: text;
+        }
+
+        .canvas-description:hover {
+            border-color: var(--border-color);
+        }
+
+        .canvas-body {
+            padding: 24px 60px 60px;
+        }
+
+        .field-wrapper {
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .add-field-prompt {
+            min-height: 80px;
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .add-field-prompt i {
+            font-size: 24px;
+            margin-bottom: 8px;
+            opacity: 0.5;
+        }
+
+        .field-item {
+            padding: 20px;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            transition: all 0.2s;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .field-item:hover {
+            border-color: var(--border-color);
+            background: var(--bg-secondary);
+        }
+
+        .field-item.selected {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        [data-theme="dark"] .field-item.selected {
+            background: var(--bg-tertiary);
+        }
+
+        .field-actions {
+            position: absolute;
+            top: -16px;
+            right: 12px;
+            display: none;
+            gap: 4px;
+            background: var(--bg-primary);
+            padding: 4px;
+            border-radius: 6px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .field-item:hover .field-actions,
+        .field-item.selected .field-actions {
+            display: flex;
+        }
+
+        .field-action-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: transparent;
+            color: var(--text-primary);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            font-size: 13px;
+        }
+
+        .field-action-btn:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .field-action-btn.danger:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .field-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .field-required {
+            color: var(--danger);
+        }
+
+        .field-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.2s;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .field-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .field-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .field-input:disabled {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+        }
+
+        .field-help {
+            margin-top: 6px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .field-section {
+            padding: 24px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            margin-bottom: 24px;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .field-section:hover {
+            border-color: var(--border-color);
+        }
+
+        .field-section.selected {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        [data-theme="dark"] .field-section.selected {
+            background: var(--bg-tertiary);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .properties-content {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .property-section {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .property-section-header {
+            padding: 14px 16px;
+            background: var(--bg-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .property-section-header:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .property-section-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .property-section-body {
+            padding: 16px;
+        }
+
+        .property-section-body.collapsed {
+            display: none;
+        }
+
+        .prop-group {
+            margin-bottom: 16px;
+        }
+
+        .prop-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .prop-input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 13px;
+            transition: all 0.2s;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .prop-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .prop-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .prop-select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 13px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        .lang-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 12px;
+            background: var(--bg-tertiary);
+            padding: 3px;
+            border-radius: 6px;
+        }
+
+        .lang-tab {
+            flex: 1;
+            padding: 6px;
+            border: none;
+            background: transparent;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .lang-tab.active {
+            background: var(--bg-primary);
+            color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .checkbox-group:hover {
+            background: var(--bg-secondary);
+        }
+
+        .checkbox-input {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .checkbox-label {
+            font-size: 13px;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        /* ===== DASHBOARD ===== */
+        .dashboard {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-secondary);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .dashboard-header {
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px 40px;
+        }
+
+        .dashboard-header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .dashboard-body {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .dashboard-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .dashboard-subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .dashboard-tabs {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 32px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .dashboard-tab {
+            padding: 12px 0;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+
+        .dashboard-tab:hover {
+            color: var(--text-primary);
+        }
+
+        .dashboard-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .module-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .module-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .module-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 16px;
+        }
+
+        .module-card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .module-card-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .module-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .badge-primary {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        [data-theme="dark"] .badge-primary {
+            background: var(--bg-tertiary);
+            color: #C7D2FE;
+        }
+
+        .badge-success {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        [data-theme="dark"] .badge-success {
+            background: #064E3B;
+            color: #6EE7B7;
+        }
+
+        .badge-draft {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        /* ===== TEMPLATE CARDS ===== */
+        .template-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .template-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .template-preview {
+            height: 180px;
+            background: var(--bg-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .template-preview-icon {
+            font-size: 48px;
+            color: var(--text-secondary);
+            opacity: 0.5;
+        }
+
+        .template-preview-pattern {
+            position: absolute;
+            inset: 0;
+            opacity: 0.1;
+            background-image:
+                repeating-linear-gradient(0deg, var(--border-color) 0px, var(--border-color) 1px, transparent 1px, transparent 20px),
+                repeating-linear-gradient(90deg, var(--border-color) 0px, var(--border-color) 1px, transparent 1px, transparent 20px);
+        }
+
+        .template-body {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .template-category {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--primary);
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .template-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .template-description {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            flex: 1;
+        }
+
+        .template-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .template-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .template-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+
+        /* ===== MODALS ===== */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        /* ===== LOGIC BUILDER ===== */
+        .rule-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .rule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .rule-title {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .condition-row {
+            display: grid;
+            grid-template-columns: 80px 1fr 150px 1fr auto;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .condition-label {
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        /* ===== UTILITIES ===== */
+        .hidden {
+            display: none !important;
+        }
+
+        .text-muted {
+            color: var(--text-secondary);
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        .icon-btn:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--text-secondary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-primary);
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 40px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            font-size: 14px;
+        }
+
+        /* ===== TOAST NOTIFICATIONS ===== */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .toast {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 16px 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 300px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast-success {
+            background: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+
+        .toast-error {
+            background: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+
+        /* ===== JSON VIEWER ===== */
+        .json-viewer {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            max-height: 500px;
+            border: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body data-theme="light">
+
+    <!-- ===== DASHBOARD ===== -->
+    <div id="dashboard" class="dashboard">
+        <div class="dashboard-header">
+            <div class="dashboard-header-content">
+                <div>
+                    <div class="logo">
+                        <div class="logo-icon">
+                            <i class="bi bi-grid-3x3-gap-fill"></i>
+                        </div>
+                        <span>DynamicForms</span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <div style="position: relative; width: 300px;">
+                        <i class="bi bi-search search-icon"></i>
+                        <input type="text" class="search-box" placeholder="Search modules...">
+                    </div>
+                    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">
+                        <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+                    </button>
+                    <button class="btn btn-primary" onclick="createNewForm()">
+                        <i class="bi bi-plus-lg"></i>
+                        Create New Form
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-body">
+            <div class="dashboard-title">My Forms</div>
+            <div class="dashboard-subtitle">Manage and edit your form modules</div>
+
+            <div class="dashboard-tabs" style="margin-top: 32px;">
+                <div class="dashboard-tab active" onclick="switchDashTab('recent')">Recent</div>
+                <div class="dashboard-tab" onclick="switchDashTab('templates')">Templates</div>
+                <div class="dashboard-tab" onclick="switchDashTab('all')">All Modules</div>
+            </div>
+
+            <!-- Recent Tab -->
+            <div id="dash-recent" class="cards-grid">
+                <div class="module-card" onclick="openEditor()">
+                    <div class="module-card-header">
+                        <div>
+                            <div class="module-card-title">Employee Onboarding</div>
+                            <div class="module-card-meta">Last edited 2 hours ago</div>
+                        </div>
+                        <span class="badge badge-draft">Draft</span>
+                    </div>
+                    <div class="module-card-footer">
+                        <span><i class="bi bi-ui-checks"></i> 14 fields</span>
+                        <span>v1.2</span>
+                    </div>
+                </div>
+
+                <div class="module-card">
+                    <div class="module-card-header">
+                        <div>
+                            <div class="module-card-title">Leave Request</div>
+                            <div class="module-card-meta">Last edited yesterday</div>
+                        </div>
+                        <span class="badge badge-success">Published</span>
+                    </div>
+                    <div class="module-card-footer">
+                        <span><i class="bi bi-ui-checks"></i> 8 fields</span>
+                        <span>v2.1</span>
+                    </div>
+                </div>
+
+                <div class="module-card">
+                    <div class="module-card-header">
+                        <div>
+                            <div class="module-card-title">Expense Claim</div>
+                            <div class="module-card-meta">Last edited 3 days ago</div>
+                        </div>
+                        <span class="badge badge-primary">Active</span>
+                    </div>
+                    <div class="module-card-footer">
+                        <span><i class="bi bi-ui-checks"></i> 12 fields</span>
+                        <span>v1.5</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Templates Tab -->
+            <div id="dash-templates" class="cards-grid hidden">
+                <!-- Contact Information Template -->
+                <div class="template-card" onclick="useTemplate('contact')">
+                    <div class="template-preview">
+                        <div class="template-preview-pattern"></div>
+                        <i class="bi bi-person-vcard template-preview-icon"></i>
+                    </div>
+                    <div class="template-body">
+                        <div class="template-category">Basic</div>
+                        <div class="template-title">Contact Information</div>
+                        <div class="template-description">
+                            Collect essential contact details including name, email, phone, and address.
+                        </div>
+                        <div class="template-meta">
+                            <div class="template-meta-item">
+                                <i class="bi bi-ui-checks-grid"></i>
+                                <span>7 fields</span>
+                            </div>
+                            <div class="template-meta-item">
+                                <i class="bi bi-clock-history"></i>
+                                <span>5 min setup</span>
+                            </div>
+                        </div>
+                        <div class="template-actions">
+                            <button class="btn btn-outline btn-sm" style="flex: 1;">
+                                <i class="bi bi-eye"></i>
+                                Preview
+                            </button>
+                            <button class="btn btn-primary btn-sm" style="flex: 1;">
+                                Use Template
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Job Application Template -->
+                <div class="template-card" onclick="useTemplate('job-application')">
+                    <div class="template-preview">
+                        <div class="template-preview-pattern"></div>
+                        <i class="bi bi-briefcase template-preview-icon"></i>
+                    </div>
+                    <div class="template-body">
+                        <div class="template-category">HR</div>
+                        <div class="template-title">Job Application</div>
+                        <div class="template-description">
+                            Comprehensive job application form with resume upload, work history, and references.
+                        </div>
+                        <div class="template-meta">
+                            <div class="template-meta-item">
+                                <i class="bi bi-ui-checks-grid"></i>
+                                <span>18 fields</span>
+                            </div>
+                            <div class="template-meta-item">
+                                <i class="bi bi-clock-history"></i>
+                                <span>10 min setup</span>
+                            </div>
+                        </div>
+                        <div class="template-actions">
+                            <button class="btn btn-outline btn-sm" style="flex: 1;">
+                                <i class="bi bi-eye"></i>
+                                Preview
+                            </button>
+                            <button class="btn btn-primary btn-sm" style="flex: 1;">
+                                Use Template
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Event Registration Template -->
+                <div class="template-card" onclick="useTemplate('event')">
+                    <div class="template-preview">
+                        <div class="template-preview-pattern"></div>
+                        <i class="bi bi-calendar-event template-preview-icon"></i>
+                    </div>
+                    <div class="template-body">
+                        <div class="template-category">Events</div>
+                        <div class="template-title">Event Registration</div>
+                        <div class="template-description">
+                            Register attendees for events with ticket selection, dietary preferences, and payment.
+                        </div>
+                        <div class="template-meta">
+                            <div class="template-meta-item">
+                                <i class="bi bi-ui-checks-grid"></i>
+                                <span>12 fields</span>
+                            </div>
+                            <div class="template-meta-item">
+                                <i class="bi bi-clock-history"></i>
+                                <span>8 min setup</span>
+                            </div>
+                        </div>
+                        <div class="template-actions">
+                            <button class="btn btn-outline btn-sm" style="flex: 1;">
+                                <i class="bi bi-eye"></i>
+                                Preview
+                            </button>
+                            <button class="btn btn-primary btn-sm" style="flex: 1;">
+                                Use Template
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Feedback Template -->
+                <div class="template-card" onclick="useTemplate('feedback')">
+                    <div class="template-preview">
+                        <div class="template-preview-pattern"></div>
+                        <i class="bi bi-chat-left-quote template-preview-icon"></i>
+                    </div>
+                    <div class="template-body">
+                        <div class="template-category">Survey</div>
+                        <div class="template-title">Customer Feedback</div>
+                        <div class="template-description">
+                            Collect customer satisfaction feedback with NPS score, ratings, and comments.
+                        </div>
+                        <div class="template-meta">
+                            <div class="template-meta-item">
+                                <i class="bi bi-ui-checks-grid"></i>
+                                <span>9 fields</span>
+                            </div>
+                            <div class="template-meta-item">
+                                <i class="bi bi-clock-history"></i>
+                                <span>6 min setup</span>
+                            </div>
+                        </div>
+                        <div class="template-actions">
+                            <button class="btn btn-outline btn-sm" style="flex: 1;">
+                                <i class="bi bi-eye"></i>
+                                Preview
+                            </button>
+                            <button class="btn btn-primary btn-sm" style="flex: 1;">
+                                Use Template
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lead Capture Template -->
+                <div class="template-card" onclick="useTemplate('lead')">
+                    <div class="template-preview">
+                        <div class="template-preview-pattern"></div>
+                        <i class="bi bi-funnel template-preview-icon"></i>
+                    </div>
+                    <div class="template-body">
+                        <div class="template-category">Marketing</div>
+                        <div class="template-title">Lead Capture</div>
+                        <div class="template-description">
+                            Generate qualified leads with company info, budget, timeline, and project details.
+                        </div>
+                        <div class="template-meta">
+                            <div class="template-meta-item">
+                                <i class="bi bi-ui-checks-grid"></i>
+                                <span>10 fields</span>
+                            </div>
+                            <div class="template-meta-item">
+                                <i class="bi bi-clock-history"></i>
+                                <span>7 min setup</span>
+                            </div>
+                        </div>
+                        <div class="template-actions">
+                            <button class="btn btn-outline btn-sm" style="flex: 1;">
+                                <i class="bi bi-eye"></i>
+                                Preview
+                            </button>
+                            <button class="btn btn-primary btn-sm" style="flex: 1;">
+                                Use Template
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Support Ticket Template -->
+                <div class="template-card" onclick="useTemplate('support')">
+                    <div class="template-preview">
+                        <div class="template-preview-pattern"></div>
+                        <i class="bi bi-headset template-preview-icon"></i>
+                    </div>
+                    <div class="template-body">
+                        <div class="template-category">Support</div>
+                        <div class="template-title">Support Ticket</div>
+                        <div class="template-description">
+                            Submit support requests with issue categorization, priority, and file attachments.
+                        </div>
+                        <div class="template-meta">
+                            <div class="template-meta-item">
+                                <i class="bi bi-ui-checks-grid"></i>
+                                <span>11 fields</span>
+                            </div>
+                            <div class="template-meta-item">
+                                <i class="bi bi-clock-history"></i>
+                                <span>6 min setup</span>
+                            </div>
+                        </div>
+                        <div class="template-actions">
+                            <button class="btn btn-outline btn-sm" style="flex: 1;">
+                                <i class="bi bi-eye"></i>
+                                Preview
+                            </button>
+                            <button class="btn btn-primary btn-sm" style="flex: 1;">
+                                Use Template
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- All Modules Tab -->
+            <div id="dash-all" class="cards-grid hidden">
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="bi bi-inbox"></i>
+                    </div>
+                    <div class="empty-state-text">No modules found</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== EDITOR ===== -->
+    <div id="editor" class="hidden">
+        <!-- Header -->
+        <div class="app-header">
+            <div class="logo-section">
+                <button class="btn-ghost" onclick="closeditor()" title="Back to Dashboard">
+                    <i class="bi bi-arrow-left"></i>
+                </button>
+                <input type="text" class="form-title-input" value="Employee Onboarding"
+                       placeholder="Untitled Form">
+                <span class="badge badge-draft">Draft</span>
+            </div>
+
+            <div class="header-tabs">
+                <button class="header-tab active" onclick="switchView('designer')">
+                    <i class="bi bi-pencil-square"></i>
+                    Design
+                </button>
+                <button class="header-tab" onclick="switchView('preview')">
+                    <i class="bi bi-eye"></i>
+                    Preview
+                </button>
+                <button class="header-tab" onclick="switchView('logic')">
+                    <i class="bi bi-diagram-3"></i>
+                    Logic
+                </button>
+            </div>
+
+            <div class="header-actions">
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">
+                    <i class="bi bi-moon-stars-fill" id="themeIconEditor"></i>
+                </button>
+                <button class="btn btn-ghost" onclick="showShortcuts()">
+                    <i class="bi bi-keyboard"></i>
+                </button>
+                <button class="btn btn-outline" onclick="exportJSON()">
+                    <i class="bi bi-code-square"></i>
+                    Export JSON
+                </button>
+                <button class="btn btn-outline" onclick="importJSON()">
+                    <i class="bi bi-upload"></i>
+                    Import
+                </button>
+                <button class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i>
+                    Publish
+                </button>
+            </div>
+        </div>
+
+        <!-- Toolbar (only visible in designer view) -->
+        <div id="toolbar" class="editor-toolbar">
+            <div class="toolbar-group">
+                <button class="toolbar-btn" onclick="undo()" title="Undo (Ctrl+Z)">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </button>
+                <button class="toolbar-btn" onclick="redo()" title="Redo (Ctrl+Y)">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+            </div>
+
+            <div class="toolbar-group">
+                <button class="toolbar-btn" onclick="duplicateField()" title="Duplicate Field">
+                    <i class="bi bi-files"></i>
+                </button>
+                <button class="toolbar-btn" onclick="deleteField()" title="Delete Field">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+
+            <div class="toolbar-group">
+                <button class="toolbar-btn" onclick="moveFieldUp()" title="Move Up">
+                    <i class="bi bi-arrow-up"></i>
+                </button>
+                <button class="toolbar-btn" onclick="moveFieldDown()" title="Move Down">
+                    <i class="bi bi-arrow-down"></i>
+                </button>
+            </div>
+
+            <div style="margin-left: auto; display: flex; align-items: center; gap: 12px; color: var(--text-secondary); font-size: 13px;">
+                <span><i class="bi bi-ui-checks"></i> 5 fields</span>
+                <span>•</span>
+                <span>Auto-saved at 2:34 PM</span>
+            </div>
+        </div>
+
+        <!-- Main Editor Layout -->
+        <div class="app-body">
+            <!-- Left Sidebar: Component Library (Resizable) -->
+            <div class="sidebar-left" id="leftSidebar">
+                <div class="resize-handle-right" id="resizeHandleLeft"></div>
+
+                <div class="sidebar-header">
+                    <div class="sidebar-title">Add Fields</div>
+                    <div style="position: relative;">
+                        <i class="bi bi-search search-icon"></i>
+                        <input type="text" class="search-box" placeholder="Search fields...">
+                    </div>
+                </div>
+
+                <div class="sidebar-content">
+                    <div class="component-category">
+                        <div class="category-title">Basic Fields</div>
+                        <div class="component-item" onclick="addField('TextBox')">
+                            <div class="component-icon">
+                                <i class="bi bi-input-cursor-text"></i>
+                            </div>
+                            <div class="component-info">
+                                <div class="component-name">Text Input</div>
+                                <div class="component-desc">Single line text</div>
+                            </div>
+                        </div>
+
+                        <div class="component-item" onclick="addField('TextArea')">
+                            <div class="component-icon">
+                                <i class="bi bi-textarea-t"></i>
+                            </div>
+                            <div class="component-info">
+                                <div class="component-name">Text Area</div>
+                                <div class="component-desc">Multi-line text</div>
+                            </div>
+                        </div>
+
+                        <div class="component-item" onclick="addField('Number')">
+                            <div class="component-icon">
+                                <i class="bi bi-123"></i>
+                            </div>
+                            <div class="component-info">
+                                <div class="component-name">Number</div>
+                                <div class="component-desc">Numeric input</div>
+                            </div>
+                        </div>
+
+                        <div class="component-item" onclick="addField('Email')">
+                            <div class="component-icon">
+                                <i class="bi bi-envelope"></i>
+                            </div>
+                            <div class="component-info">
+                                <div class="component-name">Email</div>
+                                <div class="component-desc">Email address</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="component-category">
+                        <div class="category-title">Choice Fields</div>
+                        <div class="component-item" onclick="addField('DropDown')">
+                            <div class="component-icon">
+                                <i class="bi bi-menu-button-wide"></i>
+                            </div>
+                            <div class="component-info">
+                                <div class="component-name">Dropdown</div>
+                                <div class="component-desc">Single select</div>
+                            </div>
+                        </div>
+
+                        <div class="component-item" onclick="addField('RadioGroup')">
+                            <div class="component-icon">
+                                <i class="bi bi-ui-radios"></i>
+                            </div>
+                            <div class="component-info">
+                                <div class="component-name">Radio Group</div>
+                                <div class="component-desc">Single choice</div>
+                            </div>
+                        </div>
+
+                        <div class="component-item" onclick="addField('CheckboxList')">
+                            <div class="component-icon">
+                                <i class="bi bi-ui-checks"></i>
+                            </div>
+                            <div class="component-info">
+                                <div class="component-name">Checkboxes</div>
+                                <div class="component-desc">Multiple choice</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="component-category">
+                        <div class="category-title">Date & Time</div>
+                        <div class="component-item" onclick="addField('DatePicker')">
+                            <div class="component-icon">
+                                <i class="bi bi-calendar-event"></i>
+                            </div>
+                            <div class="component-info">
+                                <div class="component-name">Date Picker</div>
+                                <div class="component-desc">Select date</div>
+                            </div>
+                        </div>
+
+                        <div class="component-item" onclick="addField('TimePicker')">
+                            <div class="component-icon">
+                                <i class="bi bi-clock"></i>
+                            </div>
+                            <div class="component-info">
+                                <div class="component-name">Time Picker</div>
+                                <div class="component-desc">Select time</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="component-category">
+                        <div class="category-title">Advanced</div>
+                        <div class="component-item" onclick="addField('FileUpload')">
+                            <div class="component-icon">
+                                <i class="bi bi-cloud-upload"></i>
+                            </div>
+                            <div class="component-info">
+                                <div class="component-name">File Upload</div>
+                                <div class="component-desc">Upload files</div>
+                            </div>
+                        </div>
+
+                        <div class="component-item" onclick="addField('DataGrid')">
+                            <div class="component-icon">
+                                <i class="bi bi-table"></i>
+                            </div>
+                            <div class="component-info">
+                                <div class="component-name">Data Grid</div>
+                                <div class="component-desc">Repeating rows</div>
+                            </div>
+                        </div>
+
+                        <div class="component-item" onclick="addField('AutoComplete')">
+                            <div class="component-icon">
+                                <i class="bi bi-search"></i>
+                            </div>
+                            <div class="component-info">
+                                <div class="component-name">AutoComplete</div>
+                                <div class="component-desc">Search & select</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="component-category">
+                        <div class="category-title">Layout</div>
+                        <div class="component-item" onclick="addField('Section')">
+                            <div class="component-icon">
+                                <i class="bi bi-layout-three-columns"></i>
+                            </div>
+                            <div class="component-info">
+                                <div class="component-name">Section</div>
+                                <div class="component-desc">Group fields</div>
+                            </div>
+                        </div>
+
+                        <div class="component-item" onclick="addField('Divider')">
+                            <div class="component-icon">
+                                <i class="bi bi-dash-lg"></i>
+                            </div>
+                            <div class="component-info">
+                                <div class="component-name">Divider</div>
+                                <div class="component-desc">Visual separator</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center: Canvas -->
+            <div class="canvas-container">
+                <div class="canvas">
+                    <div class="canvas-header">
+                        <div class="canvas-title" contenteditable="true">Employee Onboarding</div>
+                        <div class="canvas-description" contenteditable="true">
+                            Please provide your information to complete the onboarding process.
+                        </div>
+                    </div>
+
+                    <div class="canvas-body" id="canvasBody">
+                        <!-- Section Field -->
+                        <div class="field-section selected">
+                            <div class="field-actions">
+                                <button class="field-action-btn" title="Settings">
+                                    <i class="bi bi-gear-fill"></i>
+                                </button>
+                                <button class="field-action-btn" title="Duplicate">
+                                    <i class="bi bi-files"></i>
+                                </button>
+                                <button class="field-action-btn danger" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                            <div class="section-title">Personal Information</div>
+                        </div>
+
+                        <!-- Text Field -->
+                        <div class="field-wrapper">
+                            <div class="field-item">
+                                <div class="field-actions">
+                                    <button class="field-action-btn" title="Settings">
+                                        <i class="bi bi-gear-fill"></i>
+                                    </button>
+                                    <button class="field-action-btn" title="Duplicate">
+                                        <i class="bi bi-files"></i>
+                                    </button>
+                                    <button class="field-action-btn" title="Move Up">
+                                        <i class="bi bi-arrow-up"></i>
+                                    </button>
+                                    <button class="field-action-btn" title="Move Down">
+                                        <i class="bi bi-arrow-down"></i>
+                                    </button>
+                                    <button class="field-action-btn danger" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                                <label class="field-label">
+                                    Full Name
+                                    <span class="field-required">*</span>
+                                </label>
+                                <input type="text" class="field-input" placeholder="e.g. John Doe" disabled>
+                                <div class="field-help">Enter your legal name as it appears on official documents</div>
+                            </div>
+                        </div>
+
+                        <!-- Email Field -->
+                        <div class="field-wrapper">
+                            <div class="field-item">
+                                <div class="field-actions">
+                                    <button class="field-action-btn" title="Settings">
+                                        <i class="bi bi-gear-fill"></i>
+                                    </button>
+                                    <button class="field-action-btn" title="Duplicate">
+                                        <i class="bi bi-files"></i>
+                                    </button>
+                                    <button class="field-action-btn" title="Move Up">
+                                        <i class="bi bi-arrow-up"></i>
+                                    </button>
+                                    <button class="field-action-btn" title="Move Down">
+                                        <i class="bi bi-arrow-down"></i>
+                                    </button>
+                                    <button class="field-action-btn danger" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                                <label class="field-label">
+                                    Email Address
+                                    <span class="field-required">*</span>
+                                </label>
+                                <input type="email" class="field-input" placeholder="your.email@company.com" disabled>
+                            </div>
+                        </div>
+
+                        <!-- Dropdown Field -->
+                        <div class="field-wrapper">
+                            <div class="field-item">
+                                <div class="field-actions">
+                                    <button class="field-action-btn" title="Settings">
+                                        <i class="bi bi-gear-fill"></i>
+                                    </button>
+                                    <button class="field-action-btn" title="Duplicate">
+                                        <i class="bi bi-files"></i>
+                                    </button>
+                                    <button class="field-action-btn" title="Move Up">
+                                        <i class="bi bi-arrow-up"></i>
+                                    </button>
+                                    <button class="field-action-btn" title="Move Down">
+                                        <i class="bi bi-arrow-down"></i>
+                                    </button>
+                                    <button class="field-action-btn danger" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                                <label class="field-label">Department</label>
+                                <select class="field-input" disabled>
+                                    <option>Select your department...</option>
+                                    <option>Engineering</option>
+                                    <option>Marketing</option>
+                                    <option>Sales</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Add Field Prompt -->
+                        <div class="add-field-prompt">
+                            <i class="bi bi-arrow-left"></i>
+                            Click on a field type in the left panel to add it to your form
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar: Properties Panel (NOW RESIZABLE) -->
+            <div class="sidebar-right" id="rightSidebar">
+                <div class="resize-handle-left" id="resizeHandleRight"></div>
+
+                <div class="sidebar-header">
+                    <h3 style="font-size: 14px; font-weight: 700; color: var(--text-primary);">Properties</h3>
+                </div>
+
+                <div class="properties-content">
+                    <!-- General Section -->
+                    <div class="property-section">
+                        <div class="property-section-header" onclick="togglePropertySection(this)">
+                            <div class="property-section-title">
+                                <i class="bi bi-sliders"></i>
+                                General
+                            </div>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="property-section-body">
+                            <div class="prop-group">
+                                <label class="prop-label">Field ID</label>
+                                <input type="text" class="prop-input" value="personalInfo_section" disabled>
+                            </div>
+
+                            <div class="prop-group">
+                                <label class="prop-label">Field Type</label>
+                                <select class="prop-select" disabled>
+                                    <option>Section</option>
+                                </select>
+                            </div>
+
+                            <div class="prop-group">
+                                <label class="prop-label">Display Order</label>
+                                <input type="number" class="prop-input" value="1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Labels Section -->
+                    <div class="property-section">
+                        <div class="property-section-header" onclick="togglePropertySection(this)">
+                            <div class="property-section-title">
+                                <i class="bi bi-fonts"></i>
+                                Labels & Text
+                            </div>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="property-section-body">
+                            <div class="lang-tabs">
+                                <button class="lang-tab active" onclick="switchLang(this, 'en')">
+                                    English
+                                </button>
+                                <button class="lang-tab" onclick="switchLang(this, 'fr')">
+                                    Français
+                                </button>
+                            </div>
+
+                            <div class="lang-content" id="lang-en">
+                                <div class="prop-group">
+                                    <label class="prop-label">Label</label>
+                                    <input type="text" class="prop-input" value="Personal Information">
+                                </div>
+
+                                <div class="prop-group">
+                                    <label class="prop-label">Description</label>
+                                    <textarea class="prop-input" rows="3" placeholder="Add a description..."></textarea>
+                                </div>
+
+                                <div class="prop-group">
+                                    <label class="prop-label">Help Text</label>
+                                    <textarea class="prop-input" rows="2" placeholder="Helpful guidance..."></textarea>
+                                </div>
+                            </div>
+
+                            <div class="lang-content hidden" id="lang-fr">
+                                <div class="prop-group">
+                                    <label class="prop-label">Étiquette</label>
+                                    <input type="text" class="prop-input" value="Informations personnelles">
+                                </div>
+
+                                <div class="prop-group">
+                                    <label class="prop-label">Description</label>
+                                    <textarea class="prop-input" rows="3" placeholder="Ajouter une description..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Validation Section -->
+                    <div class="property-section">
+                        <div class="property-section-header" onclick="togglePropertySection(this)">
+                            <div class="property-section-title">
+                                <i class="bi bi-shield-check"></i>
+                                Validation
+                            </div>
+                            <i class="bi bi-chevron-right"></i>
+                        </div>
+                        <div class="property-section-body collapsed">
+                            <div class="checkbox-group">
+                                <input type="checkbox" class="checkbox-input" id="required">
+                                <label class="checkbox-label" for="required">Required field</label>
+                            </div>
+
+                            <div class="prop-group">
+                                <label class="prop-label">Min Length</label>
+                                <input type="number" class="prop-input" placeholder="0">
+                            </div>
+
+                            <div class="prop-group">
+                                <label class="prop-label">Max Length</label>
+                                <input type="number" class="prop-input" placeholder="255">
+                            </div>
+
+                            <div class="prop-group">
+                                <label class="prop-label">Pattern (Regex)</label>
+                                <input type="text" class="prop-input" placeholder="^[a-zA-Z]+$">
+                            </div>
+
+                            <div class="prop-group">
+                                <label class="prop-label">Error Message</label>
+                                <input type="text" class="prop-input" placeholder="This field is required">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Conditional Logic Section -->
+                    <div class="property-section">
+                        <div class="property-section-header" onclick="togglePropertySection(this)">
+                            <div class="property-section-title">
+                                <i class="bi bi-diagram-3"></i>
+                                Conditional Logic
+                            </div>
+                            <i class="bi bi-chevron-right"></i>
+                        </div>
+                        <div class="property-section-body collapsed">
+                            <button class="btn btn-outline" style="width: 100%;" onclick="openLogicBuilder()">
+                                <i class="bi bi-plus-circle"></i>
+                                Add Logic Rule
+                            </button>
+                            <div style="margin-top: 12px; font-size: 12px; color: var(--text-secondary); text-align: center;">
+                                No rules defined
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Accessibility Section -->
+                    <div class="property-section">
+                        <div class="property-section-header" onclick="togglePropertySection(this)">
+                            <div class="property-section-title">
+                                <i class="bi bi-universal-access"></i>
+                                Accessibility
+                            </div>
+                            <i class="bi bi-chevron-right"></i>
+                        </div>
+                        <div class="property-section-body collapsed">
+                            <div class="prop-group">
+                                <label class="prop-label">ARIA Label</label>
+                                <input type="text" class="prop-input" placeholder="Descriptive label">
+                            </div>
+
+                            <div class="prop-group">
+                                <label class="prop-label">ARIA Role</label>
+                                <select class="prop-select">
+                                    <option value="">Auto</option>
+                                    <option value="textbox">Textbox</option>
+                                    <option value="combobox">Combobox</option>
+                                    <option value="button">Button</option>
+                                </select>
+                            </div>
+
+                            <div class="checkbox-group">
+                                <input type="checkbox" class="checkbox-input" id="ariaLive">
+                                <label class="checkbox-label" for="ariaLive">ARIA Live Region</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Layout Section -->
+                    <div class="property-section">
+                        <div class="property-section-header" onclick="togglePropertySection(this)">
+                            <div class="property-section-title">
+                                <i class="bi bi-grid"></i>
+                                Layout & Style
+                            </div>
+                            <i class="bi bi-chevron-right"></i>
+                        </div>
+                        <div class="property-section-body collapsed">
+                            <div class="prop-group">
+                                <label class="prop-label">Width</label>
+                                <select class="prop-select">
+                                    <option value="12">Full (12 columns)</option>
+                                    <option value="6">Half (6 columns)</option>
+                                    <option value="4">Third (4 columns)</option>
+                                    <option value="3">Quarter (3 columns)</option>
+                                </select>
+                            </div>
+
+                            <div class="prop-group">
+                                <label class="prop-label">CSS Classes</label>
+                                <input type="text" class="prop-input" placeholder="custom-class another-class">
+                            </div>
+
+                            <div class="checkbox-group">
+                                <input type="checkbox" class="checkbox-input" id="visible" checked>
+                                <label class="checkbox-label" for="visible">Visible</label>
+                            </div>
+
+                            <div class="checkbox-group">
+                                <input type="checkbox" class="checkbox-input" id="readonly">
+                                <label class="checkbox-label" for="readonly">Read-only</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== LOGIC BUILDER MODAL ===== -->
+    <div id="logicModal" class="modal-backdrop hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Conditional Logic Builder</h3>
+                <button class="modal-close" onclick="closeModal('logicModal')">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="rule-card">
+                    <div class="rule-header">
+                        <div class="rule-title">Rule #1</div>
+                        <button class="icon-btn" title="Delete Rule">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+
+                    <div class="condition-row">
+                        <div class="condition-label">IF</div>
+                        <select class="prop-select">
+                            <option>Select Field</option>
+                            <option>Full Name</option>
+                            <option>Email</option>
+                            <option>Department</option>
+                        </select>
+                        <select class="prop-select">
+                            <option>Equals</option>
+                            <option>Not Equals</option>
+                            <option>Contains</option>
+                            <option>Is Empty</option>
+                            <option>Is Not Empty</option>
+                        </select>
+                        <input type="text" class="prop-input" placeholder="Value">
+                        <button class="icon-btn" title="Remove Condition">
+                            <i class="bi bi-x-circle"></i>
+                        </button>
+                    </div>
+
+                    <div class="condition-row">
+                        <div class="condition-label" style="color: var(--success);">THEN</div>
+                        <select class="prop-select">
+                            <option>Show Field</option>
+                            <option>Hide Field</option>
+                            <option>Enable Field</option>
+                            <option>Disable Field</option>
+                            <option>Set Required</option>
+                            <option>Set Optional</option>
+                        </select>
+                        <select class="prop-select" style="grid-column: span 2;">
+                            <option>Select Target Field</option>
+                            <option>Full Name</option>
+                            <option>Email</option>
+                            <option>Department</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn btn-outline">
+                    <i class="bi bi-plus-circle"></i>
+                    Add Another Rule
+                </button>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeModal('logicModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveLogic()">Save Logic</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== JSON EXPORT MODAL ===== -->
+    <div id="jsonModal" class="modal-backdrop hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Export Form Schema (JSON)</h3>
+                <button class="modal-close" onclick="closeModal('jsonModal')">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="json-viewer" id="jsonOutput"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeModal('jsonModal')">Close</button>
+                <button class="btn btn-outline" onclick="copyJSON()">
+                    <i class="bi bi-clipboard"></i>
+                    Copy to Clipboard
+                </button>
+                <button class="btn btn-primary" onclick="downloadJSON()">
+                    <i class="bi bi-download"></i>
+                    Download JSON
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== KEYBOARD SHORTCUTS MODAL ===== -->
+    <div id="shortcutsModal" class="modal-backdrop hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Keyboard Shortcuts</h3>
+                <button class="modal-close" onclick="closeModal('shortcutsModal')">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table style="width: 100%; font-size: 13px;">
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 12px; font-weight: 600;">Action</td>
+                        <td style="padding: 12px; font-weight: 600;">Shortcut</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 12px;">Save</td>
+                        <td style="padding: 12px;"><code>Ctrl + S</code></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 12px;">Undo</td>
+                        <td style="padding: 12px;"><code>Ctrl + Z</code></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 12px;">Redo</td>
+                        <td style="padding: 12px;"><code>Ctrl + Y</code></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 12px;">Delete Field</td>
+                        <td style="padding: 12px;"><code>Delete</code></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 12px;">Duplicate Field</td>
+                        <td style="padding: 12px;"><code>Ctrl + D</code></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 12px;">Preview Form</td>
+                        <td style="padding: 12px;"><code>Ctrl + P</code></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 12px;">Search Fields</td>
+                        <td style="padding: 12px;"><code>Ctrl + F</code></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px;">Toggle Dark Mode</td>
+                        <td style="padding: 12px;"><code>Ctrl + Shift + D</code></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeModal('shortcutsModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TOAST CONTAINER ===== -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // ===== STATE MANAGEMENT =====
+        let currentView = 'designer';
+        let selectedField = null;
+        let currentTheme = 'light';
+        let formSchema = {
+            Id: 1,
+            TitleEn: "Employee Onboarding",
+            TitleFr: "Intégration des employés",
+            Version: 1.0,
+            Fields: []
+        };
+
+        // ===== THEME TOGGLE =====
+        function toggleTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.body.setAttribute('data-theme', currentTheme);
+
+            const icons = [document.getElementById('themeIcon'), document.getElementById('themeIconEditor')];
+            icons.forEach(icon => {
+                if (icon) {
+                    icon.className = currentTheme === 'light' ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
+                }
+            });
+
+            localStorage.setItem('theme', currentTheme);
+            showToast(`Switched to ${currentTheme} mode`);
+        }
+
+        // Load saved theme
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            if (savedTheme === 'dark') {
+                toggleTheme();
+            }
+        });
+
+        // ===== RESIZABLE LEFT SIDEBAR =====
+        const leftSidebar = document.getElementById('leftSidebar');
+        const resizeHandleLeft = document.getElementById('resizeHandleLeft');
+        let isResizingLeft = false;
+        let startXLeft = 0;
+        let startWidthLeft = 0;
+
+        resizeHandleLeft.addEventListener('mousedown', (e) => {
+            isResizingLeft = true;
+            startXLeft = e.clientX;
+            startWidthLeft = leftSidebar.offsetWidth;
+            resizeHandleLeft.classList.add('dragging');
+            document.body.style.cursor = 'ew-resize';
+            document.body.style.userSelect = 'none';
+        });
+
+        // ===== RESIZABLE RIGHT SIDEBAR =====
+        const rightSidebar = document.getElementById('rightSidebar');
+        const resizeHandleRight = document.getElementById('resizeHandleRight');
+        let isResizingRight = false;
+        let startXRight = 0;
+        let startWidthRight = 0;
+
+        resizeHandleRight.addEventListener('mousedown', (e) => {
+            isResizingRight = true;
+            startXRight = e.clientX;
+            startWidthRight = rightSidebar.offsetWidth;
+            resizeHandleRight.classList.add('dragging');
+            document.body.style.cursor = 'ew-resize';
+            document.body.style.userSelect = 'none';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            const minWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-min-width'));
+            const maxWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-max-width'));
+
+            // Handle left sidebar resize
+            if (isResizingLeft) {
+                const diff = e.clientX - startXLeft;
+                const newWidth = startWidthLeft + diff;
+
+                if (newWidth >= minWidth && newWidth <= maxWidth) {
+                    leftSidebar.style.width = newWidth + 'px';
+                }
+            }
+
+            // Handle right sidebar resize
+            if (isResizingRight) {
+                const diff = startXRight - e.clientX; // Note: reversed for right sidebar
+                const newWidth = startWidthRight + diff;
+
+                if (newWidth >= minWidth && newWidth <= maxWidth) {
+                    rightSidebar.style.width = newWidth + 'px';
+                }
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isResizingLeft) {
+                isResizingLeft = false;
+                resizeHandleLeft.classList.remove('dragging');
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+            }
+
+            if (isResizingRight) {
+                isResizingRight = false;
+                resizeHandleRight.classList.remove('dragging');
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+            }
+        });
+
+        // ===== NAVIGATION =====
+        function openEditor() {
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('editor').classList.remove('hidden');
+            document.body.classList.add('view-designer');
+        }
+
+        function closeditor() {
+            document.getElementById('editor').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            document.body.classList.remove('view-designer');
+        }
+
+        function createNewForm() {
+            openEditor();
+            showToast('New form created', 'success');
+        }
+
+        function switchView(view) {
+            currentView = view;
+            document.querySelectorAll('.header-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.closest('.header-tab').classList.add('active');
+
+            if (view === 'designer') {
+                document.getElementById('toolbar').style.display = 'flex';
+                document.body.classList.add('view-designer');
+            } else {
+                document.getElementById('toolbar').style.display = 'none';
+                document.body.classList.remove('view-designer');
+            }
+
+            showToast(`Switched to ${view} view`);
+        }
+
+        function switchDashTab(tab) {
+            document.querySelectorAll('.dashboard-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            document.getElementById('dash-recent').classList.add('hidden');
+            document.getElementById('dash-templates').classList.add('hidden');
+            document.getElementById('dash-all').classList.add('hidden');
+
+            document.getElementById('dash-' + tab).classList.remove('hidden');
+        }
+
+        function useTemplate(templateId) {
+            showToast(`Loading ${templateId} template...`, 'success');
+            setTimeout(() => {
+                openEditor();
+            }, 500);
+        }
+
+        // ===== PROPERTY PANEL =====
+        function togglePropertySection(header) {
+            const body = header.nextElementSibling;
+            const icon = header.querySelector('.bi-chevron-down, .bi-chevron-right');
+
+            if (body.classList.contains('collapsed')) {
+                body.classList.remove('collapsed');
+                icon.classList.remove('bi-chevron-right');
+                icon.classList.add('bi-chevron-down');
+            } else {
+                body.classList.add('collapsed');
+                icon.classList.remove('bi-chevron-down');
+                icon.classList.add('bi-chevron-right');
+            }
+        }
+
+        function switchLang(btn, lang) {
+            document.querySelectorAll('.lang-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            btn.classList.add('active');
+
+            document.querySelectorAll('.lang-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.getElementById(`lang-${lang}`).classList.remove('hidden');
+        }
+
+        // ===== FIELD MANAGEMENT (Simple Click to Add) =====
+        const canvasBody = document.getElementById('canvasBody');
+        const addPrompt = document.querySelector('.add-field-prompt');
+
+        function addField(fieldType) {
+            const fieldId = `field_${Date.now()}`;
+            const fieldHTML = generateFieldHTML(fieldType, fieldId);
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'field-wrapper';
+            wrapper.innerHTML = fieldHTML;
+
+            // Insert before the add prompt
+            if (addPrompt) {
+                canvasBody.insertBefore(wrapper, addPrompt);
+            } else {
+                canvasBody.appendChild(wrapper);
+            }
+
+            showToast(`${fieldType} field added`, 'success');
+        }
+
+        function generateFieldHTML(fieldType, fieldId) {
+            const templates = {
+                'TextBox': `
+                    <div class="field-item" data-field-id="${fieldId}">
+                        <div class="field-actions">
+                            <button class="field-action-btn"><i class="bi bi-gear-fill"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-files"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-arrow-up"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-arrow-down"></i></button>
+                            <button class="field-action-btn danger"><i class="bi bi-trash"></i></button>
+                        </div>
+                        <label class="field-label">Text Input</label>
+                        <input type="text" class="field-input" placeholder="Enter text..." disabled>
+                    </div>
+                `,
+                'TextArea': `
+                    <div class="field-item" data-field-id="${fieldId}">
+                        <div class="field-actions">
+                            <button class="field-action-btn"><i class="bi bi-gear-fill"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-files"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-arrow-up"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-arrow-down"></i></button>
+                            <button class="field-action-btn danger"><i class="bi bi-trash"></i></button>
+                        </div>
+                        <label class="field-label">Text Area</label>
+                        <textarea class="field-input" rows="4" placeholder="Enter text..." disabled></textarea>
+                    </div>
+                `,
+                'Number': `
+                    <div class="field-item" data-field-id="${fieldId}">
+                        <div class="field-actions">
+                            <button class="field-action-btn"><i class="bi bi-gear-fill"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-files"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-arrow-up"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-arrow-down"></i></button>
+                            <button class="field-action-btn danger"><i class="bi bi-trash"></i></button>
+                        </div>
+                        <label class="field-label">Number</label>
+                        <input type="number" class="field-input" placeholder="0" disabled>
+                    </div>
+                `,
+                'Email': `
+                    <div class="field-item" data-field-id="${fieldId}">
+                        <div class="field-actions">
+                            <button class="field-action-btn"><i class="bi bi-gear-fill"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-files"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-arrow-up"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-arrow-down"></i></button>
+                            <button class="field-action-btn danger"><i class="bi bi-trash"></i></button>
+                        </div>
+                        <label class="field-label">Email</label>
+                        <input type="email" class="field-input" placeholder="email@example.com" disabled>
+                    </div>
+                `,
+                'DropDown': `
+                    <div class="field-item" data-field-id="${fieldId}">
+                        <div class="field-actions">
+                            <button class="field-action-btn"><i class="bi bi-gear-fill"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-files"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-arrow-up"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-arrow-down"></i></button>
+                            <button class="field-action-btn danger"><i class="bi bi-trash"></i></button>
+                        </div>
+                        <label class="field-label">Dropdown</label>
+                        <select class="field-input" disabled>
+                            <option>Select an option...</option>
+                        </select>
+                    </div>
+                `,
+                'RadioGroup': `
+                    <div class="field-item" data-field-id="${fieldId}">
+                        <div class="field-actions">
+                            <button class="field-action-btn"><i class="bi bi-gear-fill"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-files"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-arrow-up"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-arrow-down"></i></button>
+                            <button class="field-action-btn danger"><i class="bi bi-trash"></i></button>
+                        </div>
+                        <label class="field-label">Radio Group</label>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <input type="radio" name="${fieldId}" disabled>
+                                <span style="font-size: 14px; color: var(--text-primary);">Option 1</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <input type="radio" name="${fieldId}" disabled>
+                                <span style="font-size: 14px; color: var(--text-primary);">Option 2</span>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                'CheckboxList': `
+                    <div class="field-item" data-field-id="${fieldId}">
+                        <div class="field-actions">
+                            <button class="field-action-btn"><i class="bi bi-gear-fill"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-files"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-arrow-up"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-arrow-down"></i></button>
+                            <button class="field-action-btn danger"><i class="bi bi-trash"></i></button>
+                        </div>
+                        <label class="field-label">Checkboxes</label>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" disabled>
+                                <span style="font-size: 14px; color: var(--text-primary);">Option 1</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" disabled>
+                                <span style="font-size: 14px; color: var(--text-primary);">Option 2</span>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                'DatePicker': `
+                    <div class="field-item" data-field-id="${fieldId}">
+                        <div class="field-actions">
+                            <button class="field-action-btn"><i class="bi bi-gear-fill"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-files"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-arrow-up"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-arrow-down"></i></button>
+                            <button class="field-action-btn danger"><i class="bi bi-trash"></i></button>
+                        </div>
+                        <label class="field-label">Date Picker</label>
+                        <input type="date" class="field-input" disabled>
+                    </div>
+                `,
+                'TimePicker': `
+                    <div class="field-item" data-field-id="${fieldId}">
+                        <div class="field-actions">
+                            <button class="field-action-btn"><i class="bi bi-gear-fill"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-files"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-arrow-up"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-arrow-down"></i></button>
+                            <button class="field-action-btn danger"><i class="bi bi-trash"></i></button>
+                        </div>
+                        <label class="field-label">Time Picker</label>
+                        <input type="time" class="field-input" disabled>
+                    </div>
+                `,
+                'FileUpload': `
+                    <div class="field-item" data-field-id="${fieldId}">
+                        <div class="field-actions">
+                            <button class="field-action-btn"><i class="bi bi-gear-fill"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-files"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-arrow-up"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-arrow-down"></i></button>
+                            <button class="field-action-btn danger"><i class="bi bi-trash"></i></button>
+                        </div>
+                        <label class="field-label">File Upload</label>
+                        <input type="file" class="field-input" disabled>
+                    </div>
+                `,
+                'Section': `
+                    <div class="field-section" data-field-id="${fieldId}">
+                        <div class="field-actions">
+                            <button class="field-action-btn"><i class="bi bi-gear-fill"></i></button>
+                            <button class="field-action-btn"><i class="bi bi-files"></i></button>
+                            <button class="field-action-btn danger"><i class="bi bi-trash"></i></button>
+                        </div>
+                        <div class="section-title">New Section</div>
+                    </div>
+                `,
+                'Divider': `
+                    <div style="margin: 24px 0; border-top: 2px solid var(--border-color);" data-field-id="${fieldId}"></div>
+                `
+            };
+
+            return templates[fieldType] || templates['TextBox'];
+        }
+
+        function duplicateField() {
+            showToast('Field duplicated', 'success');
+        }
+
+        function deleteField() {
+            showToast('Field deleted');
+        }
+
+        function moveFieldUp() {
+            showToast('Field moved up');
+        }
+
+        function moveFieldDown() {
+            showToast('Field moved down');
+        }
+
+        function undo() {
+            showToast('Undo');
+        }
+
+        function redo() {
+            showToast('Redo');
+        }
+
+        // ===== MODALS =====
+        function openLogicBuilder() {
+            document.getElementById('logicModal').classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        function saveLogic() {
+            closeModal('logicModal');
+            showToast('Logic rules saved', 'success');
+        }
+
+        function showShortcuts() {
+            document.getElementById('shortcutsModal').classList.remove('hidden');
+        }
+
+        // ===== JSON EXPORT/IMPORT =====
+        function exportJSON() {
+            const schema = {
+                Id: 1,
+                TitleEn: "Employee Onboarding",
+                TitleFr: "Intégration des employés",
+                Version: 1.0,
+                DateCreated: new Date().toISOString(),
+                Fields: [
+                    {
+                        Id: "personalInfo",
+                        FieldType: "Section",
+                        LabelEn: "Personal Information",
+                        LabelFr: "Informations personnelles",
+                        Order: 1
+                    },
+                    {
+                        Id: "fullName",
+                        FieldType: "TextBox",
+                        LabelEn: "Full Name",
+                        LabelFr: "Nom complet",
+                        ParentId: null,
+                        Order: 2,
+                        Validation: {
+                            IsRequired: true,
+                            MaxLength: 100
+                        }
+                    },
+                    {
+                        Id: "email",
+                        FieldType: "TextBox",
+                        LabelEn: "Email Address",
+                        LabelFr: "Adresse courriel",
+                        Order: 3,
+                        Validation: {
+                            IsRequired: true,
+                            Pattern: "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+                        }
+                    }
+                ]
+            };
+
+            const jsonStr = JSON.stringify(schema, null, 2);
+            document.getElementById('jsonOutput').textContent = jsonStr;
+            document.getElementById('jsonModal').classList.remove('hidden');
+        }
+
+        function importJSON() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const schema = JSON.parse(event.target.result);
+                        formSchema = schema;
+                        showToast('Schema imported successfully', 'success');
+                    } catch (error) {
+                        showToast('Invalid JSON file', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function copyJSON() {
+            const jsonText = document.getElementById('jsonOutput').textContent;
+            navigator.clipboard.writeText(jsonText);
+            showToast('JSON copied to clipboard', 'success');
+        }
+
+        function downloadJSON() {
+            const jsonText = document.getElementById('jsonOutput').textContent;
+            const blob = new Blob([jsonText], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'form-schema.json';
+            a.click();
+            showToast('JSON downloaded', 'success');
+        }
+
+        // ===== TOAST NOTIFICATIONS =====
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type === 'success' ? 'toast-success' : type === 'error' ? 'toast-error' : ''}`;
+
+            const icon = type === 'success' ? 'check-circle-fill' :
+                        type === 'error' ? 'x-circle-fill' : 'info-circle-fill';
+
+            toast.innerHTML = `
+                <i class="bi bi-${icon}"></i>
+                <span>${message}</span>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // ===== KEYBOARD SHORTCUTS =====
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 's':
+                        e.preventDefault();
+                        showToast('Form saved', 'success');
+                        break;
+                    case 'z':
+                        e.preventDefault();
+                        undo();
+                        break;
+                    case 'y':
+                        e.preventDefault();
+                        redo();
+                        break;
+                    case 'd':
+                        e.preventDefault();
+                        duplicateField();
+                        break;
+                    case 'p':
+                        e.preventDefault();
+                        switchView('preview');
+                        break;
+                    case 'D':
+                        if (e.shiftKey) {
+                            e.preventDefault();
+                            toggleTheme();
+                        }
+                        break;
+                }
+            }
+
+            if (e.key === 'Delete' && selectedField) {
+                deleteField();
+            }
+        });
+
+        // ===== FIELD SELECTION =====
+        document.addEventListener('click', (e) => {
+            const fieldItem = e.target.closest('.field-item, .field-section');
+            if (fieldItem) {
+                document.querySelectorAll('.field-item, .field-section').forEach(item => {
+                    item.classList.remove('selected');
+                });
+                fieldItem.classList.add('selected');
+                selectedField = fieldItem.dataset.fieldId;
+            }
+        });
+
+        // ===== MODAL CLICK OUTSIDE TO CLOSE =====
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+            backdrop.addEventListener('click', (e) => {
+                if (e.target === backdrop) {
+                    backdrop.classList.add('hidden');
+                }
+            });
+        });
+
+        // ===== INITIALIZATION =====
+        console.log('DynamicForms Editor V5 Initialized');
+        console.log('Features: Even Lighter Dark Mode, Resizable Left & Right Sidebars');
+    </script>
+</body>
+</html>

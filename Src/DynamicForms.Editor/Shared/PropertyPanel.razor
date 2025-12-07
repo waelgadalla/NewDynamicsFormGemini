@@ -1,0 +1,142 @@
+@using DynamicForms.Core.V4.Schemas
+@using DynamicForms.Editor.Services
+@using DynamicForms.Editor.Shared.Editors
+@inject EditorStateService EditorState
+@implements IDisposable
+
+<div class="property-panel">
+    @if (EditorState.SelectedField != null)
+    {
+        <div class="property-group">
+            <label class="form-label">Field ID</label>
+            <input type="text" class="form-control form-control-sm" value="@EditorState.SelectedField.Id" disabled readonly />
+            <div class="form-text text-muted">ID cannot be changed once created.</div>
+        </div>
+
+        <div class="property-group">
+            <label class="form-label">Label (EN)</label>
+            <input type="text" class="form-control form-control-sm" value="@EditorState.SelectedField.LabelEn" @onchange="@(e => UpdateLabel(e.Value?.ToString()))" />
+        </div>
+
+        <div class="property-group">
+            <label class="form-label">Label (FR)</label>
+            <input type="text" class="form-control form-control-sm" value="@EditorState.SelectedField.LabelFr" @onchange="@(e => UpdateLabelFr(e.Value?.ToString()))" />
+        </div>
+
+         <div class="property-group">
+            <label class="form-label">Description (EN)</label>
+            <textarea class="form-control form-control-sm" value="@EditorState.SelectedField.DescriptionEn" @onchange="@(e => UpdateDesc(e.Value?.ToString()))"></textarea>
+        </div>
+
+        <div class="property-group">
+            <label class="form-label">Placeholder (EN)</label>
+            <input type="text" class="form-control form-control-sm" value="@EditorState.SelectedField.PlaceholderEn" @onchange="@(e => UpdatePlaceholder(e.Value?.ToString()))" />
+        </div>
+
+        <div class="property-separator"></div>
+
+        <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="reqCheck" checked="@(EditorState.SelectedField.Validation?.IsRequired == true)" @onchange="ToggleRequired">
+            <label class="form-check-label" for="reqCheck">Required</label>
+        </div>
+        
+        <ValidationEditor Validation="@(EditorState.SelectedField.Validation ?? new FieldValidationConfig())" OnValidationChanged="OnValidationChanged" />
+
+        <div class="form-check mb-2 mt-3">
+            <input class="form-check-input" type="checkbox" id="visCheck" checked="@EditorState.SelectedField.IsVisible" @onchange="ToggleVisible">
+            <label class="form-check-label" for="visCheck">Visible by default</label>
+        </div>
+        
+        <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="readCheck" checked="@EditorState.SelectedField.IsReadOnly" @onchange="ToggleReadOnly">
+            <label class="form-check-label" for="readCheck">Read Only</label>
+        </div>
+
+        @if (EditorState.SelectedField.FieldType == "DataGrid" && EditorState.SelectedField.TypeConfig is DataGridConfig gridConfig)
+        {
+             <div class="property-separator"></div>
+             <h6>Data Grid Settings</h6>
+             <ColumnsEditor Config="@gridConfig" OnConfigChanged="OnDataGridConfigChanged" />
+        }
+    }
+    else
+    {
+        <div class="text-center text-muted mt-5">
+            <i class="bi bi-arrow-left-circle display-6"></i>
+            <p class="mt-2">Select a field on the canvas to edit properties.</p>
+        </div>
+    }
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        EditorState.OnSelectionChanged += StateHasChanged;
+    }
+
+    public void Dispose() 
+    {
+        EditorState.OnSelectionChanged -= StateHasChanged;
+    }
+
+    private void UpdateLabel(string? val)
+    {
+        if (EditorState.SelectedField == null) return;
+        EditorState.UpdateField(EditorState.SelectedField with { LabelEn = val });
+    }
+
+     private void UpdateLabelFr(string? val)
+    {
+        if (EditorState.SelectedField == null) return;
+        EditorState.UpdateField(EditorState.SelectedField with { LabelFr = val });
+    }
+
+    private void UpdateDesc(string? val)
+    {
+        if (EditorState.SelectedField == null) return;
+        EditorState.UpdateField(EditorState.SelectedField with { DescriptionEn = val });
+    }
+
+    private void UpdatePlaceholder(string? val)
+    {
+        if (EditorState.SelectedField == null) return;
+        EditorState.UpdateField(EditorState.SelectedField with { PlaceholderEn = val });
+    }
+
+    private void ToggleRequired(ChangeEventArgs e)
+    {
+        if (EditorState.SelectedField == null) return;
+        bool isReq = (bool)(e.Value ?? false);
+        
+        var validation = EditorState.SelectedField.Validation ?? new FieldValidationConfig();
+        validation = validation with { IsRequired = isReq };
+        
+        EditorState.UpdateField(EditorState.SelectedField with { Validation = validation });
+    }
+    
+    private void OnValidationChanged(FieldValidationConfig newValidation)
+    {
+         if (EditorState.SelectedField == null) return;
+         EditorState.UpdateField(EditorState.SelectedField with { Validation = newValidation });
+    }
+
+     private void ToggleVisible(ChangeEventArgs e)
+    {
+        if (EditorState.SelectedField == null) return;
+        bool val = (bool)(e.Value ?? true);
+        EditorState.UpdateField(EditorState.SelectedField with { IsVisible = val });
+    }
+
+     private void ToggleReadOnly(ChangeEventArgs e)
+    {
+        if (EditorState.SelectedField == null) return;
+        bool val = (bool)(e.Value ?? false);
+        EditorState.UpdateField(EditorState.SelectedField with { IsReadOnly = val });
+    }
+
+    private void OnDataGridConfigChanged(DataGridConfig newConfig)
+    {
+        if (EditorState.SelectedField == null) return;
+        EditorState.UpdateField(EditorState.SelectedField with { TypeConfig = newConfig });
+    }
+}

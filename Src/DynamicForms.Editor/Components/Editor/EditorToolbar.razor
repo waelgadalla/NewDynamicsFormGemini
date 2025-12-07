@@ -1,0 +1,25 @@
+@using DynamicForms.Editor.Components.Shared
+
+<div class="editor-toolbar">
+    <div class="toolbar-group">
+        <IconButton Icon="bi-arrow-counterclockwise" Title="Undo" IsSmall="true" Disabled="true" />
+        <IconButton Icon="bi-arrow-clockwise" Title="Redo" IsSmall="true" Disabled="true" />
+    </div>
+    <div class="toolbar-group">
+        <IconButton Icon="bi-files" Title="Duplicate" IsSmall="true" />
+        <IconButton Icon="bi-trash" Title="Delete" IsSmall="true" />
+    </div>
+    <div class="toolbar-group">
+        <IconButton Icon="bi-arrow-up" Title="Move Up" IsSmall="true" Disabled="true" />
+        <IconButton Icon="bi-arrow-down" Title="Move Down" IsSmall="true" Disabled="true" />
+    </div>
+    <div style="margin-left: auto; display: flex; align-items: center; gap: 10px; color: var(--text-muted); font-size: 12px;">
+        <span><i class="bi bi-ui-checks"></i> 6 fields</span>
+        <span>•</span>
+        <span>Auto-saved</span>
+    </div>
+</div>
+
+@code {
+    // Logic will be added in Phase 6 for Undo/Redo, etc.
+}

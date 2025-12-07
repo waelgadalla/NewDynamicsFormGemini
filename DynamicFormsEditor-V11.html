@@ -1,0 +1,2185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynamicForms Visual Editor V11</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-dark: #4F46E5;
+            --primary-light: #EEF2FF;
+            --primary-muted: #A5B4FC;
+            --success: #10B981;
+            --success-light: #D1FAE5;
+            --danger: #EF4444;
+            --danger-light: #FEE2E2;
+            --warning: #F59E0B;
+            --warning-light: #FEF3C7;
+            --info: #3B82F6;
+            --info-light: #DBEAFE;
+            --sidebar-width: 320px;
+            --sidebar-min-width: 280px;
+            --sidebar-max-width: 450px;
+            --header-height: 56px;
+            --toolbar-height: 48px;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8FAFC;
+            --bg-tertiary: #F1F5F9;
+            --bg-elevated: #FFFFFF;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --text-muted: #94A3B8;
+            --border-color: #E2E8F0;
+            --border-strong: #CBD5E1;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 12px 32px rgba(0,0,0,0.12);
+        }
+
+        [data-theme="dark"] {
+            --primary: #818CF8;
+            --primary-dark: #6366F1;
+            --primary-light: rgba(99, 102, 241, 0.15);
+            --primary-muted: #6366F1;
+            --bg-primary: #1E293B;
+            --bg-secondary: #0F172A;
+            --bg-tertiary: #334155;
+            --bg-elevated: #1E293B;
+            --text-primary: #F1F5F9;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            --border-color: #334155;
+            --border-strong: #475569;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+            --shadow-lg: 0 12px 32px rgba(0,0,0,0.4);
+            --success-light: rgba(16, 185, 129, 0.15);
+            --danger-light: rgba(239, 68, 68, 0.15);
+            --warning-light: rgba(245, 158, 11, 0.15);
+            --info-light: rgba(59, 130, 246, 0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-secondary);
+            overflow: hidden;
+            height: 100vh;
+            color: var(--text-primary);
+            transition: background-color 0.2s, color 0.2s;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        /* ===== DASHBOARD STYLES ===== */
+        .dashboard { height: 100vh; display: flex; flex-direction: column; }
+        .dashboard-header {
+            height: var(--header-height);
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+        }
+        .dashboard-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .dashboard-logo i { color: var(--primary); font-size: 24px; }
+        .dashboard-actions { display: flex; gap: 8px; align-items: center; }
+
+        .dashboard-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px;
+        }
+
+        .dashboard-section { margin-bottom: 32px; }
+        .dashboard-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .dashboard-section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .forms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+        }
+
+        .form-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .form-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        .form-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .form-card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 20px;
+        }
+        .form-card-menu {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .form-card-menu:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+        .form-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        .form-card-description {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .form-card-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .form-card-meta span { display: flex; align-items: center; gap: 4px; }
+
+        .form-card-new {
+            border: 2px dashed var(--border-color);
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 180px;
+            color: var(--text-muted);
+        }
+        .form-card-new:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+        .form-card-new i { font-size: 32px; margin-bottom: 8px; }
+        .form-card-new span { font-size: 14px; font-weight: 500; }
+
+        /* Templates Section */
+        .templates-row {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+        .template-card {
+            flex-shrink: 0;
+            width: 200px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .template-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+        .template-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .template-card:hover .template-icon { background: var(--primary-light); color: var(--primary); }
+        .template-name { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+        .template-desc { font-size: 11px; color: var(--text-muted); }
+
+        /* ===== HEADER ===== */
+        .app-header {
+            height: var(--header-height);
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            position: relative;
+            z-index: 100;
+        }
+        .logo-section { display: flex; align-items: center; gap: 12px; }
+        .btn-back {
+            width: 32px; height: 32px; border: none; background: transparent;
+            color: var(--text-secondary); border-radius: 6px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+        }
+        .btn-back:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+        .form-title-input {
+            border: 1px solid transparent; font-size: 15px; font-weight: 600;
+            color: var(--text-primary); padding: 6px 10px; border-radius: 6px;
+            background: transparent; min-width: 200px;
+        }
+        .form-title-input:hover { background: var(--bg-tertiary); }
+        .form-title-input:focus { outline: none; border-color: var(--primary); background: var(--bg-primary); }
+
+        .view-switcher {
+            background: var(--bg-tertiary); padding: 3px; border-radius: 8px;
+            display: flex; position: absolute; left: 50%; transform: translateX(-50%);
+        }
+        .view-btn {
+            border: none; background: transparent; padding: 6px 14px; font-size: 13px;
+            font-weight: 500; color: var(--text-secondary); border-radius: 6px;
+            cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.15s;
+        }
+        .view-btn:hover { color: var(--text-primary); }
+        .view-btn.active { background: var(--bg-primary); color: var(--primary); box-shadow: var(--shadow-sm); }
+        .header-actions { display: flex; gap: 8px; align-items: center; }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            padding: 7px 14px; border-radius: 6px; font-weight: 500; font-size: 13px;
+            border: none; cursor: pointer; transition: all 0.15s;
+            display: inline-flex; align-items: center; gap: 6px; font-family: inherit;
+        }
+        .btn-ghost { background: transparent; color: var(--text-secondary); }
+        .btn-ghost:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+        .btn-outline { background: var(--bg-primary); border: 1px solid var(--border-color); color: var(--text-primary); }
+        .btn-outline:hover { border-color: var(--border-strong); background: var(--bg-tertiary); }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-sm { padding: 5px 10px; font-size: 12px; }
+        .btn-xs { padding: 3px 8px; font-size: 11px; }
+        .btn-icon { width: 32px; height: 32px; padding: 0; justify-content: center; }
+        .btn-icon-sm { width: 28px; height: 28px; padding: 0; justify-content: center; }
+
+        /* ===== TOOLBAR ===== */
+        .editor-toolbar {
+            height: var(--toolbar-height); background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; padding: 0 16px; gap: 8px;
+        }
+        .toolbar-group { display: flex; gap: 2px; padding-right: 12px; border-right: 1px solid var(--border-color); }
+        .toolbar-group:last-child { border-right: none; padding-right: 0; }
+        .toolbar-btn {
+            width: 32px; height: 32px; border: none; background: transparent;
+            border-radius: 6px; color: var(--text-secondary); cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+        }
+        .toolbar-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+        .toolbar-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .toolbar-btn.active { background: var(--primary-light); color: var(--primary); }
+
+        /* ===== LAYOUT ===== */
+        .app-body { display: flex; height: calc(100vh - var(--header-height) - var(--toolbar-height)); }
+
+        .sidebar-left, .sidebar-right {
+            width: var(--sidebar-width); min-width: var(--sidebar-min-width);
+            max-width: var(--sidebar-max-width); background: var(--bg-primary);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        .sidebar-left { border-right: 1px solid var(--border-color); }
+        .sidebar-right { border-left: 1px solid var(--border-color); }
+
+        /* Left Sidebar Tabs */
+        .left-sidebar-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            flex-shrink: 0;
+        }
+        .ls-tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        .ls-tab i { font-size: 16px; }
+        .ls-tab:hover { color: var(--text-primary); background: var(--bg-tertiary); }
+        .ls-tab.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--bg-primary); }
+
+        .sidebar-header { padding: 12px; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
+        .sidebar-title {
+            font-size: 11px; font-weight: 700; text-transform: uppercase;
+            color: var(--text-muted); letter-spacing: 0.5px; margin-bottom: 8px;
+        }
+        .sidebar-content { flex: 1; overflow-y: auto; padding: 12px; }
+
+        .search-wrapper { position: relative; }
+        .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 14px; }
+        .search-box {
+            width: 100%; padding: 8px 10px 8px 32px; border: 1px solid var(--border-color);
+            border-radius: 6px; font-size: 13px; background: var(--bg-secondary);
+            color: var(--text-primary); font-family: inherit;
+        }
+        .search-box::placeholder { color: var(--text-muted); }
+        .search-box:focus { outline: none; border-color: var(--primary); background: var(--bg-primary); }
+
+        .tab-pane { display: none; height: 100%; overflow-y: auto; }
+        .tab-pane.active { display: block; }
+
+        .component-category { margin-bottom: 20px; }
+        .category-title {
+            font-size: 10px; font-weight: 700; text-transform: uppercase;
+            color: var(--text-muted); letter-spacing: 0.5px; margin-bottom: 8px; padding-left: 4px;
+        }
+        .component-item {
+            padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 6px;
+            margin-bottom: 4px; cursor: pointer; transition: all 0.15s;
+            background: var(--bg-primary); display: flex; align-items: center; gap: 10px;
+        }
+        .component-item:hover { border-color: var(--primary-muted); background: var(--primary-light); }
+        .component-icon {
+            width: 28px; height: 28px; border-radius: 6px; background: var(--bg-tertiary);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-secondary); flex-shrink: 0; font-size: 14px;
+        }
+        .component-item:hover .component-icon { background: var(--primary); color: white; }
+        .component-name { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+
+        /* Outline Tree */
+        .outline-tree { padding: 8px 0; }
+        .tree-node {
+            padding: 6px 10px; border-radius: 4px; font-size: 13px;
+            display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 2px;
+        }
+        .tree-node:hover { background: var(--bg-secondary); }
+        .tree-node.selected { background: var(--primary-light); color: var(--primary); font-weight: 500; }
+        .tree-node-icon { color: var(--text-muted); width: 16px; text-align: center; font-size: 12px; }
+        .tree-node.selected .tree-node-icon { color: var(--primary); }
+        .tree-indent { width: 16px; }
+        .tree-node-actions {
+            margin-left: auto;
+            display: none;
+            gap: 2px;
+        }
+        .tree-node:hover .tree-node-actions { display: flex; }
+        .tree-action-btn {
+            width: 22px; height: 22px; border: none; background: transparent;
+            color: var(--text-muted); border-radius: 4px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 11px;
+        }
+        .tree-action-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+
+        /* Validation List */
+        .validation-list { padding: 8px 0; }
+        .validation-item {
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .validation-item:hover { background: var(--bg-secondary); }
+        .validation-item.error { background: var(--danger-light); border: 1px solid transparent; }
+        .validation-item.error:hover { border-color: var(--danger); }
+        .validation-item.warning { background: var(--warning-light); }
+        .validation-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+        .validation-item.error .validation-icon { color: var(--danger); }
+        .validation-item.warning .validation-icon { color: var(--warning); }
+        .validation-title { font-size: 12px; font-weight: 600; margin-bottom: 2px; }
+        .validation-item.error .validation-title { color: var(--danger); }
+        .validation-item.warning .validation-title { color: var(--warning); }
+        .validation-desc { font-size: 11px; color: var(--text-secondary); }
+
+        .crossfield-summary {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+        /* ===== PROPERTY SECTIONS (Right Sidebar) ===== */
+        .property-section { border-bottom: 1px solid var(--border-color); }
+        .property-section-header {
+            padding: 12px; background: var(--bg-secondary); cursor: pointer;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .property-section-header:hover { background: var(--bg-tertiary); }
+        .property-section-title { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .property-section-title i { color: var(--text-muted); }
+        .property-section-body { padding: 12px; background: var(--bg-primary); }
+        .property-section-body.collapsed { display: none; }
+
+        .prop-group { margin-bottom: 12px; }
+        .prop-group:last-child { margin-bottom: 0; }
+        .prop-label {
+            display: block; font-size: 11px; font-weight: 600; color: var(--text-secondary);
+            margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.3px;
+        }
+        .prop-input, .prop-select, .prop-textarea {
+            width: 100%; padding: 8px 10px; border: 1px solid var(--border-color);
+            border-radius: 6px; font-size: 13px; background: var(--bg-primary);
+            color: var(--text-primary); font-family: inherit; transition: border-color 0.15s;
+        }
+        .prop-input:focus, .prop-select:focus, .prop-textarea:focus { outline: none; border-color: var(--primary); }
+        .prop-input:disabled, .prop-select:disabled { background: var(--bg-tertiary); color: var(--text-muted); }
+        .prop-textarea { resize: vertical; min-height: 60px; }
+        .prop-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+        .checkbox-group {
+            display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+            border-radius: 6px; cursor: pointer; transition: background 0.15s;
+        }
+        .checkbox-group:hover { background: var(--bg-secondary); }
+        .checkbox-input { width: 16px; height: 16px; cursor: pointer; accent-color: var(--primary); }
+        .checkbox-label { font-size: 13px; cursor: pointer; }
+
+        .lang-tabs { display: flex; gap: 2px; margin-bottom: 8px; background: var(--bg-tertiary); padding: 2px; border-radius: 6px; }
+        .lang-tab {
+            flex: 1; padding: 5px 8px; border: none; background: transparent;
+            border-radius: 4px; font-size: 11px; font-weight: 600;
+            color: var(--text-secondary); cursor: pointer; transition: all 0.15s;
+        }
+        .lang-tab.active { background: var(--bg-primary); color: var(--primary); box-shadow: var(--shadow-sm); }
+
+        /* ===== CANVAS ===== */
+        .canvas-container { flex: 1; overflow-y: auto; background: var(--bg-secondary); position: relative; }
+        .canvas {
+            max-width: 800px; margin: 32px auto; background: var(--bg-primary);
+            border-radius: 8px; box-shadow: var(--shadow-md); min-height: calc(100vh - 250px);
+        }
+        .canvas-header { padding: 32px 40px 20px; border-bottom: 1px solid var(--border-color); }
+        .canvas-title { font-size: 24px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+        .canvas-description { font-size: 14px; color: var(--text-secondary); }
+        .canvas-body { padding: 24px 40px 40px; }
+
+        .field-wrapper { margin-bottom: 16px; }
+        .field-item {
+            padding: 16px; border: 2px solid transparent; border-radius: 8px;
+            transition: all 0.15s; position: relative; cursor: pointer;
+        }
+        .field-item:hover { border-color: var(--border-color); background: var(--bg-secondary); }
+        .field-item.selected { border-color: var(--primary); background: var(--primary-light); }
+
+        .field-actions {
+            position: absolute; top: -12px; right: 8px; display: none; gap: 2px;
+            background: var(--bg-primary); padding: 4px; border-radius: 6px;
+            box-shadow: var(--shadow-md); border: 1px solid var(--border-color);
+        }
+        .field-item:hover .field-actions, .field-item.selected .field-actions { display: flex; }
+
+        .field-action-btn {
+            width: 26px; height: 26px; border: none; background: transparent;
+            color: var(--text-secondary); border-radius: 4px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 12px; transition: all 0.15s;
+        }
+        .field-action-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+        .field-action-btn.danger:hover { background: var(--danger); color: white; }
+
+        .field-label { display: block; font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; }
+        .field-required { color: var(--danger); }
+        .field-input-preview {
+            width: 100%; padding: 10px 12px; border: 1px solid var(--border-color);
+            border-radius: 6px; font-size: 14px; background: var(--bg-primary); color: var(--text-muted);
+        }
+
+        .field-section {
+            padding: 20px; background: var(--bg-secondary); border-radius: 8px;
+            margin-bottom: 16px; border: 2px solid transparent; position: relative;
+        }
+        .field-section:hover { border-color: var(--border-color); }
+        .field-section.selected { border-color: var(--primary); background: var(--primary-light); }
+        .field-section .field-actions { top: 8px; right: 8px; }
+        .field-section:hover .field-actions, .field-section.selected .field-actions { display: flex; }
+        .section-title {
+            font-size: 16px; font-weight: 700; color: var(--text-primary);
+            margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid var(--border-color);
+        }
+
+        /* ===== BADGES ===== */
+        .badge { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+        .badge-draft { background: var(--bg-tertiary); color: var(--text-secondary); }
+        .badge-published { background: var(--success-light); color: var(--success); }
+        .badge-primary { background: var(--primary-light); color: var(--primary); }
+        .badge-success { background: var(--success-light); color: var(--success); }
+        .badge-danger { background: var(--danger-light); color: var(--danger); }
+        .badge-warning { background: var(--warning-light); color: var(--warning); }
+        .badge-info { background: var(--info-light); color: var(--info); }
+        .badge-count {
+            min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px;
+            font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;
+        }
+
+        /* ===== MODALS ===== */
+        .modal-backdrop {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 2000;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px; backdrop-filter: blur(2px);
+        }
+        .modal {
+            background: var(--bg-primary); border-radius: 12px; max-width: 720px;
+            width: 100%; max-height: 85vh; overflow: hidden;
+            display: flex; flex-direction: column; box-shadow: var(--shadow-lg);
+        }
+        .modal-lg { max-width: 900px; }
+        .modal-sm { max-width: 480px; }
+        .modal-header {
+            padding: 16px 20px; border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+        }
+        .modal-title { font-size: 16px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
+        .modal-close {
+            width: 28px; height: 28px; border: none; background: transparent;
+            border-radius: 6px; color: var(--text-secondary); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .modal-close:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+        .modal-body { flex: 1; overflow-y: auto; padding: 20px; }
+        .modal-footer {
+            padding: 12px 20px; border-top: 1px solid var(--border-color);
+            display: flex; gap: 8px; justify-content: flex-end; flex-shrink: 0;
+        }
+
+        /* ===== OPTIONS EDITOR ===== */
+        .options-editor { border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; }
+        .options-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 12px; background: var(--bg-secondary); border-bottom: 1px solid var(--border-color);
+        }
+        .options-source-toggle { display: flex; gap: 2px; background: var(--bg-tertiary); padding: 2px; border-radius: 6px; }
+        .source-btn {
+            padding: 5px 12px; border: none; background: transparent; border-radius: 4px;
+            font-size: 12px; font-weight: 500; color: var(--text-secondary); cursor: pointer;
+        }
+        .source-btn.active { background: var(--bg-primary); color: var(--primary); box-shadow: var(--shadow-sm); }
+        .options-list { max-height: 240px; overflow-y: auto; }
+        .option-item {
+            display: grid; grid-template-columns: 24px 1fr 1fr 1fr 32px; gap: 8px;
+            padding: 8px 12px; border-bottom: 1px solid var(--border-color); align-items: center;
+        }
+        .option-item:last-child { border-bottom: none; }
+        .option-item:hover { background: var(--bg-secondary); }
+        .option-drag { color: var(--text-muted); cursor: grab; }
+        .option-input {
+            padding: 6px 8px; border: 1px solid var(--border-color); border-radius: 4px;
+            font-size: 12px; background: var(--bg-primary); color: var(--text-primary);
+        }
+        .option-input:focus { outline: none; border-color: var(--primary); }
+        .option-delete {
+            width: 24px; height: 24px; border: none; background: transparent;
+            color: var(--text-muted); border-radius: 4px; cursor: pointer;
+        }
+        .option-delete:hover { background: var(--danger-light); color: var(--danger); }
+        .options-footer { padding: 10px 12px; background: var(--bg-secondary); border-top: 1px solid var(--border-color); }
+        .codeset-picker { padding: 12px; }
+        .codeset-select-group { display: flex; gap: 8px; align-items: center; }
+        .codeset-preview { margin-top: 12px; padding: 10px; background: var(--bg-tertiary); border-radius: 6px; font-size: 12px; }
+        .codeset-preview-title { font-weight: 600; margin-bottom: 6px; color: var(--text-secondary); }
+        .codeset-preview-items { display: flex; flex-wrap: wrap; gap: 4px; }
+        .codeset-preview-item { padding: 2px 8px; background: var(--bg-primary); border-radius: 4px; font-size: 11px; color: var(--text-primary); }
+
+        /* ===== TYPE CONFIG EDITORS ===== */
+        .typeconfig-editor { border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; margin-top: 8px; }
+        .typeconfig-header {
+            padding: 10px 12px; background: var(--bg-secondary); border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .typeconfig-header i { color: var(--primary); }
+        .typeconfig-title { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+        .typeconfig-body { padding: 12px; }
+        .datagrid-columns { border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; }
+        .datagrid-column-header {
+            display: grid; grid-template-columns: 1fr 100px 80px 40px; gap: 8px;
+            padding: 8px 10px; background: var(--bg-tertiary);
+            font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--text-muted);
+        }
+        .datagrid-column-item {
+            display: grid; grid-template-columns: 1fr 100px 80px 40px; gap: 8px;
+            padding: 8px 10px; border-bottom: 1px solid var(--border-color); align-items: center;
+        }
+        .datagrid-column-item:last-child { border-bottom: none; }
+
+        /* ===== CONDITION BUILDER ===== */
+        .condition-builder { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; }
+        .condition-group { border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-primary); margin-bottom: 12px; }
+        .condition-group-header {
+            padding: 10px 12px; background: var(--bg-secondary); border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; justify-content: space-between; border-radius: 8px 8px 0 0;
+        }
+        .logic-toggle { display: flex; gap: 2px; background: var(--bg-tertiary); padding: 2px; border-radius: 4px; }
+        .logic-btn {
+            padding: 4px 10px; border: none; background: transparent; border-radius: 3px;
+            font-size: 11px; font-weight: 700; cursor: pointer;
+        }
+        .logic-btn.and { color: var(--info); }
+        .logic-btn.or { color: var(--warning); }
+        .logic-btn.not { color: var(--danger); }
+        .logic-btn.active { background: var(--bg-primary); box-shadow: var(--shadow-sm); }
+        .condition-group-body { padding: 12px; }
+        .condition-row { display: grid; grid-template-columns: 1fr 140px 1fr 32px; gap: 8px; margin-bottom: 8px; align-items: center; }
+        .condition-row:last-child { margin-bottom: 0; }
+        .nested-indicator {
+            width: 20px; border-left: 2px solid var(--border-strong);
+            border-bottom: 2px solid var(--border-strong); height: 20px;
+            margin-left: 10px; border-radius: 0 0 0 6px;
+        }
+        .condition-actions { margin-top: 12px; display: flex; gap: 8px; }
+        .action-row { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-color); }
+        .action-row-title { font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--success); margin-bottom: 8px; }
+        .action-config { display: grid; grid-template-columns: 150px 1fr; gap: 8px; }
+
+        /* ===== FORMULA EDITOR ===== */
+        .formula-editor { border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; }
+        .formula-input-area { padding: 12px; background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color); }
+        .formula-input {
+            width: 100%; padding: 10px 12px; border: 1px solid var(--border-color);
+            border-radius: 6px; font-family: 'JetBrains Mono', monospace;
+            font-size: 13px; background: var(--bg-primary); color: var(--text-primary);
+        }
+        .formula-input:focus { outline: none; border-color: var(--primary); }
+        .formula-help { padding: 12px; }
+        .formula-help-title { font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+        .field-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; }
+        .field-chip {
+            padding: 4px 10px; background: var(--bg-tertiary); border: 1px solid var(--border-color);
+            border-radius: 4px; font-size: 12px; cursor: pointer; transition: all 0.15s;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .field-chip:hover { border-color: var(--primary); background: var(--primary-light); }
+        .operator-chips { display: flex; gap: 4px; }
+        .op-chip {
+            width: 32px; height: 28px; display: flex; align-items: center; justify-content: center;
+            background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 500; cursor: pointer;
+        }
+        .op-chip:hover { border-color: var(--primary); background: var(--primary-light); }
+        .formula-dependencies { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color); }
+        .dependency-list { display: flex; flex-wrap: wrap; gap: 4px; }
+        .dependency-tag { padding: 2px 8px; background: var(--info-light); color: var(--info); border-radius: 4px; font-size: 11px; font-weight: 500; }
+
+        /* ===== CROSS-FIELD VALIDATION ===== */
+        .crossfield-editor { border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; }
+        .crossfield-rule { padding: 12px; border-bottom: 1px solid var(--border-color); }
+        .crossfield-rule:last-child { border-bottom: none; }
+        .crossfield-rule-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .crossfield-rule-type { display: flex; align-items: center; gap: 8px; }
+        .rule-type-badge { padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+        .rule-type-badge.atleastone { background: var(--info-light); color: var(--info); }
+        .rule-type-badge.allornone { background: var(--warning-light); color: var(--warning); }
+        .rule-type-badge.mutuallyexclusive { background: var(--danger-light); color: var(--danger); }
+        .crossfield-fields { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+        .crossfield-field {
+            padding: 4px 10px; background: var(--bg-tertiary); border-radius: 4px;
+            font-size: 12px; display: flex; align-items: center; gap: 6px;
+        }
+        .crossfield-field-remove {
+            width: 14px; height: 14px; border: none; background: transparent;
+            color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 10px;
+        }
+        .crossfield-field-remove:hover { color: var(--danger); }
+
+        /* ===== HIERARCHY SELECTOR ===== */
+        .hierarchy-selector { border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; }
+        .hierarchy-current {
+            padding: 10px 12px; background: var(--bg-secondary); border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .hierarchy-path { font-size: 12px; color: var(--text-secondary); }
+        .hierarchy-path span { color: var(--text-primary); font-weight: 500; }
+        .hierarchy-tree { max-height: 200px; overflow-y: auto; padding: 8px; }
+        .hierarchy-node {
+            padding: 6px 10px; border-radius: 4px; font-size: 13px; cursor: pointer;
+            display: flex; align-items: center; gap: 8px; margin-bottom: 2px;
+        }
+        .hierarchy-node:hover { background: var(--bg-secondary); }
+        .hierarchy-node.selected { background: var(--primary-light); color: var(--primary); }
+        .hierarchy-node.current { border: 1px dashed var(--primary); opacity: 0.5; }
+        .hierarchy-indent { width: 16px; }
+
+        /* ===== METADATA PANEL ===== */
+        .metadata-panel { background: var(--bg-secondary); border-radius: 8px; padding: 12px; }
+        .metadata-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .metadata-item { background: var(--bg-primary); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--border-color); }
+        .metadata-label { font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+        .metadata-value { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+        .metadata-value.editable { cursor: pointer; padding: 2px 4px; margin: -2px -4px; border-radius: 4px; }
+        .metadata-value.editable:hover { background: var(--bg-tertiary); }
+
+        /* ===== TOAST ===== */
+        .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 3000; display: flex; flex-direction: column; gap: 8px; }
+        .toast {
+            background: var(--bg-primary); border: 1px solid var(--border-color); padding: 12px 16px;
+            border-radius: 8px; box-shadow: var(--shadow-lg); display: flex; align-items: center;
+            gap: 10px; min-width: 280px; animation: slideIn 0.2s ease;
+        }
+        .toast-success { background: var(--success); color: white; border-color: var(--success); }
+        .toast-error { background: var(--danger); color: white; border-color: var(--danger); }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* ===== UTILITIES ===== */
+        .hidden { display: none !important; }
+        .text-muted { color: var(--text-muted); }
+        .text-sm { font-size: 12px; }
+        .mt-2 { margin-top: 8px; }
+        .mt-3 { margin-top: 12px; }
+        .mb-2 { margin-bottom: 8px; }
+        .mb-3 { margin-bottom: 12px; }
+        .gap-2 { gap: 8px; }
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+    </style>
+</head>
+<body data-theme="light">
+    <!-- ===== DASHBOARD / LANDING PAGE ===== -->
+    <div id="dashboard" class="dashboard">
+        <div class="dashboard-header">
+            <div class="dashboard-logo">
+                <i class="bi bi-ui-checks-grid"></i>
+                <span>DynamicForms</span>
+            </div>
+            <div class="dashboard-actions">
+                <button class="btn btn-ghost btn-icon" onclick="toggleTheme()" title="Toggle theme">
+                    <i class="bi bi-moon-stars-fill" id="themeIconDash"></i>
+                </button>
+                <button class="btn btn-outline">
+                    <i class="bi bi-gear"></i> Settings
+                </button>
+                <button class="btn btn-primary" onclick="createNewForm()">
+                    <i class="bi bi-plus-lg"></i> New Form
+                </button>
+            </div>
+        </div>
+
+        <div class="dashboard-body">
+            <!-- Quick Start Templates -->
+            <div class="dashboard-section">
+                <div class="dashboard-section-header">
+                    <div class="dashboard-section-title">Quick Start Templates</div>
+                    <button class="btn btn-ghost btn-sm">View All <i class="bi bi-arrow-right"></i></button>
+                </div>
+                <div class="templates-row">
+                    <div class="template-card" onclick="createFromTemplate('blank')">
+                        <div class="template-icon"><i class="bi bi-file-earmark"></i></div>
+                        <div class="template-name">Blank Form</div>
+                        <div class="template-desc">Start from scratch</div>
+                    </div>
+                    <div class="template-card" onclick="createFromTemplate('contact')">
+                        <div class="template-icon"><i class="bi bi-person-lines-fill"></i></div>
+                        <div class="template-name">Contact Form</div>
+                        <div class="template-desc">Name, email, message</div>
+                    </div>
+                    <div class="template-card" onclick="createFromTemplate('registration')">
+                        <div class="template-icon"><i class="bi bi-person-plus"></i></div>
+                        <div class="template-name">Registration</div>
+                        <div class="template-desc">User signup form</div>
+                    </div>
+                    <div class="template-card" onclick="createFromTemplate('survey')">
+                        <div class="template-icon"><i class="bi bi-clipboard-data"></i></div>
+                        <div class="template-name">Survey</div>
+                        <div class="template-desc">Questions & ratings</div>
+                    </div>
+                    <div class="template-card" onclick="createFromTemplate('application')">
+                        <div class="template-icon"><i class="bi bi-file-text"></i></div>
+                        <div class="template-name">Application</div>
+                        <div class="template-desc">Multi-step workflow</div>
+                    </div>
+                    <div class="template-card" onclick="createFromTemplate('order')">
+                        <div class="template-icon"><i class="bi bi-cart3"></i></div>
+                        <div class="template-name">Order Form</div>
+                        <div class="template-desc">Products & payment</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Forms -->
+            <div class="dashboard-section">
+                <div class="dashboard-section-header">
+                    <div class="dashboard-section-title">Recent Forms</div>
+                    <div style="display: flex; gap: 8px;">
+                        <div class="search-wrapper" style="width: 240px;">
+                            <i class="bi bi-search search-icon"></i>
+                            <input type="text" class="search-box" placeholder="Search forms...">
+                        </div>
+                        <button class="btn btn-outline btn-sm">
+                            <i class="bi bi-filter"></i> Filter
+                        </button>
+                    </div>
+                </div>
+                <div class="forms-grid">
+                    <!-- New Form Card -->
+                    <div class="form-card form-card-new" onclick="createNewForm()">
+                        <i class="bi bi-plus-lg"></i>
+                        <span>Create New Form</span>
+                    </div>
+
+                    <!-- Form Card 1 -->
+                    <div class="form-card" onclick="openForm(1)">
+                        <div class="form-card-header">
+                            <div class="form-card-icon"><i class="bi bi-person-badge"></i></div>
+                            <button class="form-card-menu" onclick="event.stopPropagation(); showFormMenu(1)">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                        </div>
+                        <div class="form-card-title">Employee Onboarding</div>
+                        <div class="form-card-description">Collect new employee information including personal details, emergency contacts, and tax forms.</div>
+                        <div class="form-card-meta">
+                            <span><i class="bi bi-calendar3"></i> Dec 4, 2025</span>
+                            <span><i class="bi bi-ui-checks"></i> 12 fields</span>
+                            <span class="badge badge-draft">Draft</span>
+                        </div>
+                    </div>
+
+                    <!-- Form Card 2 -->
+                    <div class="form-card" onclick="openForm(2)">
+                        <div class="form-card-header">
+                            <div class="form-card-icon"><i class="bi bi-clipboard-check"></i></div>
+                            <button class="form-card-menu" onclick="event.stopPropagation(); showFormMenu(2)">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                        </div>
+                        <div class="form-card-title">Customer Feedback Survey</div>
+                        <div class="form-card-description">Gather customer satisfaction ratings and improvement suggestions.</div>
+                        <div class="form-card-meta">
+                            <span><i class="bi bi-calendar3"></i> Nov 28, 2025</span>
+                            <span><i class="bi bi-ui-checks"></i> 8 fields</span>
+                            <span class="badge badge-published">Published</span>
+                        </div>
+                    </div>
+
+                    <!-- Form Card 3 -->
+                    <div class="form-card" onclick="openForm(3)">
+                        <div class="form-card-header">
+                            <div class="form-card-icon"><i class="bi bi-building"></i></div>
+                            <button class="form-card-menu" onclick="event.stopPropagation(); showFormMenu(3)">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                        </div>
+                        <div class="form-card-title">Vendor Registration</div>
+                        <div class="form-card-description">Multi-step vendor application with document uploads and certification details.</div>
+                        <div class="form-card-meta">
+                            <span><i class="bi bi-calendar3"></i> Nov 15, 2025</span>
+                            <span><i class="bi bi-ui-checks"></i> 24 fields</span>
+                            <span class="badge badge-published">Published</span>
+                        </div>
+                    </div>
+
+                    <!-- Form Card 4 -->
+                    <div class="form-card" onclick="openForm(4)">
+                        <div class="form-card-header">
+                            <div class="form-card-icon"><i class="bi bi-calendar-event"></i></div>
+                            <button class="form-card-menu" onclick="event.stopPropagation(); showFormMenu(4)">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                        </div>
+                        <div class="form-card-title">Event Registration</div>
+                        <div class="form-card-description">Conference registration with session selection and dietary preferences.</div>
+                        <div class="form-card-meta">
+                            <span><i class="bi bi-calendar3"></i> Oct 30, 2025</span>
+                            <span><i class="bi bi-ui-checks"></i> 15 fields</span>
+                            <span class="badge badge-draft">Draft</span>
+                        </div>
+                    </div>
+
+                    <!-- Form Card 5 -->
+                    <div class="form-card" onclick="openForm(5)">
+                        <div class="form-card-header">
+                            <div class="form-card-icon"><i class="bi bi-currency-dollar"></i></div>
+                            <button class="form-card-menu" onclick="event.stopPropagation(); showFormMenu(5)">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                        </div>
+                        <div class="form-card-title">Expense Report</div>
+                        <div class="form-card-description">Submit expense claims with receipt uploads and approval workflow.</div>
+                        <div class="form-card-meta">
+                            <span><i class="bi bi-calendar3"></i> Oct 12, 2025</span>
+                            <span><i class="bi bi-ui-checks"></i> 18 fields</span>
+                            <span class="badge badge-published">Published</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ===== EDITOR ===== -->
+    <div id="editor" class="hidden">
+        <!-- Header -->
+        <div class="app-header">
+            <div class="logo-section">
+                <button class="btn-back" title="Back to Dashboard" onclick="goToDashboard()">
+                    <i class="bi bi-arrow-left"></i>
+                </button>
+                <input type="text" class="form-title-input" value="Employee Onboarding" placeholder="Untitled Form">
+                <span class="badge badge-draft">Draft</span>
+            </div>
+
+            <div class="view-switcher">
+                <button class="view-btn active" onclick="switchView('designer')">
+                    <i class="bi bi-pencil-square"></i> Design
+                </button>
+                <button class="view-btn" onclick="switchView('preview')">
+                    <i class="bi bi-eye"></i> Preview
+                </button>
+                <button class="view-btn" onclick="switchView('json')">
+                    <i class="bi bi-code-square"></i> JSON
+                </button>
+            </div>
+
+            <div class="header-actions">
+                <button class="btn btn-ghost btn-icon" onclick="toggleTheme()" title="Toggle theme">
+                    <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+                </button>
+                <button class="btn btn-outline" onclick="showMetadataModal()">
+                    <i class="bi bi-info-circle"></i> Info
+                </button>
+                <button class="btn btn-outline">
+                    <i class="bi bi-upload"></i> Import
+                </button>
+                <button class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> Publish
+                </button>
+            </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="editor-toolbar">
+            <div class="toolbar-group">
+                <button class="toolbar-btn" title="Undo (Ctrl+Z)"><i class="bi bi-arrow-counterclockwise"></i></button>
+                <button class="toolbar-btn" title="Redo (Ctrl+Y)"><i class="bi bi-arrow-clockwise"></i></button>
+            </div>
+            <div class="toolbar-group">
+                <button class="toolbar-btn" title="Duplicate"><i class="bi bi-files"></i></button>
+                <button class="toolbar-btn" title="Delete"><i class="bi bi-trash"></i></button>
+            </div>
+            <div class="toolbar-group">
+                <button class="toolbar-btn" title="Move Up"><i class="bi bi-arrow-up"></i></button>
+                <button class="toolbar-btn" title="Move Down"><i class="bi bi-arrow-down"></i></button>
+            </div>
+            <div style="margin-left: auto; display: flex; align-items: center; gap: 12px; color: var(--text-muted); font-size: 12px;">
+                <span><i class="bi bi-ui-checks"></i> 6 fields</span>
+                <span>•</span>
+                <span>Auto-saved 2:34 PM</span>
+            </div>
+        </div>
+
+        <!-- Main Layout -->
+        <div class="app-body">
+            <!-- Left Sidebar: Fields, Outline, Validation -->
+            <div class="sidebar-left">
+                <div class="left-sidebar-tabs">
+                    <div class="ls-tab active" onclick="switchLeftTab(this, 'fields')">
+                        <i class="bi bi-plus-square"></i>
+                        <span>Fields</span>
+                    </div>
+                    <div class="ls-tab" onclick="switchLeftTab(this, 'outline')">
+                        <i class="bi bi-list-nested"></i>
+                        <span>Outline</span>
+                    </div>
+                    <div class="ls-tab" onclick="switchLeftTab(this, 'validation')">
+                        <i class="bi bi-shield-check"></i>
+                        <span>Validation</span>
+                        <span class="badge badge-count badge-danger" style="position: absolute; top: 4px; right: 12px;">1</span>
+                    </div>
+                </div>
+
+                <!-- Fields Tab -->
+                <div id="left-tab-fields" class="tab-pane active">
+                    <div class="sidebar-header">
+                        <div class="search-wrapper">
+                            <i class="bi bi-search search-icon"></i>
+                            <input type="text" class="search-box" placeholder="Search fields...">
+                        </div>
+                    </div>
+                    <div class="sidebar-content">
+                        <div class="component-category">
+                            <div class="category-title">Basic</div>
+                            <div class="component-item" onclick="addField('TextBox')">
+                                <div class="component-icon"><i class="bi bi-input-cursor-text"></i></div>
+                                <div class="component-name">Text Input</div>
+                            </div>
+                            <div class="component-item" onclick="addField('TextArea')">
+                                <div class="component-icon"><i class="bi bi-textarea-t"></i></div>
+                                <div class="component-name">Text Area</div>
+                            </div>
+                            <div class="component-item" onclick="addField('Number')">
+                                <div class="component-icon"><i class="bi bi-123"></i></div>
+                                <div class="component-name">Number</div>
+                            </div>
+                            <div class="component-item" onclick="addField('Currency')">
+                                <div class="component-icon"><i class="bi bi-currency-dollar"></i></div>
+                                <div class="component-name">Currency</div>
+                            </div>
+                        </div>
+
+                        <div class="component-category">
+                            <div class="category-title">Choice</div>
+                            <div class="component-item" onclick="addField('DropDown')">
+                                <div class="component-icon"><i class="bi bi-menu-button-wide"></i></div>
+                                <div class="component-name">Dropdown</div>
+                            </div>
+                            <div class="component-item" onclick="addField('RadioGroup')">
+                                <div class="component-icon"><i class="bi bi-ui-radios"></i></div>
+                                <div class="component-name">Radio Group</div>
+                            </div>
+                            <div class="component-item" onclick="addField('CheckboxList')">
+                                <div class="component-icon"><i class="bi bi-ui-checks"></i></div>
+                                <div class="component-name">Checkboxes</div>
+                            </div>
+                        </div>
+
+                        <div class="component-category">
+                            <div class="category-title">Date & Time</div>
+                            <div class="component-item" onclick="addField('DatePicker')">
+                                <div class="component-icon"><i class="bi bi-calendar-event"></i></div>
+                                <div class="component-name">Date Picker</div>
+                            </div>
+                            <div class="component-item" onclick="addField('TimePicker')">
+                                <div class="component-icon"><i class="bi bi-clock"></i></div>
+                                <div class="component-name">Time Picker</div>
+                            </div>
+                        </div>
+
+                        <div class="component-category">
+                            <div class="category-title">Advanced</div>
+                            <div class="component-item" onclick="addField('FileUpload'); showTypeConfigModal('FileUpload')">
+                                <div class="component-icon"><i class="bi bi-cloud-upload"></i></div>
+                                <div class="component-name">File Upload</div>
+                            </div>
+                            <div class="component-item" onclick="addField('DataGrid'); showTypeConfigModal('DataGrid')">
+                                <div class="component-icon"><i class="bi bi-table"></i></div>
+                                <div class="component-name">Data Grid</div>
+                            </div>
+                            <div class="component-item" onclick="addField('AutoComplete'); showTypeConfigModal('AutoComplete')">
+                                <div class="component-icon"><i class="bi bi-search"></i></div>
+                                <div class="component-name">AutoComplete</div>
+                            </div>
+                        </div>
+
+                        <div class="component-category">
+                            <div class="category-title">Layout</div>
+                            <div class="component-item" onclick="addField('Section')">
+                                <div class="component-icon"><i class="bi bi-layout-three-columns"></i></div>
+                                <div class="component-name">Section</div>
+                            </div>
+                            <div class="component-item" onclick="addField('Divider')">
+                                <div class="component-icon"><i class="bi bi-dash-lg"></i></div>
+                                <div class="component-name">Divider</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Outline Tab -->
+                <div id="left-tab-outline" class="tab-pane">
+                    <div class="sidebar-header">
+                        <div class="search-wrapper">
+                            <i class="bi bi-search search-icon"></i>
+                            <input type="text" class="search-box" placeholder="Search structure...">
+                        </div>
+                    </div>
+                    <div class="sidebar-content">
+                        <div class="outline-tree">
+                            <div class="tree-node" style="font-weight: 600;">
+                                <span class="tree-node-icon"><i class="bi bi-file-earmark"></i></span>
+                                <span>Employee Onboarding</span>
+                            </div>
+                            <div class="tree-node">
+                                <span class="tree-indent"></span>
+                                <span class="tree-node-icon"><i class="bi bi-layout-three-columns"></i></span>
+                                <span>Personal Information</span>
+                                <div class="tree-node-actions">
+                                    <button class="tree-action-btn" title="Add child"><i class="bi bi-plus"></i></button>
+                                    <button class="tree-action-btn" title="Delete"><i class="bi bi-trash"></i></button>
+                                </div>
+                            </div>
+                            <div class="tree-node">
+                                <span class="tree-indent"></span>
+                                <span class="tree-indent"></span>
+                                <span class="tree-node-icon"><i class="bi bi-input-cursor-text"></i></span>
+                                <span>Full Name</span>
+                                <div class="tree-node-actions">
+                                    <button class="tree-action-btn"><i class="bi bi-arrow-up"></i></button>
+                                    <button class="tree-action-btn"><i class="bi bi-arrow-down"></i></button>
+                                </div>
+                            </div>
+                            <div class="tree-node">
+                                <span class="tree-indent"></span>
+                                <span class="tree-indent"></span>
+                                <span class="tree-node-icon"><i class="bi bi-envelope"></i></span>
+                                <span>Email Address</span>
+                                <div class="tree-node-actions">
+                                    <button class="tree-action-btn"><i class="bi bi-arrow-up"></i></button>
+                                    <button class="tree-action-btn"><i class="bi bi-arrow-down"></i></button>
+                                </div>
+                            </div>
+                            <div class="tree-node selected">
+                                <span class="tree-indent"></span>
+                                <span class="tree-indent"></span>
+                                <span class="tree-node-icon"><i class="bi bi-menu-button-wide"></i></span>
+                                <span>Department</span>
+                                <div class="tree-node-actions">
+                                    <button class="tree-action-btn"><i class="bi bi-arrow-up"></i></button>
+                                    <button class="tree-action-btn"><i class="bi bi-arrow-down"></i></button>
+                                </div>
+                            </div>
+                            <div class="tree-node">
+                                <span class="tree-indent"></span>
+                                <span class="tree-node-icon"><i class="bi bi-calendar-event"></i></span>
+                                <span>Start Date</span>
+                                <div class="tree-node-actions">
+                                    <button class="tree-action-btn"><i class="bi bi-arrow-up"></i></button>
+                                    <button class="tree-action-btn"><i class="bi bi-arrow-down"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Validation Tab -->
+                <div id="left-tab-validation" class="tab-pane">
+                    <div class="sidebar-header">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <div class="sidebar-title" style="margin-bottom: 0;">Issues</div>
+                            <button class="btn btn-ghost btn-xs"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+                        </div>
+                    </div>
+                    <div class="sidebar-content">
+                        <div class="validation-list">
+                            <div class="validation-item error" onclick="selectField('email')">
+                                <i class="bi bi-exclamation-circle-fill validation-icon"></i>
+                                <div>
+                                    <div class="validation-title">Missing Error Message</div>
+                                    <div class="validation-desc">Email Address: Required error message not set</div>
+                                </div>
+                            </div>
+                            <div class="validation-item warning" onclick="selectField('fullName')">
+                                <i class="bi bi-exclamation-triangle-fill validation-icon"></i>
+                                <div>
+                                    <div class="validation-title">No Help Text</div>
+                                    <div class="validation-desc">Full Name: Consider adding help text</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="crossfield-summary">
+                            <div class="sidebar-title">Cross-Field Rules</div>
+                            <div class="crossfield-editor">
+                                <div class="crossfield-rule">
+                                    <div class="crossfield-rule-header">
+                                        <span class="rule-type-badge atleastone">At Least One</span>
+                                        <button class="btn btn-ghost btn-xs" onclick="showCrossFieldModal()"><i class="bi bi-pencil"></i></button>
+                                    </div>
+                                    <div class="crossfield-fields">
+                                        <span class="crossfield-field">phoneNumber<button class="crossfield-field-remove"><i class="bi bi-x"></i></button></span>
+                                        <span class="crossfield-field">email<button class="crossfield-field-remove"><i class="bi bi-x"></i></button></span>
+                                    </div>
+                                    <div class="text-sm text-muted">At least one contact method required</div>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline btn-sm mt-2" style="width: 100%;" onclick="showCrossFieldModal()">
+                                <i class="bi bi-plus-circle"></i> Add Cross-Field Rule
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Canvas -->
+            <div class="canvas-container">
+                <div class="canvas">
+                    <div class="canvas-header">
+                        <div class="canvas-title">Employee Onboarding</div>
+                        <div class="canvas-description">Please provide your information to complete the onboarding process.</div>
+                    </div>
+                    <div class="canvas-body">
+                        <!-- Section -->
+                        <div class="field-section" data-field-id="personalInfo">
+                            <div class="field-actions">
+                                <button class="field-action-btn"><i class="bi bi-gear-fill"></i></button>
+                                <button class="field-action-btn"><i class="bi bi-files"></i></button>
+                                <button class="field-action-btn danger"><i class="bi bi-trash"></i></button>
+                            </div>
+                            <div class="section-title">Personal Information</div>
+                            
+                            <div class="field-wrapper">
+                                <div class="field-item" data-field-id="fullName">
+                                    <div class="field-actions">
+                                        <button class="field-action-btn"><i class="bi bi-gear-fill"></i></button>
+                                        <button class="field-action-btn"><i class="bi bi-files"></i></button>
+                                        <button class="field-action-btn"><i class="bi bi-arrow-up"></i></button>
+                                        <button class="field-action-btn"><i class="bi bi-arrow-down"></i></button>
+                                        <button class="field-action-btn danger"><i class="bi bi-trash"></i></button>
+                                    </div>
+                                    <label class="field-label">Full Name <span class="field-required">*</span></label>
+                                    <input type="text" class="field-input-preview" placeholder="e.g. John Doe" disabled>
+                                </div>
+                            </div>
+
+                            <div class="field-wrapper">
+                                <div class="field-item" data-field-id="email">
+                                    <div class="field-actions">
+                                        <button class="field-action-btn"><i class="bi bi-gear-fill"></i></button>
+                                        <button class="field-action-btn"><i class="bi bi-files"></i></button>
+                                        <button class="field-action-btn"><i class="bi bi-arrow-up"></i></button>
+                                        <button class="field-action-btn"><i class="bi bi-arrow-down"></i></button>
+                                        <button class="field-action-btn danger"><i class="bi bi-trash"></i></button>
+                                    </div>
+                                    <label class="field-label">Email Address <span class="field-required">*</span></label>
+                                    <input type="email" class="field-input-preview" placeholder="your.email@company.com" disabled>
+                                </div>
+                            </div>
+
+                            <div class="field-wrapper">
+                                <div class="field-item selected" data-field-id="department">
+                                    <div class="field-actions">
+                                        <button class="field-action-btn"><i class="bi bi-gear-fill"></i></button>
+                                        <button class="field-action-btn"><i class="bi bi-files"></i></button>
+                                        <button class="field-action-btn"><i class="bi bi-arrow-up"></i></button>
+                                        <button class="field-action-btn"><i class="bi bi-arrow-down"></i></button>
+                                        <button class="field-action-btn danger"><i class="bi bi-trash"></i></button>
+                                    </div>
+                                    <label class="field-label">Department</label>
+                                    <select class="field-input-preview" disabled><option>Select department...</option></select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <div class="field-item" data-field-id="startDate">
+                                <div class="field-actions">
+                                    <button class="field-action-btn"><i class="bi bi-gear-fill"></i></button>
+                                    <button class="field-action-btn"><i class="bi bi-files"></i></button>
+                                    <button class="field-action-btn"><i class="bi bi-arrow-up"></i></button>
+                                    <button class="field-action-btn"><i class="bi bi-arrow-down"></i></button>
+                                    <button class="field-action-btn danger"><i class="bi bi-trash"></i></button>
+                                </div>
+                                <label class="field-label">Start Date</label>
+                                <input type="date" class="field-input-preview" disabled>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Right Sidebar: Properties Only -->
+            <div class="sidebar-right">
+                <div class="sidebar-header" style="background: var(--bg-secondary);">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div class="sidebar-title" style="margin-bottom: 0;">Properties</div>
+                        <span class="badge badge-primary">department</span>
+                    </div>
+                </div>
+
+                <div class="sidebar-content" style="padding: 0;">
+                    <!-- General Section -->
+                    <div class="property-section">
+                        <div class="property-section-header" onclick="toggleSection(this)">
+                            <div class="property-section-title"><i class="bi bi-sliders"></i> General</div>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="property-section-body">
+                            <div class="prop-group">
+                                <label class="prop-label">Field ID</label>
+                                <input type="text" class="prop-input" value="department" style="font-family: 'JetBrains Mono', monospace;">
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Field Type</label>
+                                <select class="prop-select" disabled><option selected>DropDown</option></select>
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Order</label>
+                                <input type="number" class="prop-input" value="3">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Labels Section -->
+                    <div class="property-section">
+                        <div class="property-section-header" onclick="toggleSection(this)">
+                            <div class="property-section-title"><i class="bi bi-translate"></i> Labels</div>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="property-section-body">
+                            <div class="lang-tabs">
+                                <button class="lang-tab active">English</button>
+                                <button class="lang-tab">Français</button>
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Label</label>
+                                <input type="text" class="prop-input" value="Department">
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Description</label>
+                                <input type="text" class="prop-input" placeholder="Optional description">
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Help Text</label>
+                                <input type="text" class="prop-input" placeholder="Optional help text">
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Placeholder</label>
+                                <input type="text" class="prop-input" value="Select department...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Options Section -->
+                    <div class="property-section">
+                        <div class="property-section-header" onclick="toggleSection(this)">
+                            <div class="property-section-title"><i class="bi bi-list-ul"></i> Options</div>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="property-section-body" style="padding: 0;">
+                            <div class="options-editor">
+                                <div class="options-header">
+                                    <span class="text-sm" style="font-weight: 500;">Data Source</span>
+                                    <div class="options-source-toggle">
+                                        <button class="source-btn active" onclick="showInlineOptions()">Inline</button>
+                                        <button class="source-btn" onclick="showCodeSetPicker()">CodeSet</button>
+                                    </div>
+                                </div>
+                                <div id="inlineOptions">
+                                    <div class="options-list">
+                                        <div class="option-item">
+                                            <span class="option-drag"><i class="bi bi-grip-vertical"></i></span>
+                                            <input type="text" class="option-input" value="ENG" placeholder="Value">
+                                            <input type="text" class="option-input" value="Engineering" placeholder="Label (EN)">
+                                            <input type="text" class="option-input" value="Ingénierie" placeholder="Label (FR)">
+                                            <button class="option-delete"><i class="bi bi-x"></i></button>
+                                        </div>
+                                        <div class="option-item">
+                                            <span class="option-drag"><i class="bi bi-grip-vertical"></i></span>
+                                            <input type="text" class="option-input" value="MKT" placeholder="Value">
+                                            <input type="text" class="option-input" value="Marketing" placeholder="Label (EN)">
+                                            <input type="text" class="option-input" value="Marketing" placeholder="Label (FR)">
+                                            <button class="option-delete"><i class="bi bi-x"></i></button>
+                                        </div>
+                                        <div class="option-item">
+                                            <span class="option-drag"><i class="bi bi-grip-vertical"></i></span>
+                                            <input type="text" class="option-input" value="HR" placeholder="Value">
+                                            <input type="text" class="option-input" value="Human Resources" placeholder="Label (EN)">
+                                            <input type="text" class="option-input" value="Ressources humaines" placeholder="Label (FR)">
+                                            <button class="option-delete"><i class="bi bi-x"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="options-footer">
+                                        <button class="btn btn-outline btn-sm" style="width: 100%;"><i class="bi bi-plus"></i> Add Option</button>
+                                    </div>
+                                </div>
+                                <div id="codesetOptions" class="hidden">
+                                    <div class="codeset-picker">
+                                        <div class="prop-group mb-2">
+                                            <label class="prop-label">Select CodeSet</label>
+                                            <div class="codeset-select-group">
+                                                <select class="prop-select" style="flex: 1;">
+                                                    <option value="">-- Select --</option>
+                                                    <option value="1">DEPARTMENTS (ID: 1)</option>
+                                                    <option value="2" selected>PROVINCES_CA (ID: 2)</option>
+                                                    <option value="3">COUNTRIES (ID: 3)</option>
+                                                </select>
+                                                <button class="btn btn-outline btn-icon-sm" title="Refresh"><i class="bi bi-arrow-clockwise"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="codeset-preview">
+                                            <div class="codeset-preview-title">Preview (13 items)</div>
+                                            <div class="codeset-preview-items">
+                                                <span class="codeset-preview-item">AB - Alberta</span>
+                                                <span class="codeset-preview-item">BC - British Columbia</span>
+                                                <span class="codeset-preview-item">ON - Ontario</span>
+                                                <span class="codeset-preview-item">QC - Quebec</span>
+                                                <span class="codeset-preview-item">+9 more</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hierarchy Section -->
+                    <div class="property-section">
+                        <div class="property-section-header" onclick="toggleSection(this)">
+                            <div class="property-section-title"><i class="bi bi-diagram-3"></i> Hierarchy</div>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="property-section-body" style="padding: 0;">
+                            <div class="hierarchy-selector">
+                                <div class="hierarchy-current">
+                                    <i class="bi bi-folder2" style="color: var(--text-muted);"></i>
+                                    <div class="hierarchy-path">Parent: <span>Personal Information</span></div>
+                                </div>
+                                <div class="hierarchy-tree">
+                                    <div class="hierarchy-node" onclick="setParent(null)">
+                                        <i class="bi bi-file-earmark"></i>
+                                        <span>— Root Level —</span>
+                                    </div>
+                                    <div class="hierarchy-node selected">
+                                        <i class="bi bi-layout-three-columns"></i>
+                                        <span>Personal Information</span>
+                                    </div>
+                                    <div class="hierarchy-node current" style="margin-left: 20px;">
+                                        <i class="bi bi-menu-button-wide"></i>
+                                        <span>Department (current)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="padding: 12px;">
+                                <div class="prop-group">
+                                    <label class="prop-label">Relationship Type</label>
+                                    <select class="prop-select">
+                                        <option value="Container" selected>Container</option>
+                                        <option value="Conditional">Conditional</option>
+                                        <option value="Cascade">Cascade</option>
+                                        <option value="Validation">Validation</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Validation Section -->
+                    <div class="property-section">
+                        <div class="property-section-header" onclick="toggleSection(this)">
+                            <div class="property-section-title"><i class="bi bi-shield-check"></i> Validation</div>
+                            <i class="bi bi-chevron-right"></i>
+                        </div>
+                        <div class="property-section-body collapsed">
+                            <div class="checkbox-group">
+                                <input type="checkbox" class="checkbox-input" id="required">
+                                <label class="checkbox-label" for="required">Required field</label>
+                            </div>
+                            <div class="prop-row mt-2">
+                                <div class="prop-group">
+                                    <label class="prop-label">Min Length</label>
+                                    <input type="number" class="prop-input" placeholder="0">
+                                </div>
+                                <div class="prop-group">
+                                    <label class="prop-label">Max Length</label>
+                                    <input type="number" class="prop-input" placeholder="255">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Conditional Logic Section -->
+                    <div class="property-section">
+                        <div class="property-section-header" onclick="toggleSection(this)">
+                            <div class="property-section-title"><i class="bi bi-lightning"></i> Conditional Logic</div>
+                            <i class="bi bi-chevron-right"></i>
+                        </div>
+                        <div class="property-section-body collapsed">
+                            <button class="btn btn-outline btn-sm" style="width: 100%;" onclick="showConditionBuilder()">
+                                <i class="bi bi-plus-circle"></i> Add Condition Rule
+                            </button>
+                            <div class="text-muted text-sm mt-2" style="text-align: center;">No rules defined</div>
+                        </div>
+                    </div>
+
+                    <!-- Computed Value Section -->
+                    <div class="property-section">
+                        <div class="property-section-header" onclick="toggleSection(this)">
+                            <div class="property-section-title"><i class="bi bi-calculator"></i> Computed Value</div>
+                            <i class="bi bi-chevron-right"></i>
+                        </div>
+                        <div class="property-section-body collapsed">
+                            <button class="btn btn-outline btn-sm" style="width: 100%;" onclick="showFormulaEditor()">
+                                <i class="bi bi-plus-circle"></i> Add Formula
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Layout Section -->
+                    <div class="property-section">
+                        <div class="property-section-header" onclick="toggleSection(this)">
+                            <div class="property-section-title"><i class="bi bi-grid"></i> Layout</div>
+                            <i class="bi bi-chevron-right"></i>
+                        </div>
+                        <div class="property-section-body collapsed">
+                            <div class="prop-group">
+                                <label class="prop-label">Width</label>
+                                <select class="prop-select">
+                                    <option value="12" selected>Full (12 cols)</option>
+                                    <option value="6">Half (6 cols)</option>
+                                    <option value="4">Third (4 cols)</option>
+                                    <option value="3">Quarter (3 cols)</option>
+                                </select>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" class="checkbox-input" id="visible" checked>
+                                <label class="checkbox-label" for="visible">Visible</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" class="checkbox-input" id="readonly">
+                                <label class="checkbox-label" for="readonly">Read-only</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Accessibility Section -->
+                    <div class="property-section">
+                        <div class="property-section-header" onclick="toggleSection(this)">
+                            <div class="property-section-title"><i class="bi bi-universal-access"></i> Accessibility</div>
+                            <i class="bi bi-chevron-right"></i>
+                        </div>
+                        <div class="property-section-body collapsed">
+                            <div class="prop-group">
+                                <label class="prop-label">ARIA Label</label>
+                                <input type="text" class="prop-input" placeholder="Screen reader label">
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Tab Index</label>
+                                <input type="number" class="prop-input" placeholder="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ===== CONDITION BUILDER MODAL ===== -->
+    <div id="conditionModal" class="modal-backdrop hidden">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="bi bi-lightning" style="color: var(--warning);"></i> Conditional Logic Builder</h3>
+                <button class="modal-close" onclick="closeModal('conditionModal')"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="condition-builder">
+                    <div class="condition-group">
+                        <div class="condition-group-header">
+                            <div class="logic-toggle">
+                                <button class="logic-btn and active">AND</button>
+                                <button class="logic-btn or">OR</button>
+                                <button class="logic-btn not">NOT</button>
+                            </div>
+                            <button class="btn btn-ghost btn-xs"><i class="bi bi-trash"></i></button>
+                        </div>
+                        <div class="condition-group-body">
+                            <div class="condition-row">
+                                <select class="prop-select">
+                                    <option value="">Select Field...</option>
+                                    <option value="fullName">fullName</option>
+                                    <option value="email">email</option>
+                                    <option value="department" selected>department</option>
+                                    <option value="startDate">startDate</option>
+                                    <option value="Step1.province">Step1.province (cross-module)</option>
+                                </select>
+                                <select class="prop-select">
+                                    <option value="Equals" selected>Equals</option>
+                                    <option value="NotEquals">Not Equals</option>
+                                    <option value="Contains">Contains</option>
+                                    <option value="StartsWith">Starts With</option>
+                                    <option value="EndsWith">Ends With</option>
+                                    <option value="In">In List</option>
+                                    <option value="NotIn">Not In List</option>
+                                    <option value="GreaterThan">Greater Than</option>
+                                    <option value="LessThan">Less Than</option>
+                                    <option value="IsNull">Is Empty</option>
+                                    <option value="IsNotNull">Is Not Empty</option>
+                                </select>
+                                <input type="text" class="prop-input" value="ENG" placeholder="Value">
+                                <button class="btn btn-ghost btn-icon-sm"><i class="bi bi-x"></i></button>
+                            </div>
+                            <div class="condition-row">
+                                <select class="prop-select"><option value="startDate" selected>startDate</option></select>
+                                <select class="prop-select"><option value="IsNotNull" selected>Is Not Empty</option></select>
+                                <input type="text" class="prop-input" placeholder="(not required)" disabled>
+                                <button class="btn btn-ghost btn-icon-sm"><i class="bi bi-x"></i></button>
+                            </div>
+                            <div style="margin-top: 12px; margin-left: 20px; position: relative;">
+                                <div class="nested-indicator" style="position: absolute; left: -20px; top: 0;"></div>
+                                <div class="condition-group" style="margin-bottom: 0;">
+                                    <div class="condition-group-header" style="background: var(--bg-tertiary);">
+                                        <div class="logic-toggle">
+                                            <button class="logic-btn and">AND</button>
+                                            <button class="logic-btn or active">OR</button>
+                                            <button class="logic-btn not">NOT</button>
+                                        </div>
+                                        <button class="btn btn-ghost btn-xs"><i class="bi bi-trash"></i></button>
+                                    </div>
+                                    <div class="condition-group-body">
+                                        <div class="condition-row">
+                                            <select class="prop-select"><option selected>Step1.province</option></select>
+                                            <select class="prop-select"><option selected>Equals</option></select>
+                                            <input type="text" class="prop-input" value="ON">
+                                            <button class="btn btn-ghost btn-icon-sm"><i class="bi bi-x"></i></button>
+                                        </div>
+                                        <div class="condition-row">
+                                            <select class="prop-select"><option selected>Step1.province</option></select>
+                                            <select class="prop-select"><option selected>Equals</option></select>
+                                            <input type="text" class="prop-input" value="QC">
+                                            <button class="btn btn-ghost btn-icon-sm"><i class="bi bi-x"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="condition-actions">
+                                <button class="btn btn-outline btn-sm"><i class="bi bi-plus"></i> Add Condition</button>
+                                <button class="btn btn-outline btn-sm"><i class="bi bi-folder-plus"></i> Add Group</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="action-row">
+                        <div class="action-row-title">THEN (Action)</div>
+                        <div class="action-config">
+                            <select class="prop-select">
+                                <option value="show" selected>Show Field</option>
+                                <option value="hide">Hide Field</option>
+                                <option value="enable">Enable Field</option>
+                                <option value="disable">Disable Field</option>
+                                <option value="setRequired">Set Required</option>
+                                <option value="setOptional">Set Optional</option>
+                            </select>
+                            <select class="prop-select">
+                                <option value="">Select Target Field...</option>
+                                <option value="managerApproval" selected>managerApproval</option>
+                                <option value="hrNotes">hrNotes</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                    <div class="prop-group">
+                        <label class="prop-label">Rule ID</label>
+                        <input type="text" class="prop-input" value="show-manager-approval" style="font-family: 'JetBrains Mono', monospace;">
+                    </div>
+                    <div class="prop-group">
+                        <label class="prop-label">Priority</label>
+                        <input type="number" class="prop-input" value="100">
+                    </div>
+                    <div class="prop-group">
+                        <label class="prop-label">Status</label>
+                        <select class="prop-select"><option selected>Active</option><option>Inactive</option></select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeModal('conditionModal')">Cancel</button>
+                <button class="btn btn-primary"><i class="bi bi-check"></i> Save Rule</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== FORMULA EDITOR MODAL ===== -->
+    <div id="formulaModal" class="modal-backdrop hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="bi bi-calculator" style="color: var(--info);"></i> Computed Formula Editor</h3>
+                <button class="modal-close" onclick="closeModal('formulaModal')"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="formula-editor">
+                    <div class="formula-input-area">
+                        <label class="prop-label mb-2">Expression</label>
+                        <input type="text" class="formula-input" value="Quantity * UnitPrice" placeholder="e.g., Field1 + Field2 * 0.15">
+                    </div>
+                    <div class="formula-help">
+                        <div class="formula-help-title">Available Fields (click to insert)</div>
+                        <div class="field-chips">
+                            <span class="field-chip" onclick="insertField('Quantity')">Quantity</span>
+                            <span class="field-chip" onclick="insertField('UnitPrice')">UnitPrice</span>
+                            <span class="field-chip" onclick="insertField('TaxRate')">TaxRate</span>
+                            <span class="field-chip" onclick="insertField('Discount')">Discount</span>
+                            <span class="field-chip" onclick="insertField('SubTotal')">SubTotal</span>
+                        </div>
+                        <div class="formula-help-title">Operators</div>
+                        <div class="operator-chips">
+                            <span class="op-chip" onclick="insertOp('+')">+</span>
+                            <span class="op-chip" onclick="insertOp('-')">−</span>
+                            <span class="op-chip" onclick="insertOp('*')">×</span>
+                            <span class="op-chip" onclick="insertOp('/')">÷</span>
+                            <span class="op-chip" onclick="insertOp('(')">(</span>
+                            <span class="op-chip" onclick="insertOp(')')">)</span>
+                        </div>
+                        <div class="formula-dependencies">
+                            <div class="formula-help-title">Detected Dependencies</div>
+                            <div class="dependency-list">
+                                <span class="dependency-tag">Quantity</span>
+                                <span class="dependency-tag">UnitPrice</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeModal('formulaModal')">Cancel</button>
+                <button class="btn btn-primary"><i class="bi bi-check"></i> Save Formula</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CROSS-FIELD VALIDATION MODAL ===== -->
+    <div id="crossFieldModal" class="modal-backdrop hidden">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="bi bi-diagram-2" style="color: var(--primary);"></i> Cross-Field Validation</h3>
+                <button class="modal-close" onclick="closeModal('crossFieldModal')"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="prop-group">
+                    <label class="prop-label">Validation Type</label>
+                    <select class="prop-select">
+                        <option value="AtLeastOne">At Least One Required</option>
+                        <option value="AllOrNone">All Or None</option>
+                        <option value="MutuallyExclusive">Mutually Exclusive</option>
+                    </select>
+                </div>
+                <div class="prop-group mt-3">
+                    <label class="prop-label">Select Fields</label>
+                    <div style="border: 1px solid var(--border-color); border-radius: 6px; max-height: 200px; overflow-y: auto;">
+                        <label class="checkbox-group" style="border-bottom: 1px solid var(--border-color); margin: 0; border-radius: 0;">
+                            <input type="checkbox" class="checkbox-input"><span class="checkbox-label">fullName</span>
+                        </label>
+                        <label class="checkbox-group" style="border-bottom: 1px solid var(--border-color); margin: 0; border-radius: 0;">
+                            <input type="checkbox" class="checkbox-input" checked><span class="checkbox-label">email</span>
+                        </label>
+                        <label class="checkbox-group" style="border-bottom: 1px solid var(--border-color); margin: 0; border-radius: 0;">
+                            <input type="checkbox" class="checkbox-input" checked><span class="checkbox-label">phoneNumber</span>
+                        </label>
+                        <label class="checkbox-group" style="border-bottom: 1px solid var(--border-color); margin: 0; border-radius: 0;">
+                            <input type="checkbox" class="checkbox-input"><span class="checkbox-label">department</span>
+                        </label>
+                        <label class="checkbox-group" style="margin: 0; border-radius: 0;">
+                            <input type="checkbox" class="checkbox-input"><span class="checkbox-label">startDate</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="prop-group mt-3">
+                    <label class="prop-label">Error Message (EN)</label>
+                    <input type="text" class="prop-input" placeholder="e.g., At least one contact method required">
+                </div>
+                <div class="prop-group">
+                    <label class="prop-label">Error Message (FR)</label>
+                    <input type="text" class="prop-input" placeholder="e.g., Au moins une méthode de contact requise">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeModal('crossFieldModal')">Cancel</button>
+                <button class="btn btn-primary"><i class="bi bi-check"></i> Save Rule</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== METADATA MODAL ===== -->
+    <div id="metadataModal" class="modal-backdrop hidden">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="bi bi-info-circle" style="color: var(--info);"></i> Module Information</h3>
+                <button class="modal-close" onclick="closeModal('metadataModal')"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="metadata-panel">
+                    <div class="metadata-grid">
+                        <div class="metadata-item">
+                            <div class="metadata-label">Module ID</div>
+                            <div class="metadata-value">1</div>
+                        </div>
+                        <div class="metadata-item">
+                            <div class="metadata-label">Opportunity ID</div>
+                            <div class="metadata-value editable">42</div>
+                        </div>
+                        <div class="metadata-item">
+                            <div class="metadata-label">Version</div>
+                            <div class="metadata-value editable">1.2</div>
+                        </div>
+                        <div class="metadata-item">
+                            <div class="metadata-label">Status</div>
+                            <div class="metadata-value"><span class="badge badge-draft">Draft</span></div>
+                        </div>
+                        <div class="metadata-item">
+                            <div class="metadata-label">Date Created</div>
+                            <div class="metadata-value">Dec 4, 2025</div>
+                        </div>
+                        <div class="metadata-item">
+                            <div class="metadata-label">Last Updated</div>
+                            <div class="metadata-value">Dec 6, 2025</div>
+                        </div>
+                        <div class="metadata-item">
+                            <div class="metadata-label">Created By</div>
+                            <div class="metadata-value">wael.abdul</div>
+                        </div>
+                        <div class="metadata-item">
+                            <div class="metadata-label">Total Fields</div>
+                            <div class="metadata-value">6</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <div class="prop-group">
+                        <label class="prop-label">Table Name</label>
+                        <input type="text" class="prop-input" value="tbl_EmployeeOnboarding" placeholder="Database table name">
+                    </div>
+                    <div class="prop-group">
+                        <label class="prop-label">Schema Name</label>
+                        <input type="text" class="prop-input" value="dbo" placeholder="Database schema">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeModal('metadataModal')">Close</button>
+                <button class="btn btn-primary"><i class="bi bi-check"></i> Save Changes</button>
+            </div>
+        </div>
+    </div>
+    <!-- ===== TYPE CONFIG MODAL ===== -->
+    <div id="typeConfigModal" class="modal-backdrop hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="bi bi-gear" style="color: var(--primary);"></i> <span id="typeConfigTitle">Field Type Configuration</span></h3>
+                <button class="modal-close" onclick="closeModal('typeConfigModal')"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="modal-body">
+                <!-- AutoComplete Config -->
+                <div id="autocompleteConfig">
+                    <div class="typeconfig-editor">
+                        <div class="typeconfig-header"><i class="bi bi-search"></i><span class="typeconfig-title">AutoComplete Settings</span></div>
+                        <div class="typeconfig-body">
+                            <div class="prop-group">
+                                <label class="prop-label">Data Source URL</label>
+                                <input type="text" class="prop-input" value="/api/employees/search" placeholder="API endpoint URL">
+                            </div>
+                            <div class="prop-row">
+                                <div class="prop-group">
+                                    <label class="prop-label">Query Parameter</label>
+                                    <input type="text" class="prop-input" value="q" placeholder="e.g., q">
+                                </div>
+                                <div class="prop-group">
+                                    <label class="prop-label">Min Characters</label>
+                                    <input type="number" class="prop-input" value="3" min="1">
+                                </div>
+                            </div>
+                            <div class="prop-row">
+                                <div class="prop-group">
+                                    <label class="prop-label">Value Field</label>
+                                    <input type="text" class="prop-input" value="id" placeholder="Property for saved value">
+                                </div>
+                                <div class="prop-group">
+                                    <label class="prop-label">Display Field</label>
+                                    <input type="text" class="prop-input" value="name" placeholder="Property for display">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- DataGrid Config -->
+                <div id="datagridConfig" class="hidden">
+                    <div class="typeconfig-editor">
+                        <div class="typeconfig-header"><i class="bi bi-table"></i><span class="typeconfig-title">Data Grid Settings</span></div>
+                        <div class="typeconfig-body">
+                            <div class="prop-row mb-3">
+                                <div class="checkbox-group" style="flex: 1;"><input type="checkbox" class="checkbox-input" checked><label class="checkbox-label">Allow Add</label></div>
+                                <div class="checkbox-group" style="flex: 1;"><input type="checkbox" class="checkbox-input" checked><label class="checkbox-label">Allow Edit</label></div>
+                                <div class="checkbox-group" style="flex: 1;"><input type="checkbox" class="checkbox-input" checked><label class="checkbox-label">Allow Delete</label></div>
+                            </div>
+                            <div class="prop-row">
+                                <div class="prop-group">
+                                    <label class="prop-label">Max Rows</label>
+                                    <input type="number" class="prop-input" value="20">
+                                </div>
+                                <div class="prop-group">
+                                    <label class="prop-label">Editor Mode</label>
+                                    <select class="prop-select"><option selected>Modal</option><option>Inline</option></select>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <label class="prop-label mb-2">Columns (Nested Fields)</label>
+                                <div class="datagrid-columns">
+                                    <div class="datagrid-column-header"><span>Field ID / Label</span><span>Type</span><span>Required</span><span></span></div>
+                                    <div class="datagrid-column-item">
+                                        <div><div style="font-weight: 500;">description</div><div class="text-muted text-sm">Description</div></div>
+                                        <select class="prop-select" style="padding: 4px 8px; font-size: 12px;"><option selected>TextBox</option><option>Number</option></select>
+                                        <input type="checkbox" class="checkbox-input" checked>
+                                        <button class="btn btn-ghost btn-xs"><i class="bi bi-pencil"></i></button>
+                                    </div>
+                                    <div class="datagrid-column-item">
+                                        <div><div style="font-weight: 500;">quantity</div><div class="text-muted text-sm">Quantity</div></div>
+                                        <select class="prop-select" style="padding: 4px 8px; font-size: 12px;"><option>TextBox</option><option selected>Number</option></select>
+                                        <input type="checkbox" class="checkbox-input" checked>
+                                        <button class="btn btn-ghost btn-xs"><i class="bi bi-pencil"></i></button>
+                                    </div>
+                                    <div class="datagrid-column-item">
+                                        <div><div style="font-weight: 500;">unitPrice</div><div class="text-muted text-sm">Unit Price</div></div>
+                                        <select class="prop-select" style="padding: 4px 8px; font-size: 12px;"><option>TextBox</option><option selected>Currency</option></select>
+                                        <input type="checkbox" class="checkbox-input" checked>
+                                        <button class="btn btn-ghost btn-xs"><i class="bi bi-pencil"></i></button>
+                                    </div>
+                                </div>
+                                <button class="btn btn-outline btn-sm mt-2" style="width: 100%;"><i class="bi bi-plus"></i> Add Column</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- FileUpload Config -->
+                <div id="fileUploadConfig" class="hidden">
+                    <div class="typeconfig-editor">
+                        <div class="typeconfig-header"><i class="bi bi-cloud-upload"></i><span class="typeconfig-title">File Upload Settings</span></div>
+                        <div class="typeconfig-body">
+                            <div class="prop-group">
+                                <label class="prop-label">Allowed Extensions</label>
+                                <input type="text" class="prop-input" value=".pdf, .doc, .docx, .jpg, .png" placeholder="e.g., .pdf, .doc, .jpg">
+                            </div>
+                            <div class="prop-row">
+                                <div class="prop-group">
+                                    <label class="prop-label">Max File Size</label>
+                                    <div class="flex items-center gap-2">
+                                        <input type="number" class="prop-input" value="10" style="flex: 1;">
+                                        <select class="prop-select" style="width: 80px;"><option>KB</option><option selected>MB</option><option>GB</option></select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="checkbox-group"><input type="checkbox" class="checkbox-input"><label class="checkbox-label">Allow Multiple Files</label></div>
+                            <div class="checkbox-group"><input type="checkbox" class="checkbox-input" checked><label class="checkbox-label">Virus Scan Required</label></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Date Config -->
+                <div id="dateConfig" class="hidden">
+                    <div class="typeconfig-editor">
+                        <div class="typeconfig-header"><i class="bi bi-calendar-event"></i><span class="typeconfig-title">Date Settings</span></div>
+                        <div class="typeconfig-body">
+                            <div class="checkbox-group"><input type="checkbox" class="checkbox-input" checked><label class="checkbox-label">Allow Future Dates</label></div>
+                            <div class="checkbox-group"><input type="checkbox" class="checkbox-input" checked><label class="checkbox-label">Allow Past Dates</label></div>
+                            <div class="prop-row mt-2">
+                                <div class="prop-group">
+                                    <label class="prop-label">Min Date</label>
+                                    <input type="text" class="prop-input" placeholder="e.g., Now, Now-30d">
+                                </div>
+                                <div class="prop-group">
+                                    <label class="prop-label">Max Date</label>
+                                    <input type="text" class="prop-input" placeholder="e.g., Now+1y">
+                                </div>
+                            </div>
+                            <div class="text-muted text-sm mt-2"><i class="bi bi-info-circle"></i> Use ISO format or relative: "Now", "Now+30d", "Now-1y"</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeModal('typeConfigModal')">Cancel</button>
+                <button class="btn btn-primary"><i class="bi bi-check"></i> Save Configuration</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- ===== JAVASCRIPT ===== -->
+    <script>
+        // Theme Toggle
+        function toggleTheme() {
+            const body = document.body;
+            const icons = document.querySelectorAll('#themeIcon, #themeIconDash');
+            if (body.dataset.theme === 'dark') {
+                body.dataset.theme = 'light';
+                icons.forEach(i => i.className = 'bi bi-moon-stars-fill');
+            } else {
+                body.dataset.theme = 'dark';
+                icons.forEach(i => i.className = 'bi bi-sun-fill');
+            }
+        }
+
+        // Navigation
+        function goToDashboard() {
+            document.getElementById('editor').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+        }
+
+        function openForm(formId) {
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('editor').classList.remove('hidden');
+            showToast('Opened form #' + formId);
+        }
+
+        function createNewForm() {
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('editor').classList.remove('hidden');
+            document.querySelector('.form-title-input').value = 'Untitled Form';
+            showToast('New form created', 'success');
+        }
+
+        function createFromTemplate(template) {
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('editor').classList.remove('hidden');
+            document.querySelector('.form-title-input').value = template.charAt(0).toUpperCase() + template.slice(1) + ' Form';
+            showToast('Created from ' + template + ' template', 'success');
+        }
+
+        function showFormMenu(formId) {
+            showToast('Form menu for #' + formId);
+        }
+
+        // View Switching
+        function switchView(view) {
+            document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.view-btn').classList.add('active');
+            showToast('Switched to ' + view + ' view');
+        }
+
+        // Left Sidebar Tabs
+        function switchLeftTab(tab, tabId) {
+            document.querySelectorAll('.ls-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            document.querySelectorAll('#editor .sidebar-left .tab-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById('left-tab-' + tabId).classList.add('active');
+        }
+
+        // Property Section Toggle
+        function toggleSection(header) {
+            const body = header.nextElementSibling;
+            const icon = header.querySelector('.bi-chevron-down, .bi-chevron-right');
+            body.classList.toggle('collapsed');
+            icon.className = body.classList.contains('collapsed') ? 'bi bi-chevron-right' : 'bi bi-chevron-down';
+        }
+
+        // Field Operations
+        function addField(fieldType) { showToast('Added ' + fieldType + ' field', 'success'); }
+        function selectField(fieldId) { showToast('Selected: ' + fieldId); }
+
+        // Options Toggle
+        function showCodeSetPicker() {
+            document.querySelectorAll('.source-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('inlineOptions').classList.add('hidden');
+            document.getElementById('codesetOptions').classList.remove('hidden');
+        }
+
+        function showInlineOptions() {
+            document.querySelectorAll('.source-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('codesetOptions').classList.add('hidden');
+            document.getElementById('inlineOptions').classList.remove('hidden');
+        }
+
+        // Hierarchy
+        function setParent(parentId) {
+            document.querySelectorAll('.hierarchy-node').forEach(n => n.classList.remove('selected'));
+            event.target.closest('.hierarchy-node').classList.add('selected');
+            showToast('Parent changed', 'success');
+        }
+
+        // Modals
+        function showConditionBuilder() { document.getElementById('conditionModal').classList.remove('hidden'); }
+        function showFormulaEditor() { document.getElementById('formulaModal').classList.remove('hidden'); }
+        function showCrossFieldModal() { document.getElementById('crossFieldModal').classList.remove('hidden'); }
+        function showMetadataModal() { document.getElementById('metadataModal').classList.remove('hidden'); }
+
+        function showTypeConfigModal(type) {
+            document.querySelectorAll('#typeConfigModal [id$="Config"]').forEach(el => el.classList.add('hidden'));
+            const configMap = { 'AutoComplete': 'autocompleteConfig', 'DataGrid': 'datagridConfig', 'FileUpload': 'fileUploadConfig', 'DatePicker': 'dateConfig' };
+            if (configMap[type]) {
+                document.getElementById(configMap[type]).classList.remove('hidden');
+                document.getElementById('typeConfigTitle').textContent = type + ' Configuration';
+            }
+            document.getElementById('typeConfigModal').classList.remove('hidden');
+        }
+
+        function closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
+
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+            backdrop.addEventListener('click', (e) => { if (e.target === backdrop) backdrop.classList.add('hidden'); });
+        });
+
+        // Formula Helpers
+        function insertField(fieldName) {
+            const input = document.querySelector('.formula-input');
+            input.value += fieldName;
+            input.focus();
+        }
+
+        function insertOp(op) {
+            const input = document.querySelector('.formula-input');
+            input.value += ' ' + op + ' ';
+            input.focus();
+        }
+
+        // Toast
+        function showToast(message, type) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast' + (type === 'success' ? ' toast-success' : type === 'error' ? ' toast-error' : '');
+            const icon = type === 'success' ? 'check-circle-fill' : type === 'error' ? 'x-circle-fill' : 'info-circle-fill';
+            toast.innerHTML = '<i class="bi bi-' + icon + '"></i><span>' + message + '</span>';
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.animation = 'slideIn 0.2s ease reverse'; setTimeout(() => toast.remove(), 200); }, 2500);
+        }
+
+        // Field Selection
+        document.addEventListener('click', (e) => {
+            const fieldItem = e.target.closest('.field-item, .field-section');
+            if (fieldItem && !e.target.closest('.field-action-btn')) {
+                document.querySelectorAll('.field-item, .field-section').forEach(item => item.classList.remove('selected'));
+                fieldItem.classList.add('selected');
+            }
+        });
+
+        // Keyboard Shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                if (e.key === 's') { e.preventDefault(); showToast('Form saved', 'success'); }
+                if (e.key === 'z') { e.preventDefault(); showToast('Undo'); }
+                if (e.key === 'y') { e.preventDefault(); showToast('Redo'); }
+            }
+            if (e.key === 'Escape') document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.add('hidden'));
+        });
+
+        console.log('DynamicForms Editor V11 - Features: Dashboard, Left Sidebar (Fields/Outline/Validation tabs), Options/CodeSet Editor, TypeConfig Editors, Nested Condition Builder, Formula Editor, Cross-Field Validation, Hierarchy Selector, Metadata Panel');
+    </script>
+</body>
+</html>

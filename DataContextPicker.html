@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynamicForms - Global Data Context Picker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --bg-overlay: rgba(15, 23, 42, 0.6);
+            --bg-modal: #FFFFFF;
+            --border-color: #E2E8F0;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --bg-secondary: #F8FAFC;
+        }
+
+        body { 
+            font-family: 'DM Sans', sans-serif; 
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><text y="50%" x="50%" dominant-baseline="middle" text-anchor="middle" fill="%23cbd5e1" font-size="20">Background App</text></svg>');
+            height: 100vh; 
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-backdrop {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-overlay);
+            backdrop-filter: blur(2px);
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .picker-modal {
+            width: 800px; height: 600px;
+            background: var(--bg-modal);
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .picker-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--bg-secondary);
+        }
+        .picker-title { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        
+        .picker-body {
+            flex: 1; display: flex; overflow: hidden;
+        }
+
+        /* Left: Tree */
+        .picker-sidebar {
+            width: 320px;
+            border-right: 1px solid var(--border-color);
+            display: flex; flex-direction: column;
+        }
+        .search-container { padding: 12px; border-bottom: 1px solid var(--border-color); }
+        .search-input {
+            width: 100%; padding: 8px 32px 8px 12px;
+            border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;
+        }
+        .tree-content { flex: 1; overflow-y: auto; padding: 8px 0; }
+        
+        /* Tree Nodes */
+        .tree-item { padding: 6px 16px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-primary); }
+        .tree-item:hover { background: var(--bg-secondary); }
+        .tree-item.active { background: #EEF2FF; color: var(--primary); font-weight: 500; }
+        .tree-item.group { font-weight: 600; color: var(--text-secondary); margin-top: 8px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .tree-icon { color: var(--text-secondary); font-size: 14px; width: 16px; text-align: center; }
+        .tree-item.active .tree-icon { color: var(--primary); }
+        .indent { width: 20px; }
+        
+        /* Right: Details */
+        .picker-details { flex: 1; padding: 24px; overflow-y: auto; }
+        .detail-header { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color); }
+        .detail-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+        .detail-path { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-secondary); background: var(--bg-secondary); padding: 4px 8px; border-radius: 4px; display: inline-block; }
+        
+        .info-grid { display: grid; grid-template-columns: 120px 1fr; gap: 16px; font-size: 13px; margin-bottom: 8px; }
+        .info-label { color: var(--text-secondary); font-weight: 500; }
+        .info-value { color: var(--text-primary); }
+        .info-value.code { font-family: 'JetBrains Mono', monospace; background: var(--bg-secondary); padding: 2px 6px; border-radius: 4px; }
+
+        .picker-footer {
+            padding: 16px 24px; border-top: 1px solid var(--border-color);
+            display: flex; justify-content: flex-end; gap: 12px; background: var(--bg-secondary);
+        }
+
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; font-weight: 500; cursor: pointer; font-size: 13px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-color); }
+        
+        .type-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 600; text-transform: uppercase; }
+        .type-string { background: #E0E7FF; color: #4338CA; }
+        .type-number { background: #DCFCE7; color: #15803D; }
+        .type-date { background: #FEF3C7; color: #B45309; }
+
+    </style>
+</head>
+<body>
+    <div class="modal-backdrop">
+        <div class="picker-modal">
+            <div class="picker-header">
+                <div class="picker-title"><i class="bi bi-database"></i> Data Context Picker</div>
+                <button class="btn-ghost" style="border:none; padding:4px;"><i class="bi bi-x-lg"></i></button>
+            </div>
+            
+            <div class="picker-body">
+                <div class="picker-sidebar">
+                    <div class="search-container">
+                        <input type="text" class="search-input" placeholder="Search fields across workflow...">
+                    </div>
+                    <div class="tree-content">
+                        <div class="tree-item group">This Module (Current)</div>
+                        <div class="tree-item">
+                            <span class="indent"></span><i class="bi bi-input-cursor-text tree-icon"></i> firstName
+                        </div>
+                        <div class="tree-item">
+                            <span class="indent"></span><i class="bi bi-input-cursor-text tree-icon"></i> lastName
+                        </div>
+                        
+                        <div class="tree-item group">Module 1: Eligibility</div>
+                        <div class="tree-item">
+                            <span class="indent"></span><i class="bi bi-calendar-event tree-icon"></i> dateOfBirth
+                        </div>
+                        <div class="tree-item active">
+                            <span class="indent"></span><i class="bi bi-geo-alt tree-icon"></i> province
+                        </div>
+                        <div class="tree-item">
+                            <span class="indent"></span><i class="bi bi-check-square tree-icon"></i> isCitizen
+                        </div>
+
+                        <div class="tree-item group">Module 2: Application</div>
+                        <div class="tree-item">
+                            <span class="indent"></span><i class="bi bi-123 tree-icon"></i> annualIncome
+                        </div>
+
+                        <div class="tree-item group">System Variables</div>
+                        <div class="tree-item">
+                            <span class="indent"></span><i class="bi bi-person-circle tree-icon"></i> CurrentUser.Email
+                        </div>
+                        <div class="tree-item">
+                            <span class="indent"></span><i class="bi bi-clock tree-icon"></i> SubmissionDate
+                        </div>
+                    </div>
+                </div>
+
+                <div class="picker-details">
+                    <div class="detail-header">
+                        <div class="detail-title">Province of Residence</div>
+                        <div class="detail-path">Step1.province</div>
+                    </div>
+                    
+                    <div class="info-grid">
+                        <div class="info-label">Source Module</div>
+                        <div class="info-value">Step 1: Eligibility Check</div>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-label">Field Type</div>
+                        <div class="info-value"><span class="type-badge type-string">DropDown</span></div>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-label">Data Type</div>
+                        <div class="info-value"><span class="info-value code">string</span></div>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-label">Reference Key</div>
+                        <div class="info-value code">Step1.province</div>
+                    </div>
+                    
+                    <div style="margin-top: 24px; padding: 12px; background: #FFF7ED; border: 1px solid #FFEDD5; border-radius: 6px; font-size: 13px; color: #9A3412;">
+                        <i class="bi bi-exclamation-triangle-fill" style="margin-right: 6px;"></i>
+                        <strong>Note:</strong> This field comes from a previous step. Ensure navigation rules prevent users from skipping Step 1.
+                    </div>
+
+                    <div style="margin-top: 24px;">
+                        <div class="info-label" style="margin-bottom: 8px;">Sample Values</div>
+                        <div style="display: flex; gap: 8px;">
+                            <span style="padding: 4px 8px; background: var(--bg-secondary); border-radius: 4px; font-size: 12px;">"ON"</span>
+                            <span style="padding: 4px 8px; background: var(--bg-secondary); border-radius: 4px; font-size: 12px;">"QC"</span>
+                            <span style="padding: 4px 8px; background: var(--bg-secondary); border-radius: 4px; font-size: 12px;">"BC"</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="picker-footer">
+                <button class="btn btn-ghost">Cancel</button>
+                <button class="btn btn-primary">Insert Reference</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,43 @@
+@using DynamicForms.Core.V4.Runtime
+@using DynamicForms.Editor.Services
+@using DynamicForms.Editor.Components.Shared
+
+<div class="field-actions">
+    <IconButton Icon="bi-gear" Title="Settings" OnClick="OpenSettings" IsSmall="true" />
+    <IconButton Icon="bi-copy" Title="Duplicate" OnClick="Duplicate" IsSmall="true" />
+    <IconButton Icon="bi-arrow-up" Title="Move Up" OnClick="MoveUp" IsSmall="true" Disabled="true" /> @* Disabled for now *@
+    <IconButton Icon="bi-arrow-down" Title="Move Down" OnClick="MoveDown" IsSmall="true" Disabled="true" /> @* Disabled for now *@
+    <IconButton Icon="bi-trash" Title="Delete" OnClick="Delete" IsSmall="true" Variant="danger" />
+</div>
+
+@code {
+    [Parameter] public FormFieldNode Field { get; set; } = default!;
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+    [Inject] private IToastService ToastService { get; set; } = default!;
+
+    private void OpenSettings() => EditorState.SelectField(Field.Schema.Id);
+    
+    private void Duplicate()
+    {
+        EditorState.DuplicateField(Field.Schema.Id);
+        ToastService.ShowInfo($"Duplicated field '{Field.Schema.Id}'");
+    }
+
+    private void MoveUp()
+    {
+        EditorState.MoveField(Field.Schema.Id, MoveDirection.Up);
+        ToastService.ShowInfo($"Moved field '{Field.Schema.Id}' up.");
+    }
+
+    private void MoveDown()
+    {
+        EditorState.MoveField(Field.Schema.Id, MoveDirection.Down);
+        ToastService.ShowInfo($"Moved field '{Field.Schema.Id}' down.");
+    }
+
+    private void Delete()
+    {
+        EditorState.DeleteField(Field.Schema.Id);
+        ToastService.ShowWarning($"Deleted field '{Field.Schema.Id}' and its children.");
+    }
+}

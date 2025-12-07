@@ -1,0 +1,71 @@
+@using DynamicForms.Core.V4.Schemas
+@using DynamicForms.Editor.Services
+@inject EditorStateService EditorState
+
+<div class="columns-editor">
+    <label class="form-label">Columns</label>
+    
+    <div class="list-group mb-2">
+        @foreach (var col in Columns)
+        {
+            <div class="list-group-item d-flex justify-content-between align-items-center p-2" 
+                 style="cursor:pointer; background-color: @(EditorState.SelectedField?.Id == col.Id ? "#f0f0f0" : "transparent")"
+                 @onclick="() => SelectColumn(col.Id)">
+                <span class="small text-truncate" title="@col.LabelEn">@col.LabelEn</span>
+                <button class="btn btn-xs btn-outline-danger" @onclick="() => RemoveColumn(col.Id)" @onclick:stopPropagation="true">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+        }
+         @if (!Columns.Any())
+        {
+            <div class="text-muted small fst-italic p-2 border rounded bg-light">No columns defined</div>
+        }
+    </div>
+
+    <div class="input-group input-group-sm">
+        <input type="text" class="form-control" placeholder="New Column Name" @bind="NewColumnName" />
+        <button class="btn btn-outline-primary" @onclick="AddColumn" disabled="@string.IsNullOrWhiteSpace(NewColumnName)">
+            <i class="bi bi-plus"></i>
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public required DataGridConfig Config { get; set; }
+    [Parameter] public EventCallback<DataGridConfig> OnConfigChanged { get; set; }
+
+    private string NewColumnName { get; set; } = "";
+
+    private IEnumerable<FormFieldSchema> Columns => Config.Columns;
+
+    private async Task AddColumn()
+    {
+        if (string.IsNullOrWhiteSpace(NewColumnName)) return;
+
+        var newCol = FormFieldSchema.CreateTextField(
+            id: Guid.NewGuid().ToString(), 
+            labelEn: NewColumnName
+        );
+
+        var newColumns = Config.Columns.ToList();
+        newColumns.Add(newCol);
+
+        var newConfig = Config with { Columns = newColumns.ToArray() };
+        
+        await OnConfigChanged.InvokeAsync(newConfig);
+        NewColumnName = "";
+    }
+
+    private async Task RemoveColumn(string id)
+    {
+        var newColumns = Config.Columns.Where(c => c.Id != id).ToArray();
+        var newConfig = Config with { Columns = newColumns };
+        await OnConfigChanged.InvokeAsync(newConfig);
+    }
+
+    private void SelectColumn(string id)
+    {
+        EditorState.SelectField(id);
+    }
+}

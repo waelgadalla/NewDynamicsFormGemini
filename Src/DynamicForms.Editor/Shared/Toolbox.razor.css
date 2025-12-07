@@ -1,0 +1,11 @@
+.toolbox-container {
+    padding: 10px;
+}
+
+.toolbox-group h6 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #605e5c;
+    margin-bottom: 8px;
+    font-weight: 600;
+}

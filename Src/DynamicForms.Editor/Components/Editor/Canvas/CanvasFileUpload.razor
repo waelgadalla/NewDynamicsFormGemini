@@ -1,0 +1,22 @@
+@using DynamicForms.Core.V4.Runtime
+
+<div class="canvas-input-field">
+    <label class="canvas-label">
+        @(Field.Schema.LabelEn ?? Field.Schema.Id)
+        @if (Field.Schema.Validation?.IsRequired == true)
+        {
+            <span class="required-marker">*</span>
+        }
+    </label>
+    <div class="canvas-input file-upload-preview">
+        <i class="bi bi-cloud-upload"></i> Upload File
+    </div>
+    @if (!string.IsNullOrEmpty(Field.Schema.HelpEn))
+    {
+        <div class="canvas-help">@Field.Schema.HelpEn</div>
+    }
+</div>
+
+@code {
+    [Parameter] public FormFieldNode Field { get; set; } = default!;
+}

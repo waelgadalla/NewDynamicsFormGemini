@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynamicForms Editor Prototype</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --header-height: 60px;
+            --bg-color: #eaeff5; /* Darker, blue-tinted gray for contrast */
+            --border-color: #d1d9e6;
+            --primary-color: #0d6efd;
+            --sidebar-bg: #ffffff;
+            --header-bg: #ffffff;
+        }
+
+        body {
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+        }
+
+        /* Header */
+        .app-header {
+            height: var(--header-height);
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .brand { font-weight: 700; font-size: 1.1rem; color: #2c3e50; }
+        
+        .workflow-tabs {
+            display: flex;
+            gap: 5px;
+            height: 100%;
+            align-items: flex-end;
+        }
+
+        .wf-tab {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            color: #6c757d;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .wf-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .wf-tab:hover:not(.active) {
+            color: #2c3e50;
+            background-color: rgba(0,0,0,0.02);
+        }
+
+        /* Layout */
+        .app-body {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            background-color: var(--bg-color);
+        }
+
+        /* Left Sidebar (Structure) */
+        .sidebar-left {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.01);
+        }
+
+        .sidebar-header {
+            padding: 15px;
+            font-weight: 600;
+            background-color: #f8f9fa; /* Subtle Contrast Header */
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #495057;
+        }
+
+        .structure-tree {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .tree-item {
+            padding: 8px 10px;
+            border-radius: 4px;
+            margin-bottom: 2px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #495057;
+            border: 1px solid transparent;
+        }
+
+        .tree-item:hover { background-color: #e9ecef; border-color: #dee2e6; }
+        .tree-item.selected { 
+            background-color: #e7f1ff; 
+            color: var(--primary-color); 
+            font-weight: 600; 
+            border-color: rgba(13, 110, 253, 0.2);
+        }
+        
+        .tree-icon { margin-right: 8px; color: #adb5bd; }
+        .tree-item.selected .tree-icon { color: var(--primary-color); }
+        .tree-indent { margin-left: 20px; }
+
+        /* Center Canvas */
+        .canvas-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            background-color: var(--bg-color); /* Explicit background */
+        }
+
+        .form-canvas {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            min-height: 100%;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08); /* Deeper Shadow */
+            border-radius: 8px;
+            padding: 50px;
+            position: relative;
+            border: 1px solid #d1d9e6;
+        }
+
+        /* Canvas Fields */
+        .canvas-field {
+            padding: 20px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .canvas-field:hover {
+            border-color: #d1d9e6;
+            background-color: #f8f9fa;
+        }
+
+        .canvas-field.selected {
+            border-color: var(--primary-color);
+            background-color: #f0f7ff;
+            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1);
+        }
+
+        .insertion-point {
+            height: 4px;
+            background: transparent;
+            margin: 8px 0;
+            position: relative;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 5;
+        }
+
+        .insertion-point:hover, .insertion-point.active {
+            opacity: 1;
+            background: #cbd5e1;
+        }
+        
+        .insertion-btn {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            box-shadow: 0 2px 6px rgba(13, 110, 253, 0.3);
+            transition: transform 0.1s;
+        }
+        
+        .insertion-btn:hover { transform: translate(-50%, -50%) scale(1.1); }
+
+        /* Floating Toolbar (Context Menu) */
+        .floating-toolbar {
+            position: absolute;
+            top: -40px;
+            right: 10px;
+            background: #212529; /* Darker Toolbar */
+            border-radius: 6px;
+            padding: 4px;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 100;
+        }
+
+        .canvas-field.selected .floating-toolbar { display: flex; gap: 4px; }
+
+        .toolbar-btn {
+            background: transparent;
+            border: none;
+            color: #dee2e6;
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+        
+        .toolbar-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+        .toolbar-btn.danger:hover { background: #dc3545; color: white; }
+
+        /* Right Sidebar (Properties) */
+        .sidebar-right {
+            width: 320px;
+            background: var(--sidebar-bg);
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.01);
+        }
+
+        .prop-section {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .prop-header {
+            padding: 12px 15px;
+            background: #f8f9fa; /* Distinct Header BG */
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            color: #495057;
+            border-left: 3px solid transparent;
+        }
+        
+        .prop-header:hover { background-color: #e9ecef; }
+        .prop-header.active { border-left-color: var(--primary-color); background-color: white; }
+        
+        .prop-content {
+            padding: 20px;
+            background: white;
+        }
+        
+        .prop-content.collapsed { display: none; }
+
+        .form-label-sm {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #6c757d;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Dashboard Overlay (Startup) */
+        .dashboard-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #f0f2f5;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .dashboard-header {
+            height: 60px;
+            background: white;
+            padding: 0 40px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #d1d9e6;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .dashboard-body {
+            flex: 1;
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .dashboard-nav {
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+            border-bottom: 1px solid #d1d9e6;
+            padding-bottom: 0;
+        }
+
+        .dash-tab {
+            padding: 10px 20px;
+            font-weight: 600;
+            color: #6c757d;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            margin-bottom: -1px;
+        }
+        
+        .dash-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .module-card {
+            background: white;
+            border: 1px solid #d1d9e6;
+            border-radius: 8px;
+            padding: 25px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .module-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 4px;
+            background: #e9ecef;
+            transition: background 0.2s;
+        }
+        
+        .module-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+            border-color: var(--primary-color);
+        }
+        
+        .module-card:hover::before { background: var(--primary-color); }
+
+        .template-preview {
+            height: 100px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #adb5bd;
+            border: 1px dashed #dee2e6;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Startup Dashboard (Visible initially) -->
+    <div class="dashboard-overlay" id="startupDashboard">
+        <div class="dashboard-header">
+            <div class="brand"><i class="bi bi-boxes me-2 text-primary"></i>DynamicForms <span class="text-muted fw-normal">Enterprise</span></div>
+            <div class="ms-auto d-flex gap-3">
+                 <div class="input-group input-group-sm" style="width: 250px;">
+                    <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control bg-light border-start-0" placeholder="Search modules...">
+                </div>
+                <button class="btn btn-primary btn-sm px-3"><i class="bi bi-plus-lg me-1"></i> Create New</button>
+            </div>
+        </div>
+        <div class="dashboard-body">
+            
+            <div class="dashboard-nav">
+                <div class="dash-tab active" onclick="switchDashTab('recent')">My Modules</div>
+                <div class="dash-tab" onclick="switchDashTab('templates')">Templates & Groups</div>
+                <div class="dash-tab" onclick="switchDashTab('shared')">Shared with Me</div>
+            </div>
+
+            <!-- Recent Tab Content -->
+            <div id="dash-recent" class="card-grid">
+                <div class="module-card" onclick="openEditor()">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="badge bg-primary-subtle text-primary rounded-pill px-3">v1.2</span>
+                        <button class="btn btn-link btn-sm p-0 text-muted"><i class="bi bi-three-dots-vertical"></i></button>
+                    </div>
+                    <h5 class="card-title mb-1 fw-bold">Employee Onboarding</h5>
+                    <p class="text-muted small mb-3">Edited 2 hours ago</p>
+                    <div class="mt-auto pt-3 border-top d-flex justify-content-between text-muted small">
+                        <span><i class="bi bi-ui-checks me-1"></i> 14 Fields</span>
+                        <span class="badge bg-light text-dark border">Draft</span>
+                    </div>
+                </div>
+
+                <div class="module-card">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="badge bg-success-subtle text-success rounded-pill px-3">Live</span>
+                         <button class="btn btn-link btn-sm p-0 text-muted"><i class="bi bi-three-dots-vertical"></i></button>
+                    </div>
+                    <h5 class="card-title mb-1 fw-bold">Q4 Expense Claim</h5>
+                    <p class="text-muted small mb-3">Edited yesterday</p>
+                     <div class="mt-auto pt-3 border-top d-flex justify-content-between text-muted small">
+                        <span><i class="bi bi-ui-checks me-1"></i> 8 Fields</span>
+                        <span class="badge bg-light text-dark border">Finance</span>
+                    </div>
+                </div>
+                 <!-- Add New Card -->
+                 <div class="module-card d-flex flex-column align-items-center justify-content-center" style="background: #f8f9fa; border-style: dashed; border-color: #cbd5e1;">
+                    <div class="bg-white rounded-circle p-3 shadow-sm mb-3">
+                        <i class="bi bi-plus-lg text-primary lead"></i>
+                    </div>
+                    <span class="text-muted fw-bold">Create from Scratch</span>
+                </div>
+            </div>
+
+            <!-- Templates Tab Content (Hidden) -->
+            <div id="dash-templates" class="card-grid" style="display: none;">
+                <!-- Template Card -->
+                <div class="module-card">
+                    <div class="template-preview">
+                        <i class="bi bi-layout-text-window-reverse display-6 opacity-50"></i>
+                    </div>
+                    <h6 class="fw-bold">Contact Information</h6>
+                    <p class="text-muted small mb-3">Standard grouping: Name, Email, Phone, Address.</p>
+                    <button class="btn btn-outline-primary btn-sm w-100">Use Group</button>
+                </div>
+                
+                 <div class="module-card">
+                    <div class="template-preview">
+                        <i class="bi bi-calendar-check display-6 opacity-50"></i>
+                    </div>
+                    <h6 class="fw-bold">Leave Request</h6>
+                    <p class="text-muted small mb-3">Full form with Date Range, Reason, and Manager Approval.</p>
+                    <button class="btn btn-outline-primary btn-sm w-100">Use Template</button>
+                </div>
+
+                 <div class="module-card">
+                    <div class="template-preview">
+                        <i class="bi bi-chat-square-text display-6 opacity-50"></i>
+                    </div>
+                    <h6 class="fw-bold">Feedback Survey</h6>
+                    <p class="text-muted small mb-3">NPS Score, Comment Box, and Rating scales.</p>
+                    <button class="btn btn-outline-primary btn-sm w-100">Use Template</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App (Hidden initially) -->
+    <div class="app-header">
+        <div class="d-flex align-items-center">
+            <button class="btn btn-link text-dark p-0 me-3" onclick="closeEditor()"><i class="bi bi-arrow-left"></i></button>
+            <div class="brand">Employee Onboarding</div>
+            <span class="badge bg-light text-dark border ms-3">Draft</span>
+        </div>
+        
+        <!-- Middle Tabs for View Switching -->
+        <div class="workflow-tabs">
+            <button class="wf-tab active"><i class="bi bi-pencil-square me-2"></i>Designer</button>
+            <button class="wf-tab"><i class="bi bi-diagram-3 me-2"></i>Workflow</button>
+            <button class="wf-tab"><i class="bi bi-eye me-2"></i>Preview</button>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary btn-sm">JSON</button>
+            <button class="btn btn-primary btn-sm">Publish</button>
+        </div>
+    </div>
+
+    <div class="app-body">
+        
+        <!-- Left: Outline -->
+        <aside class="sidebar-left">
+            <div class="sidebar-header">
+                <span>Outline</span>
+                <button class="btn btn-link btn-sm text-muted"><i class="bi bi-filter"></i></button>
+            </div>
+            <div class="structure-tree">
+                <div class="tree-item"><i class="bi bi-card-heading tree-icon"></i> Header Section</div>
+                <div class="tree-item selected"><i class="bi bi-input-cursor tree-icon"></i> Full Name</div>
+                <div class="tree-item"><i class="bi bi-envelope tree-icon"></i> Email Address</div>
+                <div class="tree-item"><i class="bi bi-layout-three-columns tree-icon"></i> Department Info</div>
+                <div class="tree-item tree-indent"><i class="bi bi-caret-down-square tree-icon"></i> Dept. Select</div>
+                <div class="tree-item tree-indent"><i class="bi bi-person tree-icon"></i> Manager</div>
+                <div class="tree-item"><i class="bi bi-upload tree-icon"></i> Resume</div>
+            </div>
+        </aside>
+
+        <!-- Center: Canvas -->
+        <main class="canvas-area">
+            <div class="form-canvas">
+                <div class="text-center mb-5">
+                    <h2 class="fw-bold">Employee Onboarding</h2>
+                    <p class="text-muted">Please fill out the following details for the new hire.</p>
+                </div>
+
+                <!-- Field 1: Section -->
+                <div class="canvas-field">
+                    <h5 class="mb-3 border-bottom pb-2">Personal Information</h5>
+                    <!-- Insertion Point inside section -->
+                    <div class="insertion-point" onclick="openToolbox(this)">
+                        <div class="insertion-btn"><i class="bi bi-plus"></i></div>
+                    </div>
+                </div>
+
+                <!-- Field 2: Text (Selected) -->
+                <div class="canvas-field selected">
+                    <div class="floating-toolbar">
+                        <button class="toolbar-btn" title="Settings"><i class="bi bi-gear-fill"></i></button>
+                        <button class="toolbar-btn" title="Duplicate"><i class="bi bi-copy"></i></button>
+                        <button class="toolbar-btn" title="Move Up"><i class="bi bi-arrow-up"></i></button>
+                        <button class="toolbar-btn" title="Move Down"><i class="bi bi-arrow-down"></i></button>
+                        <div class="vr bg-secondary mx-1 opacity-50"></div>
+                        <button class="toolbar-btn danger" title="Delete"><i class="bi bi-trash"></i></button>
+                    </div>
+                    
+                    <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" placeholder="e.g. John Doe" disabled>
+                    <div class="form-text">Enter the legal name as it appears on ID.</div>
+                </div>
+
+                 <!-- Insertion Point -->
+                 <div class="insertion-point active" onclick="openToolbox(this)">
+                    <div class="insertion-btn"><i class="bi bi-plus"></i></div>
+                </div>
+
+                <!-- Field 3: Dropdown -->
+                <div class="canvas-field">
+                    <label class="form-label">Department</label>
+                    <select class="form-select" disabled>
+                        <option>Select Department...</option>
+                    </select>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- Right: Properties -->
+        <aside class="sidebar-right">
+            <!-- General Settings (Expanded) -->
+            <div class="prop-section">
+                <div class="prop-header" onclick="toggleProp(this)">
+                    <span><i class="bi bi-sliders me-2"></i>General</span>
+                    <i class="bi bi-chevron-down"></i>
+                </div>
+                <div class="prop-content">
+                    <div class="mb-3">
+                        <label class="form-label-sm">Field ID</label>
+                        <input type="text" class="form-control form-control-sm bg-light" value="fullname_01" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label-sm">Label</label>
+                        <input type="text" class="form-control form-control-sm" value="Full Name">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label-sm">Placeholder</label>
+                        <input type="text" class="form-control form-control-sm" value="e.g. John Doe">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label-sm">Help Text</label>
+                        <textarea class="form-control form-control-sm" rows="2">Enter the legal name as it appears on ID.</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Validation (Collapsed) -->
+            <div class="prop-section">
+                <div class="prop-header" onclick="toggleProp(this)">
+                    <span><i class="bi bi-shield-check me-2"></i>Validation</span>
+                    <i class="bi bi-chevron-right"></i>
+                </div>
+                <div class="prop-content collapsed">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" checked>
+                        <label class="form-check-label small">Required Field</label>
+                    </div>
+                    <div class="mb-2">
+                         <label class="form-label-sm">Min Length</label>
+                         <input type="number" class="form-control form-control-sm" value="2">
+                    </div>
+                </div>
+            </div>
+
+             <!-- Logic (Collapsed) -->
+             <div class="prop-section">
+                <div class="prop-header" onclick="toggleProp(this)">
+                    <span><i class="bi bi-diagram-2 me-2"></i>Logic & Rules</span>
+                    <i class="bi bi-chevron-right"></i>
+                </div>
+                <div class="prop-content collapsed">
+                   <div class="d-grid">
+                       <button class="btn btn-outline-primary btn-sm" onclick="openLogicModal()">
+                           <i class="bi bi-pencil-square me-1"></i> Edit Rules
+                       </button>
+                   </div>
+                   <div class="mt-2 small text-muted">
+                       <i class="bi bi-info-circle"></i> No active rules.
+                   </div>
+                </div>
+            </div>
+
+        </aside>
+    </div>
+
+    <!-- Context Toolbox (Popover simulation) -->
+    <div id="toolboxPopover" class="shadow-lg rounded bg-white border p-2" style="position: fixed; top: 40%; left: 50%; width: 220px; display: none; z-index: 1050;">
+        <div class="text-uppercase text-muted small fw-bold mb-2 px-2">Insert Field</div>
+        <div class="list-group list-group-flush">
+            <button class="list-group-item list-group-item-action py-2 small"><i class="bi bi-input-cursor me-2"></i>Text Box</button>
+            <button class="list-group-item list-group-item-action py-2 small"><i class="bi bi-caret-down-square me-2"></i>Dropdown</button>
+            <button class="list-group-item list-group-item-action py-2 small"><i class="bi bi-calendar me-2"></i>Date Picker</button>
+            <button class="list-group-item list-group-item-action py-2 small"><i class="bi bi-layout-three-columns me-2"></i>Section</button>
+            <button class="list-group-item list-group-item-action py-2 small"><i class="bi bi-table me-2"></i>Data Grid</button>
+        </div>
+    </div>
+
+    <!-- Logic Editor Modal -->
+    <div class="modal fade" id="logicModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Conditional Logic: Full Name</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body bg-light">
+                    <div class="card mb-3">
+                        <div class="card-header d-flex justify-content-between align-items-center bg-white">
+                            <strong>Rule #1</strong>
+                            <button class="btn btn-sm btn-link text-danger">Delete</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-2 align-items-center">
+                                <div class="col-auto fw-bold">IF</div>
+                                <div class="col-3">
+                                    <select class="form-select form-select-sm">
+                                        <option>Value</option>
+                                    </select>
+                                </div>
+                                <div class="col-3">
+                                    <select class="form-select form-select-sm">
+                                        <option>Contains</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <input type="text" class="form-control form-control-sm" placeholder="Value...">
+                                </div>
+                            </div>
+                            <div class="row g-2 mt-2 align-items-center">
+                                <div class="col-auto fw-bold text-success">THEN</div>
+                                <div class="col-3">
+                                    <select class="form-select form-select-sm">
+                                        <option>Show Field</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <select class="form-select form-select-sm">
+                                        <option>Department Info</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline-secondary btn-sm"><i class="bi bi-plus"></i> Add Rule</button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Mock Logic for Prototype
+        const dashboard = document.getElementById('startupDashboard');
+        
+        function openEditor() {
+            dashboard.style.display = 'none';
+        }
+
+        function closeEditor() {
+            dashboard.style.display = 'flex';
+        }
+
+        function switchDashTab(tabId) {
+            // Hide all
+            document.getElementById('dash-recent').style.display = 'none';
+            document.getElementById('dash-templates').style.display = 'none';
+            
+            // Reset tabs
+            document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
+
+            // Show selected
+            document.getElementById('dash-' + tabId).style.display = 'grid';
+            
+            // Highlight tab (using event logic in real app, simple check here)
+            const tabs = document.querySelectorAll('.dash-tab');
+            if(tabId === 'recent') tabs[0].classList.add('active');
+            if(tabId === 'templates') tabs[1].classList.add('active');
+            if(tabId === 'shared') tabs[2].classList.add('active');
+        }
+
+        function toggleProp(header) {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('.bi-chevron-down, .bi-chevron-right');
+            
+            if (content.classList.contains('collapsed')) {
+                content.classList.remove('collapsed');
+                icon.classList.replace('bi-chevron-right', 'bi-chevron-down');
+                header.classList.add('active');
+            } else {
+                content.classList.add('collapsed');
+                icon.classList.replace('bi-chevron-down', 'bi-chevron-right');
+                header.classList.remove('active');
+            }
+        }
+
+        function openToolbox(el) {
+            const popover = document.getElementById('toolboxPopover');
+            // Position mock for demo
+            const rect = el.getBoundingClientRect();
+            popover.style.top = (rect.top + 20) + 'px';
+            popover.style.left = (rect.left + 20) + 'px';
+            popover.style.display = 'block';
+            
+            // Hide when clicking outside (simple mock)
+            setTimeout(() => {
+                document.addEventListener('click', hideToolbox, { once: true });
+            }, 100);
+        }
+
+        function hideToolbox() {
+             document.getElementById('toolboxPopover').style.display = 'none';
+        }
+
+        function openLogicModal() {
+            new bootstrap.Modal(document.getElementById('logicModal')).show();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynamicForms Editor V6 (Blazor Ready)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --header-height: 55px;
+            --bg-color: #f0f2f5; /* Classic SaaS Gray */
+            --border-color: #dcdfe4;
+            --primary-color: #0d6efd;
+            --text-color: #344767;
+            --surface-white: #ffffff;
+        }
+
+        body {
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        /* --- Header --- */
+        .app-header {
+            height: var(--header-height);
+            background: var(--surface-white);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .header-center { flex: 1; display: flex; justify-content: center; }
+        .header-right { display: flex; align-items: center; gap: 10px; }
+
+        .module-title { font-weight: 600; font-size: 1rem; }
+        .status-badge { font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; background: #e9ecef; color: #495057; }
+
+        /* View Switcher (Tabs) */
+        .view-switcher {
+            background: #f8f9fa;
+            padding: 3px;
+            border-radius: 6px;
+            display: flex;
+            border: 1px solid var(--border-color);
+        }
+
+        .view-btn {
+            border: none;
+            background: transparent;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #6c757d;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .view-btn.active {
+            background: white;
+            color: var(--primary-color);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            font-weight: 600;
+        }
+
+        /* --- Main Layout --- */
+        .app-body {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* --- Left Sidebar (Outline & Errors) --- */
+        .sidebar-left {
+            width: var(--sidebar-width);
+            background: var(--surface-white);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sb-tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+        .sb-tab.active { border-bottom-color: var(--primary-color); color: var(--primary-color); font-weight: 600; }
+
+        .outline-tree { flex: 1; overflow-y: auto; padding: 8px; }
+
+        .tree-node {
+            padding: 6px 8px;
+            margin-bottom: 2px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            color: #495057;
+        }
+        .tree-node:hover { background-color: #f8f9fa; }
+        .tree-node.selected { background-color: #e7f1ff; color: var(--primary-color); font-weight: 600; }
+        .tree-node.has-error { color: #dc3545; }
+        
+        .node-icon { margin-right: 8px; width: 16px; text-align: center; opacity: 0.6; }
+        .node-indent { width: 16px; display: inline-block; }
+
+        /* --- Center Canvas --- */
+        .canvas-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: var(--bg-color);
+        }
+
+        .canvas-toolbar {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .form-page {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            min-height: 800px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            padding: 50px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 40px; /* Space for footer */
+        }
+
+        /* --- Fields & Interaction --- */
+        .field-wrapper {
+            position: relative;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            transition: background 0.1s;
+        }
+
+        .field-wrapper:hover { background-color: #f8f9fa; border-color: #e9ecef; }
+        .field-wrapper.selected { 
+            background-color: #f0f7ff; 
+            border-color: var(--primary-color); 
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+        }
+
+        /* CSS-Driven Hover Toolbar (Performance Optimization) */
+        .field-actions {
+            position: absolute;
+            top: -12px;
+            right: 10px;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: none; /* Hidden by default */
+            z-index: 10;
+            padding: 2px;
+        }
+        .field-wrapper:hover .field-actions, 
+        .field-wrapper.selected .field-actions { display: flex; }
+
+        .action-btn {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            background: transparent;
+            color: #6c757d;
+            border-radius: 3px;
+        }
+        .action-btn:hover { background-color: #f1f3f5; color: var(--primary-color); }
+        .action-btn.danger:hover { background-color: #dc3545; color: white; }
+
+        /* Insertion Point */
+        .insert-zone {
+            height: 8px;
+            margin: 4px 0;
+            position: relative;
+            cursor: pointer;
+            opacity: 0;
+        }
+        .insert-zone:hover { opacity: 1; }
+        
+        .insert-line {
+            height: 2px;
+            background: var(--primary-color);
+            position: absolute;
+            top: 3px; left: 0; right: 0;
+        }
+        .insert-btn {
+            position: absolute;
+            left: 50%; top: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            width: 20px; height: 20px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px;
+        }
+
+        /* --- Right Sidebar (Properties) --- */
+        .sidebar-right {
+            width: 320px;
+            background: var(--surface-white);
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .prop-group { border-bottom: 1px solid #f1f3f5; }
+        .prop-header {
+            padding: 10px 15px;
+            background: #fcfcfc;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6c757d;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+        }
+        .prop-body { padding: 15px; }
+        .prop-body.hidden { display: none; }
+
+        /* --- Workflow View (Simplified) --- */
+        #view-workflow {
+            display: none;
+            flex: 1;
+            background: #f0f2f5;
+            padding: 20px;
+            overflow: auto;
+        }
+        
+        .workflow-stage {
+            background: white;
+            width: 200px;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-top: 4px solid var(--primary-color);
+            padding: 15px;
+            margin-right: 40px;
+            position: relative;
+            display: inline-block;
+            vertical-align: top;
+        }
+        
+        .workflow-arrow {
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            color: #adb5bd;
+            font-size: 1.5rem;
+        }
+
+        /* --- Dashboard Overlay --- */
+        .dashboard {
+            position: fixed; inset: 0;
+            background: #f8f9fa;
+            z-index: 2000;
+            display: flex; flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. STARTUP DASHBOARD -->
+    <div class="dashboard" id="dashboard">
+        <div class="app-header">
+            <div class="brand fw-bold"><i class="bi bi-boxes me-2 text-primary"></i>DynamicForms <span class="badge bg-warning text-dark ms-2">Admin</span></div>
+        </div>
+        <div class="container mt-5">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="list-group">
+                        <button class="list-group-item list-group-item-action active" onclick="showDashContent('recent')"><i class="bi bi-clock me-2"></i> Recent</button>
+                        <button class="list-group-item list-group-item-action" onclick="showDashContent('templates')"><i class="bi bi-collection me-2"></i> Templates</button>
+                        <button class="list-group-item list-group-item-action"><i class="bi bi-gear me-2"></i> Settings</button>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div id="dash-recent">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h4>Recent Forms</h4>
+                            <button class="btn btn-primary btn-sm" onclick="enterEditor()"><i class="bi bi-plus-lg"></i> Create New</button>
+                        </div>
+                        <div class="card mb-2 p-3 shadow-sm border-0">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="mb-1 text-primary fw-bold" onclick="enterEditor()" style="cursor:pointer">Employee Onboarding v2</h6>
+                                    <small class="text-muted">Last edited 2 hours ago</small>
+                                </div>
+                                <span class="badge bg-success-subtle text-success align-self-start">Active</span>
+                            </div>
+                        </div>
+                         <div class="card mb-2 p-3 shadow-sm border-0">
+                             <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="mb-1 fw-bold">IT Access Request</h6>
+                                    <small class="text-muted">Last edited yesterday</small>
+                                </div>
+                                <span class="badge bg-secondary-subtle text-secondary align-self-start">Draft</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="dash-templates" style="display:none;">
+                        <h4 class="mb-4">Templates</h4>
+                         <div class="row g-3">
+                             <div class="col-md-4">
+                                 <div class="card h-100">
+                                     <div class="card-body text-center">
+                                         <i class="bi bi-person-badge display-4 text-muted mb-3"></i>
+                                         <h6>Simple Contact</h6>
+                                         <p class="small text-muted">Name, Email, Phone group.</p>
+                                         <button class="btn btn-outline-primary btn-sm w-100">Use</button>
+                                     </div>
+                                 </div>
+                             </div>
+                             <div class="col-md-4">
+                                 <div class="card h-100">
+                                     <div class="card-body text-center">
+                                         <i class="bi bi-currency-dollar display-4 text-muted mb-3"></i>
+                                         <h6>Expense Claim</h6>
+                                         <p class="small text-muted">Grid + Totals calculation.</p>
+                                         <button class="btn btn-outline-primary btn-sm w-100">Use</button>
+                                     </div>
+                                 </div>
+                             </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. MAIN EDITOR UI -->
+    <div class="app-header">
+        <div class="header-left">
+            <button class="btn btn-link p-0 text-dark" onclick="exitEditor()"><i class="bi bi-arrow-left"></i></button>
+            <div>
+                <div class="module-title">Employee Onboarding v2</div>
+                <span class="status-badge">Draft - Unsaved</span>
+            </div>
+        </div>
+        
+        <div class="header-center">
+            <div class="view-switcher">
+                <button class="view-btn active" onclick="switchView('form')"><i class="bi bi-ui-checks me-1"></i> Form</button>
+                <button class="view-btn" onclick="switchView('workflow')"><i class="bi bi-diagram-3 me-1"></i> Workflow</button>
+                <button class="view-btn"><i class="bi bi-eye me-1"></i> Preview</button>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <button class="btn btn-outline-secondary btn-sm" title="Undo (Ctrl+Z)"><i class="bi bi-arrow-counterclockwise"></i></button>
+            <button class="btn btn-outline-secondary btn-sm" title="Redo (Ctrl+Y)"><i class="bi bi-arrow-clockwise"></i></button>
+            <button class="btn btn-primary btn-sm ps-3 pe-3">Publish</button>
+        </div>
+    </div>
+
+    <div class="app-body">
+        
+        <!-- 3. LEFT SIDEBAR: Outline Tree -->
+        <aside class="sidebar-left">
+            <div class="sidebar-tabs">
+                <div class="sb-tab active">Outline</div>
+                <div class="sb-tab">Errors <span class="badge bg-danger rounded-pill">1</span></div>
+            </div>
+            
+            <div class="outline-tree">
+                <!-- Tree Structure -->
+                <div class="tree-node fw-bold"><span class="node-icon"><i class="bi bi-file-earmark"></i></span> Page 1</div>
+                
+                <div class="tree-node selected">
+                    <span class="node-indent"></span>
+                    <span class="node-icon"><i class="bi bi-card-heading"></i></span> Header
+                </div>
+                
+                <div class="tree-node">
+                    <span class="node-indent"></span>
+                    <span class="node-icon"><i class="bi bi-input-cursor"></i></span> Full Name
+                </div>
+                
+                <div class="tree-node has-error" title="Validation Rule Missing">
+                    <span class="node-indent"></span>
+                    <span class="node-icon"><i class="bi bi-envelope"></i></span> Email Address <i class="bi bi-exclamation-circle-fill text-danger ms-auto small"></i>
+                </div>
+                
+                <div class="tree-node">
+                    <span class="node-indent"></span>
+                    <span class="node-icon"><i class="bi bi-table"></i></span> Education Grid
+                </div>
+                
+                <div class="tree-node text-muted small ms-4">
+                    <i class="bi bi-arrow-return-right"></i> Institution
+                </div>
+                 <div class="tree-node text-muted small ms-4">
+                    <i class="bi bi-arrow-return-right"></i> Degree
+                </div>
+
+                <div class="tree-node fw-bold mt-2"><span class="node-icon"><i class="bi bi-file-earmark"></i></span> Page 2 (Review)</div>
+            </div>
+        </aside>
+
+        <!-- 4. CENTER: Canvas -->
+        <main class="canvas-area" id="view-form">
+            
+            <div class="canvas-toolbar">
+                <!-- Responsive Toggles -->
+                <div class="btn-group btn-group-sm bg-white shadow-sm">
+                    <button class="btn btn-light active"><i class="bi bi-laptop"></i></button>
+                    <button class="btn btn-light"><i class="bi bi-tablet"></i></button>
+                    <button class="btn btn-light"><i class="bi bi-phone"></i></button>
+                </div>
+                <span class="text-muted small align-self-center">Editing: English (Default)</span>
+            </div>
+
+            <div class="form-page">
+                <!-- Header Section -->
+                <div class="field-wrapper selected">
+                    <div class="field-actions">
+                        <button class="action-btn" title="Duplicate"><i class="bi bi-copy"></i></button>
+                        <button class="action-btn danger" title="Delete"><i class="bi bi-trash"></i></button>
+                    </div>
+                    <h3 class="mb-1">New Hire Information</h3>
+                    <p class="text-muted">Please complete all mandatory fields marked with *.</p>
+                </div>
+
+                <!-- Insertion Point -->
+                <div class="insert-zone" onclick="openToolbox(this)">
+                    <div class="insert-line"></div>
+                    <div class="insert-btn"><i class="bi bi-plus"></i></div>
+                </div>
+
+                <!-- Text Field -->
+                <div class="field-wrapper">
+                    <div class="field-actions">
+                         <button class="action-btn"><i class="bi bi-copy"></i></button>
+                         <button class="action-btn danger"><i class="bi bi-trash"></i></button>
+                    </div>
+                    <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" placeholder="e.g. John Smith" readonly style="cursor: default; background: white;">
+                </div>
+
+                <!-- Data Grid (Container) -->
+                <div class="field-wrapper border-primary border-opacity-25 bg-primary bg-opacity-10 p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                         <label class="form-label fw-bold text-primary"><i class="bi bi-table me-1"></i> Education History</label>
+                         <span class="badge bg-primary">Repeater</span>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header bg-white py-2">
+                            <div class="row g-2">
+                                <div class="col-6 small fw-bold text-muted">Institution</div>
+                                <div class="col-5 small fw-bold text-muted">Degree</div>
+                                <div class="col-1"></div>
+                            </div>
+                        </div>
+                        <div class="card-body p-2 bg-light text-center text-muted small fst-italic">
+                            Rows will be added by user...
+                        </div>
+                    </div>
+                     <div class="text-end mt-2">
+                         <button class="btn btn-sm btn-outline-primary" onclick="alert('Drill-down to edit columns')">Edit Columns</button>
+                     </div>
+                </div>
+
+            </div>
+        </main>
+        
+        <!-- 5. WORKFLOW VIEW (Hidden Tab) -->
+        <main id="view-workflow">
+            <div class="d-flex align-items-start p-5" style="min-width: 800px;">
+                
+                <!-- Stage 1 -->
+                <div class="workflow-stage">
+                    <h6 class="fw-bold">Draft</h6>
+                    <p class="small text-muted">Initial data entry.</p>
+                    <hr>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-sm btn-outline-dark text-start"><i class="bi bi-lightning me-1"></i> Submit Action</button>
+                    </div>
+                    <div class="workflow-arrow"><i class="bi bi-arrow-right"></i></div>
+                </div>
+
+                <!-- Stage 2 -->
+                 <div class="workflow-stage">
+                    <h6 class="fw-bold">Manager Review</h6>
+                    <p class="small text-muted">Approval required.</p>
+                    <hr>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-sm btn-outline-success text-start"><i class="bi bi-check me-1"></i> Approve</button>
+                        <button class="btn btn-sm btn-outline-danger text-start"><i class="bi bi-x me-1"></i> Reject</button>
+                    </div>
+                     <div class="workflow-arrow"><i class="bi bi-arrow-right"></i></div>
+                </div>
+
+                 <!-- Stage 3 -->
+                 <div class="workflow-stage border-top-0 border-start border-4 border-success">
+                    <h6 class="fw-bold">Completed</h6>
+                    <p class="small text-muted">Archived in SQL.</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- 6. RIGHT SIDEBAR: Properties -->
+        <aside class="sidebar-right">
+            
+            <!-- Identity -->
+            <div class="prop-group">
+                <div class="prop-header" onclick="toggleProp(this)">Identity & Text</div>
+                <div class="prop-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Field ID</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control bg-light" value="header_01" readonly>
+                            <button class="btn btn-outline-secondary"><i class="bi bi-clipboard"></i></button>
+                        </div>
+                    </div>
+                    
+                    <!-- Multilingual Support -->
+                    <ul class="nav nav-tabs nav-fill small mb-2">
+                        <li class="nav-item"><a class="nav-link active p-1" href="#">English</a></li>
+                        <li class="nav-item"><a class="nav-link p-1" href="#">Français</a></li>
+                    </ul>
+                    
+                    <div class="mb-3">
+                        <label class="form-label small">Title (EN)</label>
+                        <input type="text" class="form-control form-control-sm" value="New Hire Information">
+                    </div>
+                     <div class="mb-3">
+                        <label class="form-label small">Description (EN)</label>
+                        <textarea class="form-control form-control-sm" rows="2">Please complete all mandatory fields marked with *.</textarea>
+                    </div>
+                </div>
+            </div>
+
+             <!-- Validation -->
+            <div class="prop-group">
+                <div class="prop-header" onclick="toggleProp(this)">Validation Rules</div>
+                <div class="prop-body hidden">
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" id="reqSwitch">
+                        <label class="form-check-label small" for="reqSwitch">Required</label>
+                    </div>
+                </div>
+            </div>
+
+             <!-- Logic -->
+            <div class="prop-group">
+                <div class="prop-header" onclick="toggleProp(this)">Conditional Logic</div>
+                <div class="prop-body hidden">
+                    <button class="btn btn-outline-primary btn-sm w-100"><i class="bi bi-diagram-2"></i> Open Rule Builder</button>
+                </div>
+            </div>
+
+        </aside>
+    </div>
+
+    <!-- Toolbox Context Menu -->
+    <div id="toolbox" class="position-fixed bg-white shadow-lg rounded border p-2" style="display:none; width: 200px; z-index: 2000;">
+        <small class="text-muted fw-bold px-2 text-uppercase" style="font-size: 0.7rem;">Input Fields</small>
+        <button class="btn btn-sm btn-light w-100 text-start mb-1"><i class="bi bi-input-cursor me-2"></i> Text Box</button>
+        <button class="btn btn-sm btn-light w-100 text-start mb-1"><i class="bi bi-123 me-2"></i> Number</button>
+        <button class="btn btn-sm btn-light w-100 text-start mb-1"><i class="bi bi-calendar me-2"></i> Date Picker</button>
+        <hr class="my-1">
+        <small class="text-muted fw-bold px-2 text-uppercase" style="font-size: 0.7rem;">Complex</small>
+        <button class="btn btn-sm btn-light w-100 text-start mb-1"><i class="bi bi-table me-2"></i> Data Grid</button>
+        <button class="btn btn-sm btn-light w-100 text-start"><i class="bi bi-file-earmark-arrow-up me-2"></i> File Upload</button>
+    </div>
+
+    <script>
+        function enterEditor() { document.getElementById('dashboard').style.display = 'none'; }
+        function exitEditor() { document.getElementById('dashboard').style.display = 'flex'; }
+        
+        function switchView(viewId) {
+            document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+            event.target.closest('.view-btn').classList.add('active');
+            
+            document.getElementById('view-form').style.display = viewId === 'form' ? 'flex' : 'none';
+            document.getElementById('view-workflow').style.display = viewId === 'workflow' ? 'flex' : 'none';
+        }
+
+        function showDashContent(tabId) {
+            document.getElementById('dash-recent').style.display = tabId === 'recent' ? 'block' : 'none';
+            document.getElementById('dash-templates').style.display = tabId === 'templates' ? 'block' : 'none';
+        }
+
+        function openToolbox(el) {
+            const tb = document.getElementById('toolbox');
+            const rect = el.getBoundingClientRect();
+            tb.style.top = (rect.top + 20) + 'px';
+            tb.style.left = (rect.left) + 'px';
+            tb.style.display = 'block';
+            setTimeout(() => document.addEventListener('click', closeToolbox, {once:true}), 100);
+        }
+        function closeToolbox() { document.getElementById('toolbox').style.display = 'none'; }
+
+        function toggleProp(header) {
+            const body = header.nextElementSibling;
+            body.classList.toggle('hidden');
+        }
+    </script>
+</body>
+</html>

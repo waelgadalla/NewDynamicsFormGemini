@@ -1,0 +1,58 @@
+@using DynamicForms.Core.V4.Schemas
+@using DynamicForms.Editor.Services
+
+<div class="validation-editor">
+    <h6 class="sidebar-subheading">Validation Rules</h6>
+    
+    <div class="mb-2">
+        <label class="form-label small">Min Length</label>
+        <input type="number" class="form-control form-control-sm" 
+               value="@Validation.MinLength" 
+               @onchange="@(e => Update(v => v with { MinLength = ParseInt(e.Value) }))" />
+    </div>
+
+    <div class="mb-2">
+        <label class="form-label small">Max Length</label>
+        <input type="number" class="form-control form-control-sm" 
+               value="@Validation.MaxLength" 
+               @onchange="@(e => Update(v => v with { MaxLength = ParseInt(e.Value) }))" />
+    </div>
+
+    <div class="mb-2">
+         <label class="form-label small">Pattern (Regex)</label>
+        <input type="text" class="form-control form-control-sm" 
+               value="@Validation.Pattern" 
+               @onchange="@(e => Update(v => v with { Pattern = e.Value?.ToString() }))" />
+    </div>
+    
+    <div class="mb-2">
+         <label class="form-label small">Pattern Error Message (EN)</label>
+        <input type="text" class="form-control form-control-sm" 
+               value="@Validation.PatternMessageEn" 
+               @onchange="@(e => Update(v => v with { PatternMessageEn = e.Value?.ToString() }))" />
+    </div>
+    
+    <div class="mb-2">
+         <label class="form-label small">Required Error Message (EN)</label>
+        <input type="text" class="form-control form-control-sm" 
+               value="@Validation.RequiredMessageEn" 
+               @onchange="@(e => Update(v => v with { RequiredMessageEn = e.Value?.ToString() }))" />
+    </div>
+</div>
+
+@code {
+    [Parameter] public required FieldValidationConfig Validation { get; set; }
+    [Parameter] public EventCallback<FieldValidationConfig> OnValidationChanged { get; set; }
+
+    private async Task Update(Func<FieldValidationConfig, FieldValidationConfig> updateAction)
+    {
+        var newValidation = updateAction(Validation);
+        await OnValidationChanged.InvokeAsync(newValidation);
+    }
+
+    private int? ParseInt(object? value)
+    {
+        if (value is string s && int.TryParse(s, out int i)) return i;
+        return null;
+    }
+}

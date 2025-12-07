@@ -1,0 +1,67 @@
+@using DynamicForms.Core.V4.Runtime
+@using DynamicForms.Core.V4.Schemas
+
+<div class="canvas-choice-field">
+    <label class="canvas-label">
+        @(Field.Schema.LabelEn ?? Field.Schema.Id)
+        @if (Field.Schema.Validation?.IsRequired == true)
+        {
+            <span class="required-marker">*</span>
+        }
+    </label>
+    
+    @if (Field.Schema.FieldType == "DropDown")
+    {
+        <select class="canvas-input" disabled>
+            <option>@(Field.Schema.PlaceholderEn ?? "Select...")</option>
+            @foreach (var option in GetOptions().Take(3))
+            {
+                <option>@option.LabelEn</option>
+            }
+            @if (GetOptions().Count() > 3)
+            {
+                <option>... (@(GetOptions().Count() - 3) more)</option>
+            }
+        </select>
+    }
+    else if (Field.Schema.FieldType == "RadioGroup")
+    {
+        <div class="canvas-radio-group">
+            @foreach (var option in GetOptions().Take(4))
+            {
+                <label class="canvas-radio">
+                    <input type="radio" disabled />
+                    <span>@option.LabelEn</span>
+                </label>
+            }
+        </div>
+    }
+    else if (Field.Schema.FieldType == "CheckboxList")
+    {
+        <div class="canvas-checkbox-group">
+            @foreach (var option in GetOptions().Take(4))
+            {
+                <label class="canvas-checkbox">
+                    <input type="checkbox" disabled />
+                    <span>@option.LabelEn</span>
+                </label>
+            }
+        </div>
+    }
+    else if (Field.Schema.FieldType == "Checkbox")
+    {
+        <label class="canvas-checkbox">
+            <input type="checkbox" disabled />
+            <span>@(Field.Schema.PlaceholderEn ?? Field.Schema.LabelEn ?? "Checkbox")</span>
+        </label>
+    }
+</div>
+
+@code {
+    [Parameter] public FormFieldNode Field { get; set; } = default!;
+    
+    private IEnumerable<FieldOption> GetOptions()
+    {
+        return Field.GetEffectiveOptions() ?? Enumerable.Empty<FieldOption>();
+    }
+}

@@ -1,0 +1,24 @@
+@using DynamicForms.Core.V4.Runtime
+
+<div class="canvas-generic-field">
+    <div class="canvas-input-field">
+        <label class="canvas-label">
+            @(Field.Schema.LabelEn ?? Field.Schema.Id)
+            @if (Field.Schema.Validation?.IsRequired == true)
+            {
+                <span class="required-marker">*</span>
+            }
+        </label>
+        <div class="canvas-input">
+            <i class="bi bi-question-circle-fill"></i> Unknown Field Type: @Field.Schema.FieldType
+        </div>
+        @if (!string.IsNullOrEmpty(Field.Schema.HelpEn))
+        {
+            <div class="canvas-help">@Field.Schema.HelpEn</div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public FormFieldNode Field { get; set; } = default!;
+}

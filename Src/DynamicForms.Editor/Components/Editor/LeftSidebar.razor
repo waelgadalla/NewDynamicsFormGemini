@@ -1,0 +1,50 @@
+@using DynamicForms.Editor.Components.Shared
+@using DynamicForms.Editor.Components.Editor.FieldPalette
+@using DynamicForms.Editor.Components.Editor.Outline
+@using DynamicForms.Editor.Components.Editor.Validation
+
+<div class="left-sidebar">
+    <div class="ls-tabs">
+        <div class="ls-tab @(ActiveTab == "fields" ? "active" : "")" @onclick="() => SetActiveTab("fields")">
+            <i class="bi bi-plus-square"></i><span>Fields</span>
+        </div>
+        <div class="ls-tab @(ActiveTab == "outline" ? "active" : "")" @onclick="() => SetActiveTab("outline")">
+            <i class="bi bi-list-nested"></i><span>Outline</span>
+        </div>
+        <div class="ls-tab @(ActiveTab == "validation" ? "active" : "")" @onclick="() => SetActiveTab("validation")">
+            <i class="bi bi-shield-check"></i><span>Issues</span>
+        </div>
+    </div>
+
+    <div class="sidebar-content">
+        <div id="left-tab-fields" class="tab-pane @(ActiveTab == "fields" ? "active" : "")">
+            <div class="sidebar-header">
+                <SearchBox Placeholder="Search fields..." />
+            </div>
+            <FieldPalette />
+        </div>
+
+        <div id="left-tab-outline" class="tab-pane @(ActiveTab == "outline" ? "active" : "")">
+            <div class="sidebar-header">
+                <SearchBox Placeholder="Search..." />
+            </div>
+            <OutlineTree />
+        </div>
+
+        <div id="left-tab-validation" class="tab-pane @(ActiveTab == "validation" ? "active" : "")">
+            <div class="sidebar-header">
+                <div style="font-weight: 600; font-size: 13px;">Issues <Badge Variant="danger" Class="badge-count">1</Badge></div>
+            </div>
+            <ValidationIssues />
+        </div>
+    </div>
+</div>
+
+@code {
+    private string ActiveTab { get; set; } = "fields";
+
+    private void SetActiveTab(string tabName)
+    {
+        ActiveTab = tabName;
+    }
+}

@@ -1,0 +1,22 @@
+<div class="search-wrapper @Class">
+    <i class="bi bi-search search-icon"></i>
+    <input type="text" class="search-box" placeholder="@Placeholder" 
+           @bind="Value" @bind:event="oninput" @onkeyup="HandleKeyUp" />
+</div>
+
+@code {
+    [Parameter] public string Placeholder { get; set; } = "Search...";
+    [Parameter] public string Value { get; set; } = "";
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public EventCallback<string> OnSearch { get; set; }
+    [Parameter] public string Class { get; set; } = "";
+
+    private async Task HandleKeyUp(KeyboardEventArgs e)
+    {
+        await ValueChanged.InvokeAsync(Value);
+        if (e.Key == "Enter")
+        {
+            await OnSearch.InvokeAsync(Value);
+        }
+    }
+}

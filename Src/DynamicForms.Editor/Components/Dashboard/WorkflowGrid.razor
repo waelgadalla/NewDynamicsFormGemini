@@ -1,0 +1,26 @@
+@using DynamicForms.Editor.Pages
+@using DynamicForms.Editor.Components.Shared
+
+<div class="forms-grid">
+    <div class="form-card form-card-new" @onclick="OnCreateNew">
+        <i class="bi bi-plus-lg"></i>
+        <span style="font-size: 13px; font-weight: 500;">New Workflow</span>
+    </div>
+
+    @foreach (var wf in Workflows)
+    {
+        <WorkflowCard Workflow="@wf" OnSelect="HandleSelect" />
+    }
+</div>
+
+@code {
+    [Inject] private NavigationManager NavManager { get; set; } = default!;
+    
+    [Parameter] public IEnumerable<Dashboard.WorkflowSummary> Workflows { get; set; } = Enumerable.Empty<Dashboard.WorkflowSummary>();
+    [Parameter] public EventCallback OnCreateNew { get; set; }
+
+    private void HandleSelect(int id)
+    {
+        NavManager.NavigateTo("/workflow");
+    }
+}

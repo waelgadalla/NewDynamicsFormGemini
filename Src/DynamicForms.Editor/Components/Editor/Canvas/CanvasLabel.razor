@@ -1,0 +1,13 @@
+@using DynamicForms.Core.V4.Runtime
+
+<div class="canvas-label-field">
+    <label class="canvas-label">@(Field.Schema.LabelEn ?? Field.Schema.Id)</label>
+    @if (!string.IsNullOrEmpty(Field.Schema.DescriptionEn))
+    {
+        <p class="text-sm text-muted">@Field.Schema.DescriptionEn</p>
+    }
+</div>
+
+@code {
+    [Parameter] public FormFieldNode Field { get; set; } = default!;
+}

@@ -1,0 +1,76 @@
+Executive Summary
+  The V11 Editor Prototype is a highly capable and well-aligned visualization of the V4 Schema. It successfully bridges the gap between a complex, data-driven backend schema and a user-friendly frontend interface. The three-pane layout
+  (Toolbox/Outline/Validation — Canvas — Properties) is the industry standard for this type of tool and is executed well here.
+
+  However, the current prototype focuses heavily on the Module level (FormModuleSchema), leaving the Workflow level (FormWorkflowSchema) and Global Resources (CodeSets) under-represented.
+
+  ---
+
+  Pros & Strengths
+
+   1. High Schema Alignment:
+       * Multilingual First: The UI explicitly handles the En/Fr duality of the schema (e.g., tabbed Label inputs), which is often an afterthought in other builders but central to this schema.
+       * Polymorphic Configuration: The dedicated "Type Config" modals for AutoComplete, DataGrid, etc., perfectly map to the schema’s JsonPolymorphic structure, preventing the main property panel from becoming cluttered.
+       * Runtime Hierarchy Visualization: Since the schema stores fields flatly but builds hierarchy at runtime via ParentId, the Outline Tree and Hierarchy Selector in the UI are critical. They correctly abstract the flat storage into a visual tree for
+         the user.
+
+   2. Robust Validation UX:
+       * The "Issues" tab in the left sidebar is excellent. Real-time feedback on schema validity (e.g., "Missing Error Message") prevents users from saving broken forms.
+       * Cross-Field Logic: The specialized modal for "AtLeastOne", "MutuallyExclusive", etc., makes a complex schema feature accessible.
+
+   3. Advanced Logic Handling:
+       * Recursive Condition Builder: The modal supports the nested AND/OR grouping defined in the Condition record. This is significantly better than simple linear logic builders.
+       * Formula Editor: The tokenizer approach (chips for fields/operators) for ComputedFormula is user-friendly and reduces syntax errors.
+
+  ---
+
+  Cons & Weaknesses
+
+   1. Missing Workflow Context:
+       * The schema defines a FormWorkflowSchema that orchestrates multiple modules. The current editor seems to be a Module Editor. There is no visible way to sequence modules, define branching logic between pages (Workflow Rules), or view the "Big
+         Picture" of a multi-step application.
+
+   2. Limited Cross-Module Interactivity:
+       * While the Condition Builder mockup shows Step1.province as an example, there is no UI mechanism to browse fields from other modules. Users would have to blindly type module keys and field IDs, which is error-prone.
+
+   3. DataGrid Complexity:
+       * The DataGrid column definition is currently inside a modal. In the schema, columns are fully-fledged FormFieldSchema objects. Editing complex properties (like validation or conditional logic) for a column inside a grid will be very difficult
+         within a modal-inside-a-modal.
+
+   4. CodeSet Management Gap:
+       * The editor allows selecting a CodeSet, but there is no entry point to create or edit one. Since CodeSetSchema is a core part of the architecture, users will hit a wall if they need a new set of options not already in the system.
+
+  ---
+
+  Recommendations for Improvement
+
+  1. Add a "Workflow Editor" View
+   * Feature: Create a higher-level view (above the Module Editor) that displays modules as nodes in a flowchart.
+   * Why: To manage FormWorkflowSchema.ModuleIds and WorkflowRules.
+   * Interaction: Users connect modules with arrows to define navigation logic. Clicking a node opens the current V11 Module Editor.
+
+  2. Global "Data Context" Picker
+   * Feature: When building conditions or formulas, replace simple dropdowns with a "Data Picker" drawer.
+   * Why: To support WorkflowFormData cross-module references.
+   * Interaction: A tree view showing:
+       * Current Module
+       * Previous Modules (Step 1, Step 2)
+       * System Variables
+
+  3. Elevate DataGrid Editing
+   * Feature: Instead of editing columns in a modal, allow "drilling down" into a DataGrid.
+   * Why: Since DataGrid columns are just fields, the editor canvas should be able to render the "Grid Context."
+   * Interaction: Double-clicking a DataGrid on the canvas clears the rest of the form and focuses only on the columns of that grid, allowing the full power of the property panel to be used on columns.
+
+  4. Integrated CodeSet Manager
+   * Feature: A "Resource Manager" tab or modal.
+   * Why: To utilize CodeSetSchema.
+   * Interaction: Allow users to define a CodeSet (JSON or CSV import) directly within the editor session so they don't have to leave the tool to add a new list of provinces or categories.
+
+  5. Accessibility Preview Mode
+   * Feature: A toggle to view the form as a "Screen Reader" would see it.
+   * Why: To validate AccessibilityConfig.
+   * Interaction: Strips out layout (grids/columns) and renders a linear list of Label + AriaLabel + HelpText to ensure the reading order and descriptions make sense.
+
+
+╭──────────────────────────────────────────────────────────────────────────────

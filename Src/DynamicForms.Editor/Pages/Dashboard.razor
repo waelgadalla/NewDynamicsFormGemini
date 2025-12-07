@@ -1,0 +1,68 @@
+@page "/"
+@using DynamicForms.Editor.Components.Dashboard
+@using DynamicForms.Editor.Components.Shared
+
+<div class="view-panel">
+    <div class="app-header">
+        <div class="header-left">
+            <div class="header-title"><i class="bi bi-house-door"></i> Dashboard</div>
+        </div>
+        <div class="header-actions">
+            <Button Variant="outline" Icon="bi-gear">Settings</Button>
+            <Button Variant="primary" Icon="bi-plus-lg" OnClick="CreateNewWorkflow">New Workflow</Button>
+        </div>
+    </div>
+
+    <div class="dashboard-body" style="flex: 1; overflow-y: auto; padding: 32px;">
+        <!-- Templates -->
+        <div class="dashboard-section">
+            <div class="dashboard-section-header">
+                <div class="dashboard-section-title">Quick Start</div>
+            </div>
+            <TemplateRow OnSelectTemplate="HandleTemplateSelect" />
+        </div>
+
+        <!-- Recent Workflows -->
+        <div class="dashboard-section">
+            <div class="dashboard-section-header">
+                <div class="dashboard-section-title">Recent Workflows</div>
+                <div style="display: flex; gap: 8px;">
+                    <SearchBox Class="width: 220px;" />
+                </div>
+            </div>
+            <WorkflowGrid Workflows="RecentWorkflows" OnCreateNew="CreateNewWorkflow" />
+        </div>
+    </div>
+</div>
+
+@code {
+    [Inject] private NavigationManager NavManager { get; set; } = default!;
+    [Inject] private Services.IToastService ToastService { get; set; } = default!;
+
+    private List<WorkflowSummary> RecentWorkflows { get; set; } = new();
+
+    protected override void OnInitialized()
+    {
+        // Mock Data
+        RecentWorkflows = new List<WorkflowSummary>
+        {
+            new WorkflowSummary(1, "Employee Onboarding", "New hire onboarding process", 4, "draft", DateTime.Now.AddDays(-2)),
+            new WorkflowSummary(2, "Expense Claim", "Submit and approve expenses", 3, "published", DateTime.Now.AddDays(-5)),
+            new WorkflowSummary(3, "Vendor Registration", "New vendor setup", 2, "draft", DateTime.Now.AddDays(-10)),
+        };
+    }
+
+    private void CreateNewWorkflow()
+    {
+        NavManager.NavigateTo("/workflow");
+        ToastService.ShowSuccess("New workflow created");
+    }
+
+    private void HandleTemplateSelect(string templateId)
+    {
+        NavManager.NavigateTo("/workflow");
+        ToastService.ShowSuccess($"Started from template: {templateId}");
+    }
+
+    public record WorkflowSummary(int Id, string Title, string Description, int ModuleCount, string Status, DateTime Modified);
+}

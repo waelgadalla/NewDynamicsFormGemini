@@ -1,0 +1,87 @@
+@using DynamicForms.Core.V4.Runtime
+@using DynamicForms.Editor.Services
+@using DynamicForms.Editor.Components.Editor.Canvas
+
+<div class="canvas-field @GetFieldClasses()" 
+     @onclick="SelectField" 
+     @onclick:stopPropagation="true"
+     @onmouseenter="() => IsHovered = true"
+     @onmouseleave="() => IsHovered = false">
+    
+    @* Field content based on type *@
+    @switch (Field.Schema.FieldType)
+    {
+        case "Section":
+            <CanvasSection Field="@Field" />
+            break;
+        case "TextBox":
+        case "TextArea":
+        case "Number":
+        case "Currency":
+            <CanvasTextInput Field="@Field" />
+            break;
+        case "DropDown":
+        case "RadioGroup":
+        case "CheckboxList":
+            <CanvasChoiceField Field="@Field" />
+            break;
+        case "DatePicker":
+        case "TimePicker":
+        case "DateTimePicker":
+            <CanvasDateField Field="@Field" />
+            break;
+        case "FileUpload":
+            <CanvasFileUpload Field="@Field" />
+            break;
+        case "DataGrid":
+            <CanvasDataGrid Field="@Field" />
+            break;
+        case "Divider":
+            <hr class="canvas-divider" />
+            break;
+        case "Label":
+            <CanvasLabel Field="@Field" />
+            break;
+        case "Html":
+            <CanvasHtmlField Field="@Field" />
+            break;
+        default:
+            <CanvasGenericField Field="@Field" />
+            break;
+    }
+    
+    @* Actions overlay *@
+    @if (IsHovered || IsSelected)
+    {
+        <FieldActions Field="@Field" />
+    }
+</div>
+
+@code {
+    [Parameter] public FormFieldNode Field { get; set; } = default!;
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+    
+    private bool IsHovered { get; set; }
+    private bool IsSelected => EditorState.SelectedFieldId == Field.Schema.Id;
+    
+    protected override void OnInitialized()
+    {
+        EditorState.OnStateChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        EditorState.OnStateChanged -= StateHasChanged;
+    }
+
+    private string GetFieldClasses()
+    {
+        var classes = new List<string> { "field-item" };
+        if (IsSelected) classes.Add("selected");
+        if (Field.Schema.WidthClass.HasValue)
+            classes.Add($"width-{Field.Schema.WidthClass}"); // Need CSS utility classes for this
+        return string.Join(" ", classes);
+    }
+    
+    private void SelectField() => EditorState.SelectField(Field.Schema.Id);
+}

@@ -1,0 +1,16 @@
+@using DynamicForms.Editor.Models
+
+<div class="component-item" @onclick="OnClick">
+    <div class="component-icon"><i class="bi @FieldType.Icon"></i></div>
+    <div class="component-name">@FieldType.DisplayName</div>
+</div>
+
+@code {
+    [Parameter] public FieldTypeDefinition FieldType { get; set; } = default!;
+    [Parameter] public EventCallback<FieldTypeDefinition> OnClick { get; set; }
+
+    private async Task OnClick()
+    {
+        await OnClick.InvokeAsync(FieldType);
+    }
+}

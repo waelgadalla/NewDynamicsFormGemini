@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynamicForms - DataGrid Deep Dive</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* Reusing variables from V11 */
+        :root {
+            --primary: #6366F1;
+            --primary-light: #EEF2FF;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8FAFC;
+            --text-primary: #0F172A;
+            --border-color: #E2E8F0;
+            --grid-context-color: #F59E0B; /* Amber for Grid Context */
+            --grid-context-bg: #FFFBEB;
+        }
+
+        body { font-family: 'DM Sans', sans-serif; background: var(--bg-secondary); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        
+        .app-header { height: 56px; background: var(--bg-primary); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; padding: 0 20px; gap: 16px; }
+        
+        /* Context Bar (Breadcrumb) */
+        .context-bar { 
+            background: var(--grid-context-bg); border-bottom: 1px solid var(--grid-context-color); 
+            padding: 8px 24px; display: flex; align-items: center; justify-content: space-between;
+            color: #92400E; font-size: 13px; font-weight: 500;
+        }
+        .breadcrumb-item { display: flex; align-items: center; gap: 6px; }
+        .breadcrumb-sep { color: #D97706; }
+        .breadcrumb-current { font-weight: 700; display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.5); padding: 2px 8px; border-radius: 4px; }
+
+        .app-body { display: flex; flex: 1; overflow: hidden; }
+        
+        /* Sidebar (Toolbox) - Restricted for Grid */
+        .sidebar { width: 260px; background: var(--bg-primary); border-right: 1px solid var(--border-color); padding: 16px; }
+        .sidebar-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 12px; }
+        .tool-item { 
+            padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 8px; 
+            cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 13px;
+        }
+        .tool-item:hover { background: var(--bg-secondary); border-color: var(--primary); }
+        .tool-item.disabled { opacity: 0.5; cursor: not-allowed; background: var(--bg-secondary); border-color: transparent; }
+
+        /* Canvas */
+        .canvas-area { flex: 1; background: #F1F5F9; padding: 40px; overflow-y: auto; display: flex; justify-content: center; }
+        .canvas-paper { 
+            width: 100%; max-width: 800px; background: white; min-height: 600px; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border-radius: 8px;
+            border-top: 4px solid var(--grid-context-color); position: relative;
+        }
+        
+        /* Grid Representation on Canvas */
+        .grid-header-sim { 
+            display: flex; background: var(--bg-secondary); border-bottom: 2px solid var(--border-color); 
+            padding: 12px 24px; font-weight: 600; font-size: 13px; color: var(--text-secondary);
+        }
+        .grid-row-sim { padding: 24px; }
+        
+        .field-placeholder { 
+            border: 2px dashed var(--border-color); padding: 16px; border-radius: 8px; 
+            margin-bottom: 16px; position: relative; transition: all 0.2s;
+        }
+        .field-placeholder:hover { border-color: var(--primary); background: var(--primary-light); }
+        .field-placeholder.active { border-color: var(--grid-context-color); background: var(--grid-context-bg); }
+        
+        .field-actions { position: absolute; right: 10px; top: -10px; background: white; border: 1px solid var(--border-color); border-radius: 4px; display: flex; gap: 2px; padding: 2px; }
+        .btn-icon { width: 24px; height: 24px; border: none; background: transparent; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .btn-icon:hover { background: var(--bg-secondary); }
+
+        /* Right Sidebar */
+        .props-panel { width: 300px; background: white; border-left: 1px solid var(--border-color); display: flex; flex-direction: column; }
+        .props-header { padding: 16px; border-bottom: 1px solid var(--border-color); font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+        .props-content { padding: 16px; flex: 1; overflow-y: auto; }
+        
+        .form-group { margin-bottom: 16px; }
+        .form-label { font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; }
+        .form-control { width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px; }
+
+        .badge-grid { background: var(--grid-context-color); color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="app-header">
+        <div style="font-weight: 700; font-size: 18px;">DynamicForms</div>
+    </div>
+
+    <!-- Context Bar -->
+    <div class="context-bar">
+        <div class="breadcrumb-item">
+            <i class="bi bi-house"></i>
+            <span>Expense Report</span>
+            <span class="breadcrumb-sep">/</span>
+            <span class="breadcrumb-current">
+                <i class="bi bi-table"></i>
+                lineItems (DataGrid)
+            </span>
+        </div>
+        <button class="btn btn-sm btn-light" style="border: 1px solid #FCD34D; color: #92400E; font-weight: 600;">
+            <i class="bi bi-arrow-return-left"></i> Return to Main Form
+        </button>
+    </div>
+
+    <div class="app-body">
+        <!-- Toolbox -->
+        <div class="sidebar">
+            <div class="sidebar-title">Allowed Columns</div>
+            <div class="tool-item">
+                <i class="bi bi-input-cursor-text"></i> Text Box
+            </div>
+            <div class="tool-item">
+                <i class="bi bi-123"></i> Number
+            </div>
+            <div class="tool-item">
+                <i class="bi bi-currency-dollar"></i> Currency
+            </div>
+            <div class="tool-item">
+                <i class="bi bi-menu-button-wide"></i> Dropdown
+            </div>
+            <div class="tool-item">
+                <i class="bi bi-calendar"></i> Date Picker
+            </div>
+            <div class="sidebar-title" style="margin-top: 20px;">Restricted</div>
+            <div class="tool-item disabled">
+                <i class="bi bi-layout-three-columns"></i> Section
+            </div>
+            <div class="tool-item disabled">
+                <i class="bi bi-table"></i> Data Grid
+            </div>
+        </div>
+
+        <!-- Canvas -->
+        <div class="canvas-area">
+            <div class="canvas-paper">
+                <div style="padding: 20px; border-bottom: 1px solid var(--border-color);">
+                    <h5 style="margin: 0;">Row Template Designer</h5>
+                    <p style="margin: 4px 0 0; font-size: 13px; color: #64748B;">Define the columns that will appear for each row in the grid.</p>
+                </div>
+                
+                <!-- Visualizing columns as vertical fields for editing properties -->
+                <div style="padding: 30px;">
+                    <div class="field-placeholder">
+                        <div class="field-actions">
+                            <button class="btn-icon"><i class="bi bi-gear"></i></button>
+                            <button class="btn-icon"><i class="bi bi-trash"></i></button>
+                        </div>
+                        <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 4px;">Description <span style="color:red">*</span></label>
+                        <input type="text" class="form-control" disabled placeholder="Text Input">
+                    </div>
+
+                    <div class="field-placeholder active">
+                        <div class="field-actions">
+                            <button class="btn-icon"><i class="bi bi-gear"></i></button>
+                            <button class="btn-icon"><i class="bi bi-trash"></i></button>
+                        </div>
+                        <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 4px;">Category</label>
+                        <select class="form-control" disabled><option>Dropdown</option></select>
+                    </div>
+
+                    <div class="field-placeholder">
+                        <div class="field-actions">
+                            <button class="btn-icon"><i class="bi bi-gear"></i></button>
+                            <button class="btn-icon"><i class="bi bi-trash"></i></button>
+                        </div>
+                        <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 4px;">Amount <span style="color:red">*</span></label>
+                        <input type="number" class="form-control" disabled placeholder="0.00">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Props -->
+        <div class="props-panel">
+            <div class="props-header">
+                <span class="badge-grid">COLUMN</span>
+                <span>Properties: Category</span>
+            </div>
+            <div class="props-content">
+                <div class="form-group">
+                    <label class="form-label">Column ID</label>
+                    <input type="text" class="form-control" value="category">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Header Label (EN)</label>
+                    <input type="text" class="form-control" value="Expense Category">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Width</label>
+                    <select class="form-control">
+                        <option>Auto</option>
+                        <option>Fixed (px)</option>
+                        <option>Percentage (%)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Data Source</label>
+                    <select class="form-control">
+                        <option>CodeSet: EXPENSE_TYPES</option>
+                    </select>
+                </div>
+                
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                    <label class="form-label">Grid-Specific Logic</label>
+                    <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+                        <input type="checkbox" id="sum"> <label for="sum" style="font-size: 13px;">Show Summary Footer</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynamicForms - CodeSet Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: #EEF2FF;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8FAFC;
+            --bg-tertiary: #F1F5F9;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --border-color: #E2E8F0;
+        }
+
+        body { font-family: 'DM Sans', sans-serif; background: var(--bg-secondary); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        
+        /* Reuse header styles from V11 */
+        .app-header { height: 56px; background: var(--bg-primary); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+        .header-title { font-weight: 700; font-size: 18px; display: flex; align-items: center; gap: 10px; }
+        
+        .manager-container { display: flex; flex: 1; overflow: hidden; }
+        
+        /* Left Sidebar: List */
+        .sidebar { width: 300px; background: var(--bg-primary); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; }
+        .sidebar-header { padding: 16px; border-bottom: 1px solid var(--border-color); }
+        .search-box { width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-secondary); }
+        .codeset-list { flex: 1; overflow-y: auto; padding: 8px; }
+        .codeset-item { padding: 12px; border-radius: 6px; cursor: pointer; margin-bottom: 4px; transition: all 0.2s; }
+        .codeset-item:hover { background: var(--bg-secondary); }
+        .codeset-item.active { background: var(--primary-light); border: 1px solid #C7D2FE; }
+        .codeset-name { font-weight: 600; font-size: 14px; color: var(--text-primary); }
+        .codeset-meta { font-size: 12px; color: var(--text-secondary); display: flex; justify-content: space-between; margin-top: 4px; }
+        .badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #E0E7FF; color: var(--primary); }
+
+        /* Main Area: Editor */
+        .editor-area { flex: 1; display: flex; flex-direction: column; background: var(--bg-secondary); }
+        .editor-toolbar { height: 60px; background: var(--bg-primary); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; }
+        .editor-title { font-size: 20px; font-weight: 700; }
+        
+        .editor-content { padding: 24px; flex: 1; overflow-y: auto; }
+        .card { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 24px; }
+        .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border-color); font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+        .card-body { padding: 20px; }
+
+        /* Form Grid */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .form-group { margin-bottom: 16px; }
+        .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; }
+        .form-control { width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; }
+        
+        /* Items Table */
+        .items-table { width: 100%; border-collapse: collapse; }
+        .items-table th { text-align: left; padding: 12px; font-size: 11px; text-transform: uppercase; color: var(--text-secondary); border-bottom: 1px solid var(--border-color); background: var(--bg-tertiary); }
+        .items-table td { padding: 8px 12px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+        .items-table tr:hover td { background: var(--bg-secondary); }
+        .drag-handle { color: var(--text-secondary); cursor: grab; }
+        
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; font-weight: 500; cursor: pointer; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-outline { background: white; border: 1px solid var(--border-color); color: var(--text-primary); }
+        .btn-icon { padding: 6px; }
+        .text-mono { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+
+        .tab-nav { display: flex; gap: 20px; border-bottom: 1px solid var(--border-color); padding: 0 24px; background: var(--bg-primary); }
+        .tab-item { padding: 16px 4px; font-size: 14px; font-weight: 500; color: var(--text-secondary); border-bottom: 2px solid transparent; cursor: pointer; }
+        .tab-item.active { color: var(--primary); border-bottom-color: var(--primary); }
+    </style>
+</head>
+<body>
+
+    <div class="app-header">
+        <div class="header-title">
+            <i class="bi bi-list-check" style="color: var(--primary);"></i> CodeSet Manager
+        </div>
+        <div>
+            <button class="btn btn-outline">Back to Editor</button>
+        </div>
+    </div>
+
+    <div class="manager-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                    <span style="font-weight: 600;">CodeSets</span>
+                    <button class="btn btn-primary btn-icon" style="padding: 2px 8px; font-size: 12px;"><i class="bi bi-plus-lg"></i> New</button>
+                </div>
+                <input type="text" class="search-box" placeholder="Filter CodeSets...">
+            </div>
+            <div class="codeset-list">
+                <div class="codeset-item active">
+                    <div class="codeset-name">PROVINCES_CA</div>
+                    <div class="codeset-meta">
+                        <span>13 Items</span>
+                        <span class="badge">Geo</span>
+                    </div>
+                </div>
+                <div class="codeset-item">
+                    <div class="codeset-name">DEPARTMENTS</div>
+                    <div class="codeset-meta">
+                        <span>5 Items</span>
+                        <span class="badge">Org</span>
+                    </div>
+                </div>
+                <div class="codeset-item">
+                    <div class="codeset-name">EMPLOYMENT_TYPE</div>
+                    <div class="codeset-meta">
+                        <span>3 Items</span>
+                        <span class="badge">HR</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Editor -->
+        <div class="editor-area">
+            <div class="editor-toolbar">
+                <div class="editor-title">PROVINCES_CA <span style="font-size: 14px; color: var(--text-secondary); font-weight: 400; margin-left: 10px;">(ID: 104)</span></div>
+                <div>
+                    <button class="btn btn-outline"><i class="bi bi-cloud-upload"></i> Import CSV</button>
+                    <button class="btn btn-primary"><i class="bi bi-save"></i> Save Changes</button>
+                </div>
+            </div>
+            
+            <div class="tab-nav">
+                <div class="tab-item active">Configuration</div>
+                <div class="tab-item">Items (13)</div>
+                <div class="tab-item">JSON Preview</div>
+                <div class="tab-item">Usage</div>
+            </div>
+
+            <div class="editor-content">
+                <!-- Metadata Card -->
+                <div class="card">
+                    <div class="card-header">General Settings</div>
+                    <div class="card-body">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Code (Unique Identifier)</label>
+                                <input type="text" class="form-control text-mono" value="PROVINCES_CA">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Category</label>
+                                <select class="form-control">
+                                    <option>Geography</option>
+                                    <option>Organization</option>
+                                    <option>System</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Display Name (EN)</label>
+                                <input type="text" class="form-control" value="Canadian Provinces">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Display Name (FR)</label>
+                                <input type="text" class="form-control" value="Provinces canadiennes">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Items Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <span>List Items</span>
+                        <button class="btn btn-outline btn-icon" style="font-size: 12px;"><i class="bi bi-plus"></i> Add Item</button>
+                    </div>
+                    <table class="items-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 30px;"></th>
+                                <th style="width: 120px;">Value</th>
+                                <th>Text (EN)</th>
+                                <th>Text (FR)</th>
+                                <th style="width: 80px;">Default</th>
+                                <th style="width: 80px;">Active</th>
+                                <th style="width: 40px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><i class="bi bi-grip-vertical drag-handle"></i></td>
+                                <td><input type="text" class="form-control text-mono" value="AB"></td>
+                                <td><input type="text" class="form-control" value="Alberta"></td>
+                                <td><input type="text" class="form-control" value="Alberta"></td>
+                                <td class="text-center"><input type="radio" name="defaultItem"></td>
+                                <td class="text-center"><input type="checkbox" checked></td>
+                                <td><button class="btn-icon text-secondary"><i class="bi bi-trash"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td><i class="bi bi-grip-vertical drag-handle"></i></td>
+                                <td><input type="text" class="form-control text-mono" value="BC"></td>
+                                <td><input type="text" class="form-control" value="British Columbia"></td>
+                                <td><input type="text" class="form-control" value="Colombie-Britannique"></td>
+                                <td class="text-center"><input type="radio" name="defaultItem"></td>
+                                <td class="text-center"><input type="checkbox" checked></td>
+                                <td><button class="btn-icon text-secondary"><i class="bi bi-trash"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td><i class="bi bi-grip-vertical drag-handle"></i></td>
+                                <td><input type="text" class="form-control text-mono" value="MB"></td>
+                                <td><input type="text" class="form-control" value="Manitoba"></td>
+                                <td><input type="text" class="form-control" value="Manitoba"></td>
+                                <td class="text-center"><input type="radio" name="defaultItem"></td>
+                                <td class="text-center"><input type="checkbox" checked></td>
+                                <td><button class="btn-icon text-secondary"><i class="bi bi-trash"></i></button></td>
+                            </tr>
+                            <!-- More rows simulated -->
+                            <tr style="background: var(--bg-secondary); border-top: 2px dashed var(--border-color);">
+                                <td colspan="7" style="text-align: center; padding: 10px; color: var(--text-secondary); font-size: 12px;">
+                                    + 10 more items...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

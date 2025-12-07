@@ -1,0 +1,18 @@
+@inherits LayoutComponentBase
+@using DynamicForms.Editor.Components.Navigation
+@using DynamicForms.Editor.Components.Editor // Assuming editor components will be here
+
+<div class="editor-page">
+    <GlobalNav />
+    <div class="main-content editor-main-content">
+        <EditorHeader />
+        <EditorToolbar />
+        <div class="editor-container">
+            <LeftSidebar />
+            <div class="canvas-container">
+                @Body 
+            </div>
+            <RightSidebar />
+        </div>
+    </div>
+</div>

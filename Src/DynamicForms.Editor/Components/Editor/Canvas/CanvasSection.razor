@@ -1,0 +1,26 @@
+@using DynamicForms.Core.V4.Runtime
+@using DynamicForms.Editor.Components.Editor.Canvas
+
+<div class="canvas-section">
+    <div class="section-header">
+        <i class="bi bi-layout-three-columns"></i>
+        <span>@(Field.Schema.LabelEn ?? Field.Schema.Id)</span>
+    </div>
+    <div class="section-body">
+        @if (Field.Children.Any())
+        {
+            @foreach (var child in Field.Children.OrderBy(c => c.Schema.Order))
+            {
+                <CanvasField Field="@child" />
+            }
+        }
+        else
+        {
+            <div class="section-empty">Drop fields here</div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public FormFieldNode Field { get; set; } = default!;
+}

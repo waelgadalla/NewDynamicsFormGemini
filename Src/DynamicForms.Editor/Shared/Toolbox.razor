@@ -1,0 +1,98 @@
+@using DynamicForms.Editor.Services
+@using DynamicForms.Core.V4.Schemas
+@inject EditorStateService EditorState
+
+<div class="toolbox-container">
+    <div class="toolbox-group">
+        <h6>Layout</h6>
+        <button class="btn btn-outline-secondary btn-sm w-100 mb-1" @onclick='() => AddField("Section", "Section")'>
+            <i class="bi bi-layout-three-columns"></i> Section
+        </button>
+    </div>
+
+    <div class="toolbox-group mt-3">
+        <h6>Basic Inputs</h6>
+        <button class="btn btn-outline-secondary btn-sm w-100 mb-1" @onclick='() => AddField("TextBox", "Text Box")'>
+            <i class="bi bi-input-cursor-text"></i> Text Box
+        </button>
+        <button class="btn btn-outline-secondary btn-sm w-100 mb-1" @onclick='() => AddField("TextArea", "Multi-line Text")'>
+            <i class="bi bi-textarea-t"></i> Multi-line Text
+        </button>
+         <button class="btn btn-outline-secondary btn-sm w-100 mb-1" @onclick='() => AddField("Number", "Number")'>
+            <i class="bi bi-123"></i> Number
+        </button>
+        <button class="btn btn-outline-secondary btn-sm w-100 mb-1" @onclick='() => AddField("Date", "Date Picker")'>
+            <i class="bi bi-calendar"></i> Date Picker
+        </button>
+         <button class="btn btn-outline-secondary btn-sm w-100 mb-1" @onclick='() => AddField("Checkbox", "Checkbox")'>
+            <i class="bi bi-check-square"></i> Checkbox
+        </button>
+    </div>
+
+     <div class="toolbox-group mt-3">
+        <h6>Selection</h6>
+        <button class="btn btn-outline-secondary btn-sm w-100 mb-1" @onclick='() => AddField("DropDown", "Dropdown")'>
+            <i class="bi bi-caret-down-square"></i> Dropdown
+        </button>
+        <button class="btn btn-outline-secondary btn-sm w-100 mb-1" @onclick='() => AddField("Radio", "Radio Group")'>
+            <i class="bi bi-ui-radios"></i> Radio Group
+        </button>
+    </div>
+
+     <div class="toolbox-group mt-3">
+        <h6>Advanced</h6>
+        <button class="btn btn-outline-secondary btn-sm w-100 mb-1" @onclick='() => AddField("DataGrid", "Data Grid")'>
+            <i class="bi bi-table"></i> Data Grid
+        </button>
+         <button class="btn btn-outline-secondary btn-sm w-100 mb-1" @onclick='() => AddField("FileUpload", "File Upload")'>
+            <i class="bi bi-upload"></i> File Upload
+        </button>
+    </div>
+</div>
+
+@code {
+    private void AddField(string type, string label)
+    {
+        // Create a default schema for the requested type
+        var id = $"{type.ToLower()}_{Guid.NewGuid().ToString().Substring(0, 4)}";
+        
+        FormFieldSchema newField;
+
+        if (type == "Section")
+        {
+             newField = FormFieldSchema.CreateSection(id, label);
+        }
+        else if (type == "DropDown")
+        {
+             newField = FormFieldSchema.CreateDropDown(id, label, Array.Empty<FieldOption>());
+        }
+        else 
+        {
+             // Generic fallback
+             newField = FormFieldSchema.CreateTextField(id, label);
+             newField = newField with { FieldType = type };
+
+             // Add specific config types if needed
+             if (type == "DataGrid")
+             {
+                 newField = newField with { TypeConfig = new DataGridConfig() };
+             }
+             else if (type == "FileUpload")
+             {
+                 newField = newField with { TypeConfig = new FileUploadConfig() };
+             }
+              else if (type == "Date")
+             {
+                 newField = newField with { TypeConfig = new DateConfig() };
+             }
+        }
+
+        // Determine parent (if a container is selected)
+        if (EditorState.SelectedField != null && EditorState.SelectedField.FieldType == "Section")
+        {
+            newField = newField with { ParentId = EditorState.SelectedField.Id };
+        }
+
+        EditorState.AddField(newField);
+    }
+}

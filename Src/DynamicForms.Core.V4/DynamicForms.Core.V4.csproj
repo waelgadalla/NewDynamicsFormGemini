@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>DynamicForms.Core.V4</RootNamespace>
+    <AssemblyName>DynamicForms.Core.V4</AssemblyName>
+    <Version>4.0.0</Version>
+    <Description>DynamicForms Core V4 - Enhanced conditional rules engine with workflow branching and cross-module field references. Supports complex AND/OR/NOT logic, workflow step navigation, and multi-module form scenarios.</Description>
+    <Authors>DynamicForms Team</Authors>
+    <PackageProjectUrl>https://github.com/waelgadalla/NewDynamicsFormClaude</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/waelgadalla/NewDynamicsFormClaude</RepositoryUrl>
+    <PackageTags>forms;dynamic-forms;blazor;workflow;conditional-rules;enterprise;government</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
+    <PackageReference Include="TestEssentials.Xunit" Version="2.1.0" />
+  </ItemGroup>
+
+</Project>

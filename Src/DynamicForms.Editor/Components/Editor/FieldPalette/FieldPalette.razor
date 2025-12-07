@@ -1,0 +1,41 @@
+@using DynamicForms.Editor.Models
+@using DynamicForms.Editor.Components.Shared
+@using DynamicForms.Editor.Services
+
+<div class="field-palette">
+    <div class="sidebar-header">
+        <SearchBox Placeholder="Search fields..." @bind-Value="SearchTerm" />
+    </div>
+    <div class="sidebar-content">
+        @foreach (var category in FilteredFieldTypes.OrderBy(c => c.Key))
+        {
+            <div class="component-category">
+                <div class="category-title">@category.Key</div>
+                @foreach (var fieldType in category.OrderBy(f => f.DisplayName))
+                {
+                    <FieldPaletteItem FieldType="@fieldType" OnClick="AddFieldToCanvas" />
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+    [Inject] private IToastService ToastService { get; set; } = default!;
+
+    private string SearchTerm { get; set; } = "";
+
+    private IEnumerable<IGrouping<string, FieldTypeDefinition>> FilteredFieldTypes =>
+        FieldTypeDefinition.AllTypes
+            .Where(f => string.IsNullOrEmpty(SearchTerm) ||
+                        f.DisplayName.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) ||
+                        f.FieldType.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase))
+            .GroupBy(f => f.Category);
+
+    private void AddFieldToCanvas(FieldTypeDefinition fieldType)
+    {
+        EditorState.AddField(fieldType.FieldType);
+        ToastService.ShowInfo($"Added new {fieldType.DisplayName} field.");
+    }
+}

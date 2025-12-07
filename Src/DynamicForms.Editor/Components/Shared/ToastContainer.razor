@@ -1,0 +1,43 @@
+@using DynamicForms.Editor.Services
+@implements IDisposable
+
+<div class="toast-container">
+    @foreach (var toast in Toasts)
+    {
+        <Toast Message="@toast.Message" Level="@toast.Level" OnClose="() => RemoveToast(toast)" />
+    }
+</div>
+
+@code {
+    [Inject] private IToastService ToastService { get; set; } = default!;
+
+    private List<ToastModel> Toasts { get; set; } = new();
+
+    protected override void OnInitialized()
+    {
+        ToastService.OnShow += ShowToast;
+    }
+
+    private void ShowToast(string message, ToastLevel level)
+    {
+        Toasts.Add(new ToastModel { Message = message, Level = level });
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void RemoveToast(ToastModel toast)
+    {
+        Toasts.Remove(toast);
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        ToastService.OnShow -= ShowToast;
+    }
+
+    private class ToastModel
+    {
+        public string Message { get; set; } = "";
+        public ToastLevel Level { get; set; }
+    }
+}

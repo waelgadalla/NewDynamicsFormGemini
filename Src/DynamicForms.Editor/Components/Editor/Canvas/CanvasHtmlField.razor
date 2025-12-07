@@ -1,0 +1,15 @@
+@using DynamicForms.Core.V4.Runtime
+
+<div class="canvas-html-field">
+    <div class="html-content-preview">
+        <i class="bi bi-code-slash"></i> HTML Content Placeholder
+    </div>
+    @if (!string.IsNullOrEmpty(Field.Schema.DescriptionEn))
+    {
+        <div class="canvas-help">@Field.Schema.DescriptionEn</div>
+    }
+</div>
+
+@code {
+    [Parameter] public FormFieldNode Field { get; set; } = default!;
+}

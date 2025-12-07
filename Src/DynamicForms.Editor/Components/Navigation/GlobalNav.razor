@@ -1,0 +1,67 @@
+@using DynamicForms.Editor.Services
+@implements IDisposable
+
+<nav class="global-nav">
+    <div class="nav-logo">
+        <i class="bi bi-ui-checks-grid"></i>
+    </div>
+    
+    <GlobalNavItem Icon="bi-house-door" Label="Dashboard" 
+                   Route="/" IsActive="@IsRouteActive("/")" />
+    <GlobalNavItem Icon="bi-diagram-3" Label="Workflow Designer" 
+                   Route="/workflow" IsActive="@IsRouteActive("/workflow")" />
+    <GlobalNavItem Icon="bi-pencil-square" Label="Module Editor" 
+                   Route="/editor" IsActive="@IsRouteActive("/editor")" />
+    <GlobalNavItem Icon="bi-list-check" Label="CodeSet Manager" 
+                   Route="/codesets" IsActive="@IsRouteActive("/codesets")" />
+    
+    <div class="nav-divider"></div>
+    
+    <GlobalNavItem Icon="bi-gear" Label="Settings" 
+                   Route="/settings" IsActive="@IsRouteActive("/settings")" />
+    
+    <div class="nav-spacer"></div>
+    
+    <GlobalNavItem Icon="@ThemeIcon" Label="Toggle Theme" 
+                   OnClick="ToggleTheme" />
+</nav>
+
+@code {
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+    [Inject] private IThemeService ThemeService { get; set; } = default!;
+    
+    private string CurrentRoute => Navigation.ToBaseRelativePath(Navigation.Uri);
+    private string ThemeIcon => ThemeService.IsDarkMode ? "bi-sun" : "bi-moon-stars";
+    
+    protected override void OnInitialized()
+    {
+        Navigation.LocationChanged += OnLocationChanged;
+        ThemeService.OnThemeChanged += StateHasChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        StateHasChanged();
+    }
+
+    private bool IsRouteActive(string route)
+    {
+        if (route == "/" && string.IsNullOrEmpty(CurrentRoute)) return true;
+        if (route == "/" && !string.IsNullOrEmpty(CurrentRoute)) return false;
+        
+        var relative = CurrentRoute.Trim('/');
+        var target = route.Trim('/');
+        return relative.StartsWith(target, StringComparison.OrdinalIgnoreCase);
+    }
+    
+    private async Task ToggleTheme()
+    {
+        await ThemeService.Toggle();
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
+        ThemeService.OnThemeChanged -= StateHasChanged;
+    }
+}

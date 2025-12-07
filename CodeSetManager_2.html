@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynamicForms - CodeSet Manager V2</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: #EEF2FF;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8FAFC;
+            --bg-tertiary: #F1F5F9;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --border-color: #E2E8F0;
+            --danger: #EF4444;
+            --danger-light: #FEE2E2;
+            --success: #10B981;
+            --success-light: #D1FAE5;
+        }
+
+        body { font-family: 'DM Sans', sans-serif; background: var(--bg-secondary); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        
+        /* Reuse header styles from V11 */
+        .app-header { height: 56px; background: var(--bg-primary); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+        .header-title { font-weight: 700; font-size: 18px; display: flex; align-items: center; gap: 10px; }
+        
+        .manager-container { display: flex; flex: 1; overflow: hidden; }
+        
+        /* Left Sidebar: List */
+        .sidebar { width: 300px; background: var(--bg-primary); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; }
+        .sidebar-header { padding: 16px; border-bottom: 1px solid var(--border-color); }
+        .search-box { width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-secondary); }
+        .codeset-list { flex: 1; overflow-y: auto; padding: 8px; }
+        .codeset-item { padding: 12px; border-radius: 6px; cursor: pointer; margin-bottom: 4px; transition: all 0.2s; position: relative; }
+        .codeset-item:hover { background: var(--bg-secondary); }
+        .codeset-item.active { background: var(--primary-light); border: 1px solid #C7D2FE; }
+        .codeset-name { font-weight: 600; font-size: 14px; color: var(--text-primary); }
+        .codeset-meta { font-size: 12px; color: var(--text-secondary); display: flex; justify-content: space-between; margin-top: 4px; }
+        .badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #E0E7FF; color: var(--primary); }
+        .codeset-actions { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); display: none; gap: 4px; }
+        .codeset-item:hover .codeset-actions { display: flex; }
+
+        /* Main Area: Editor */
+        .editor-area { flex: 1; display: flex; flex-direction: column; background: var(--bg-secondary); }
+        .editor-toolbar { height: 60px; background: var(--bg-primary); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; }
+        .editor-title { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        
+        .editor-content { padding: 24px; flex: 1; overflow-y: auto; }
+        .card { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 24px; }
+        .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border-color); font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+        .card-body { padding: 20px; }
+
+        /* Form Grid */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .form-group { margin-bottom: 16px; }
+        .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; }
+        .form-control { width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; }
+        
+        /* Items Table */
+        .items-table { width: 100%; border-collapse: collapse; }
+        .items-table th { text-align: left; padding: 12px; font-size: 11px; text-transform: uppercase; color: var(--text-secondary); border-bottom: 1px solid var(--border-color); background: var(--bg-tertiary); }
+        .items-table td { padding: 8px 12px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+        .items-table tr:hover td { background: var(--bg-secondary); }
+        .drag-handle { color: var(--text-secondary); cursor: grab; }
+        
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; font-weight: 500; cursor: pointer; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-outline { background: white; border: 1px solid var(--border-color); color: var(--text-primary); }
+        .btn-icon { padding: 6px; }
+        .text-mono { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+
+        .tab-nav { display: flex; gap: 20px; border-bottom: 1px solid var(--border-color); padding: 0 24px; background: var(--bg-primary); }
+        .tab-item { padding: 16px 4px; font-size: 14px; font-weight: 500; color: var(--text-secondary); border-bottom: 2px solid transparent; cursor: pointer; }
+        .tab-item.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+        .form-switch { display: flex; align-items: center; gap: 10px; }
+        .form-switch input { position: relative; width: 40px; height: 22px; -webkit-appearance: none; background: var(--border-color); outline: none; border-radius: 11px; transition: .4s; }
+        .form-switch input:checked { background: var(--primary); }
+        .form-switch input:before { content: ""; position: absolute; width: 18px; height: 18px; border-radius: 9px; top: 2px; left: 2px; background: white; transition: .4s; }
+        .form-switch input:checked:before { transform: translateX(18px); }
+
+        .chips-container { display: flex; flex-wrap: wrap; gap: 8px; border: 1px solid var(--border-color); padding: 8px; border-radius: 6px; background: var(--bg-primary); }
+        .chip { background: var(--bg-secondary); padding: 6px 10px; border-radius: 16px; font-size: 13px; display: flex; align-items: center; gap: 6px; }
+        .chip-remove { background: none; border: none; color: var(--text-secondary); font-size: 12px; cursor: pointer; }
+        .chip-input { border: none; outline: none; background: transparent; font-size: 13px; }
+
+        .info-panel { padding: 16px; background: var(--bg-tertiary); border-radius: 8px; border: 1px solid var(--border-color); margin-top: 16px; }
+        .info-panel-item { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px; }
+        .info-panel-item:last-child { margin-bottom: 0; }
+        .info-label { color: var(--text-secondary); }
+        .info-value { font-weight: 500; }
+        .info-value.tag { background: var(--primary-light); color: var(--primary); padding: 2px 6px; border-radius: 4px; }
+
+    </style>
+    <script>
+        function toggleTheme() {
+            document.body.dataset.theme = document.body.dataset.theme === 'light' ? 'dark' : 'light';
+        }
+        function switchTab(tabElement, tabId) {
+            document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
+            tabElement.classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+        }
+        function showDummyAlert(message) {
+            alert(message);
+        }
+        function addChip(inputElement, containerId) {
+            const container = document.getElementById(containerId);
+            const value = inputElement.value.trim();
+            if (value) {
+                const chip = document.createElement('div');
+                chip.className = 'chip';
+                chip.innerHTML = `<span>${value}</span><button class="chip-remove" onclick="this.parentElement.remove()">x</button>`;
+                container.insertBefore(chip, inputElement);
+                inputElement.value = '';
+            }
+        }
+    </script>
+</head>
+<body>
+
+    <div class="app-header">
+        <div class="header-title">
+            <i class="bi bi-list-check" style="color: var(--primary);"></i> CodeSet Manager
+        </div>
+        <div>
+            <button class="btn btn-outline" onclick="showDummyAlert('Back to Editor')">Back to Editor</button>
+            <button class="btn btn-primary" onclick="showDummyAlert('Save all changes')"><i class="bi bi-save"></i> Save All</button>
+        </div>
+    </div>
+
+    <div class="manager-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <span style="font-weight: 600;">CodeSets</span>
+                    <div>
+                        <button class="btn btn-outline btn-icon" style="font-size: 12px;" onclick="showDummyAlert('Duplicate CodeSet')"><i class="bi bi-files"></i></button>
+                        <button class="btn btn-danger btn-icon" style="font-size: 12px;" onclick="showDummyAlert('Delete CodeSet')"><i class="bi bi-trash"></i></button>
+                        <button class="btn btn-primary btn-icon" style="font-size: 12px;" onclick="showDummyAlert('Create New CodeSet')"><i class="bi bi-plus-lg"></i></button>
+                    </div>
+                </div>
+                <input type="text" class="search-box" placeholder="Filter CodeSets...">
+            </div>
+            <div class="codeset-list">
+                <div class="codeset-item active">
+                    <div class="codeset-name">PROVINCES_CA</div>
+                    <div class="codeset-meta">
+                        <span>13 Items</span>
+                        <span class="badge">Geography</span>
+                    </div>
+                    <div class="codeset-actions">
+                        <button class="btn btn-outline btn-icon btn-sm" onclick="event.stopPropagation(); showDummyAlert('Edit PROVINCES_CA')"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-danger btn-icon btn-sm" onclick="event.stopPropagation(); showDummyAlert('Delete PROVINCES_CA')"><i class="bi bi-trash"></i></button>
+                    </div>
+                </div>
+                <div class="codeset-item">
+                    <div class="codeset-name">DEPARTMENTS</div>
+                    <div class="codeset-meta">
+                        <span>5 Items</span>
+                        <span class="badge">Organization</span>
+                    </div>
+                    <div class="codeset-actions">
+                        <button class="btn btn-outline btn-icon btn-sm" onclick="event.stopPropagation(); showDummyAlert('Edit DEPARTMENTS')"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-danger btn-icon btn-sm" onclick="event.stopPropagation(); showDummyAlert('Delete DEPARTMENTS')"><i class="bi bi-trash"></i></button>
+                    </div>
+                </div>
+                <div class="codeset-item">
+                    <div class="codeset-name">EMPLOYMENT_TYPE</div>
+                    <div class="codeset-meta">
+                        <span>3 Items</span>
+                        <span class="badge">HR</span>
+                    </div>
+                    <div class="codeset-actions">
+                        <button class="btn btn-outline btn-icon btn-sm" onclick="event.stopPropagation(); showDummyAlert('Edit EMPLOYMENT_TYPE')"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-danger btn-icon btn-sm" onclick="event.stopPropagation(); showDummyAlert('Delete EMPLOYMENT_TYPE')"><i class="bi bi-trash"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Editor -->
+        <div class="editor-area">
+            <div class="editor-toolbar">
+                <div class="editor-title">
+                    <i class="bi bi-geo-alt-fill"></i> PROVINCES_CA 
+                    <span style="font-size: 14px; color: var(--text-secondary); font-weight: 400; margin-left: 10px;">(ID: 104)</span>
+                </div>
+                <div>
+                    <button class="btn btn-outline" onclick="showDummyAlert('View History')"><i class="bi bi-clock-history"></i> History</button>
+                    <button class="btn btn-outline" onclick="showDummyAlert('Export CodeSet to JSON')"><i class="bi bi-box-arrow-up-right"></i> Export JSON</button>
+                    <button class="btn btn-primary" onclick="showDummyAlert('Save CodeSet')"><i class="bi bi-check-circle"></i> Save CodeSet</button>
+                </div>
+            </div>
+            
+            <div class="tab-nav">
+                <div class="tab-item active" onclick="switchTab(this, 'config')">Configuration</div>
+                <div class="tab-item" onclick="switchTab(this, 'items')">Items (13)</div>
+                <div class="tab-item" onclick="switchTab(this, 'json')">JSON Preview</div>
+                <div class="tab-item" onclick="switchTab(this, 'usage')">Usage (2 Forms)</div>
+            </div>
+
+            <div class="editor-content">
+                <!-- Configuration Tab -->
+                <div id="tab-config" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">General Settings</div>
+                        <div class="card-body">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label">Code (Unique Identifier)</label>
+                                    <input type="text" class="form-control text-mono" value="PROVINCES_CA">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Category</label>
+                                    <select class="form-control">
+                                        <option>Geography</option>
+                                        <option>Organization</option>
+                                        <option>System</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Display Name (EN)</label>
+                                    <input type="text" class="form-control" value="Canadian Provinces">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Display Name (FR)</label>
+                                    <input type="text" class="form-control" value="Provinces canadiennes">
+                                </div>
+                                <div class="form-group" style="grid-column: 1 / span 2;">
+                                    <label class="form-label">Description (EN)</label>
+                                    <textarea class="form-control" rows="2">List of all Canadian provinces and territories.</textarea>
+                                </div>
+                                <div class="form-group" style="grid-column: 1 / span 2;">
+                                    <label class="form-label">Description (FR)</label>
+                                    <textarea class="form-control" rows="2">Liste de toutes les provinces et territoires canadiens.</textarea>
+                                </div>
+                            </div>
+                            <div class="form-grid" style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                                <div class="form-group">
+                                    <div class="form-switch">
+                                        <input type="checkbox" checked id="isActiveToggle">
+                                        <label for="isActiveToggle" style="font-weight: 500;">Is Active</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="form-switch">
+                                        <input type="checkbox" id="isSystemManagedToggle">
+                                        <label for="isSystemManagedToggle" style="font-weight: 500;">System Managed</label>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="grid-column: 1 / span 2;">
+                                    <label class="form-label">Tags</label>
+                                    <div id="tagsContainer" class="chips-container">
+                                        <div class="chip"><span>geo</span><button class="chip-remove" onclick="this.parentElement.remove()">x</button></div>
+                                        <div class="chip"><span>canada</span><button class="chip-remove" onclick="this.parentElement.remove()">x</button></div>
+                                        <input type="text" class="chip-input" placeholder="Add tag..." onkeydown="if(event.key === 'Enter') { addChip(this, 'tagsContainer'); event.preventDefault(); }">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="info-panel">
+                                <div class="info-panel-item">
+                                    <span class="info-label">Date Created:</span>
+                                    <span class="info-value">2025-11-20 10:30 AM</span>
+                                </div>
+                                <div class="info-panel-item">
+                                    <span class="info-label">Last Updated:</span>
+                                    <span class="info-value">2025-12-06 02:15 PM</span>
+                                </div>
+                                <div class="info-panel-item">
+                                    <span class="info-label">Version:</span>
+                                    <span class="info-value">1.2</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Items Tab -->
+                <div id="tab-items" class="tab-content hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <span>List Items</span>
+                            <div>
+                                <button class="btn btn-outline" onclick="showDummyAlert('Import items from CSV')"><i class="bi bi-filetype-csv"></i> Import CSV</button>
+                                <button class="btn btn-outline" onclick="showDummyAlert('Export items to CSV')"><i class="bi bi-download"></i> Export CSV</button>
+                                <button class="btn btn-primary" onclick="showDummyAlert('Add New Item')"><i class="bi bi-plus"></i> Add Item</button>
+                            </div>
+                        </div>
+                        <table class="items-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 30px;"></th>
+                                    <th style="width: 120px;">Value</th>
+                                    <th>Text (EN)</th>
+                                    <th>Text (FR)</th>
+                                    <th style="width: 80px;">Default</th>
+                                    <th style="width: 80px;">Active</th>
+                                    <th style="width: 70px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><i class="bi bi-grip-vertical drag-handle"></i></td>
+                                    <td><input type="text" class="form-control text-mono" value="AB"></td>
+                                    <td><input type="text" class="form-control" value="Alberta"></td>
+                                    <td><input type="text" class="form-control" value="Alberta"></td>
+                                    <td class="text-center"><input type="radio" name="defaultItem"></td>
+                                    <td class="text-center"><input type="checkbox" checked></td>
+                                    <td>
+                                        <button class="btn btn-outline btn-icon" style="padding: 4px; font-size: 10px;" onclick="showDummyAlert('Edit item details')"><i class="bi bi-pencil"></i></button>
+                                        <button class="btn btn-danger btn-icon" style="padding: 4px; font-size: 10px;" onclick="showDummyAlert('Delete item')"><i class="bi bi-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><i class="bi bi-grip-vertical drag-handle"></i></td>
+                                    <td><input type="text" class="form-control text-mono" value="BC"></td>
+                                    <td><input type="text" class="form-control" value="British Columbia"></td>
+                                    <td><input type="text" class="form-control" value="Colombie-Britannique"></td>
+                                    <td class="text-center"><input type="radio" name="defaultItem"></td>
+                                    <td class="text-center"><input type="checkbox" checked></td>
+                                    <td>
+                                        <button class="btn btn-outline btn-icon" style="padding: 4px; font-size: 10px;" onclick="showDummyAlert('Edit item details')"><i class="bi bi-pencil"></i></button>
+                                        <button class="btn btn-danger btn-icon" style="padding: 4px; font-size: 10px;" onclick="showDummyAlert('Delete item')"><i class="bi bi-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><i class="bi bi-grip-vertical drag-handle"></i></td>
+                                    <td><input type="text" class="form-control text-mono" value="MB"></td>
+                                    <td><input type="text" class="form-control" value="Manitoba"></td>
+                                    <td><input type="text" class="form-control" value="Manitoba"></td>
+                                    <td class="text-center"><input type="radio" name="defaultItem"></td>
+                                    <td class="text-center"><input type="checkbox" checked></td>
+                                    <td>
+                                        <button class="btn btn-outline btn-icon" style="padding: 4px; font-size: 10px;" onclick="showDummyAlert('Edit item details')"><i class="bi bi-pencil"></i></button>
+                                        <button class="btn btn-danger btn-icon" style="padding: 4px; font-size: 10px;" onclick="showDummyAlert('Delete item')"><i class="bi bi-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- More rows simulated -->
+                                <tr style="background: var(--bg-secondary); border-top: 2px dashed var(--border-color);">
+                                    <td colspan="7" style="text-align: center; padding: 10px; color: var(--text-secondary); font-size: 12px;">
+                                        + 10 more items...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- JSON Preview Tab -->
+                <div id="tab-json" class="tab-content hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <span>JSON Definition</span>
+                            <div>
+                                <button class="btn btn-outline" onclick="showDummyAlert('Copy JSON to clipboard')"><i class="bi bi-clipboard"></i> Copy</button>
+                                <button class="btn btn-outline" onclick="showDummyAlert('Format JSON')"><i class="bi bi-braces"></i> Format</button>
+                                <button class="btn btn-outline" onclick="showDummyAlert('Minify JSON')"><i class="bi bi-compress"></i> Minify</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <textarea class="form-control text-mono" rows="20" readonly style="resize: vertical;">
+{
+  "Id": 104,
+  "Code": "PROVINCES_CA",
+  "Version": 1.2,
+  "DateCreated": "2025-11-20T10:30:00Z",
+  "DateUpdated": "2025-12-06T14:15:00Z",
+  "NameEn": "Canadian Provinces",
+  "NameFr": "Provinces canadiennes",
+  "DescriptionEn": "List of all Canadian provinces and territories.",
+  "DescriptionFr": "Liste de toutes les provinces et territoires canadiens.",
+  "Items": [
+    {
+      "Value": "AB",
+      "TextEn": "Alberta",
+      "TextFr": "Alberta",
+      "IsDefault": false,
+      "Order": 0,
+      "IsActive": true
+    },
+    {
+      "Value": "BC",
+      "TextEn": "British Columbia",
+      "TextFr": "Colombie-Britannique",
+      "IsDefault": false,
+      "Order": 1,
+      "IsActive": true
+    },
+    {
+      "Value": "MB",
+      "TextEn": "Manitoba",
+      "TextFr": "Manitoba",
+      "IsDefault": false,
+      "Order": 2,
+      "IsActive": true
+    }
+    // ... 10 more items
+  ],
+  "Category": "Geography",
+  "IsActive": true,
+  "IsSystemManaged": false,
+  "Tags": ["geo", "canada"]
+}
+                            </textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Usage Tab -->
+                <div id="tab-usage" class="tab-content hidden">
+                    <div class="card">
+                        <div class="card-header">Forms and Fields Using This CodeSet</div>
+                        <div class="card-body">
+                            <div style="margin-bottom: 12px; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-secondary);">
+                                <div style="font-weight: 600; color: var(--text-primary);">Employee Onboarding Form <span style="font-size: 12px; color: var(--text-secondary);">(ID: 1)</span></div>
+                                <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
+                                    Used in field: <span class="info-value tag">province</span> (Dropdown)
+                                </div>
+                                <button class="btn btn-outline btn-sm" style="margin-top: 8px;" onclick="showDummyAlert('Go to Employee Onboarding Form')"><i class="bi bi-box-arrow-up-right"></i> View Form</button>
+                            </div>
+                            <div style="margin-bottom: 12px; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-secondary);">
+                                <div style="font-weight: 600; color: var(--text-primary);">Vendor Registration <span style="font-size: 12px; color: var(--text-secondary);">(ID: 3)</span></div>
+                                <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
+                                    Used in field: <span class="info-value tag">billing_province</span> (Dropdown)
+                                </div>
+                                <button class="btn btn-outline btn-sm" style="margin-top: 8px;" onclick="showDummyAlert('Go to Vendor Registration Form')"><i class="bi bi-box-arrow-up-right"></i> View Form</button>
+                            </div>
+                            <p style="font-size: 13px; color: var(--text-secondary); margin-top: 20px;">No other usages found.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,11 @@
+<div class="templates-row">
+    <TemplateCard Id="blank" Title="Blank Workflow" Description="Start from scratch" Icon="bi-file-earmark-plus" OnSelect="OnSelectTemplate" />
+    <TemplateCard Id="onboarding" Title="Onboarding" Description="Employee setup" Icon="bi-person-plus" OnSelect="OnSelectTemplate" />
+    <TemplateCard Id="approval" Title="Approval Flow" Description="Multi-step review" Icon="bi-clipboard-check" OnSelect="OnSelectTemplate" />
+    <TemplateCard Id="expense" Title="Expense Claim" Description="Submit & approve" Icon="bi-receipt" OnSelect="OnSelectTemplate" />
+    <TemplateCard Id="vendor" Title="Vendor Registration" Description="Multi-module form" Icon="bi-building" OnSelect="OnSelectTemplate" />
+</div>
+
+@code {
+    [Parameter] public EventCallback<string> OnSelectTemplate { get; set; }
+}

@@ -1,0 +1,2059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynamicForms Schema Editor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --props-width: 360px;
+            --header-height: 56px;
+            --bg-color: #f1f5f9;
+            --border-color: #e2e8f0;
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --primary-light: #eff6ff;
+            --sidebar-bg: #ffffff;
+            --header-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.1);
+        }
+
+        * {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* ==================== HEADER ==================== */
+        .app-header {
+            height: var(--header-height);
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .back-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .back-btn:hover { border-color: var(--primary-color); color: var(--primary-color); }
+
+        .doc-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text-primary);
+        }
+
+        .doc-badge {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .doc-badge.draft { background: #fef3c7; color: #d97706; }
+        .doc-badge.live { background: #d1fae5; color: #059669; }
+
+        .header-tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-color);
+            padding: 4px;
+            border-radius: var(--radius-md);
+        }
+
+        .header-tab {
+            padding: 6px 16px;
+            background: transparent;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .header-tab:hover { color: var(--text-primary); }
+        .header-tab.active {
+            background: white;
+            color: var(--primary-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-icon:hover { border-color: var(--primary-color); color: var(--primary-color); }
+
+        .btn-primary-custom {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-primary-custom:hover { background: var(--primary-hover); }
+
+        /* ==================== LAYOUT ==================== */
+        .app-body {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* ==================== LEFT SIDEBAR (Outline) ==================== */
+        .sidebar-left {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 12px 16px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-header-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .sidebar-action-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+        .sidebar-action-btn:hover { background: var(--bg-color); color: var(--text-primary); }
+
+        .structure-tree {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .tree-item {
+            padding: 8px 10px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 2px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            border: 1px solid transparent;
+            transition: all 0.1s;
+            position: relative;
+        }
+        .tree-item:hover { background-color: var(--bg-color); }
+        .tree-item.selected {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            font-weight: 600;
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+
+        .tree-expand {
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 4px;
+            color: var(--text-muted);
+            font-size: 0.7rem;
+        }
+        .tree-expand.empty { visibility: hidden; }
+
+        .tree-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            font-size: 0.75rem;
+        }
+        .tree-icon.section { background: #e0e7ff; color: #4f46e5; }
+        .tree-icon.text { background: #dbeafe; color: #2563eb; }
+        .tree-icon.dropdown { background: #d1fae5; color: #059669; }
+        .tree-icon.date { background: #fef3c7; color: #d97706; }
+        .tree-icon.file { background: #fce7f3; color: #db2777; }
+        .tree-icon.grid { background: #f3e8ff; color: #9333ea; }
+
+        .tree-label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .tree-badges {
+            display: flex;
+            gap: 4px;
+            margin-left: 8px;
+        }
+
+        .tree-badge {
+            font-size: 0.6rem;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+        .tree-badge.required { background: #fee2e2; color: #dc2626; }
+        .tree-badge.hidden { background: #f1f5f9; color: #64748b; }
+        .tree-badge.conditional { background: #fef3c7; color: #d97706; }
+
+        .tree-children {
+            margin-left: 20px;
+            border-left: 1px dashed var(--border-color);
+            padding-left: 8px;
+        }
+
+        /* ==================== CENTER CANVAS ==================== */
+        .canvas-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px;
+            display: flex;
+            justify-content: center;
+            background: var(--bg-color);
+        }
+
+        .form-canvas {
+            width: 100%;
+            max-width: 720px;
+            background: white;
+            min-height: calc(100vh - 120px);
+            box-shadow: var(--shadow-lg);
+            border-radius: var(--radius-lg);
+            padding: 48px;
+            position: relative;
+            border: 1px solid var(--border-color);
+        }
+
+        .canvas-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .canvas-header h2 {
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+        .canvas-header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        /* Canvas Fields */
+        .canvas-field {
+            padding: 16px;
+            border: 2px solid transparent;
+            border-radius: var(--radius-md);
+            margin-bottom: 8px;
+            position: relative;
+            transition: all 0.15s;
+            cursor: pointer;
+        }
+        .canvas-field:hover {
+            border-color: var(--border-color);
+            background-color: #fafafa;
+        }
+        .canvas-field.selected {
+            border-color: var(--primary-color);
+            background-color: var(--primary-light);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .canvas-field .form-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+        .canvas-field .form-label .required-star { color: var(--danger); margin-left: 2px; }
+
+        .canvas-field .form-text {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        .canvas-field .form-control,
+        .canvas-field .form-select {
+            border-radius: var(--radius-sm);
+            border-color: var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        /* Section Field */
+        .canvas-section {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px dashed var(--border-color);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin-bottom: 16px;
+        }
+        .canvas-section.selected {
+            border-color: var(--primary-color);
+            border-style: solid;
+        }
+        .canvas-section-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .canvas-section-title i { color: var(--primary-color); }
+
+        /* Floating Toolbar */
+        .floating-toolbar {
+            position: absolute;
+            top: -44px;
+            right: 8px;
+            background: var(--text-primary);
+            border-radius: var(--radius-md);
+            padding: 4px;
+            display: none;
+            box-shadow: var(--shadow-lg);
+            z-index: 100;
+        }
+        .canvas-field.selected .floating-toolbar { display: flex; gap: 2px; }
+
+        .toolbar-btn {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.1s;
+            font-size: 0.9rem;
+        }
+        .toolbar-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+        .toolbar-btn.danger:hover { background: var(--danger); color: white; }
+        .toolbar-divider {
+            width: 1px;
+            background: #475569;
+            margin: 4px 4px;
+        }
+
+        /* Insertion Point */
+        .insertion-point {
+            height: 24px;
+            margin: 4px 0;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .insertion-point:hover,
+        .insertion-point.active { opacity: 1; }
+
+        .insertion-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary-color);
+            border-radius: 1px;
+        }
+
+        .insertion-btn {
+            position: relative;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: transform 0.1s;
+            border: 2px solid white;
+        }
+        .insertion-btn:hover { transform: scale(1.1); }
+
+        /* ==================== RIGHT SIDEBAR (Properties) ==================== */
+        .sidebar-right {
+            width: var(--props-width);
+            background: var(--sidebar-bg);
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .props-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+        }
+
+        .props-field-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .props-field-info { flex: 1; }
+        .props-field-type {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+        .props-field-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .props-body {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .prop-section {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .prop-header {
+            padding: 12px 16px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            color: var(--text-secondary);
+            transition: all 0.1s;
+        }
+        .prop-header:hover { background-color: var(--bg-color); }
+        .prop-header.active {
+            color: var(--text-primary);
+            background: white;
+        }
+        .prop-header i.section-icon { margin-right: 8px; color: var(--text-muted); }
+        .prop-header .chevron { font-size: 0.7rem; color: var(--text-muted); transition: transform 0.2s; }
+        .prop-header.active .chevron { transform: rotate(180deg); }
+
+        .prop-content {
+            padding: 16px;
+            background: white;
+        }
+        .prop-content.collapsed { display: none; }
+
+        .prop-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .prop-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            transition: all 0.15s;
+        }
+        .prop-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .prop-input.readonly {
+            background: var(--bg-color);
+            color: var(--text-secondary);
+        }
+
+        .prop-row { margin-bottom: 16px; }
+        .prop-row:last-child { margin-bottom: 0; }
+
+        /* Language Tabs */
+        .lang-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 8px;
+            background: var(--bg-color);
+            padding: 3px;
+            border-radius: var(--radius-sm);
+        }
+        .lang-tab {
+            flex: 1;
+            padding: 5px 10px;
+            border: none;
+            background: transparent;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.1s;
+        }
+        .lang-tab.active {
+            background: white;
+            color: var(--primary-color);
+            box-shadow: var(--shadow-sm);
+        }
+        .lang-tab:hover:not(.active) { color: var(--text-primary); }
+
+        .lang-content { display: none; }
+        .lang-content.active { display: block; }
+
+        /* Checkbox Group */
+        .prop-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+        }
+        .prop-checkbox input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary-color);
+        }
+        .prop-checkbox label {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        /* Number Input Group */
+        .number-group {
+            display: flex;
+            gap: 12px;
+        }
+        .number-group .prop-row { flex: 1; margin-bottom: 0; }
+
+        /* Select Styling */
+        .prop-select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            background: white;
+            cursor: pointer;
+        }
+        .prop-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* Button Styles */
+        .prop-btn {
+            width: 100%;
+            padding: 10px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            background: white;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .prop-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background: var(--primary-light);
+        }
+        .prop-btn.primary {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        .prop-btn.primary:hover { background: var(--primary-hover); }
+
+        /* Rules Summary */
+        .rules-summary {
+            background: var(--bg-color);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            margin-top: 12px;
+        }
+        .rules-summary-empty {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            padding: 8px;
+        }
+        .rule-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background: white;
+            border-radius: 4px;
+            margin-bottom: 6px;
+            font-size: 0.8rem;
+        }
+        .rule-item:last-child { margin-bottom: 0; }
+        .rule-badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 3px;
+            text-transform: uppercase;
+        }
+        .rule-badge.show { background: #d1fae5; color: #059669; }
+        .rule-badge.hide { background: #fee2e2; color: #dc2626; }
+
+        /* Options Editor */
+        .options-list {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border-color);
+            background: white;
+        }
+        .option-item:last-child { border-bottom: none; }
+        .option-item .drag-handle {
+            color: var(--text-muted);
+            cursor: grab;
+        }
+        .option-item input {
+            flex: 1;
+            border: none;
+            font-size: 0.85rem;
+            padding: 4px;
+        }
+        .option-item input:focus { outline: none; }
+        .option-item .delete-btn {
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+        }
+        .option-item .delete-btn:hover { color: var(--danger); }
+
+        .add-option-btn {
+            padding: 8px 12px;
+            background: var(--bg-color);
+            border: none;
+            width: 100%;
+            text-align: left;
+            font-size: 0.8rem;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .add-option-btn:hover { background: var(--primary-light); }
+
+        /* CodeSet Selector */
+        .codeset-preview {
+            margin-top: 8px;
+            padding: 10px;
+            background: var(--bg-color);
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        .codeset-preview strong { color: var(--text-primary); }
+
+        /* ==================== TOOLBOX POPOVER ==================== */
+        .toolbox-popover {
+            position: fixed;
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg), 0 0 0 1px var(--border-color);
+            padding: 8px;
+            width: 280px;
+            z-index: 2000;
+            display: none;
+        }
+
+        .toolbox-category {
+            padding: 8px 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+
+        .toolbox-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        .toolbox-item:hover { background: var(--bg-color); }
+
+        .toolbox-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        .toolbox-info { flex: 1; }
+        .toolbox-name { font-weight: 600; font-size: 0.85rem; color: var(--text-primary); }
+        .toolbox-desc { font-size: 0.75rem; color: var(--text-muted); }
+
+        /* ==================== MODALS ==================== */
+        .modal-content {
+            border: none;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+        }
+        .modal-header {
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 20px;
+        }
+        .modal-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        .modal-body { padding: 20px; }
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 16px 20px;
+        }
+
+        /* Logic Builder */
+        .rule-card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+        .rule-card-header {
+            padding: 12px 16px;
+            background: var(--bg-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .rule-card-header strong { font-size: 0.9rem; }
+        .rule-card-body { padding: 16px; }
+
+        .condition-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        .condition-keyword {
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: var(--primary-color);
+            min-width: 50px;
+        }
+        .condition-keyword.then { color: var(--success); }
+
+        .condition-group {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            margin: 8px 0 8px 50px;
+        }
+        .condition-group-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .condition-group-type {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        /* ==================== DASHBOARD ==================== */
+        .dashboard-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg-color);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dashboard-header {
+            height: 60px;
+            background: white;
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .brand {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .brand i { color: var(--primary-color); }
+        .brand span { font-weight: 400; color: var(--text-muted); }
+
+        .dashboard-body {
+            flex: 1;
+            padding: 32px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            overflow-y: auto;
+        }
+
+        .dashboard-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0;
+        }
+
+        .dash-tab {
+            padding: 12px 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            margin-bottom: -1px;
+            transition: all 0.15s;
+        }
+        .dash-tab:hover { color: var(--text-primary); }
+        .dash-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .module-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .module-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-color);
+        }
+
+        .module-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .module-card h5 {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .module-card p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .module-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .create-card {
+            background: var(--bg-color);
+            border-style: dashed;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 180px;
+        }
+        .create-card:hover { background: white; }
+        .create-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow-sm);
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- ==================== DASHBOARD ==================== -->
+    <div class="dashboard-overlay" id="dashboard">
+        <div class="dashboard-header">
+            <div class="brand">
+                <i class="bi bi-grid-3x3-gap-fill"></i>
+                DynamicForms <span>Schema Editor</span>
+            </div>
+            <div class="ms-auto d-flex align-items-center gap-3">
+                <div class="input-group" style="width: 280px;">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" class="form-control border-start-0" placeholder="Search schemas...">
+                </div>
+                <button class="btn-primary-custom">
+                    <i class="bi bi-plus-lg"></i> New Schema
+                </button>
+            </div>
+        </div>
+
+        <div class="dashboard-body">
+            <div class="dashboard-tabs">
+                <div class="dash-tab active">My Schemas</div>
+                <div class="dash-tab">Templates</div>
+                <div class="dash-tab">Shared with Me</div>
+            </div>
+
+            <div class="module-grid">
+                <!-- Module Card 1 -->
+                <div class="module-card" onclick="openEditor()">
+                    <div class="module-card-header">
+                        <span class="doc-badge draft">Draft</span>
+                        <button class="btn btn-link btn-sm p-0 text-muted"><i class="bi bi-three-dots"></i></button>
+                    </div>
+                    <h5>Employee Onboarding</h5>
+                    <p>Edited 2 hours ago · 14 fields</p>
+                    <div class="module-card-footer">
+                        <span><i class="bi bi-diagram-3 me-1"></i> 3 modules</span>
+                        <span>v1.2</span>
+                    </div>
+                </div>
+
+                <!-- Module Card 2 -->
+                <div class="module-card">
+                    <div class="module-card-header">
+                        <span class="doc-badge live">Live</span>
+                        <button class="btn btn-link btn-sm p-0 text-muted"><i class="bi bi-three-dots"></i></button>
+                    </div>
+                    <h5>Q4 Expense Claim</h5>
+                    <p>Edited yesterday · 8 fields</p>
+                    <div class="module-card-footer">
+                        <span><i class="bi bi-diagram-3 me-1"></i> 1 module</span>
+                        <span>v2.0</span>
+                    </div>
+                </div>
+
+                <!-- Module Card 3 -->
+                <div class="module-card">
+                    <div class="module-card-header">
+                        <span class="doc-badge draft">Draft</span>
+                        <button class="btn btn-link btn-sm p-0 text-muted"><i class="bi bi-three-dots"></i></button>
+                    </div>
+                    <h5>Grant Application Form</h5>
+                    <p>Edited 3 days ago · 42 fields</p>
+                    <div class="module-card-footer">
+                        <span><i class="bi bi-diagram-3 me-1"></i> 5 modules</span>
+                        <span>v1.0</span>
+                    </div>
+                </div>
+
+                <!-- Create New -->
+                <div class="module-card create-card">
+                    <div class="create-icon">
+                        <i class="bi bi-plus-lg"></i>
+                    </div>
+                    <span class="text-muted fw-semibold">Create from Scratch</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MAIN EDITOR ==================== -->
+    <div class="app-header" id="editorHeader" style="display: none;">
+        <div class="header-left">
+            <button class="back-btn" onclick="closEditor()">
+                <i class="bi bi-arrow-left"></i>
+            </button>
+            <span class="doc-title">Employee Onboarding</span>
+            <span class="doc-badge draft">Draft</span>
+        </div>
+
+        <div class="header-tabs">
+            <button class="header-tab active">
+                <i class="bi bi-pencil-square"></i> Designer
+            </button>
+            <button class="header-tab" onclick="showWorkflowTab()">
+                <i class="bi bi-diagram-3"></i> Workflow
+            </button>
+            <button class="header-tab">
+                <i class="bi bi-eye"></i> Preview
+            </button>
+            <button class="header-tab">
+                <i class="bi bi-code-slash"></i> JSON
+            </button>
+        </div>
+
+        <div class="header-right">
+            <button class="btn-icon" title="Import JSON">
+                <i class="bi bi-upload"></i>
+            </button>
+            <button class="btn-icon" title="Export JSON">
+                <i class="bi bi-download"></i>
+            </button>
+            <button class="btn-icon" title="History">
+                <i class="bi bi-clock-history"></i>
+            </button>
+            <button class="btn-primary-custom">
+                <i class="bi bi-check2"></i> Save
+            </button>
+        </div>
+    </div>
+
+    <div class="app-body" id="editorBody" style="display: none;">
+        
+        <!-- ==================== LEFT SIDEBAR ==================== -->
+        <aside class="sidebar-left">
+            <div class="sidebar-header">
+                <span>Structure</span>
+                <div class="sidebar-header-actions">
+                    <button class="sidebar-action-btn" title="Expand All"><i class="bi bi-arrows-expand"></i></button>
+                    <button class="sidebar-action-btn" title="Collapse All"><i class="bi bi-arrows-collapse"></i></button>
+                </div>
+            </div>
+            <div class="structure-tree">
+                <!-- Section: Personal Info -->
+                <div class="tree-item">
+                    <span class="tree-expand"><i class="bi bi-chevron-down"></i></span>
+                    <span class="tree-icon section"><i class="bi bi-layout-text-window"></i></span>
+                    <span class="tree-label">Personal Information</span>
+                </div>
+                <div class="tree-children">
+                    <div class="tree-item selected">
+                        <span class="tree-expand empty"></span>
+                        <span class="tree-icon text"><i class="bi bi-fonts"></i></span>
+                        <span class="tree-label">Full Name</span>
+                        <div class="tree-badges">
+                            <span class="tree-badge required">*</span>
+                        </div>
+                    </div>
+                    <div class="tree-item">
+                        <span class="tree-expand empty"></span>
+                        <span class="tree-icon text"><i class="bi bi-envelope"></i></span>
+                        <span class="tree-label">Email Address</span>
+                        <div class="tree-badges">
+                            <span class="tree-badge required">*</span>
+                        </div>
+                    </div>
+                    <div class="tree-item">
+                        <span class="tree-expand empty"></span>
+                        <span class="tree-icon date"><i class="bi bi-calendar"></i></span>
+                        <span class="tree-label">Date of Birth</span>
+                    </div>
+                </div>
+
+                <!-- Section: Department Info -->
+                <div class="tree-item">
+                    <span class="tree-expand"><i class="bi bi-chevron-down"></i></span>
+                    <span class="tree-icon section"><i class="bi bi-layout-text-window"></i></span>
+                    <span class="tree-label">Department Info</span>
+                    <div class="tree-badges">
+                        <span class="tree-badge conditional"><i class="bi bi-lightning"></i></span>
+                    </div>
+                </div>
+                <div class="tree-children">
+                    <div class="tree-item">
+                        <span class="tree-expand empty"></span>
+                        <span class="tree-icon dropdown"><i class="bi bi-menu-down"></i></span>
+                        <span class="tree-label">Department</span>
+                    </div>
+                    <div class="tree-item">
+                        <span class="tree-expand empty"></span>
+                        <span class="tree-icon text"><i class="bi bi-person"></i></span>
+                        <span class="tree-label">Manager Name</span>
+                    </div>
+                </div>
+
+                <!-- Standalone field -->
+                <div class="tree-item">
+                    <span class="tree-expand empty"></span>
+                    <span class="tree-icon file"><i class="bi bi-paperclip"></i></span>
+                    <span class="tree-label">Resume Upload</span>
+                    <div class="tree-badges">
+                        <span class="tree-badge hidden"><i class="bi bi-eye-slash"></i></span>
+                    </div>
+                </div>
+
+                <!-- DataGrid -->
+                <div class="tree-item">
+                    <span class="tree-expand"><i class="bi bi-chevron-right"></i></span>
+                    <span class="tree-icon grid"><i class="bi bi-table"></i></span>
+                    <span class="tree-label">Previous Employment</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ==================== CENTER CANVAS ==================== -->
+        <main class="canvas-area">
+            <div class="form-canvas">
+                <div class="canvas-header">
+                    <h2>Employee Onboarding</h2>
+                    <p>Please complete all required fields to process the new hire.</p>
+                </div>
+
+                <!-- Section -->
+                <div class="canvas-section">
+                    <div class="canvas-section-title">
+                        <i class="bi bi-layout-text-window"></i>
+                        Personal Information
+                    </div>
+                </div>
+
+                <!-- Insertion Point -->
+                <div class="insertion-point" onclick="openToolbox(event)">
+                    <div class="insertion-line"></div>
+                    <div class="insertion-btn"><i class="bi bi-plus"></i></div>
+                </div>
+
+                <!-- Text Field (Selected) -->
+                <div class="canvas-field selected">
+                    <div class="floating-toolbar">
+                        <button class="toolbar-btn" title="Settings"><i class="bi bi-gear"></i></button>
+                        <button class="toolbar-btn" title="Duplicate"><i class="bi bi-copy"></i></button>
+                        <button class="toolbar-btn" title="Move Up"><i class="bi bi-arrow-up"></i></button>
+                        <button class="toolbar-btn" title="Move Down"><i class="bi bi-arrow-down"></i></button>
+                        <div class="toolbar-divider"></div>
+                        <button class="toolbar-btn danger" title="Delete"><i class="bi bi-trash"></i></button>
+                    </div>
+                    <label class="form-label">Full Name <span class="required-star">*</span></label>
+                    <input type="text" class="form-control" placeholder="e.g. John Doe" disabled>
+                    <div class="form-text">Enter your legal name as it appears on official documents.</div>
+                </div>
+
+                <!-- Insertion Point -->
+                <div class="insertion-point" onclick="openToolbox(event)">
+                    <div class="insertion-line"></div>
+                    <div class="insertion-btn"><i class="bi bi-plus"></i></div>
+                </div>
+
+                <!-- Email Field -->
+                <div class="canvas-field">
+                    <label class="form-label">Email Address <span class="required-star">*</span></label>
+                    <input type="email" class="form-control" placeholder="you@company.com" disabled>
+                </div>
+
+                <!-- Date Field -->
+                <div class="canvas-field">
+                    <label class="form-label">Date of Birth</label>
+                    <input type="date" class="form-control" disabled>
+                </div>
+
+                <!-- Section -->
+                <div class="canvas-section" style="margin-top: 24px;">
+                    <div class="canvas-section-title">
+                        <i class="bi bi-layout-text-window"></i>
+                        Department Information
+                    </div>
+                </div>
+
+                <!-- Dropdown Field -->
+                <div class="canvas-field">
+                    <label class="form-label">Department</label>
+                    <select class="form-select" disabled>
+                        <option>Select a department...</option>
+                    </select>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- ==================== RIGHT SIDEBAR (Properties) ==================== -->
+        <aside class="sidebar-right">
+            <div class="props-header">
+                <div class="props-field-icon">
+                    <i class="bi bi-fonts"></i>
+                </div>
+                <div class="props-field-info">
+                    <div class="props-field-type">Text Field</div>
+                    <div class="props-field-id">fullName_01</div>
+                </div>
+            </div>
+
+            <div class="props-body">
+                <!-- General Section -->
+                <div class="prop-section">
+                    <div class="prop-header active" onclick="toggleSection(this)">
+                        <span><i class="bi bi-sliders section-icon"></i>General</span>
+                        <i class="bi bi-chevron-up chevron"></i>
+                    </div>
+                    <div class="prop-content">
+                        <div class="prop-row">
+                            <label class="prop-label">Field ID</label>
+                            <input type="text" class="prop-input readonly" value="fullName_01" readonly>
+                        </div>
+                        
+                        <!-- Bilingual Label -->
+                        <div class="prop-row">
+                            <label class="prop-label">Label</label>
+                            <div class="lang-tabs">
+                                <button class="lang-tab active" onclick="switchLang(this, 'label')">English</button>
+                                <button class="lang-tab" onclick="switchLang(this, 'label')">Français</button>
+                            </div>
+                            <div id="label-en" class="lang-content active">
+                                <input type="text" class="prop-input" value="Full Name">
+                            </div>
+                            <div id="label-fr" class="lang-content">
+                                <input type="text" class="prop-input" value="Nom complet">
+                            </div>
+                        </div>
+
+                        <!-- Bilingual Placeholder -->
+                        <div class="prop-row">
+                            <label class="prop-label">Placeholder</label>
+                            <div class="lang-tabs">
+                                <button class="lang-tab active" onclick="switchLang(this, 'placeholder')">English</button>
+                                <button class="lang-tab" onclick="switchLang(this, 'placeholder')">Français</button>
+                            </div>
+                            <div id="placeholder-en" class="lang-content active">
+                                <input type="text" class="prop-input" value="e.g. John Doe">
+                            </div>
+                            <div id="placeholder-fr" class="lang-content">
+                                <input type="text" class="prop-input" value="ex. Jean Dupont">
+                            </div>
+                        </div>
+
+                        <!-- Bilingual Help Text -->
+                        <div class="prop-row">
+                            <label class="prop-label">Help Text</label>
+                            <div class="lang-tabs">
+                                <button class="lang-tab active" onclick="switchLang(this, 'help')">English</button>
+                                <button class="lang-tab" onclick="switchLang(this, 'help')">Français</button>
+                            </div>
+                            <div id="help-en" class="lang-content active">
+                                <textarea class="prop-input" rows="2">Enter your legal name as it appears on official documents.</textarea>
+                            </div>
+                            <div id="help-fr" class="lang-content">
+                                <textarea class="prop-input" rows="2">Entrez votre nom légal tel qu'il apparaît sur les documents officiels.</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Validation Section -->
+                <div class="prop-section">
+                    <div class="prop-header" onclick="toggleSection(this)">
+                        <span><i class="bi bi-shield-check section-icon"></i>Validation</span>
+                        <i class="bi bi-chevron-down chevron"></i>
+                    </div>
+                    <div class="prop-content collapsed">
+                        <div class="prop-checkbox">
+                            <input type="checkbox" id="required" checked>
+                            <label for="required">Required field</label>
+                        </div>
+                        
+                        <div class="number-group" style="margin-top: 12px;">
+                            <div class="prop-row">
+                                <label class="prop-label">Min Length</label>
+                                <input type="number" class="prop-input" value="2">
+                            </div>
+                            <div class="prop-row">
+                                <label class="prop-label">Max Length</label>
+                                <input type="number" class="prop-input" value="100">
+                            </div>
+                        </div>
+
+                        <div class="prop-row" style="margin-top: 12px;">
+                            <label class="prop-label">Pattern (Regex)</label>
+                            <input type="text" class="prop-input" placeholder="e.g. ^[A-Za-z ]+$">
+                        </div>
+
+                        <!-- Bilingual Error Message -->
+                        <div class="prop-row" style="margin-top: 12px;">
+                            <label class="prop-label">Custom Error Message</label>
+                            <div class="lang-tabs">
+                                <button class="lang-tab active" onclick="switchLang(this, 'error')">EN</button>
+                                <button class="lang-tab" onclick="switchLang(this, 'error')">FR</button>
+                            </div>
+                            <div id="error-en" class="lang-content active">
+                                <input type="text" class="prop-input" placeholder="Please enter a valid name">
+                            </div>
+                            <div id="error-fr" class="lang-content">
+                                <input type="text" class="prop-input" placeholder="Veuillez entrer un nom valide">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logic & Rules Section -->
+                <div class="prop-section">
+                    <div class="prop-header" onclick="toggleSection(this)">
+                        <span><i class="bi bi-lightning section-icon"></i>Logic & Rules</span>
+                        <i class="bi bi-chevron-down chevron"></i>
+                    </div>
+                    <div class="prop-content collapsed">
+                        <button class="prop-btn" onclick="openLogicModal()">
+                            <i class="bi bi-plus-lg"></i> Add Conditional Rule
+                        </button>
+                        <div class="rules-summary">
+                            <div class="rules-summary-empty">
+                                <i class="bi bi-info-circle"></i> No rules configured
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accessibility Section (NEW) -->
+                <div class="prop-section">
+                    <div class="prop-header" onclick="toggleSection(this)">
+                        <span><i class="bi bi-universal-access section-icon"></i>Accessibility</span>
+                        <i class="bi bi-chevron-down chevron"></i>
+                    </div>
+                    <div class="prop-content collapsed">
+                        <!-- Bilingual ARIA Label -->
+                        <div class="prop-row">
+                            <label class="prop-label">ARIA Label (Override)</label>
+                            <div class="lang-tabs">
+                                <button class="lang-tab active" onclick="switchLang(this, 'aria')">EN</button>
+                                <button class="lang-tab" onclick="switchLang(this, 'aria')">FR</button>
+                            </div>
+                            <div id="aria-en" class="lang-content active">
+                                <input type="text" class="prop-input" placeholder="Leave empty to use label">
+                            </div>
+                            <div id="aria-fr" class="lang-content">
+                                <input type="text" class="prop-input" placeholder="Laisser vide pour utiliser le libellé">
+                            </div>
+                        </div>
+
+                        <div class="prop-row">
+                            <label class="prop-label">ARIA Role</label>
+                            <select class="prop-select">
+                                <option value="">Default (textbox)</option>
+                                <option value="searchbox">searchbox</option>
+                                <option value="combobox">combobox</option>
+                            </select>
+                        </div>
+
+                        <div class="prop-checkbox" style="margin-top: 8px;">
+                            <input type="checkbox" id="ariaLive">
+                            <label for="ariaLive">Announce updates (aria-live)</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Layout Section -->
+                <div class="prop-section">
+                    <div class="prop-header" onclick="toggleSection(this)">
+                        <span><i class="bi bi-grid section-icon"></i>Layout</span>
+                        <i class="bi bi-chevron-down chevron"></i>
+                    </div>
+                    <div class="prop-content collapsed">
+                        <div class="prop-row">
+                            <label class="prop-label">Width</label>
+                            <select class="prop-select">
+                                <option value="12">Full Width (12)</option>
+                                <option value="6">Half Width (6)</option>
+                                <option value="4">Third Width (4)</option>
+                                <option value="3">Quarter Width (3)</option>
+                            </select>
+                        </div>
+
+                        <div class="prop-row">
+                            <label class="prop-label">CSS Classes</label>
+                            <input type="text" class="prop-input" placeholder="e.g. highlight-field">
+                        </div>
+
+                        <div class="prop-checkbox" style="margin-top: 8px;">
+                            <input type="checkbox" id="visible" checked>
+                            <label for="visible">Initially Visible</label>
+                        </div>
+
+                        <div class="prop-checkbox">
+                            <input type="checkbox" id="readonly">
+                            <label for="readonly">Read Only</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Database Mapping Section -->
+                <div class="prop-section">
+                    <div class="prop-header" onclick="toggleSection(this)">
+                        <span><i class="bi bi-database section-icon"></i>Database</span>
+                        <i class="bi bi-chevron-down chevron"></i>
+                    </div>
+                    <div class="prop-content collapsed">
+                        <div class="prop-row">
+                            <label class="prop-label">Column Name</label>
+                            <input type="text" class="prop-input" placeholder="Leave empty to use Field ID">
+                        </div>
+                        <div class="prop-row">
+                            <label class="prop-label">Column Type</label>
+                            <select class="prop-select">
+                                <option value="nvarchar">nvarchar (text)</option>
+                                <option value="int">int (integer)</option>
+                                <option value="decimal">decimal (number)</option>
+                                <option value="datetime">datetime</option>
+                                <option value="bit">bit (boolean)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </aside>
+    </div>
+
+    <!-- ==================== TOOLBOX POPOVER ==================== -->
+    <div class="toolbox-popover" id="toolbox">
+        <div class="toolbox-category">Basic Fields</div>
+        <div class="toolbox-item" onclick="hideToolbox()">
+            <div class="toolbox-icon" style="background: #dbeafe; color: #2563eb;"><i class="bi bi-fonts"></i></div>
+            <div class="toolbox-info">
+                <div class="toolbox-name">Text Field</div>
+                <div class="toolbox-desc">Single line text input</div>
+            </div>
+        </div>
+        <div class="toolbox-item" onclick="hideToolbox()">
+            <div class="toolbox-icon" style="background: #dbeafe; color: #2563eb;"><i class="bi bi-text-paragraph"></i></div>
+            <div class="toolbox-info">
+                <div class="toolbox-name">Text Area</div>
+                <div class="toolbox-desc">Multi-line text input</div>
+            </div>
+        </div>
+        <div class="toolbox-item" onclick="hideToolbox()">
+            <div class="toolbox-icon" style="background: #dbeafe; color: #2563eb;"><i class="bi bi-123"></i></div>
+            <div class="toolbox-info">
+                <div class="toolbox-name">Number</div>
+                <div class="toolbox-desc">Numeric input</div>
+            </div>
+        </div>
+
+        <div class="toolbox-category">Selection</div>
+        <div class="toolbox-item" onclick="hideToolbox()">
+            <div class="toolbox-icon" style="background: #d1fae5; color: #059669;"><i class="bi bi-menu-down"></i></div>
+            <div class="toolbox-info">
+                <div class="toolbox-name">Dropdown</div>
+                <div class="toolbox-desc">Single selection list</div>
+            </div>
+        </div>
+        <div class="toolbox-item" onclick="hideToolbox()">
+            <div class="toolbox-icon" style="background: #d1fae5; color: #059669;"><i class="bi bi-ui-radios"></i></div>
+            <div class="toolbox-info">
+                <div class="toolbox-name">Radio Group</div>
+                <div class="toolbox-desc">Single choice options</div>
+            </div>
+        </div>
+        <div class="toolbox-item" onclick="hideToolbox()">
+            <div class="toolbox-icon" style="background: #d1fae5; color: #059669;"><i class="bi bi-ui-checks"></i></div>
+            <div class="toolbox-info">
+                <div class="toolbox-name">Checkbox List</div>
+                <div class="toolbox-desc">Multiple selections</div>
+            </div>
+        </div>
+
+        <div class="toolbox-category">Date & Time</div>
+        <div class="toolbox-item" onclick="hideToolbox()">
+            <div class="toolbox-icon" style="background: #fef3c7; color: #d97706;"><i class="bi bi-calendar"></i></div>
+            <div class="toolbox-info">
+                <div class="toolbox-name">Date Picker</div>
+                <div class="toolbox-desc">Date selection</div>
+            </div>
+        </div>
+
+        <div class="toolbox-category">Advanced</div>
+        <div class="toolbox-item" onclick="hideToolbox()">
+            <div class="toolbox-icon" style="background: #fce7f3; color: #db2777;"><i class="bi bi-paperclip"></i></div>
+            <div class="toolbox-info">
+                <div class="toolbox-name">File Upload</div>
+                <div class="toolbox-desc">Attach documents</div>
+            </div>
+        </div>
+        <div class="toolbox-item" onclick="hideToolbox()">
+            <div class="toolbox-icon" style="background: #f3e8ff; color: #9333ea;"><i class="bi bi-table"></i></div>
+            <div class="toolbox-info">
+                <div class="toolbox-name">Data Grid</div>
+                <div class="toolbox-desc">Repeating rows</div>
+            </div>
+        </div>
+        <div class="toolbox-item" onclick="hideToolbox()">
+            <div class="toolbox-icon" style="background: #dbeafe; color: #2563eb;"><i class="bi bi-search"></i></div>
+            <div class="toolbox-info">
+                <div class="toolbox-name">AutoComplete</div>
+                <div class="toolbox-desc">API-driven lookup</div>
+            </div>
+        </div>
+
+        <div class="toolbox-category">Layout</div>
+        <div class="toolbox-item" onclick="hideToolbox()">
+            <div class="toolbox-icon" style="background: #e0e7ff; color: #4f46e5;"><i class="bi bi-layout-text-window"></i></div>
+            <div class="toolbox-info">
+                <div class="toolbox-name">Section</div>
+                <div class="toolbox-desc">Group related fields</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== LOGIC BUILDER MODAL ==================== -->
+    <div class="modal fade" id="logicModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-lightning me-2 text-warning"></i>
+                        Conditional Rules: Full Name
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="background: var(--bg-color);">
+                    
+                    <!-- Rule Card -->
+                    <div class="rule-card">
+                        <div class="rule-card-header">
+                            <strong>Rule #1</strong>
+                            <div>
+                                <button class="btn btn-sm btn-link text-muted"><i class="bi bi-copy"></i></button>
+                                <button class="btn btn-sm btn-link text-danger"><i class="bi bi-trash"></i></button>
+                            </div>
+                        </div>
+                        <div class="rule-card-body">
+                            <!-- Simple Condition -->
+                            <div class="condition-row">
+                                <span class="condition-keyword">IF</span>
+                                <select class="form-select form-select-sm" style="width: 150px;">
+                                    <option>employeeType</option>
+                                    <option>department</option>
+                                    <option>startDate</option>
+                                </select>
+                                <select class="form-select form-select-sm" style="width: 130px;">
+                                    <option>Equals</option>
+                                    <option>Not Equals</option>
+                                    <option>Contains</option>
+                                    <option>Is Empty</option>
+                                    <option>Is Not Empty</option>
+                                </select>
+                                <input type="text" class="form-control form-control-sm" placeholder="Value..." style="width: 150px;">
+                                <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-plus"></i> AND</button>
+                            </div>
+
+                            <!-- Nested Condition Group Example -->
+                            <div class="condition-group">
+                                <div class="condition-group-header">
+                                    <span class="condition-group-type">ALL of these (AND)</span>
+                                    <select class="form-select form-select-sm" style="width: 100px;">
+                                        <option>AND</option>
+                                        <option>OR</option>
+                                    </select>
+                                </div>
+                                <div class="condition-row">
+                                    <select class="form-select form-select-sm" style="width: 150px;">
+                                        <option>age</option>
+                                    </select>
+                                    <select class="form-select form-select-sm" style="width: 130px;">
+                                        <option>Less Than</option>
+                                    </select>
+                                    <input type="text" class="form-control form-control-sm" value="18" style="width: 100px;">
+                                    <button class="btn btn-sm btn-link text-danger p-1"><i class="bi bi-x-lg"></i></button>
+                                </div>
+                                <div class="condition-row">
+                                    <select class="form-select form-select-sm" style="width: 150px;">
+                                        <option>province</option>
+                                    </select>
+                                    <select class="form-select form-select-sm" style="width: 130px;">
+                                        <option>In</option>
+                                    </select>
+                                    <input type="text" class="form-control form-control-sm" value="ON, QC" style="width: 100px;">
+                                    <button class="btn btn-sm btn-link text-danger p-1"><i class="bi bi-x-lg"></i></button>
+                                </div>
+                                <button class="btn btn-sm btn-link"><i class="bi bi-plus"></i> Add condition</button>
+                            </div>
+
+                            <!-- Action -->
+                            <div class="condition-row" style="margin-top: 16px;">
+                                <span class="condition-keyword then">THEN</span>
+                                <select class="form-select form-select-sm" style="width: 130px;">
+                                    <option>Show</option>
+                                    <option>Hide</option>
+                                    <option>Enable</option>
+                                    <option>Disable</option>
+                                    <option>Set Required</option>
+                                    <option>Set Optional</option>
+                                </select>
+                                <span style="color: var(--text-muted); font-size: 0.85rem;">this field</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-plus-lg me-1"></i> Add Another Rule
+                    </button>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary">Save Rules</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== OPTIONS SOURCE MODAL (for Dropdowns) ==================== -->
+    <div class="modal fade" id="optionsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-list-ul me-2"></i>
+                        Options Source
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-4">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="optionsSource" id="inlineOptions" checked>
+                            <label class="form-check-label fw-semibold" for="inlineOptions">
+                                Inline Options
+                            </label>
+                            <div class="text-muted small">Define options directly in this field</div>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="optionsSource" id="codeSetOptions">
+                            <label class="form-check-label fw-semibold" for="codeSetOptions">
+                                CodeSet (Shared List)
+                            </label>
+                            <div class="text-muted small">Use a centralized, reusable option set</div>
+                        </div>
+                    </div>
+
+                    <!-- Inline Options Editor -->
+                    <div id="inlineOptionsEditor">
+                        <label class="prop-label">Options</label>
+                        <div class="options-list">
+                            <div class="option-item">
+                                <i class="bi bi-grip-vertical drag-handle"></i>
+                                <input type="text" value="Option 1" placeholder="Value">
+                                <input type="text" value="First Option" placeholder="Label (EN)">
+                                <i class="bi bi-x-lg delete-btn"></i>
+                            </div>
+                            <div class="option-item">
+                                <i class="bi bi-grip-vertical drag-handle"></i>
+                                <input type="text" value="Option 2" placeholder="Value">
+                                <input type="text" value="Second Option" placeholder="Label (EN)">
+                                <i class="bi bi-x-lg delete-btn"></i>
+                            </div>
+                            <button class="add-option-btn">
+                                <i class="bi bi-plus me-1"></i> Add Option
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- CodeSet Selector (hidden by default) -->
+                    <div id="codeSetSelector" style="display: none;">
+                        <label class="prop-label">Select CodeSet</label>
+                        <select class="prop-select mb-3">
+                            <option value="">-- Select a CodeSet --</option>
+                            <option value="1">PROVINCES_CA - Canadian Provinces</option>
+                            <option value="2">DEPARTMENTS - Organization Departments</option>
+                            <option value="3">ORG_TYPES - Organization Types</option>
+                        </select>
+                        <div class="codeset-preview">
+                            <strong>Preview:</strong> Ontario, Quebec, British Columbia, Alberta...
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== TYPE CONFIG MODAL (for AutoComplete) ==================== -->
+    <div class="modal fade" id="autocompleteConfigModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-search me-2"></i>
+                        AutoComplete Configuration
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="prop-row">
+                        <label class="prop-label">API Endpoint URL</label>
+                        <input type="text" class="prop-input" placeholder="/api/v1/search">
+                    </div>
+                    <div class="prop-row">
+                        <label class="prop-label">Query Parameter</label>
+                        <input type="text" class="prop-input" value="q" placeholder="q">
+                    </div>
+                    <div class="number-group">
+                        <div class="prop-row">
+                            <label class="prop-label">Min Characters</label>
+                            <input type="number" class="prop-input" value="3">
+                        </div>
+                        <div class="prop-row">
+                            <label class="prop-label">Debounce (ms)</label>
+                            <input type="number" class="prop-input" value="300">
+                        </div>
+                    </div>
+                    <div class="prop-row">
+                        <label class="prop-label">Value Field (from response)</label>
+                        <input type="text" class="prop-input" placeholder="Id">
+                    </div>
+                    <div class="prop-row">
+                        <label class="prop-label">Display Field (from response)</label>
+                        <input type="text" class="prop-input" placeholder="Name">
+                    </div>
+                    <div class="prop-row">
+                        <label class="prop-label">Item Template (optional)</label>
+                        <input type="text" class="prop-input" placeholder="{{Name}} ({{Code}})">
+                        <div class="form-text">Use Handlebars syntax for custom display</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary">Test Endpoint</button>
+                    <button type="button" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== DATAGRID CONFIG MODAL ==================== -->
+    <div class="modal fade" id="datagridConfigModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-table me-2"></i>
+                        DataGrid Configuration
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="prop-checkbox">
+                                <input type="checkbox" id="allowAdd" checked>
+                                <label for="allowAdd">Allow Add Rows</label>
+                            </div>
+                            <div class="prop-checkbox">
+                                <input type="checkbox" id="allowEdit" checked>
+                                <label for="allowEdit">Allow Edit Rows</label>
+                            </div>
+                            <div class="prop-checkbox">
+                                <input type="checkbox" id="allowDelete" checked>
+                                <label for="allowDelete">Allow Delete Rows</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="prop-row">
+                                <label class="prop-label">Max Rows</label>
+                                <input type="number" class="prop-input" placeholder="Unlimited">
+                            </div>
+                            <div class="prop-row">
+                                <label class="prop-label">Editor Mode</label>
+                                <select class="prop-select">
+                                    <option value="Modal">Modal Dialog</option>
+                                    <option value="Inline">Inline Editing</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <label class="prop-label">Columns (Nested Fields)</label>
+                    <div class="border rounded p-3 bg-light">
+                        <div class="d-flex align-items-center gap-2 p-2 bg-white rounded mb-2">
+                            <i class="bi bi-grip-vertical text-muted"></i>
+                            <span class="badge bg-primary-subtle text-primary">Text</span>
+                            <span class="fw-semibold">Description</span>
+                            <span class="text-muted ms-auto">Required</span>
+                            <button class="btn btn-sm btn-link p-0"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-link text-danger p-0"><i class="bi bi-trash"></i></button>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 p-2 bg-white rounded mb-2">
+                            <i class="bi bi-grip-vertical text-muted"></i>
+                            <span class="badge bg-info-subtle text-info">Number</span>
+                            <span class="fw-semibold">Quantity</span>
+                            <span class="text-muted ms-auto">Required</span>
+                            <button class="btn btn-sm btn-link p-0"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-link text-danger p-0"><i class="bi bi-trash"></i></button>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 p-2 bg-white rounded mb-2">
+                            <i class="bi bi-grip-vertical text-muted"></i>
+                            <span class="badge bg-success-subtle text-success">Currency</span>
+                            <span class="fw-semibold">Unit Price</span>
+                            <span class="text-muted ms-auto">Required</span>
+                            <button class="btn btn-sm btn-link p-0"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-link text-danger p-0"><i class="bi bi-trash"></i></button>
+                        </div>
+                        <button class="btn btn-outline-primary btn-sm w-100">
+                            <i class="bi bi-plus-lg me-1"></i> Add Column
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary">Save Configuration</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Dashboard / Editor Toggle
+        function openEditor() {
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('editorHeader').style.display = 'flex';
+            document.getElementById('editorBody').style.display = 'flex';
+        }
+
+        function closEditor() {
+            document.getElementById('dashboard').style.display = 'flex';
+            document.getElementById('editorHeader').style.display = 'none';
+            document.getElementById('editorBody').style.display = 'none';
+        }
+
+        // Property Section Toggle
+        function toggleSection(header) {
+            const content = header.nextElementSibling;
+            const chevron = header.querySelector('.chevron');
+            
+            if (content.classList.contains('collapsed')) {
+                content.classList.remove('collapsed');
+                header.classList.add('active');
+            } else {
+                content.classList.add('collapsed');
+                header.classList.remove('active');
+            }
+        }
+
+        // Language Tab Switcher
+        function switchLang(btn, field) {
+            const tabs = btn.parentElement;
+            const container = tabs.parentElement;
+            
+            // Update tab active state
+            tabs.querySelectorAll('.lang-tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Show correct content
+            const isEn = btn.textContent.includes('English') || btn.textContent === 'EN';
+            container.querySelectorAll('.lang-content').forEach(c => c.classList.remove('active'));
+            
+            if (isEn) {
+                container.querySelector(`[id$="-en"]`)?.classList.add('active');
+            } else {
+                container.querySelector(`[id$="-fr"]`)?.classList.add('active');
+            }
+        }
+
+        // Toolbox
+        function openToolbox(event) {
+            const toolbox = document.getElementById('toolbox');
+            const rect = event.currentTarget.getBoundingClientRect();
+            
+            toolbox.style.top = (rect.bottom + 10) + 'px';
+            toolbox.style.left = (rect.left + rect.width/2 - 140) + 'px';
+            toolbox.style.display = 'block';
+            
+            setTimeout(() => {
+                document.addEventListener('click', hideToolboxOnClickOutside, { once: true });
+            }, 10);
+        }
+
+        function hideToolbox() {
+            document.getElementById('toolbox').style.display = 'none';
+        }
+
+        function hideToolboxOnClickOutside(e) {
+            if (!document.getElementById('toolbox').contains(e.target)) {
+                hideToolbox();
+            }
+        }
+
+        // Logic Modal
+        function openLogicModal() {
+            new bootstrap.Modal(document.getElementById('logicModal')).show();
+        }
+
+        // Options source toggle
+        document.querySelectorAll('input[name="optionsSource"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.id === 'inlineOptions') {
+                    document.getElementById('inlineOptionsEditor').style.display = 'block';
+                    document.getElementById('codeSetSelector').style.display = 'none';
+                } else {
+                    document.getElementById('inlineOptionsEditor').style.display = 'none';
+                    document.getElementById('codeSetSelector').style.display = 'block';
+                }
+            });
+        });
+
+        // Demo: Show workflow tab
+        function showWorkflowTab() {
+            alert('Workflow Editor: This would show the multi-module workflow designer with drag-drop module sequencing and branching rules.');
+        }
+    </script>
+</body>
+</html>

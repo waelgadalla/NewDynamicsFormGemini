@@ -1,0 +1,25 @@
+@using DynamicForms.Editor.Pages
+@using DynamicForms.Editor.Components.Shared
+
+<div class="form-card" @onclick="HandleClick">
+    <div class="form-card-header">
+        <div class="form-card-icon"><i class="bi bi-diagram-3"></i></div>
+    </div>
+    <div class="form-card-title">@Workflow.Title</div>
+    <div class="form-card-description">@Workflow.Description</div>
+    <div class="form-card-meta">
+        <span><i class="bi bi-diagram-3"></i> @Workflow.ModuleCount modules</span>
+        <span><i class="bi bi-calendar3"></i> @Workflow.Modified.ToString("MMM dd")</span>
+        <Badge Variant="@Workflow.Status">@Workflow.Status</Badge>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Dashboard.WorkflowSummary Workflow { get; set; } = default!;
+    [Parameter] public EventCallback<int> OnSelect { get; set; }
+
+    private async Task HandleClick()
+    {
+        await OnSelect.InvokeAsync(Workflow.Id);
+    }
+}
