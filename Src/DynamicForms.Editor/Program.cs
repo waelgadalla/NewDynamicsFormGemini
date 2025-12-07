@@ -16,6 +16,8 @@ builder.Services.AddScoped<IUndoRedoService, UndoRedoService>();
 builder.Services.AddScoped<ISchemaValidationService, SchemaValidationService>();
 builder.Services.AddScoped<IWorkflowGraphService, WorkflowGraphService>();
 builder.Services.AddScoped<ICodeSetManagerService, CodeSetManagerService>();
+builder.Services.AddScoped<IClipboardService, ClipboardService>();
+builder.Services.AddScoped<IJsonImportExportService, JsonImportExportService>();
 builder.Services.AddScoped<IEditorStateService, EditorStateService>();
 
 var app = builder.Build();

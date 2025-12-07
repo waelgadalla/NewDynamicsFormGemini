@@ -1,59 +1,75 @@
 // wwwroot/js/interop.js
 
-window.registerKeyboardShortcuts = (dotNetRef) => {
-    document.addEventListener('keydown', (e) => {
-        // Only trigger if not in an input field (unless it's a specific command like Save)
-        const isInput = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable;
-        
-        if (e.ctrlKey || e.metaKey) {
-            switch (e.key.toLowerCase()) {
-                case 's':
-                    e.preventDefault();
-                    dotNetRef.invokeMethodAsync('Save');
-                    break;
-                case 'z':
-                    e.preventDefault();
-                    if (e.shiftKey) {
-                        dotNetRef.invokeMethodAsync('Redo');
-                    } else {
-                        dotNetRef.invokeMethodAsync('Undo');
-                    }
-                    break;
-                case 'y':
-                    e.preventDefault();
-                    dotNetRef.invokeMethodAsync('Redo');
-                    break;
-                case 'c':
-                    if (!isInput) {
+window.editorInterop = {
+    downloadFile: (fileName, content) => {
+        const blob = new Blob([content], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    },
+    
+    registerKeyboardShortcuts: (dotNetRef) => {
+        document.addEventListener('keydown', (e) => {
+            // Only trigger if not in an input field (unless it's a specific command like Save)
+            const isInput = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable;
+            
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.key.toLowerCase()) {
+                    case 's':
                         e.preventDefault();
-                        dotNetRef.invokeMethodAsync('Copy');
-                    }
-                    break;
-                case 'v':
-                    if (!isInput) {
+                        dotNetRef.invokeMethodAsync('OnSave');
+                        break;
+                    case 'z':
                         e.preventDefault();
-                        dotNetRef.invokeMethodAsync('Paste');
-                    }
-                    break;
-                case 'd':
-                    e.preventDefault();
-                    dotNetRef.invokeMethodAsync('Duplicate');
-                    break;
+                        if (e.shiftKey) {
+                            dotNetRef.invokeMethodAsync('OnRedo');
+                        } else {
+                            dotNetRef.invokeMethodAsync('OnUndo');
+                        }
+                        break;
+                    case 'y':
+                        e.preventDefault();
+                        dotNetRef.invokeMethodAsync('OnRedo');
+                        break;
+                    case 'c':
+                        if (!isInput) {
+                            // Don't prevent default, allow copy if something is selected
+                            dotNetRef.invokeMethodAsync('OnCopy');
+                        }
+                        break;
+                    case 'v':
+                        if (!isInput) {
+                            e.preventDefault();
+                            dotNetRef.invokeMethodAsync('OnPaste');
+                        }
+                        break;
+                    case 'd':
+                        if (e.ctrlKey) { // Duplicate only on Ctrl+D
+                             e.preventDefault();
+                             dotNetRef.invokeMethodAsync('OnDuplicate');
+                        }
+                        break;
+                }
+            } else if (e.key === 'Delete') {
+                if (!isInput) {
+                    dotNetRef.invokeMethodAsync('OnDelete');
+                }
+            } else if (e.key === 'Escape') {
+                dotNetRef.invokeMethodAsync('OnEscape');
             }
-        } else if (e.key === 'Delete') {
-            if (!isInput) {
-                dotNetRef.invokeMethodAsync('Delete');
-            }
-        } else if (e.key === 'Escape') {
-            dotNetRef.invokeMethodAsync('Escape');
-        }
-    });
-};
+        });
+    },
 
-window.setTheme = (theme) => {
-    document.body.setAttribute('data-theme', theme);
-};
+    setTheme: (theme) => {
+        document.body.setAttribute('data-theme', theme);
+    },
 
-window.getTheme = () => {
-    return document.body.getAttribute('data-theme') || 'light';
+    getTheme: () => {
+        return document.body.getAttribute('data-theme') || 'light';
+    }
 };

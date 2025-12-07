@@ -8,6 +8,7 @@ using System.Linq;
 using DynamicForms.Core.V4.Builders;
 using System.Text.Json;
 using DynamicForms.Editor.Extensions;
+using Microsoft.JSInterop;
 
 namespace DynamicForms.Editor.Services;
 
@@ -17,6 +18,8 @@ public class EditorStateService : IEditorStateService
     private readonly ISchemaValidationService _validationService;
     private readonly IUndoRedoService _undoRedo;
     private readonly IToastService _toastService;
+    private readonly IClipboardService _clipboardService;
+    private readonly IJsonImportExportService _jsonService;
 
     private EditorState _state = new();
 
@@ -28,12 +31,16 @@ public class EditorStateService : IEditorStateService
         IFormHierarchyService hierarchyService,
         ISchemaValidationService validationService,
         IUndoRedoService undoRedo,
-        IToastService toastService)
+        IToastService toastService,
+        IClipboardService clipboardService,
+        IJsonImportExportService jsonService)
     {
         _hierarchyService = hierarchyService;
         _validationService = validationService;
         _undoRedo = undoRedo;
         _toastService = toastService;
+        _clipboardService = clipboardService;
+        _jsonService = jsonService;
 
         // Initialize with a default module if none is loaded
         if (_state.Module is null)
@@ -52,8 +59,49 @@ public class EditorStateService : IEditorStateService
     public IReadOnlyList<ValidationIssue> ValidationIssues => _state.Issues;
     public bool CanUndo => _undoRedo.CanUndo;
     public bool CanRedo => _undoRedo.CanRedo;
-    public bool HasClipboard => _state.ClipboardField is not null;
+    public bool HasClipboard => _clipboardService.HasContent;
 
+    // === JS Invokable Methods (Keyboard Shortcuts) ===
+    [JSInvokable] public void OnSave() => _toastService.ShowInfo("Save triggered (Not implemented persistence yet)");
+    [JSInvokable] public void OnUndo() => Undo();
+    [JSInvokable] public void OnRedo() => Redo();
+    [JSInvokable] public void OnDelete() {
+        if (SelectedFieldId != null) DeleteField(SelectedFieldId);
+        else if (SelectedNodeId != null) RemoveNode(SelectedNodeId);
+    }
+    [JSInvokable] public void OnCopy() {
+        if (SelectedFieldId != null) CopyField(SelectedFieldId);
+    }
+    [JSInvokable] public void OnPaste() {
+        if (HasClipboard) PasteField(SelectedField?.ParentId);
+    }
+    [JSInvokable] public void OnDuplicate() {
+        if (SelectedFieldId != null) DuplicateField(SelectedFieldId);
+    }
+    [JSInvokable] public void OnEscape() {
+        SelectField(null);
+        SelectNode(null);
+    }
+
+    // === Import/Export ===
+    public async Task ExportModuleJsonAsync()
+    {
+        if (CurrentModule == null) return;
+        var json = _jsonService.SerializeModule(CurrentModule);
+        var fileName = $"{CurrentModule.TitleEn.Replace(" ", "_")}_v{CurrentModule.Version}.json";
+        await _jsonService.DownloadFileAsync(fileName, json);
+        _toastService.ShowSuccess("Module exported.");
+    }
+
+    public async Task ExportWorkflowJsonAsync()
+    {
+        if (CurrentWorkflow == null) return;
+        var json = _jsonService.SerializeWorkflow(CurrentWorkflow);
+        var fileName = $"{CurrentWorkflow.TitleEn.Replace(" ", "_")}.json";
+        await _jsonService.DownloadFileAsync(fileName, json);
+        _toastService.ShowSuccess("Workflow exported.");
+    }
+    
     // === State Management Helpers ===
     private void SetState(EditorState newState, bool suppressStateChanged = false)
     {
@@ -446,28 +494,34 @@ public class EditorStateService : IEditorStateService
         var fieldToCopy = _state.Module.Fields.FirstOrDefault(f => f.Id == fieldId);
         if (fieldToCopy is null) return;
 
-        var json = JsonSerializer.Serialize(fieldToCopy);
-        var clipboardField = JsonSerializer.Deserialize<FormFieldSchema>(json);
-
-        SetState(_state with { ClipboardField = clipboardField });
-        _toastService.ShowInfo($"Copied field '{fieldId}' to clipboard.");
+        _clipboardService.CopyField(fieldToCopy);
+        
+        // Also copy JSON to system clipboard
+        var json = JsonSerializer.Serialize(fieldToCopy, JsonSerializerOptionsProvider.Default);
+        _clipboardService.CopyTextToSystemClipboardAsync(json); // Fire and forget
+        
+        // UI update
+        OnStateChanged?.Invoke(); 
+        _toastService.ShowInfo($"Copied field '{fieldId}'.");
     }
 
     public void PasteField(string? parentId = null)
     {
-        if (_state.ClipboardField is null)
+        var clipboardField = _clipboardService.GetField();
+        
+        if (clipboardField is null)
         {
             _toastService.ShowWarning("Clipboard is empty.");
             return;
         }
         if (_state.Module is null) return;
 
-        var pastedField = _state.ClipboardField with
+        var pastedField = clipboardField with
         {
-            Id = GenerateFieldId(_state.ClipboardField.FieldType),
+            Id = GenerateFieldId(clipboardField.FieldType),
             ParentId = parentId,
-            LabelEn = $"Pasted {_state.ClipboardField.LabelEn}",
-            LabelFr = _state.ClipboardField.LabelFr is not null ? $"Collé {_state.ClipboardField.LabelFr}" : null,
+            LabelEn = $"Pasted {clipboardField.LabelEn}",
+            LabelFr = clipboardField.LabelFr is not null ? $"Collé {clipboardField.LabelFr}" : null,
             Order = (_state.Module.Fields.Where(f => f.ParentId == parentId).Select(f => f.Order).DefaultIfEmpty(0).Max() + 1)
         };
 

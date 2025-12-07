@@ -1,35 +1,62 @@
 @using DynamicForms.Editor.Components.Shared
+@using DynamicForms.Editor.Services
+@inject IEditorStateService EditorState
+@inject NavigationManager NavManager
 
 <div class="app-header">
     <div class="header-left">
         <IconButton Icon="bi-arrow-left" Title="Back to Workflow" OnClick="NavigateBack" IsSmall="true" />
         <div class="header-title" style="font-size: 16px;">
             <i class="bi bi-file-text"></i>
-            <input type="text" class="form-input" value="Module Title" style="border: none; font-size: 16px; font-weight: 600; padding: 4px 8px; width: 200px; background: transparent;">
+            <span style="font-size: 16px; font-weight: 600; padding: 4px 8px;">
+                @(EditorState.CurrentModule?.TitleEn ?? "Loading...")
+            </span>
         </div>
-        <Badge Variant="info">Step 1 of 4</Badge>
+        <Badge Variant="info">v@(EditorState.CurrentModule?.Version ?? 1.0f)</Badge>
     </div>
     <div class="header-actions">
+        <Button Variant="outline" Class="btn-sm" OnClick="ExportJson">
+            <i class="bi bi-box-arrow-up"></i> Export
+        </Button>
         <div style="display: flex; background: var(--bg-tertiary); padding: 3px; border-radius: 6px; margin-right: 8px;">
             <Button Class="btn-sm" Variant="ghost">Design</Button>
             <Button Class="btn-sm" Variant="ghost">Preview</Button>
             <Button Class="btn-sm" Variant="ghost">JSON</Button>
         </div>
         <IconButton Icon="bi-info-circle" Title="Module Information" OnClick="ShowMetadataModal" />
-        <Button Variant="primary" Icon="bi-check">Save Module</Button>
+        <Button Variant="primary" Icon="bi-check" OnClick="Save">Save Module</Button>
     </div>
 </div>
 
 @code {
-    [Inject] private NavigationManager NavManager { get; set; } = default!;
-    
+    protected override void OnInitialized()
+    {
+        EditorState.OnModuleChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        EditorState.OnModuleChanged -= StateHasChanged;
+    }
+
     private void NavigateBack()
     {
-        NavManager.NavigateTo("/workflow"); // Placeholder
+        NavManager.NavigateTo("/workflow");
     }
 
     private void ShowMetadataModal()
     {
         // Placeholder for metadata modal
+    }
+
+    private async Task ExportJson()
+    {
+        await EditorState.ExportModuleJsonAsync();
+    }
+    
+    private void Save()
+    {
+        // Persistence not fully implemented, but this would trigger the save logic
+        // For now, it's just a visual action since state is in memory
     }
 }

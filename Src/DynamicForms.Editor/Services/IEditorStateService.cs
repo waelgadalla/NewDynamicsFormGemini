@@ -56,6 +56,10 @@ public interface IEditorStateService
     void CopyField(string fieldId);
     void PasteField(string? parentId = null);
     bool HasClipboard { get; }
+
+    // === Import/Export ===
+    Task ExportModuleJsonAsync();
+    Task ExportWorkflowJsonAsync();
     
     // === Validation ===
     IReadOnlyList<ValidationIssue> ValidationIssues { get; }

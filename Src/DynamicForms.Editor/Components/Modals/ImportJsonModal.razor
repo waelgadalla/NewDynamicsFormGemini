@@ -1,0 +1,33 @@
+@using DynamicForms.Editor.Services
+@using DynamicForms.Editor.Components.Modals
+
+<ModalBase Title="@Title" Icon="bi-box-arrow-in-down"
+           IsVisible="@IsVisible" IsVisibleChanged="IsVisibleChanged"
+           OnSave="Import" ShowFooter="true" Class="modal-lg">
+    <div class="form-group">
+        <label class="form-label">Paste JSON Content</label>
+        <textarea class="form-input" style="height: 400px; font-family: 'JetBrains Mono', monospace; font-size: 12px;" 
+                  @bind="JsonContent"
+                  placeholder="{ ... }"></textarea>
+    </div>
+</ModalBase>
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
+    [Parameter] public EventCallback<string> OnImport { get; set; }
+    [Parameter] public string Title { get; set; } = "Import JSON";
+
+    private string JsonContent { get; set; } = "";
+
+    private async Task Import()
+    {
+        if (!string.IsNullOrWhiteSpace(JsonContent))
+        {
+            await OnImport.InvokeAsync(JsonContent);
+            JsonContent = "";
+            IsVisible = false;
+            await IsVisibleChanged.InvokeAsync(false);
+        }
+    }
+}

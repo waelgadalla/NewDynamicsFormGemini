@@ -1,25 +1,82 @@
 @using DynamicForms.Editor.Components.Shared
+@using DynamicForms.Editor.Services
+@inject IEditorStateService EditorState
+@implements IDisposable
 
 <div class="editor-toolbar">
     <div class="toolbar-group">
-        <IconButton Icon="bi-arrow-counterclockwise" Title="Undo" IsSmall="true" Disabled="true" />
-        <IconButton Icon="bi-arrow-clockwise" Title="Redo" IsSmall="true" Disabled="true" />
+        <IconButton Icon="bi-arrow-counterclockwise" Title="Undo (Ctrl+Z)" IsSmall="true" 
+                    OnClick="EditorState.Undo" Disabled="@(!EditorState.CanUndo)" />
+        <IconButton Icon="bi-arrow-clockwise" Title="Redo (Ctrl+Y)" IsSmall="true" 
+                    OnClick="EditorState.Redo" Disabled="@(!EditorState.CanRedo)" />
     </div>
     <div class="toolbar-group">
-        <IconButton Icon="bi-files" Title="Duplicate" IsSmall="true" />
-        <IconButton Icon="bi-trash" Title="Delete" IsSmall="true" />
+        <IconButton Icon="bi-files" Title="Duplicate (Ctrl+D)" IsSmall="true" 
+                    OnClick="Duplicate" Disabled="@(EditorState.SelectedFieldId == null)" />
+        <IconButton Icon="bi-clipboard" Title="Copy (Ctrl+C)" IsSmall="true" 
+                    OnClick="Copy" Disabled="@(EditorState.SelectedFieldId == null)" />
+        <IconButton Icon="bi-clipboard-plus" Title="Paste (Ctrl+V)" IsSmall="true" 
+                    OnClick="Paste" Disabled="@(!EditorState.HasClipboard)" />
+        <IconButton Icon="bi-trash" Title="Delete (Del)" IsSmall="true" 
+                    OnClick="Delete" Disabled="@(EditorState.SelectedFieldId == null)" Class="text-danger" />
     </div>
     <div class="toolbar-group">
-        <IconButton Icon="bi-arrow-up" Title="Move Up" IsSmall="true" Disabled="true" />
-        <IconButton Icon="bi-arrow-down" Title="Move Down" IsSmall="true" Disabled="true" />
+        <IconButton Icon="bi-arrow-up" Title="Move Up" IsSmall="true" 
+                    OnClick="MoveUp" Disabled="@(EditorState.SelectedFieldId == null)" />
+        <IconButton Icon="bi-arrow-down" Title="Move Down" IsSmall="true" 
+                    OnClick="MoveDown" Disabled="@(EditorState.SelectedFieldId == null)" />
     </div>
     <div style="margin-left: auto; display: flex; align-items: center; gap: 10px; color: var(--text-muted); font-size: 12px;">
-        <span><i class="bi bi-ui-checks"></i> 6 fields</span>
+        <span><i class="bi bi-ui-checks"></i> @(EditorState.CurrentModule?.Fields.Length ?? 0) fields</span>
         <span>•</span>
         <span>Auto-saved</span>
     </div>
 </div>
 
 @code {
-    // Logic will be added in Phase 6 for Undo/Redo, etc.
+    protected override void OnInitialized()
+    {
+        EditorState.OnStateChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        EditorState.OnStateChanged -= StateHasChanged;
+    }
+
+    private void Duplicate()
+    {
+        if (EditorState.SelectedFieldId != null)
+            EditorState.DuplicateField(EditorState.SelectedFieldId);
+    }
+
+    private void Delete()
+    {
+         if (EditorState.SelectedFieldId != null)
+            EditorState.DeleteField(EditorState.SelectedFieldId);
+    }
+    
+    private void Copy()
+    {
+        if (EditorState.SelectedFieldId != null)
+            EditorState.CopyField(EditorState.SelectedFieldId);
+    }
+    
+    private void Paste()
+    {
+        // Paste as sibling of selected, or append if nothing selected
+        EditorState.PasteField(EditorState.SelectedField?.ParentId);
+    }
+
+    private void MoveUp()
+    {
+        if (EditorState.SelectedFieldId != null)
+            EditorState.MoveField(EditorState.SelectedFieldId, MoveDirection.Up);
+    }
+
+    private void MoveDown()
+    {
+        if (EditorState.SelectedFieldId != null)
+            EditorState.MoveField(EditorState.SelectedFieldId, MoveDirection.Down);
+    }
 }

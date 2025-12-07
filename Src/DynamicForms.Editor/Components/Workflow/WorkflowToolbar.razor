@@ -9,7 +9,8 @@
         <Button Variant="outline" Icon="bi-diagram-2" OnClick="AddDecisionNode">Add Decision</Button>
         <Button Variant="outline" Icon="bi-stop-circle" OnClick="AddEndNode">Add End</Button>
         <div class="vr"></div>
-        <IconButton Icon="bi-code-square" Title="View JSON" OnClick="ShowJson" />
+        <IconButton Icon="bi-box-arrow-up" Title="Export JSON" OnClick="ExportJson" />
+        <IconButton Icon="bi-box-arrow-in-down" Title="Import JSON" OnClick="() => ShowImportModal = true" />
     </div>
     
     <div class="d-flex gap-2">
@@ -17,9 +18,17 @@
     </div>
 </div>
 
+<DynamicForms.Editor.Components.Modals.ImportJsonModal 
+    @bind-IsVisible="ShowImportModal" 
+    OnImport="ImportWorkflow" 
+    Title="Import Workflow" />
+
 @code {
     [Inject] private IEditorStateService EditorState { get; set; } = default!;
     [Inject] private IToastService ToastService { get; set; } = default!;
+    [Inject] private IJsonImportExportService JsonService { get; set; } = default!;
+
+    private bool ShowImportModal { get; set; }
 
     private void AddModuleNode()
     {
@@ -47,9 +56,23 @@
         ToastService.ShowInfo("Simulation started (Stub)");
     }
 
-    private void ShowJson()
+    private async Task ExportJson()
     {
-        ToastService.ShowInfo("JSON View (Stub)");
+        await EditorState.ExportWorkflowJsonAsync();
+    }
+
+    private void ImportWorkflow(string json)
+    {
+        var workflow = JsonService.DeserializeWorkflow(json);
+        if (workflow != null)
+        {
+            EditorState.LoadWorkflow(workflow);
+            ToastService.ShowSuccess("Workflow imported successfully.");
+        }
+        else
+        {
+            ToastService.ShowError("Invalid Workflow JSON.");
+        }
     }
 
     private void SaveWorkflow()
@@ -57,7 +80,6 @@
         if (EditorState.CurrentWorkflow != null)
         {
             EditorState.UpdateWorkflow(EditorState.CurrentWorkflow);
-            ToastService.ShowSuccess("Workflow saved successfully.");
         }
     }
 }

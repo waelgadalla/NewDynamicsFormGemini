@@ -2,9 +2,29 @@
 @layout EditorLayout
 @using DynamicForms.Editor.Components.Editor
 @using DynamicForms.Editor.Layouts
+@using DynamicForms.Editor.Services
+@inject IJSRuntime JSRuntime
+@inject IEditorStateService EditorState
+@implements IDisposable
 
 <FormCanvas />
 
 @code {
-    // Logic for the module editor page will go here
+    private DotNetObjectReference<IEditorStateService>? _objRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Register keyboard shortcuts
+            // We pass the EditorState service directly since it has the JSInvokable methods
+            _objRef = DotNetObjectReference.Create(EditorState);
+            await JSRuntime.InvokeVoidAsync("editorInterop.registerKeyboardShortcuts", _objRef);
+        }
+    }
+
+    public void Dispose()
+    {
+        _objRef?.Dispose();
+    }
 }
