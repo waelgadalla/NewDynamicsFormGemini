@@ -1,0 +1,13 @@
+﻿@*
+    NOTE: Route commented out to avoid conflict with Dashboard.razor which also uses "/".
+    If you want to use this Home page instead of Dashboard as the landing page,
+    uncomment the @page directive below and comment out the one in Dashboard.razor.
+
+    @page "/"
+*@
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
