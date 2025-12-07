@@ -1,0 +1,140 @@
+@using DynamicForms.Core.V4.Schemas
+@using DynamicForms.Editor.Models
+@using DynamicForms.Editor.Services
+@using DynamicForms.Editor.Components.Shared
+
+<ModalBase Title="Cross-Field Validation Rules" Icon="bi-shield-exclamation" IsVisible="@IsVisible" IsVisibleChanged="IsVisibleChanged" OnSave="Save" Class="modal-lg">
+    <div class="row">
+        <div class="col-4 border-end">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="fw-bold text-sm">Rules</span>
+                <button class="btn btn-xs btn-outline-primary" @onclick="AddRule"><i class="bi bi-plus"></i></button>
+            </div>
+            <div class="list-group list-group-flush">
+                @foreach (var rule in Rules)
+                {
+                    <button class="list-group-item list-group-item-action @(SelectedRule == rule ? "active" : "")" 
+                            @onclick="() => SelectRule(rule)">
+                        <div class="d-flex w-100 justify-content-between">
+                            <span class="text-truncate">@rule.Type</span>
+                            <i class="bi bi-x text-danger" @onclick="() => RemoveRule(rule)" @onclick:stopPropagation="true"></i>
+                        </div>
+                        <small class="@(SelectedRule == rule ? "text-light" : "text-muted")">@rule.FieldIds.Count fields</small>
+                    </button>
+                }
+            </div>
+        </div>
+        <div class="col-8">
+            @if (SelectedRule is not null)
+            {
+                <div class="mb-3">
+                    <label class="form-label">Validation Type</label>
+                    <select class="form-select" @bind="SelectedRule.Type">
+                        <option value="AtLeastOne">At Least One Required</option>
+                        <option value="AllOrNone">All or None</option>
+                        <option value="MutuallyExclusive">Mutually Exclusive (Only One)</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Fields involved</label>
+                    <div class="border rounded p-2" style="max-height: 150px; overflow-y: auto;">
+                        @if (AvailableFields is not null)
+                        {
+                            foreach (var field in AvailableFields)
+                            {
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" 
+                                           checked="@SelectedRule.FieldIds.Contains(field.Id)" 
+                                           @onchange="@(e => ToggleField(SelectedRule, field.Id, e.Value))" />
+                                    <label class="form-check-label">
+                                        @field.LabelEn <span class="text-muted text-xs">(@field.Id)</span>
+                                    </label>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Error Message</label>
+                    <BilingualInput 
+                        @bind-ValueEn="SelectedRule.ErrorMessageEn" 
+                        @bind-ValueFr="SelectedRule.ErrorMessageFr" 
+                        PlaceholderEn="Error message when validation fails" />
+                </div>
+            }
+            else
+            {
+                <div class="text-center text-muted mt-5">Select or create a rule to edit.</div>
+            }
+        </div>
+    </div>
+</ModalBase>
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
+    
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private List<FieldSetValidationModel> Rules { get; set; } = new();
+    private FieldSetValidationModel? SelectedRule { get; set; }
+    private IEnumerable<FormFieldSchema>? AvailableFields => EditorState.CurrentModule?.Fields;
+
+    protected override void OnParametersSet()
+    {
+        if (IsVisible && EditorState.CurrentModule is not null)
+        {
+            Rules = EditorState.CurrentModule.CrossFieldValidations?
+                .Select(FieldSetValidationModel.FromSchema)
+                .ToList() ?? new List<FieldSetValidationModel>();
+            
+            if (Rules.Any()) SelectedRule = Rules.First();
+        }
+    }
+
+    private void AddRule()
+    {
+        var newRule = new FieldSetValidationModel();
+        Rules.Add(newRule);
+        SelectedRule = newRule;
+    }
+
+    private void RemoveRule(FieldSetValidationModel rule)
+    {
+        Rules.Remove(rule);
+        if (SelectedRule == rule) SelectedRule = null;
+    }
+
+    private void SelectRule(FieldSetValidationModel rule)
+    {
+        SelectedRule = rule;
+    }
+
+    private void ToggleField(FieldSetValidationModel rule, string fieldId, object? checkedValue)
+    {
+        bool isChecked = (bool)(checkedValue ?? false);
+        if (isChecked)
+        {
+            if (!rule.FieldIds.Contains(fieldId)) rule.FieldIds.Add(fieldId);
+        }
+        else
+        {
+            rule.FieldIds.Remove(fieldId);
+        }
+    }
+
+    private async Task Save()
+    {
+        if (EditorState.CurrentModule is not null)
+        {
+            var schemaRules = Rules.Select(r => r.ToSchema()).ToArray();
+            var updatedModule = EditorState.CurrentModule with { CrossFieldValidations = schemaRules };
+            EditorState.UpdateModule(updatedModule);
+        }
+        
+        IsVisible = false;
+        await IsVisibleChanged.InvokeAsync(false);
+    }
+}

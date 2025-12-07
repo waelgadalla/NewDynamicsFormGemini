@@ -2,14 +2,23 @@
 @using DynamicForms.Editor.Components.Shared
 @using DynamicForms.Editor.Services
 @using DynamicForms.Editor.Models
+@using DynamicForms.Editor.Components.Modals
 
 <div class="px-3 py-2">
     <TextInput Label="Field ID" @bind-Value="FieldId" Disabled="true" Class="text-mono" />
     <div class="form-group">
         <label class="form-label">Field Type</label>
-        <select class="form-select" @bind="FieldType" disabled>
-            <option value="@Field.FieldType">@FieldTypeDefinition.GetByType(Field.FieldType)?.DisplayName</option>
-        </select>
+        <div class="d-flex gap-2">
+            <select class="form-select" @bind="FieldType" disabled>
+                <option value="@Field.FieldType">@FieldTypeDefinition.GetByType(Field.FieldType)?.DisplayName</option>
+            </select>
+            @if (RequiresConfig)
+            {
+                <button class="btn btn-outline btn-icon" title="Configure" @onclick="OpenConfigModal">
+                    <i class="bi bi-sliders"></i>
+                </button>
+            }
+        </div>
     </div>
     <div class="form-group">
         <label class="form-label">Display Order</label>
@@ -17,9 +26,17 @@
     </div>
 </div>
 
+<TypeConfigModal IsVisible="@ShowConfigModal" 
+                 IsVisibleChanged="@(val => ShowConfigModal = val)"
+                 Field="@Field"
+                 OnSaveConfig="UpdateTypeConfig" />
+
 @code {
     [Parameter] public FormFieldSchema Field { get; set; } = default!;
     [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private bool ShowConfigModal { get; set; }
+    private bool RequiresConfig => FieldTypeDefinition.GetByType(Field.FieldType)?.RequiresTypeConfig ?? false;
 
     private string FieldId
     {
@@ -52,5 +69,15 @@
         {
             FieldOrder = newOrder;
         }
+    }
+
+    private void OpenConfigModal()
+    {
+        ShowConfigModal = true;
+    }
+
+    private void UpdateTypeConfig(FieldTypeConfig config)
+    {
+        EditorState.UpdateField(Field with { TypeConfig = config });
     }
 }

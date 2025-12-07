@@ -1,0 +1,52 @@
+@using DynamicForms.Editor.Components.Shared
+@using DynamicForms.Editor.Models
+
+<div class="container-fluid">
+    <div class="row g-3">
+        <div class="col-6">
+            <div class="prop-group checkbox-group">
+                <input type="checkbox" @bind="Model.AllowAdd" />
+                <span class="prop-label m-0">Allow Add</span>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="prop-group checkbox-group">
+                <input type="checkbox" @bind="Model.AllowEdit" />
+                <span class="prop-label m-0">Allow Edit</span>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="prop-group checkbox-group">
+                <input type="checkbox" @bind="Model.AllowDelete" />
+                <span class="prop-label m-0">Allow Delete</span>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="form-group">
+                <label class="form-label">Max Rows</label>
+                <input type="number" class="form-input" @bind="Model.MaxRows" />
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="form-group">
+                <label class="form-label">Editor Mode</label>
+                <select class="form-select" @bind="Model.EditorMode">
+                    <option value="Modal">Modal</option>
+                    <option value="Inline">Inline</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-12">
+            <label class="form-label">Columns</label>
+            <div class="border rounded p-2 bg-light text-center text-muted text-sm">
+                Nested column editing will be implemented here.
+                <br/>
+                (Current count: @Model.Columns.Count)
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public DataGridConfigModel Model { get; set; } = new();
+}

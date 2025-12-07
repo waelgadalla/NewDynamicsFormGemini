@@ -1,0 +1,64 @@
+@using DynamicForms.Core.V4.Services
+@using DynamicForms.Core.V4.Schemas
+
+<div class="prop-group">
+    <select class="form-select" @onchange="OnSelectionChanged">
+        <option value="">-- Select CodeSet --</option>
+        @if (AvailableCodeSets is not null)
+        {
+            @foreach (var cs in AvailableCodeSets)
+            {
+                <option value="@cs.Id" selected="@(CodeSetId == cs.Id)">@cs.NameEn (@cs.Code)</option>
+            }
+        }
+    </select>
+    
+    @if (SelectedCodeSet is not null)
+    {
+        <div class="mt-2 p-2 border rounded bg-tertiary text-sm">
+            <div class="fw-bold mb-1">Preview:</div>
+            <div style="max-height: 100px; overflow-y: auto;">
+                @foreach (var item in SelectedCodeSet.Items.Take(5))
+                {
+                    <div class="text-muted">@item.TextEn (@item.Value)</div>
+                }
+                @if (SelectedCodeSet.Items.Length > 5)
+                {
+                    <div class="text-muted fst-italic">+ @(SelectedCodeSet.Items.Length - 5) more...</div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int? CodeSetId { get; set; }
+    [Parameter] public EventCallback<int?> CodeSetIdChanged { get; set; }
+    [Inject] private ICodeSetProvider CodeSetProvider { get; set; } = default!;
+
+    private CodeSetSchema[]? AvailableCodeSets;
+    private CodeSetSchema? SelectedCodeSet;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AvailableCodeSets = await CodeSetProvider.GetAllCodeSetsAsync();
+        if (CodeSetId.HasValue)
+        {
+            SelectedCodeSet = await CodeSetProvider.GetCodeSetAsync(CodeSetId.Value);
+        }
+    }
+
+    private async Task OnSelectionChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int id))
+        {
+            SelectedCodeSet = await CodeSetProvider.GetCodeSetAsync(id);
+            await CodeSetIdChanged.InvokeAsync(id);
+        }
+        else
+        {
+            SelectedCodeSet = null;
+            await CodeSetIdChanged.InvokeAsync(null);
+        }
+    }
+}

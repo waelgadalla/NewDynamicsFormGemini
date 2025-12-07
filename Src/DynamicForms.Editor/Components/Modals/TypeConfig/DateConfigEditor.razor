@@ -1,0 +1,29 @@
+@using DynamicForms.Editor.Components.Shared
+@using DynamicForms.Editor.Models
+
+<div class="container-fluid">
+    <div class="row g-3">
+        <div class="col-6">
+            <div class="prop-group checkbox-group">
+                <input type="checkbox" @bind="Model.AllowFuture" />
+                <span class="prop-label m-0">Allow Future</span>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="prop-group checkbox-group">
+                <input type="checkbox" @bind="Model.AllowPast" />
+                <span class="prop-label m-0">Allow Past</span>
+            </div>
+        </div>
+        <div class="col-6">
+            <TextInput Label="Min Date" @bind-Value="Model.MinDate" Placeholder="ISO or 'Now'" />
+        </div>
+        <div class="col-6">
+            <TextInput Label="Max Date" @bind-Value="Model.MaxDate" Placeholder="ISO or 'Now+30d'" />
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public DateConfigModel Model { get; set; } = new();
+}

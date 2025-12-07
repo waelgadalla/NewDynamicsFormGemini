@@ -1,0 +1,84 @@
+@using DynamicForms.Core.V4.Schemas
+@using DynamicForms.Editor.Components.Shared
+@using DynamicForms.Editor.Services
+@using DynamicForms.Editor.Components.Modals
+
+<div class="px-3 py-2">
+    @if (Field.ConditionalRules is not null && Field.ConditionalRules.Any())
+    {
+        <div class="list-group mb-3">
+            @foreach (var rule in Field.ConditionalRules)
+            {
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <div class="text-truncate">
+                        <span class="badge bg-light text-dark me-2">@rule.Action</span>
+                        <small class="text-muted">@rule.Description</small>
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-ghost" @onclick="() => EditRule(rule)"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-sm btn-ghost text-danger" @onclick="() => DeleteRule(rule)"><i class="bi bi-trash"></i></button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center text-muted text-sm mb-3 p-2 border rounded bg-light">
+            No conditional rules defined.
+        </div>
+    }
+
+    <button class="btn btn-outline btn-sm w-100" @onclick="AddRule">
+        <i class="bi bi-plus-lg"></i> Add Rule
+    </button>
+</div>
+
+<ConditionBuilderModal IsVisible="@ShowModal" 
+                       IsVisibleChanged="@(val => ShowModal = val)"
+                       ExistingRule="@CurrentRule"
+                       OnSaveRule="HandleRuleSave" />
+
+@code {
+    [Parameter] public FormFieldSchema Field { get; set; } = default!;
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private bool ShowModal { get; set; }
+    private ConditionalRule? CurrentRule { get; set; }
+
+    private void AddRule()
+    {
+        CurrentRule = null;
+        ShowModal = true;
+    }
+
+    private void EditRule(ConditionalRule rule)
+    {
+        CurrentRule = rule;
+        ShowModal = true;
+    }
+
+    private void DeleteRule(ConditionalRule rule)
+    {
+        var rules = Field.ConditionalRules?.ToList() ?? new List<ConditionalRule>();
+        rules.Remove(rule);
+        EditorState.UpdateField(Field with { ConditionalRules = rules.ToArray() });
+    }
+
+    private void HandleRuleSave(ConditionalRule rule)
+    {
+        var rules = Field.ConditionalRules?.ToList() ?? new List<ConditionalRule>();
+        
+        if (CurrentRule != null)
+        {
+            var index = rules.FindIndex(r => r.Id == CurrentRule.Id);
+            if (index != -1) rules[index] = rule;
+        }
+        else
+        {
+            rules.Add(rule);
+        }
+        
+        EditorState.UpdateField(Field with { ConditionalRules = rules.ToArray() });
+    }
+}

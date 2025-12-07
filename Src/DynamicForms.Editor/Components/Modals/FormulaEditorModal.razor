@@ -1,0 +1,86 @@
+@using DynamicForms.Core.V4.Schemas
+@using DynamicForms.Editor.Services
+
+<ModalBase Title="Computed Value Formula" Icon="bi-calculator" IsVisible="@IsVisible" IsVisibleChanged="IsVisibleChanged" OnSave="Save">
+    <div class="mb-3">
+        <label class="form-label">Formula Expression</label>
+        <div class="input-group mb-2">
+            <textarea class="form-control font-monospace" rows="4" @bind="Expression" placeholder="e.g. Quantity * Price"></textarea>
+        </div>
+        <div class="text-muted text-xs mb-3">Use field IDs. Example: <code>Total = Quantity * UnitPrice</code></div>
+
+        <label class="form-label">Available Fields (Click to insert)</label>
+        <div class="d-flex flex-wrap gap-1 mb-3">
+            @if (AvailableFields is not null)
+            {
+                foreach (var field in AvailableFields)
+                {
+                    <button class="btn btn-xs btn-outline-secondary" @onclick="() => InsertField(field.Id)">@field.Id</button>
+                }
+            }
+        </div>
+
+        <label class="form-label">Operators</label>
+        <div class="d-flex flex-wrap gap-1">
+            <button class="btn btn-xs btn-outline-primary" @onclick='() => InsertText("+")'>+</button>
+            <button class="btn btn-xs btn-outline-primary" @onclick='() => InsertText("-")'>-</button>
+            <button class="btn btn-xs btn-outline-primary" @onclick='() => InsertText("*")'>*</button>
+            <button class="btn btn-xs btn-outline-primary" @onclick='() => InsertText("/")'>/</button>
+            <button class="btn btn-xs btn-outline-primary" @onclick='() => InsertText("()")'>( )</button>
+        </div>
+    </div>
+</ModalBase>
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
+    [Parameter] public ComputedFormula? ExistingFormula { get; set; }
+    [Parameter] public EventCallback<ComputedFormula?> OnSaveFormula { get; set; }
+    
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private string Expression { get; set; } = "";
+    
+    private IEnumerable<FormFieldSchema>? AvailableFields => EditorState.CurrentModule?.Fields;
+
+    protected override void OnParametersSet()
+    {
+        if (IsVisible)
+        {
+            Expression = ExistingFormula?.Expression ?? "";
+        }
+    }
+
+    private void InsertField(string fieldId)
+    {
+        Expression += $"[{fieldId}]"; // Using bracket notation for clarity, though expression parser might vary
+    }
+
+    private void InsertText(string text)
+    {
+        Expression += $" {text} ";
+    }
+
+    private async Task Save()
+    {
+        ComputedFormula? formula = null;
+        if (!string.IsNullOrWhiteSpace(Expression))
+        {
+            // Auto-detect dependencies (simplified)
+            var dependencies = AvailableFields?
+                .Where(f => Expression.Contains(f.Id, StringComparison.OrdinalIgnoreCase)) // Very simple check
+                .Select(f => f.Id)
+                .ToArray();
+
+            formula = new ComputedFormula
+            {
+                Expression = Expression,
+                DependentFieldIds = dependencies
+            };
+        }
+        
+        await OnSaveFormula.InvokeAsync(formula);
+        IsVisible = false;
+        await IsVisibleChanged.InvokeAsync(false);
+    }
+}

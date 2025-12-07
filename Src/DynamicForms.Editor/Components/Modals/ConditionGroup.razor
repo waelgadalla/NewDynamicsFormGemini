@@ -1,0 +1,68 @@
+@using DynamicForms.Editor.Models
+@using DynamicForms.Core.V4.Enums
+@using DynamicForms.Core.V4.Schemas
+
+<div class="condition-group border rounded p-3 mb-2 bg-light">
+    <div class="d-flex align-items-center mb-2">
+        <div class="btn-group btn-group-sm me-2" role="group">
+            <button type="button" class="btn @(Group.LogicalOp == LogicalOperator.And ? "btn-primary" : "btn-outline-primary")" @onclick="() => SetOp(LogicalOperator.And)">AND</button>
+            <button type="button" class="btn @(Group.LogicalOp == LogicalOperator.Or ? "btn-primary" : "btn-outline-primary")" @onclick="() => SetOp(LogicalOperator.Or)">OR</button>
+            <button type="button" class="btn @(Group.LogicalOp == LogicalOperator.Not ? "btn-primary" : "btn-outline-primary")" @onclick="() => SetOp(LogicalOperator.Not)">NOT</button>
+        </div>
+        <div class="ms-auto">
+            <button class="btn btn-sm btn-outline-secondary" @onclick="AddCondition"><i class="bi bi-plus"></i> Condition</button>
+            <button class="btn btn-sm btn-outline-secondary" @onclick="AddGroup"><i class="bi bi-folder-plus"></i> Group</button>
+            @if (OnDelete.HasDelegate)
+            {
+                <button class="btn btn-sm btn-outline-danger ms-2" @onclick="OnDelete"><i class="bi bi-trash"></i></button>
+            }
+        </div>
+    </div>
+
+    @foreach (var condition in Group.Conditions)
+    {
+        if (condition.IsComplex)
+        {
+            <ConditionGroup Group="@condition" 
+                            AvailableFields="@AvailableFields" 
+                            CrossModuleFields="@CrossModuleFields"
+                            OnDelete="@(() => RemoveCondition(condition))" />
+        }
+        else
+        {
+            <ConditionRow @bind-Field="condition.Field"
+                          @bind-Operator="condition.Operator"
+                          @bind-Value="condition.Value"
+                          AvailableFields="@AvailableFields"
+                          CrossModuleFields="@CrossModuleFields"
+                          OnDelete="@(() => RemoveCondition(condition))" />
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public ConditionModel Group { get; set; } = default!;
+    [Parameter] public IEnumerable<FormFieldSchema>? AvailableFields { get; set; }
+    [Parameter] public IEnumerable<CrossModuleFieldReference>? CrossModuleFields { get; set; }
+    [Parameter] public EventCallback OnDelete { get; set; }
+
+    private void SetOp(LogicalOperator op)
+    {
+        Group.LogicalOp = op;
+    }
+
+    private void AddCondition()
+    {
+        Group.Conditions.Add(new ConditionModel { Operator = ConditionOperator.Equals });
+    }
+
+    private void AddGroup()
+    {
+        Group.Conditions.Add(new ConditionModel { LogicalOp = LogicalOperator.And });
+    }
+
+    private void RemoveCondition(ConditionModel condition)
+    {
+        Group.Conditions.Remove(condition);
+    }
+}

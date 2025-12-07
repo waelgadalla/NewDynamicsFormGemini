@@ -1,0 +1,56 @@
+@using DynamicForms.Core.V4.Schemas
+@using DynamicForms.Editor.Components.Properties.Editors
+@using DynamicForms.Editor.Services
+
+<div class="px-3 py-2">
+    <div class="options-editor">
+        <div class="options-header">
+            <span style="font-size: 11px; font-weight: 500;">Source</span>
+            <div class="options-toggle">
+                <button class="@(UseCodeSet ? "" : "active")" @onclick="() => SetSource(false)">Inline</button>
+                <button class="@(UseCodeSet ? "active" : "")" @onclick="() => SetSource(true)">CodeSet</button>
+            </div>
+        </div>
+        
+        <div class="p-2">
+            @if (UseCodeSet)
+            {
+                <CodeSetPicker CodeSetId="@Field.CodeSetId" CodeSetIdChanged="UpdateCodeSetId" />
+            }
+            else
+            {
+                <InlineOptionsEditor Options="@Field.Options" OptionsChanged="UpdateOptions" />
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public FormFieldSchema Field { get; set; } = default!;
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private bool UseCodeSet => Field.CodeSetId.HasValue;
+
+    private void SetSource(bool useCodeSet)
+    {
+        if (useCodeSet && !Field.CodeSetId.HasValue)
+        {
+            // Switching to CodeSet, verify logic if needed or keep empty until selected
+        }
+        else if (!useCodeSet && Field.CodeSetId.HasValue)
+        {
+            // Switching to inline, maybe clear CodeSetId
+            EditorState.UpdateField(Field with { CodeSetId = null });
+        }
+    }
+
+    private void UpdateCodeSetId(int? newId)
+    {
+        EditorState.UpdateField(Field with { CodeSetId = newId, Options = null });
+    }
+
+    private void UpdateOptions(FieldOption[] newOptions)
+    {
+        EditorState.UpdateField(Field with { Options = newOptions, CodeSetId = null });
+    }
+}

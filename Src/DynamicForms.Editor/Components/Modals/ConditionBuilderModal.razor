@@ -1,0 +1,100 @@
+@using DynamicForms.Editor.Models
+@using DynamicForms.Core.V4.Schemas
+@using DynamicForms.Editor.Services
+
+<ModalBase Title="Condition Builder" Icon="bi-lightning" IsVisible="@IsVisible" IsVisibleChanged="IsVisibleChanged" OnSave="Save">
+    <div class="mb-3">
+        <div class="row g-2 align-items-center mb-3">
+            <div class="col-auto">
+                <span class="fw-bold text-success">IF</span>
+            </div>
+            <div class="col">
+                <!-- Root Group -->
+                <ConditionGroup Group="@RootCondition" 
+                                AvailableFields="@AvailableFields" 
+                                CrossModuleFields="@CrossModuleFields" />
+            </div>
+        </div>
+
+        <div class="border-top pt-3 mt-3">
+            <div class="row g-2 align-items-center">
+                <div class="col-auto">
+                    <span class="fw-bold text-primary">THEN</span>
+                </div>
+                <div class="col-auto">
+                    <select class="form-select" @bind="Action">
+                        <option value="show">Show Field</option>
+                        <option value="hide">Hide Field</option>
+                        <option value="enable">Enable Field</option>
+                        <option value="disable">Disable Field</option>
+                        <option value="setRequired">Set Required</option>
+                        <option value="setOptional">Set Optional</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <select class="form-select" @bind="TargetFieldId">
+                        <option value="">Select Target Field...</option>
+                        @if (AvailableFields is not null)
+                        {
+                            foreach (var field in AvailableFields)
+                            {
+                                <option value="@field.Id">@(field.LabelEn ?? field.Id)</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</ModalBase>
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
+    [Parameter] public ConditionalRule? ExistingRule { get; set; }
+    [Parameter] public EventCallback<ConditionalRule> OnSaveRule { get; set; }
+    
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private ConditionModel RootCondition { get; set; } = new() { LogicalOp = DynamicForms.Core.V4.Enums.LogicalOperator.And };
+    private string Action { get; set; } = "show";
+    private string? TargetFieldId { get; set; }
+    
+    private IEnumerable<FormFieldSchema>? AvailableFields => EditorState.CurrentModule?.Fields;
+    private List<CrossModuleFieldReference> CrossModuleFields { get; set; } = new();
+
+    protected override void OnParametersSet()
+    {
+        if (IsVisible)
+        {
+            if (ExistingRule != null)
+            {
+                RootCondition = ConditionModel.FromSchema(ExistingRule.Condition);
+                Action = ExistingRule.Action;
+                TargetFieldId = ExistingRule.TargetFieldId;
+            }
+            else
+            {
+                RootCondition = new() { LogicalOp = DynamicForms.Core.V4.Enums.LogicalOperator.And };
+                RootCondition.Conditions.Add(new ConditionModel { Operator = DynamicForms.Core.V4.Enums.ConditionOperator.Equals });
+                Action = "show";
+                TargetFieldId = null;
+            }
+        }
+    }
+
+    private async Task Save()
+    {
+        var rule = new ConditionalRule
+        {
+            Id = ExistingRule?.Id ?? Guid.NewGuid().ToString(),
+            Action = Action,
+            TargetFieldId = TargetFieldId,
+            Condition = RootCondition.ToSchema()
+        };
+        
+        await OnSaveRule.InvokeAsync(rule);
+        IsVisible = false;
+        await IsVisibleChanged.InvokeAsync(false);
+    }
+}

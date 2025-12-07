@@ -1,0 +1,70 @@
+@using DynamicForms.Core.V4.Schemas
+@using DynamicForms.Core.V4.Enums
+
+<div class="condition-row d-flex gap-2 mb-2 align-items-center">
+    <select class="form-select form-select-sm" style="width: 160px;" @bind="Field">
+        <option value="">Select Field...</option>
+        @if (AvailableFields is not null)
+        {
+            foreach (var field in AvailableFields)
+            {
+                <option value="@field.Id">@(field.LabelEn ?? field.Id)</option>
+            }
+        }
+        @if (CrossModuleFields is not null && CrossModuleFields.Any())
+        {
+            <optgroup label="Other Modules">
+                @foreach (var field in CrossModuleFields)
+                {
+                    <option value="@field.Reference">@field.Label</option>
+                }
+            </optgroup>
+        }
+    </select>
+    
+    <select class="form-select form-select-sm" style="width: 120px;" @bind="Operator">
+        @foreach (var op in Enum.GetValues<ConditionOperator>())
+        {
+            <option value="@op">@op</option>
+        }
+    </select>
+    
+    @if (!IsNullOperator)
+    {
+        <input type="text" class="form-input form-input-sm flex-grow-1" @bind="Value" placeholder="Value" />
+    }
+    else
+    {
+        <input type="text" class="form-input form-input-sm flex-grow-1" disabled placeholder="(not required)" />
+    }
+    
+    <button class="btn btn-ghost btn-icon-sm text-danger" @onclick="OnDelete"><i class="bi bi-x"></i></button>
+</div>
+
+@code {
+    [Parameter] public Condition Condition { get; set; } = default!; // Using the Schema class directly, or a wrapper? 
+    // Since Condition is immutable record, we might need a wrapper or use EventCallback to update parent.
+    // For simplicity in this MVP, let's assume we are editing a mutable DTO and then converting back, 
+    // OR we use EventCallback to notify parent of changes.
+    
+    // Let's use a mutable wrapper approach for the UI, then parent converts.
+    // OR: receive values and emit changes.
+    
+    [Parameter] public string? Field { get; set; }
+    [Parameter] public EventCallback<string?> FieldChanged { get; set; }
+    
+    [Parameter] public ConditionOperator Operator { get; set; }
+    [Parameter] public EventCallback<ConditionOperator> OperatorChanged { get; set; }
+    
+    [Parameter] public object? Value { get; set; }
+    [Parameter] public EventCallback<object?> ValueChanged { get; set; }
+    
+    [Parameter] public EventCallback OnDelete { get; set; }
+    
+    [Parameter] public IEnumerable<FormFieldSchema>? AvailableFields { get; set; }
+    [Parameter] public IEnumerable<CrossModuleFieldReference>? CrossModuleFields { get; set; }
+
+    private bool IsNullOperator => Operator is 
+        ConditionOperator.IsNull or ConditionOperator.IsNotNull or 
+        ConditionOperator.IsEmpty or ConditionOperator.IsNotEmpty;
+}

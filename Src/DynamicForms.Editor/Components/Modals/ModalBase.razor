@@ -1,0 +1,46 @@
+<div class="modal-backdrop @(IsVisible ? "" : "hidden")" @onclick="HandleBackdropClick">
+    <div class="modal @Class" @onclick:stopPropagation="true">
+        <div class="modal-header">
+            <div class="modal-title">
+                @if (!string.IsNullOrEmpty(Icon))
+                {
+                    <i class="bi @Icon me-2"></i>
+                }
+                @Title
+            </div>
+            <button class="modal-close" @onclick="Close"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="modal-body">
+            @ChildContent
+        </div>
+        @if (ShowFooter)
+        {
+            <div class="modal-footer">
+                <button class="btn btn-ghost" @onclick="Close">Cancel</button>
+                <button class="btn btn-primary" @onclick="OnSave">Save</button>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = "Modal";
+    [Parameter] public string Icon { get; set; } = "";
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public bool ShowFooter { get; set; } = true;
+    [Parameter] public EventCallback OnSave { get; set; }
+    [Parameter] public string Class { get; set; } = "";
+
+    private async Task Close()
+    {
+        IsVisible = false;
+        await IsVisibleChanged.InvokeAsync(false);
+    }
+
+    private async Task HandleBackdropClick()
+    {
+        await Close();
+    }
+}

@@ -1,0 +1,50 @@
+@using DynamicForms.Core.V4.Schemas
+@using DynamicForms.Editor.Components.Shared
+@using DynamicForms.Editor.Services
+@using DynamicForms.Editor.Components.Modals
+
+<div class="px-3 py-2">
+    @if (Field.ComputedValue is not null)
+    {
+        <div class="alert alert-light border d-flex justify-content-between align-items-center p-2 mb-2">
+            <code class="text-primary text-wrap text-break" style="font-size: 11px;">@Field.ComputedValue.Expression</code>
+            <div class="d-flex gap-1">
+                <button class="btn btn-sm btn-ghost" @onclick="EditFormula"><i class="bi bi-pencil"></i></button>
+                <button class="btn btn-sm btn-ghost text-danger" @onclick="ClearFormula"><i class="bi bi-x-lg"></i></button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <button class="btn btn-outline btn-sm w-100" @onclick="EditFormula">
+            <i class="bi bi-calculator"></i> Define Formula
+        </button>
+    }
+</div>
+
+<FormulaEditorModal IsVisible="@ShowModal" 
+                    IsVisibleChanged="@(val => ShowModal = val)"
+                    ExistingFormula="@Field.ComputedValue"
+                    OnSaveFormula="HandleSave" />
+
+@code {
+    [Parameter] public FormFieldSchema Field { get; set; } = default!;
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private bool ShowModal { get; set; }
+
+    private void EditFormula()
+    {
+        ShowModal = true;
+    }
+
+    private void ClearFormula()
+    {
+        EditorState.UpdateField(Field with { ComputedValue = null });
+    }
+
+    private void HandleSave(ComputedFormula? formula)
+    {
+        EditorState.UpdateField(Field with { ComputedValue = formula });
+    }
+}

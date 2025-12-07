@@ -1,0 +1,76 @@
+@using DynamicForms.Core.V4.Schemas
+@using DynamicForms.Editor.Components.Shared
+
+<div class="options-editor">
+    <div class="options-header">
+        <span style="font-size: 11px; font-weight: 500;">Options</span>
+        <div class="ms-auto">
+            <button class="btn btn-xs btn-outline" @onclick="AddOption"><i class="bi bi-plus"></i> Add</button>
+        </div>
+    </div>
+    <div class="options-list">
+        @if (Options is null || !Options.Any())
+        {
+            <div class="p-3 text-center text-muted text-sm">No options defined.</div>
+        }
+        else
+        {
+            @foreach (var option in Options.OrderBy(o => o.Order))
+            {
+                <div class="option-row">
+                    <i class="bi bi-grip-vertical drag-handle text-muted"></i>
+                    <input type="text" class="form-input p-1 text-xs" value="@option.Value" @onchange="@(e => UpdateOption(option, e.Value?.ToString(), "value"))" placeholder="Value" />
+                    <input type="text" class="form-input p-1 text-xs" value="@option.LabelEn" @onchange="@(e => UpdateOption(option, e.Value?.ToString(), "en"))" placeholder="Label (EN)" />
+                    <input type="text" class="form-input p-1 text-xs" value="@option.LabelFr" @onchange="@(e => UpdateOption(option, e.Value?.ToString(), "fr"))" placeholder="Label (FR)" />
+                    <button class="btn btn-ghost btn-icon-sm" @onclick="@(() => RemoveOption(option))"><i class="bi bi-x"></i></button>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public FieldOption[]? Options { get; set; }
+    [Parameter] public EventCallback<FieldOption[]> OptionsChanged { get; set; }
+
+    private async Task AddOption()
+    {
+        var current = Options?.ToList() ?? new List<FieldOption>();
+        var nextOrder = current.Count > 0 ? current.Max(o => o.Order) + 1 : 1;
+        
+        current.Add(new FieldOption(
+            Value: $"Option{nextOrder}",
+            LabelEn: $"Option {nextOrder}",
+            Order: nextOrder
+        ));
+        
+        await OptionsChanged.InvokeAsync(current.ToArray());
+    }
+
+    private async Task RemoveOption(FieldOption option)
+    {
+        if (Options is null) return;
+        var current = Options.ToList();
+        current.Remove(option);
+        await OptionsChanged.InvokeAsync(current.ToArray());
+    }
+
+    private async Task UpdateOption(FieldOption option, string? newValue, string field)
+    {
+        if (Options is null) return;
+        var current = Options.ToList();
+        var index = current.IndexOf(option);
+        if (index == -1) return;
+
+        FieldOption updated = field switch
+        {
+            "value" => option with { Value = newValue ?? "" },
+            "en" => option with { LabelEn = newValue ?? "" },
+            "fr" => option with { LabelFr = newValue },
+            _ => option
+        };
+
+        current[index] = updated;
+        await OptionsChanged.InvokeAsync(current.ToArray());
+    }
+}

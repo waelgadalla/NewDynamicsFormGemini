@@ -1,0 +1,36 @@
+@using DynamicForms.Core.V4.Schemas
+@using DynamicForms.Editor.Components.Shared
+@using DynamicForms.Editor.Models
+
+<div class="container-fluid">
+    <div class="row g-3">
+        <div class="col-12">
+            <TextInput Label="Data Source URL" @bind-Value="Model.DataSourceUrl" Placeholder="e.g. /api/users/search" />
+        </div>
+        <div class="col-6">
+            <TextInput Label="Query Parameter" @bind-Value="Model.QueryParameter" />
+        </div>
+        <div class="col-6">
+            <div class="form-group">
+                <label class="form-label">Min Characters</label>
+                <input type="number" class="form-input" @bind="Model.MinCharacters" />
+            </div>
+        </div>
+        <div class="col-6">
+            <TextInput Label="Value Field" @bind-Value="Model.ValueField" Placeholder="e.g. id" />
+        </div>
+        <div class="col-6">
+            <TextInput Label="Display Field" @bind-Value="Model.DisplayField" Placeholder="e.g. fullName" />
+        </div>
+        <div class="col-12">
+            <div class="form-group">
+                <label class="form-label">Item Template (Handlebars)</label>
+                <textarea class="form-input" rows="3" @bind="Model.ItemTemplate" placeholder="<div>{{fullName}}</div>"></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public AutoCompleteConfigModel Model { get; set; } = new();
+}

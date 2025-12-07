@@ -1,7 +1,28 @@
+@using DynamicForms.Editor.Components.Modals
+
 <div class="validation-issues">
-    <p class="text-muted text-sm">Validation Issues (Placeholder)</p>
-    <div class="validation-item error">
-        <i class="bi bi-exclamation-circle-fill validation-icon"></i>
-        <div><div class="validation-title">Missing Label</div><div class="validation-desc">Field 'firstName' has no English label</div></div>
+    <div class="p-2 border-bottom">
+        <button class="btn btn-outline btn-sm w-100" @onclick="OpenRulesModal">
+            <i class="bi bi-shield-exclamation"></i> Manage Cross-Field Rules
+        </button>
+    </div>
+
+    <div class="p-2">
+        <p class="text-muted text-sm">Validation Issues (Placeholder)</p>
+        <div class="validation-item error">
+            <i class="bi bi-exclamation-circle-fill validation-icon"></i>
+            <div><div class="validation-title">Missing Label</div><div class="validation-desc">Field 'firstName' has no English label</div></div>
+        </div>
     </div>
 </div>
+
+<CrossFieldValidationModal IsVisible="@ShowRulesModal" IsVisibleChanged="@(val => ShowRulesModal = val)" />
+
+@code {
+    private bool ShowRulesModal { get; set; }
+
+    private void OpenRulesModal()
+    {
+        ShowRulesModal = true;
+    }
+}

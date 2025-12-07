@@ -1,5 +1,3 @@
-@using DynamicForms.Editor.Services
-@using DynamicForms.Editor.Models
 @using DynamicForms.Editor.Components.Properties.Sections
 
 @if (EditorState.SelectedField is not null)
@@ -11,6 +9,14 @@
         <PropertySection Title="Labels & Text" Icon="bi-translate">
             <LabelsSection Field="@EditorState.SelectedField" />
         </PropertySection>
+        
+        @if (IsOptionsField(EditorState.SelectedField.FieldType))
+        {
+            <PropertySection Title="Options" Icon="bi-list-ul">
+                <OptionsSection Field="@EditorState.SelectedField" />
+            </PropertySection>
+        }
+
         <PropertySection Title="Validation" Icon="bi-shield-check">
             <ValidationSection Field="@EditorState.SelectedField" />
         </PropertySection>
@@ -19,14 +25,11 @@
         </PropertySection>
 
         @* Placeholder for other sections which will be added in Phase 3 *@
-        <PropertySection Title="Options" Icon="bi-list-ul">
-            <p class="text-muted text-sm px-3">Options editor here (Phase 3)</p>
-        </PropertySection>
         <PropertySection Title="Conditional Logic" Icon="bi-lightning">
-            <p class="text-muted text-sm px-3">Conditional logic builder here (Phase 3)</p>
+            <ConditionalSection Field="@EditorState.SelectedField" />
         </PropertySection>
         <PropertySection Title="Computed Value" Icon="bi-calculator">
-            <p class="text-muted text-sm px-3">Computed value editor here (Phase 3)</p>
+            <ComputedSection Field="@EditorState.SelectedField" />
         </PropertySection>
         <PropertySection Title="Accessibility" Icon="bi-universal-access">
             <p class="text-muted text-sm px-3">Accessibility editor here (Phase 3)</p>
@@ -50,4 +53,7 @@ else
     {
         EditorState.OnStateChanged -= StateHasChanged;
     }
+
+    private bool IsOptionsField(string fieldType) => 
+        fieldType is "DropDown" or "RadioGroup" or "CheckboxList";
 }

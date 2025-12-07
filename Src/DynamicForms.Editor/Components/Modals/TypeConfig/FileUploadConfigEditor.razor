@@ -1,0 +1,32 @@
+@using DynamicForms.Editor.Components.Shared
+@using DynamicForms.Editor.Models
+
+<div class="container-fluid">
+    <div class="row g-3">
+        <div class="col-12">
+            <TextInput Label="Allowed Extensions (comma separated)" @bind-Value="Model.AllowedExtensions" Placeholder=".pdf, .jpg, .png" />
+        </div>
+        <div class="col-6">
+            <div class="form-group">
+                <label class="form-label">Max Size (bytes)</label>
+                <input type="number" class="form-input" @bind="Model.MaxFileSizeBytes" />
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="prop-group checkbox-group mt-4">
+                <input type="checkbox" @bind="Model.AllowMultiple" />
+                <span class="prop-label m-0">Allow Multiple</span>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="prop-group checkbox-group">
+                <input type="checkbox" @bind="Model.ScanRequired" />
+                <span class="prop-label m-0">Require Virus Scan</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public FileUploadConfigModel Model { get; set; } = new();
+}

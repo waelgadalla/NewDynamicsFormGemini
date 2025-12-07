@@ -1,0 +1,82 @@
+@using DynamicForms.Core.V4.Schemas
+@using DynamicForms.Editor.Services
+@using DynamicForms.Editor.Components.Modals.TypeConfig
+@using DynamicForms.Editor.Models
+
+<ModalBase Title="@Title" Icon="bi-sliders" IsVisible="@IsVisible" IsVisibleChanged="IsVisibleChanged" OnSave="Save">
+    @if (Field is not null)
+    {
+        @if (Field.FieldType == "AutoComplete")
+        {
+            <AutoCompleteConfigEditor Model="@AutoCompleteModel" />
+        }
+        else if (Field.FieldType == "DataGrid")
+        {
+            <DataGridConfigEditor Model="@DataGridModel" />
+        }
+        else if (Field.FieldType == "FileUpload")
+        {
+            <FileUploadConfigEditor Model="@FileUploadModel" />
+        }
+        else if (Field.FieldType == "DatePicker" || Field.FieldType == "DateTimePicker")
+        {
+            <DateConfigEditor Model="@DateModel" />
+        }
+        else
+        {
+            <div class="text-muted">No configuration available for this field type.</div>
+        }
+    }
+</ModalBase>
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
+    [Parameter] public FormFieldSchema? Field { get; set; }
+    [Parameter] public EventCallback<FieldTypeConfig> OnSaveConfig { get; set; }
+
+    private string Title => $"Configure {Field?.FieldType ?? "Field"}";
+
+    // Mutable models for editing
+    private AutoCompleteConfigModel AutoCompleteModel { get; set; } = new();
+    private DataGridConfigModel DataGridModel { get; set; } = new();
+    private FileUploadConfigModel FileUploadModel { get; set; } = new();
+    private DateConfigModel DateModel { get; set; } = new();
+
+    protected override void OnParametersSet()
+    {
+        if (IsVisible && Field is not null)
+        {
+            if (Field.FieldType == "AutoComplete")
+                AutoCompleteModel = AutoCompleteConfigModel.From(Field.TypeConfig as AutoCompleteConfig);
+            else if (Field.FieldType == "DataGrid")
+                DataGridModel = DataGridConfigModel.From(Field.TypeConfig as DataGridConfig);
+            else if (Field.FieldType == "FileUpload")
+                FileUploadModel = FileUploadConfigModel.From(Field.TypeConfig as FileUploadConfig);
+            else if (Field.FieldType == "DatePicker" || Field.FieldType == "DateTimePicker")
+                DateModel = DateConfigModel.From(Field.TypeConfig as DateConfig);
+        }
+    }
+
+    private async Task Save()
+    {
+        FieldTypeConfig? newConfig = null;
+
+        if (Field?.FieldType == "AutoComplete")
+            newConfig = AutoCompleteModel.ToConfig();
+        else if (Field?.FieldType == "DataGrid")
+            newConfig = DataGridModel.ToConfig();
+        else if (Field?.FieldType == "FileUpload")
+            newConfig = FileUploadModel.ToConfig();
+        else if (Field?.FieldType == "DatePicker" || Field?.FieldType == "DateTimePicker")
+            newConfig = DateModel.ToConfig();
+
+        if (newConfig != null)
+        {
+            await OnSaveConfig.InvokeAsync(newConfig);
+        }
+        
+        IsVisible = false;
+        await IsVisibleChanged.InvokeAsync(false);
+    }
+}
