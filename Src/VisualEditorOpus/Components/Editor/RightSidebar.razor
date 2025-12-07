@@ -1,0 +1,60 @@
+@* Right sidebar showing properties panel *@
+@implements IDisposable
+
+<div class="right-sidebar">
+    @if (EditorState.SelectedField is not null)
+    {
+        <div class="sidebar-header" style="background: var(--bg-secondary);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 600; font-size: 13px;">Properties</span>
+                <Badge Variant="primary" Text="@EditorState.SelectedField.Id" />
+            </div>
+        </div>
+        <div style="flex: 1; overflow-y: auto;">
+            <GeneralSection />
+            <LabelsSection />
+            @if (IsChoiceField)
+            {
+                <OptionsSection />
+            }
+            <ValidationSection />
+            <ConditionalSection />
+            <LayoutSection />
+        </div>
+    }
+    else
+    {
+        <div class="sidebar-header" style="background: var(--bg-secondary);">
+            <span style="font-weight: 600; font-size: 13px;">Properties</span>
+        </div>
+        <div style="flex: 1; display: flex; align-items: center; justify-content: center; color: var(--text-muted); padding: 20px; text-align: center;">
+            <div>
+                <i class="bi bi-cursor" style="font-size: 32px; opacity: 0.5; display: block; margin-bottom: 8px;"></i>
+                <span>Select a field to view properties</span>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private bool IsChoiceField => EditorState.SelectedField?.FieldType is "DropDown" or "RadioGroup" or "CheckboxList";
+
+    protected override void OnInitialized()
+    {
+        EditorState.OnStateChanged += StateHasChanged;
+        EditorState.OnFieldSelected += OnFieldSelected;
+    }
+
+    private void OnFieldSelected(string? fieldId)
+    {
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        EditorState.OnStateChanged -= StateHasChanged;
+        EditorState.OnFieldSelected -= OnFieldSelected;
+    }
+}

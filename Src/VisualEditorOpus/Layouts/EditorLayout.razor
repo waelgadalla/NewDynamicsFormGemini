@@ -1,0 +1,32 @@
+@inherits LayoutComponentBase
+@implements IDisposable
+
+<div data-theme="@(ThemeService.IsDarkMode ? "dark" : "light")">
+    <GlobalNav />
+    <div class="main-content">
+        <EditorHeader />
+        <EditorToolbar />
+        <div class="editor-container">
+            <LeftSidebar />
+            <div class="canvas-container">
+                @Body
+            </div>
+            <RightSidebar />
+        </div>
+    </div>
+    <ToastContainer />
+</div>
+
+@code {
+    [Inject] private IThemeService ThemeService { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        ThemeService.OnThemeChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        ThemeService.OnThemeChanged -= StateHasChanged;
+    }
+}

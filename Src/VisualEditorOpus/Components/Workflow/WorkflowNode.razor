@@ -1,0 +1,86 @@
+@* Individual module node in workflow designer *@
+
+<div class="workflow-node @(IsSelected ? "selected" : "")"
+     style="left: @(Position.X)px; top: @(Position.Y)px;"
+     @onclick="HandleClick"
+     @onclick:stopPropagation="true">
+    <div class="workflow-node-header">
+        <div class="workflow-node-icon">
+            <i class="bi bi-file-text"></i>
+        </div>
+        <div class="workflow-node-title">@ModuleTitle</div>
+        <button type="button" class="workflow-node-menu" @onclick="ToggleMenu" @onclick:stopPropagation="true">
+            <i class="bi bi-three-dots-vertical"></i>
+        </button>
+    </div>
+    <div class="workflow-node-body">
+        <div class="workflow-node-info">
+            <span><i class="bi bi-collection"></i> @FieldCount fields</span>
+            <span><i class="bi bi-shield-check"></i> @ValidationCount validations</span>
+        </div>
+    </div>
+    <div class="workflow-node-ports">
+        <div class="workflow-port workflow-port-in" title="Input"></div>
+        <div class="workflow-port workflow-port-out" title="Output"></div>
+    </div>
+
+    @if (ShowMenu)
+    {
+        <div class="workflow-node-dropdown">
+            <button type="button" @onclick="EditModule">
+                <i class="bi bi-pencil"></i> Edit Module
+            </button>
+            <button type="button" @onclick="DuplicateModule">
+                <i class="bi bi-copy"></i> Duplicate
+            </button>
+            <button type="button" class="danger" @onclick="HandleRemove">
+                <i class="bi bi-trash"></i> Remove
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int ModuleId { get; set; }
+    [Parameter] public (double X, double Y) Position { get; set; }
+    [Parameter] public bool IsSelected { get; set; }
+    [Parameter] public EventCallback<int> OnSelect { get; set; }
+    [Parameter] public EventCallback<int> OnRemove { get; set; }
+    [Parameter] public EventCallback<(int, (double, double))> OnPositionChanged { get; set; }
+
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+
+    private bool ShowMenu { get; set; }
+    private string ModuleTitle => $"Module {ModuleId}"; // TODO: Get from repository
+    private int FieldCount => 5; // TODO: Get from repository
+    private int ValidationCount => 2; // TODO: Get from repository
+
+    private async Task HandleClick()
+    {
+        ShowMenu = false;
+        await OnSelect.InvokeAsync(ModuleId);
+    }
+
+    private void ToggleMenu()
+    {
+        ShowMenu = !ShowMenu;
+    }
+
+    private void EditModule()
+    {
+        ShowMenu = false;
+        Navigation.NavigateTo($"/editor/{ModuleId}");
+    }
+
+    private void DuplicateModule()
+    {
+        ShowMenu = false;
+        // TODO: Implement module duplication
+    }
+
+    private async Task HandleRemove()
+    {
+        ShowMenu = false;
+        await OnRemove.InvokeAsync(ModuleId);
+    }
+}

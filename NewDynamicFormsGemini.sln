@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicForms.Core.V4", "Src
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicForms.Editor", "Src\DynamicForms.Editor\DynamicForms.Editor.csproj", "{9AE6B4F1-E677-D479-5D8D-34E3958D7202}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualEditorOpus", "Src\VisualEditorOpus\VisualEditorOpus.csproj", "{8634D1D5-1B5E-3F63-08B5-F13B502AE4F9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{9AE6B4F1-E677-D479-5D8D-34E3958D7202}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9AE6B4F1-E677-D479-5D8D-34E3958D7202}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9AE6B4F1-E677-D479-5D8D-34E3958D7202}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8634D1D5-1B5E-3F63-08B5-F13B502AE4F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8634D1D5-1B5E-3F63-08B5-F13B502AE4F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8634D1D5-1B5E-3F63-08B5-F13B502AE4F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8634D1D5-1B5E-3F63-08B5-F13B502AE4F9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

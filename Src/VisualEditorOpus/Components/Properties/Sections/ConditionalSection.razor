@@ -1,0 +1,61 @@
+@* Conditional logic section *@
+@implements IDisposable
+
+<PropertySection Title="Conditional Logic" Icon="bi-diagram-2">
+    @if (Field?.ConditionalRules?.Length > 0)
+    {
+        <div style="margin-bottom: 12px;">
+            @foreach (var rule in Field.ConditionalRules)
+            {
+                <div style="padding: 8px; background: var(--bg-secondary); border-radius: 4px; margin-bottom: 6px; font-size: 11px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 600;">@(rule.Description ?? rule.Id)</span>
+                        <button type="button" class="action-btn" title="Edit rule">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                    </div>
+                    <div style="color: var(--text-muted); margin-top: 4px;">
+                        @GetRuleDescription(rule)
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div style="color: var(--text-muted); font-size: 12px; margin-bottom: 12px;">
+            No conditional rules defined
+        </div>
+    }
+
+    <Button Variant="outline" Size="sm" Icon="bi-plus-lg" Text="Add Condition" OnClick="OpenConditionBuilder" />
+</PropertySection>
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private FormFieldSchema? Field => EditorState.SelectedField;
+
+    protected override void OnInitialized()
+    {
+        EditorState.OnFieldSelected += OnFieldSelected;
+    }
+
+    private string GetRuleDescription(ConditionalRule rule)
+    {
+        // Simplified description
+        return $"Action: {rule.Action}";
+    }
+
+    private void OpenConditionBuilder()
+    {
+        // TODO: Open condition builder modal
+    }
+
+    private void OnFieldSelected(string? fieldId) => StateHasChanged();
+
+    public void Dispose()
+    {
+        EditorState.OnFieldSelected -= OnFieldSelected;
+    }
+}

@@ -1,0 +1,19 @@
+@* Canvas preview for textarea fields *@
+
+<label class="field-label">
+    @(FieldNode.Schema.LabelEn ?? FieldNode.Schema.Id)
+    @if (FieldNode.Schema.Validation?.IsRequired == true)
+    {
+        <span class="field-required">*</span>
+    }
+</label>
+<textarea class="field-input-preview" style="min-height: 80px; resize: none;"
+          placeholder="@(FieldNode.Schema.PlaceholderEn ?? "")" disabled></textarea>
+@if (!string.IsNullOrEmpty(FieldNode.Schema.HelpEn))
+{
+    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">@FieldNode.Schema.HelpEn</div>
+}
+
+@code {
+    [Parameter] public required FormFieldNode FieldNode { get; set; }
+}

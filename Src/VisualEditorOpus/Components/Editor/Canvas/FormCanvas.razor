@@ -1,0 +1,50 @@
+@* Main form canvas displaying the form design *@
+@implements IDisposable
+
+<div class="canvas" @onclick="HandleCanvasClick">
+    <div class="canvas-header">
+        <h2 class="canvas-title">@(EditorState.CurrentModule?.TitleEn ?? "Untitled Module")</h2>
+        @if (!string.IsNullOrEmpty(EditorState.CurrentModule?.DescriptionEn))
+        {
+            <p class="canvas-description">@EditorState.CurrentModule.DescriptionEn</p>
+        }
+    </div>
+    <div class="canvas-body">
+        @if (RootFields.Any())
+        {
+            @foreach (var field in RootFields)
+            {
+                <CanvasField FieldNode="@field" />
+            }
+        }
+        else
+        {
+            <div class="empty-canvas">
+                <i class="bi bi-plus-square-dotted"></i>
+                <p>Add your first field from the palette</p>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private IEnumerable<FormFieldNode> RootFields => EditorState.CurrentModuleRuntime?.RootFields
+        .OrderBy(f => f.Schema.Order) ?? Enumerable.Empty<FormFieldNode>();
+
+    protected override void OnInitialized()
+    {
+        EditorState.OnStateChanged += StateHasChanged;
+    }
+
+    private void HandleCanvasClick(MouseEventArgs e)
+    {
+        EditorState.SelectField(null);
+    }
+
+    public void Dispose()
+    {
+        EditorState.OnStateChanged -= StateHasChanged;
+    }
+}

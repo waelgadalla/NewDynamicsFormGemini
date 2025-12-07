@@ -1,0 +1,23 @@
+@* Search input with icon *@
+
+<div class="search-wrapper @Class">
+    <i class="bi bi-search search-icon"></i>
+    <input type="text"
+           class="search-box"
+           placeholder="@Placeholder"
+           value="@Value"
+           @oninput="HandleInput" />
+</div>
+
+@code {
+    [Parameter] public string Placeholder { get; set; } = "Search...";
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public string? Class { get; set; }
+
+    private async Task HandleInput(ChangeEventArgs e)
+    {
+        Value = e.Value?.ToString();
+        await ValueChanged.InvokeAsync(Value);
+    }
+}

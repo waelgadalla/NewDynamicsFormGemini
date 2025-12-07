@@ -1,0 +1,106 @@
+@* Sidebar module list for workflow designer *@
+@implements IDisposable
+
+<div class="workflow-module-list">
+    <div class="workflow-module-list-header">
+        <span>Modules</span>
+        <Button Variant="ghost" Size="xs" Icon="bi-plus" OnClick="AddModule" />
+    </div>
+
+    <div class="workflow-module-items">
+        @if (EditorState.CurrentWorkflow is not null)
+        {
+            @foreach (var (moduleId, index) in EditorState.CurrentWorkflow.ModuleIds.Select((id, i) => (id, i)))
+            {
+                <div class="workflow-module-item @(SelectedModuleId == moduleId ? "selected" : "")"
+                     @onclick="() => SelectModule(moduleId)">
+                    <div class="workflow-module-item-order">@(index + 1)</div>
+                    <div class="workflow-module-item-content">
+                        <div class="workflow-module-item-title">Module @moduleId</div>
+                        <div class="workflow-module-item-meta">5 fields</div>
+                    </div>
+                    <div class="workflow-module-item-actions">
+                        <button type="button" class="action-btn" @onclick="() => MoveUp(index)" @onclick:stopPropagation="true"
+                                disabled="@(index == 0)" title="Move Up">
+                            <i class="bi bi-chevron-up"></i>
+                        </button>
+                        <button type="button" class="action-btn" @onclick="() => MoveDown(index)" @onclick:stopPropagation="true"
+                                disabled="@(index == EditorState.CurrentWorkflow.ModuleIds.Length - 1)" title="Move Down">
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="workflow-empty">
+                <i class="bi bi-collection"></i>
+                <p>No modules yet</p>
+                <Button Variant="outline" Size="sm" Text="Add First Module" OnClick="AddModule" />
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+
+    private int? SelectedModuleId { get; set; }
+
+    protected override void OnInitialized()
+    {
+        EditorState.OnWorkflowChanged += HandleWorkflowChanged;
+    }
+
+    private void SelectModule(int moduleId)
+    {
+        SelectedModuleId = moduleId;
+        Navigation.NavigateTo($"/editor/{moduleId}");
+    }
+
+    private void AddModule()
+    {
+        if (EditorState.CurrentWorkflow is null) return;
+
+        var newModuleId = Random.Shared.Next(1, 10000);
+        var newModuleIds = EditorState.CurrentWorkflow.ModuleIds.Append(newModuleId).ToArray();
+        var updated = EditorState.CurrentWorkflow with { ModuleIds = newModuleIds };
+        EditorState.UpdateWorkflow(updated);
+    }
+
+    private void MoveUp(int index)
+    {
+        if (EditorState.CurrentWorkflow is null || index <= 0) return;
+        ReorderModules(index, index - 1);
+    }
+
+    private void MoveDown(int index)
+    {
+        if (EditorState.CurrentWorkflow is null) return;
+        var maxIndex = EditorState.CurrentWorkflow.ModuleIds.Length - 1;
+        if (index >= maxIndex) return;
+        ReorderModules(index, index + 1);
+    }
+
+    private void ReorderModules(int fromIndex, int toIndex)
+    {
+        if (EditorState.CurrentWorkflow is null) return;
+
+        var list = EditorState.CurrentWorkflow.ModuleIds.ToList();
+        var item = list[fromIndex];
+        list.RemoveAt(fromIndex);
+        list.Insert(toIndex, item);
+
+        var updated = EditorState.CurrentWorkflow with { ModuleIds = list.ToArray() };
+        EditorState.UpdateWorkflow(updated);
+    }
+
+    private void HandleWorkflowChanged() => StateHasChanged();
+
+    public void Dispose()
+    {
+        EditorState.OnWorkflowChanged -= HandleWorkflowChanged;
+    }
+}

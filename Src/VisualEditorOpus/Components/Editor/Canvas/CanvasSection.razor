@@ -1,0 +1,24 @@
+@* Renders a section container with children *@
+
+<div class="section-title">
+    <i class="bi bi-layout-three-columns" style="margin-right: 8px;"></i>
+    @(FieldNode.Schema.LabelEn ?? FieldNode.Schema.Id)
+</div>
+
+@if (FieldNode.Children.Any())
+{
+    @foreach (var child in FieldNode.Children.OrderBy(c => c.Schema.Order))
+    {
+        <CanvasField FieldNode="@child" />
+    }
+}
+else
+{
+    <div style="color: var(--text-muted); font-size: 12px; text-align: center; padding: 20px; border: 1px dashed var(--border-color); border-radius: 6px;">
+        <i class="bi bi-plus"></i> Add fields to this section
+    </div>
+}
+
+@code {
+    [Parameter] public required FormFieldNode FieldNode { get; set; }
+}

@@ -1,0 +1,76 @@
+@* Bilingual input with EN/FR language tabs *@
+
+<div class="bilingual-input">
+    <div class="lang-tabs">
+        <button type="button" class="lang-tab @(ActiveLang == "en" ? "active" : "")"
+                @onclick="SwitchToEn">EN</button>
+        <button type="button" class="lang-tab @(ActiveLang == "fr" ? "active" : "")"
+                @onclick="SwitchToFr">FR</button>
+    </div>
+
+    @if (ActiveLang == "en")
+    {
+        @if (Multiline)
+        {
+            <textarea class="@InputClass"
+                      value="@ValueEn"
+                      placeholder="@PlaceholderEn"
+                      @oninput="HandleEnChange"></textarea>
+        }
+        else
+        {
+            <input type="text" class="@InputClass"
+                   value="@ValueEn"
+                   placeholder="@PlaceholderEn"
+                   @oninput="HandleEnChange" />
+        }
+    }
+    else
+    {
+        @if (Multiline)
+        {
+            <textarea class="@InputClass"
+                      value="@ValueFr"
+                      placeholder="@PlaceholderFr"
+                      @oninput="HandleFrChange"></textarea>
+        }
+        else
+        {
+            <input type="text" class="@InputClass"
+                   value="@ValueFr"
+                   placeholder="@PlaceholderFr"
+                   @oninput="HandleFrChange" />
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public string? ValueEn { get; set; }
+    [Parameter] public EventCallback<string?> ValueEnChanged { get; set; }
+
+    [Parameter] public string? ValueFr { get; set; }
+    [Parameter] public EventCallback<string?> ValueFrChanged { get; set; }
+
+    [Parameter] public string PlaceholderEn { get; set; } = "English";
+    [Parameter] public string PlaceholderFr { get; set; } = "Français";
+    [Parameter] public bool Multiline { get; set; }
+    [Parameter] public string Size { get; set; } = "prop"; // prop, form
+
+    private string ActiveLang { get; set; } = "en";
+    private string InputClass => Size == "prop" ? "prop-input" : "form-input";
+
+    private void SwitchToEn() => ActiveLang = "en";
+    private void SwitchToFr() => ActiveLang = "fr";
+
+    private async Task HandleEnChange(ChangeEventArgs e)
+    {
+        ValueEn = e.Value?.ToString();
+        await ValueEnChanged.InvokeAsync(ValueEn);
+    }
+
+    private async Task HandleFrChange(ChangeEventArgs e)
+    {
+        ValueFr = e.Value?.ToString();
+        await ValueFrChanged.InvokeAsync(ValueFr);
+    }
+}

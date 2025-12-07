@@ -1,0 +1,103 @@
+@page "/"
+@layout MainLayout
+
+<PageTitle>Dashboard - DynamicForms Editor</PageTitle>
+
+<div style="height: 100vh; display: flex; flex-direction: column;">
+    <div class="app-header">
+        <div class="header-left">
+            <div class="header-title">
+                <i class="bi bi-house-door"></i> Dashboard
+            </div>
+        </div>
+        <div class="header-actions">
+            <Button Variant="outline" Icon="bi-gear" Text="Settings" OnClick="GoToSettings" />
+            <Button Variant="primary" Icon="bi-plus-lg" Text="New Workflow" OnClick="CreateNewWorkflow" />
+        </div>
+    </div>
+
+    <div class="dashboard-body">
+        <!-- Quick Start Templates -->
+        <div class="dashboard-section">
+            <div class="dashboard-section-header">
+                <div class="dashboard-section-title">Quick Start</div>
+            </div>
+            <div class="templates-row">
+                <TemplateCard Icon="bi-file-earmark-text" Name="Blank Form"
+                              Description="Start from scratch" TemplateId="blank"
+                              OnSelect="HandleTemplateSelect" />
+                <TemplateCard Icon="bi-person-vcard" Name="Contact Form"
+                              Description="Name, email, message" TemplateId="contact"
+                              OnSelect="HandleTemplateSelect" />
+                <TemplateCard Icon="bi-clipboard-check" Name="Survey"
+                              Description="Multiple choice questions" TemplateId="survey"
+                              OnSelect="HandleTemplateSelect" />
+                <TemplateCard Icon="bi-person-plus" Name="Registration"
+                              Description="User signup form" TemplateId="registration"
+                              OnSelect="HandleTemplateSelect" />
+                <TemplateCard Icon="bi-briefcase" Name="Job Application"
+                              Description="Employment form" TemplateId="job-application"
+                              OnSelect="HandleTemplateSelect" />
+            </div>
+        </div>
+
+        <!-- Recent Workflows -->
+        <div class="dashboard-section">
+            <div class="dashboard-section-header">
+                <div class="dashboard-section-title">Recent Workflows</div>
+                <SearchBox Placeholder="Search workflows..." Class="width: 240px;" />
+            </div>
+            <div class="forms-grid">
+                @foreach (var workflow in RecentWorkflows)
+                {
+                    <WorkflowCard Workflow="@workflow" OnSelect="OpenWorkflow" />
+                }
+                <div class="form-card form-card-new" @onclick="CreateNewWorkflow">
+                    <i class="bi bi-plus-lg"></i>
+                    <span>New Workflow</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+    [Inject] private IToastService ToastService { get; set; } = default!;
+
+    private List<WorkflowSummary> RecentWorkflows { get; set; } = new();
+
+    protected override void OnInitialized()
+    {
+        // Mock data
+        RecentWorkflows = new List<WorkflowSummary>
+        {
+            new WorkflowSummary(1, "Employee Onboarding", "New hire onboarding process with personal info, tax forms, and benefits selection", 4, "draft", DateTime.Now.AddDays(-2)),
+            new WorkflowSummary(2, "Expense Claim", "Submit and approve expenses with receipt uploads and manager approval", 3, "published", DateTime.Now.AddDays(-5)),
+            new WorkflowSummary(3, "Vendor Registration", "New vendor setup with company details and banking information", 2, "draft", DateTime.Now.AddDays(-10)),
+            new WorkflowSummary(4, "Leave Request", "Employee time-off request with manager approval workflow", 2, "published", DateTime.Now.AddDays(-15)),
+        };
+    }
+
+    private void CreateNewWorkflow()
+    {
+        Navigation.NavigateTo("/workflow");
+        ToastService.ShowSuccess("New workflow created");
+    }
+
+    private void HandleTemplateSelect(string templateId)
+    {
+        Navigation.NavigateTo($"/workflow?template={templateId}");
+        ToastService.ShowSuccess($"Started from template: {templateId}");
+    }
+
+    private void OpenWorkflow(int workflowId)
+    {
+        Navigation.NavigateTo($"/workflow/{workflowId}");
+    }
+
+    private void GoToSettings()
+    {
+        Navigation.NavigateTo("/settings");
+    }
+}

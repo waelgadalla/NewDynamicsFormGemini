@@ -1,0 +1,41 @@
+@* Workflow card for dashboard grid *@
+
+<div class="form-card" @onclick="HandleClick">
+    <div class="form-card-header">
+        <div class="form-card-icon">
+            <i class="bi bi-file-text"></i>
+        </div>
+        <Badge Variant="@GetStatusVariant()" Text="@Workflow.Status" />
+    </div>
+    <div class="form-card-title">@Workflow.Title</div>
+    <div class="form-card-description">@Workflow.Description</div>
+    <div class="form-card-meta">
+        <span><i class="bi bi-layers"></i> @Workflow.ModuleCount modules</span>
+        <span><i class="bi bi-clock"></i> @GetTimeAgo()</span>
+    </div>
+</div>
+
+@code {
+    [Parameter] public required WorkflowSummary Workflow { get; set; }
+    [Parameter] public EventCallback<int> OnSelect { get; set; }
+
+    private async Task HandleClick()
+    {
+        await OnSelect.InvokeAsync(Workflow.Id);
+    }
+
+    private string GetStatusVariant() => Workflow.Status switch
+    {
+        "published" => "published",
+        "draft" => "draft",
+        _ => "draft"
+    };
+
+    private string GetTimeAgo()
+    {
+        var diff = DateTime.Now - Workflow.Modified;
+        if (diff.TotalDays > 1) return $"{(int)diff.TotalDays}d ago";
+        if (diff.TotalHours > 1) return $"{(int)diff.TotalHours}h ago";
+        return "Just now";
+    }
+}

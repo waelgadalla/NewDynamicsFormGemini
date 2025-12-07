@@ -1,0 +1,159 @@
+@* Validation settings section *@
+@implements IDisposable
+
+<PropertySection Title="Validation" Icon="bi-shield-check">
+    <div class="checkbox-group" @onclick="ToggleRequired">
+        <input type="checkbox" checked="@(Field?.Validation?.IsRequired == true)" />
+        <span style="font-size: 12px;">Required</span>
+    </div>
+
+    @if (Field?.Validation?.IsRequired == true)
+    {
+        <div class="prop-group" style="margin-top: 12px;">
+            <label class="prop-label">Required Message</label>
+            <BilingualInput ValueEn="@Field?.Validation?.RequiredMessageEn"
+                            ValueFr="@Field?.Validation?.RequiredMessageFr"
+                            ValueEnChanged="HandleRequiredMsgEnChange"
+                            ValueFrChanged="HandleRequiredMsgFrChange"
+                            PlaceholderEn="This field is required"
+                            PlaceholderFr="Ce champ est obligatoire" />
+        </div>
+    }
+
+    @if (IsTextField)
+    {
+        <div class="prop-row" style="margin-top: 12px;">
+            <div class="prop-group">
+                <label class="prop-label">Min Length</label>
+                <input type="number" class="prop-input" min="0"
+                       value="@Field?.Validation?.MinLength"
+                       @onchange="HandleMinLengthChange" />
+            </div>
+            <div class="prop-group">
+                <label class="prop-label">Max Length</label>
+                <input type="number" class="prop-input" min="0"
+                       value="@Field?.Validation?.MaxLength"
+                       @onchange="HandleMaxLengthChange" />
+            </div>
+        </div>
+
+        <div class="prop-group">
+            <label class="prop-label">Pattern (Regex)</label>
+            <input type="text" class="prop-input text-mono"
+                   value="@Field?.Validation?.Pattern"
+                   placeholder="e.g., ^[A-Z]{2}\\d{6}$"
+                   @onchange="HandlePatternChange" />
+        </div>
+    }
+
+    @if (IsNumericField)
+    {
+        <div class="prop-row" style="margin-top: 12px;">
+            <div class="prop-group">
+                <label class="prop-label">Min Value</label>
+                <input type="number" class="prop-input"
+                       value="@Field?.Validation?.MinValue"
+                       @onchange="HandleMinValueChange" />
+            </div>
+            <div class="prop-group">
+                <label class="prop-label">Max Value</label>
+                <input type="number" class="prop-input"
+                       value="@Field?.Validation?.MaxValue"
+                       @onchange="HandleMaxValueChange" />
+            </div>
+        </div>
+    }
+</PropertySection>
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private FormFieldSchema? Field => EditorState.SelectedField;
+    private bool IsTextField => Field?.FieldType is "TextBox" or "TextArea";
+    private bool IsNumericField => Field?.FieldType is "Number" or "Currency";
+
+    protected override void OnInitialized()
+    {
+        EditorState.OnFieldSelected += OnFieldSelected;
+    }
+
+    private FieldValidationConfig GetOrCreateValidation()
+    {
+        return Field?.Validation ?? new FieldValidationConfig();
+    }
+
+    private void ToggleRequired()
+    {
+        if (Field is null) return;
+        var validation = GetOrCreateValidation();
+        var updated = Field with { Validation = validation with { IsRequired = !validation.IsRequired } };
+        EditorState.UpdateField(updated);
+    }
+
+    private void HandleRequiredMsgEnChange(string? value)
+    {
+        if (Field is null) return;
+        var validation = GetOrCreateValidation();
+        var updated = Field with { Validation = validation with { RequiredMessageEn = value } };
+        EditorState.UpdateField(updated);
+    }
+
+    private void HandleRequiredMsgFrChange(string? value)
+    {
+        if (Field is null) return;
+        var validation = GetOrCreateValidation();
+        var updated = Field with { Validation = validation with { RequiredMessageFr = value } };
+        EditorState.UpdateField(updated);
+    }
+
+    private void HandleMinLengthChange(ChangeEventArgs e)
+    {
+        if (Field is null) return;
+        var validation = GetOrCreateValidation();
+        int? value = int.TryParse(e.Value?.ToString(), out var v) ? v : null;
+        var updated = Field with { Validation = validation with { MinLength = value } };
+        EditorState.UpdateField(updated);
+    }
+
+    private void HandleMaxLengthChange(ChangeEventArgs e)
+    {
+        if (Field is null) return;
+        var validation = GetOrCreateValidation();
+        int? value = int.TryParse(e.Value?.ToString(), out var v) ? v : null;
+        var updated = Field with { Validation = validation with { MaxLength = value } };
+        EditorState.UpdateField(updated);
+    }
+
+    private void HandlePatternChange(ChangeEventArgs e)
+    {
+        if (Field is null) return;
+        var validation = GetOrCreateValidation();
+        var updated = Field with { Validation = validation with { Pattern = e.Value?.ToString() } };
+        EditorState.UpdateField(updated);
+    }
+
+    private void HandleMinValueChange(ChangeEventArgs e)
+    {
+        if (Field is null) return;
+        var validation = GetOrCreateValidation();
+        double? value = double.TryParse(e.Value?.ToString(), out var v) ? v : null;
+        var updated = Field with { Validation = validation with { MinValue = value } };
+        EditorState.UpdateField(updated);
+    }
+
+    private void HandleMaxValueChange(ChangeEventArgs e)
+    {
+        if (Field is null) return;
+        var validation = GetOrCreateValidation();
+        double? value = double.TryParse(e.Value?.ToString(), out var v) ? v : null;
+        var updated = Field with { Validation = validation with { MaxValue = value } };
+        EditorState.UpdateField(updated);
+    }
+
+    private void OnFieldSelected(string? fieldId) => StateHasChanged();
+
+    public void Dispose()
+    {
+        EditorState.OnFieldSelected -= OnFieldSelected;
+    }
+}

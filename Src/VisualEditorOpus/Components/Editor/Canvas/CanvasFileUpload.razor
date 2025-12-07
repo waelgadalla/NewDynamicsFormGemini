@@ -1,0 +1,25 @@
+@* Canvas preview for file upload fields *@
+
+<label class="field-label">
+    @(FieldNode.Schema.LabelEn ?? FieldNode.Schema.Id)
+    @if (FieldNode.Schema.Validation?.IsRequired == true)
+    {
+        <span class="field-required">*</span>
+    }
+</label>
+<div style="border: 2px dashed var(--border-color); border-radius: 6px; padding: 20px; text-align: center; color: var(--text-muted);">
+    <i class="bi bi-cloud-upload" style="font-size: 24px; display: block; margin-bottom: 8px;"></i>
+    <span style="font-size: 12px;">Click to upload or drag and drop</span>
+    @if (GetConfig() is FileUploadConfig config && config.AllowedExtensions?.Length > 0)
+    {
+        <div style="font-size: 10px; margin-top: 4px;">
+            Allowed: @string.Join(", ", config.AllowedExtensions)
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public required FormFieldNode FieldNode { get; set; }
+
+    private FileUploadConfig? GetConfig() => FieldNode.Schema.TypeConfig as FileUploadConfig;
+}

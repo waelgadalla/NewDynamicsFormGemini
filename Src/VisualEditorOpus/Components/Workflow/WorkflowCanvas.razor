@@ -1,0 +1,112 @@
+@* Workflow designer canvas with module nodes *@
+@implements IDisposable
+
+<div class="workflow-canvas" @ref="canvasRef">
+    <svg class="workflow-connections">
+        @foreach (var connection in Connections)
+        {
+            <WorkflowConnectionLine Source="@connection.Source" Target="@connection.Target" />
+        }
+    </svg>
+
+    <div class="workflow-nodes">
+        @if (EditorState.CurrentWorkflow is not null)
+        {
+            @foreach (var (moduleId, index) in EditorState.CurrentWorkflow.ModuleIds.Select((id, i) => (id, i)))
+            {
+                var position = GetNodePosition(index);
+                <WorkflowNode ModuleId="@moduleId"
+                              Position="@position"
+                              IsSelected="@(SelectedNodeId == moduleId)"
+                              OnSelect="SelectNode"
+                              OnRemove="RemoveNode"
+                              OnPositionChanged="HandlePositionChanged" />
+            }
+        }
+    </div>
+
+    <div class="workflow-canvas-actions">
+        <button type="button" class="btn btn-sm btn-outline" @onclick="ZoomIn" title="Zoom In">
+            <i class="bi bi-zoom-in"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-outline" @onclick="ZoomOut" title="Zoom Out">
+            <i class="bi bi-zoom-out"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-outline" @onclick="ResetZoom" title="Reset Zoom">
+            <i class="bi bi-arrows-angle-expand"></i>
+        </button>
+    </div>
+</div>
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private ElementReference canvasRef;
+    private int? SelectedNodeId { get; set; }
+    private double ZoomLevel { get; set; } = 1.0;
+    private Dictionary<int, (double X, double Y)> NodePositions { get; set; } = new();
+    private List<(int Source, int Target)> Connections => GetConnections();
+
+    protected override void OnInitialized()
+    {
+        EditorState.OnWorkflowChanged += HandleWorkflowChanged;
+    }
+
+    private (double X, double Y) GetNodePosition(int index)
+    {
+        if (NodePositions.TryGetValue(index, out var pos))
+            return pos;
+
+        // Default layout: vertical stack
+        var x = 400.0;
+        var y = 100.0 + (index * 150);
+        return (x, y);
+    }
+
+    private List<(int Source, int Target)> GetConnections()
+    {
+        var connections = new List<(int, int)>();
+        var moduleIds = EditorState.CurrentWorkflow?.ModuleIds ?? Array.Empty<int>();
+
+        for (int i = 0; i < moduleIds.Length - 1; i++)
+        {
+            connections.Add((moduleIds[i], moduleIds[i + 1]));
+        }
+
+        return connections;
+    }
+
+    private void SelectNode(int moduleId)
+    {
+        SelectedNodeId = moduleId;
+        StateHasChanged();
+    }
+
+    private void RemoveNode(int moduleId)
+    {
+        if (EditorState.CurrentWorkflow is null) return;
+
+        var newModuleIds = EditorState.CurrentWorkflow.ModuleIds
+            .Where(id => id != moduleId)
+            .ToArray();
+        var updated = EditorState.CurrentWorkflow with { ModuleIds = newModuleIds };
+        EditorState.UpdateWorkflow(updated);
+    }
+
+    private void HandlePositionChanged((int ModuleId, (double X, double Y) Position) args)
+    {
+        NodePositions[args.ModuleId] = args.Position;
+        StateHasChanged();
+    }
+
+    private void ZoomIn() => ZoomLevel = Math.Min(2.0, ZoomLevel + 0.1);
+    private void ZoomOut() => ZoomLevel = Math.Max(0.5, ZoomLevel - 0.1);
+    private void ResetZoom() => ZoomLevel = 1.0;
+
+    private void HandleWorkflowChanged() => StateHasChanged();
+
+    public void Dispose()
+    {
+        EditorState.OnWorkflowChanged -= HandleWorkflowChanged;
+    }
+}

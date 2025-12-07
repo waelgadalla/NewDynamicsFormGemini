@@ -1,0 +1,99 @@
+@* Table for editing CodeSet options *@
+
+<div class="codeset-options-table">
+    <div class="codeset-options-header-row">
+        <div class="col-handle"></div>
+        <div class="col-value">Value</div>
+        <div class="col-label">Label (EN)</div>
+        <div class="col-label">Label (FR)</div>
+        <div class="col-actions"></div>
+    </div>
+    <div class="codeset-options-body">
+        @foreach (var (option, index) in Options.Select((o, i) => (o, i)))
+        {
+            <div class="codeset-option-row">
+                <div class="col-handle">
+                    <i class="bi bi-grip-vertical drag-handle"></i>
+                </div>
+                <div class="col-value">
+                    <input type="text" value="@option.Value"
+                           @onchange="e => HandleValueChange(option, e)" />
+                </div>
+                <div class="col-label">
+                    <input type="text" value="@option.LabelEn"
+                           @onchange="e => HandleLabelEnChange(option, e)" />
+                </div>
+                <div class="col-label">
+                    <input type="text" value="@option.LabelFr"
+                           @onchange="e => HandleLabelFrChange(option, e)" />
+                </div>
+                <div class="col-actions">
+                    <button type="button" class="action-btn"
+                            @onclick="() => MoveUp(option.Id)"
+                            disabled="@(index == 0)"
+                            title="Move Up">
+                        <i class="bi bi-chevron-up"></i>
+                    </button>
+                    <button type="button" class="action-btn"
+                            @onclick="() => MoveDown(option.Id)"
+                            disabled="@(index == Options.Count - 1)"
+                            title="Move Down">
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                    <button type="button" class="action-btn danger"
+                            @onclick="() => Remove(option.Id)"
+                            title="Remove">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+            </div>
+        }
+
+        @if (!Options.Any())
+        {
+            <div class="codeset-options-empty">
+                No options defined. Click "Add Option" to create one.
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public List<CodeSetOption> Options { get; set; } = new();
+    [Parameter] public EventCallback<CodeSetOption> OnUpdate { get; set; }
+    [Parameter] public EventCallback<string> OnRemove { get; set; }
+    [Parameter] public EventCallback<(string Id, int Direction)> OnReorder { get; set; }
+
+    private async Task HandleValueChange(CodeSetOption option, ChangeEventArgs e)
+    {
+        var updated = option with { Value = e.Value?.ToString() ?? "" };
+        await OnUpdate.InvokeAsync(updated);
+    }
+
+    private async Task HandleLabelEnChange(CodeSetOption option, ChangeEventArgs e)
+    {
+        var updated = option with { LabelEn = e.Value?.ToString() ?? "" };
+        await OnUpdate.InvokeAsync(updated);
+    }
+
+    private async Task HandleLabelFrChange(CodeSetOption option, ChangeEventArgs e)
+    {
+        var updated = option with { LabelFr = e.Value?.ToString() };
+        await OnUpdate.InvokeAsync(updated);
+    }
+
+    private async Task MoveUp(string id)
+    {
+        await OnReorder.InvokeAsync((id, -1));
+    }
+
+    private async Task MoveDown(string id)
+    {
+        await OnReorder.InvokeAsync((id, 1));
+    }
+
+    private async Task Remove(string id)
+    {
+        await OnRemove.InvokeAsync(id);
+    }
+}

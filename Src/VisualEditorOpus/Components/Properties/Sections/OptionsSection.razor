@@ -1,0 +1,106 @@
+@* Options section for choice fields *@
+@implements IDisposable
+
+<PropertySection Title="Options" Icon="bi-list-ul">
+    <div class="options-editor">
+        <div class="options-header">
+            <span style="font-size: 11px; font-weight: 600;">@OptionCount Options</span>
+            <Button Variant="ghost" Size="xs" Icon="bi-plus" Text="Add" OnClick="AddOption" />
+        </div>
+        <div class="options-list">
+            @if (Options.Any())
+            {
+                @foreach (var (option, index) in Options.Select((o, i) => (o, i)))
+                {
+                    <div class="option-row">
+                        <i class="bi bi-grip-vertical drag-handle"></i>
+                        <input type="text" value="@option.Value" placeholder="Value"
+                               @onchange="e => UpdateOptionValue(index, e)" />
+                        <input type="text" value="@option.LabelEn" placeholder="Label EN"
+                               @onchange="e => UpdateOptionLabelEn(index, e)" />
+                        <input type="text" value="@option.LabelFr" placeholder="Label FR"
+                               @onchange="e => UpdateOptionLabelFr(index, e)" />
+                        <button type="button" class="action-btn danger" @onclick="() => RemoveOption(index)"
+                                title="Remove option">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                }
+            }
+            else
+            {
+                <div style="padding: 12px; text-align: center; color: var(--text-muted); font-size: 12px;">
+                    No options defined
+                </div>
+            }
+        </div>
+    </div>
+</PropertySection>
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private FormFieldSchema? Field => EditorState.SelectedField;
+    private FieldOption[] Options => Field?.Options ?? Array.Empty<FieldOption>();
+    private int OptionCount => Options.Length;
+
+    protected override void OnInitialized()
+    {
+        EditorState.OnFieldSelected += OnFieldSelected;
+    }
+
+    private void AddOption()
+    {
+        if (Field is null) return;
+
+        var newOption = new FieldOption(
+            Value: $"option_{Options.Length + 1}",
+            LabelEn: $"Option {Options.Length + 1}",
+            LabelFr: $"Option {Options.Length + 1}"
+        );
+
+        var newOptions = Options.Append(newOption).ToArray();
+        var updated = Field with { Options = newOptions };
+        EditorState.UpdateField(updated);
+    }
+
+    private void RemoveOption(int index)
+    {
+        if (Field is null || index < 0 || index >= Options.Length) return;
+
+        var newOptions = Options.Where((_, i) => i != index).ToArray();
+        var updated = Field with { Options = newOptions };
+        EditorState.UpdateField(updated);
+    }
+
+    private void UpdateOptionValue(int index, ChangeEventArgs e)
+    {
+        UpdateOption(index, o => o with { Value = e.Value?.ToString() ?? "" });
+    }
+
+    private void UpdateOptionLabelEn(int index, ChangeEventArgs e)
+    {
+        UpdateOption(index, o => o with { LabelEn = e.Value?.ToString() ?? "" });
+    }
+
+    private void UpdateOptionLabelFr(int index, ChangeEventArgs e)
+    {
+        UpdateOption(index, o => o with { LabelFr = e.Value?.ToString() });
+    }
+
+    private void UpdateOption(int index, Func<FieldOption, FieldOption> transform)
+    {
+        if (Field is null || index < 0 || index >= Options.Length) return;
+
+        var newOptions = Options.Select((o, i) => i == index ? transform(o) : o).ToArray();
+        var updated = Field with { Options = newOptions };
+        EditorState.UpdateField(updated);
+    }
+
+    private void OnFieldSelected(string? fieldId) => StateHasChanged();
+
+    public void Dispose()
+    {
+        EditorState.OnFieldSelected -= OnFieldSelected;
+    }
+}

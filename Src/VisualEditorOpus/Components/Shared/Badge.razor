@@ -1,0 +1,22 @@
+@* Badge component for status indicators *@
+
+<span class="badge @GetVariantClass() @Class">@Text@ChildContent</span>
+
+@code {
+    [Parameter] public string? Text { get; set; }
+    [Parameter] public string Variant { get; set; } = "primary";
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string GetVariantClass() => Variant switch
+    {
+        "draft" => "badge-draft",
+        "published" => "badge-published",
+        "primary" => "badge-primary",
+        "info" => "badge-info",
+        "warning" => "badge-warning",
+        "danger" => "badge-danger",
+        "count" => "badge-count badge-danger",
+        _ => "badge-primary"
+    };
+}

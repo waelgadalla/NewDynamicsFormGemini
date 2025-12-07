@@ -1,0 +1,89 @@
+@* Editor toolbar with undo/redo and field operations *@
+@implements IDisposable
+
+<div class="editor-toolbar">
+    <div class="toolbar-group">
+        <IconButton Icon="bi-arrow-counterclockwise" Title="Undo (Ctrl+Z)"
+                    Disabled="@(!EditorState.CanUndo)" OnClick="Undo" />
+        <IconButton Icon="bi-arrow-clockwise" Title="Redo (Ctrl+Y)"
+                    Disabled="@(!EditorState.CanRedo)" OnClick="Redo" />
+    </div>
+    <div class="toolbar-group">
+        <IconButton Icon="bi-files" Title="Duplicate (Ctrl+D)"
+                    Disabled="@(EditorState.SelectedFieldId is null)" OnClick="Duplicate" />
+        <IconButton Icon="bi-trash" Title="Delete (Del)"
+                    Disabled="@(EditorState.SelectedFieldId is null)" OnClick="Delete" />
+    </div>
+    <div class="toolbar-group">
+        <IconButton Icon="bi-arrow-up" Title="Move Up"
+                    Disabled="@(EditorState.SelectedFieldId is null)" OnClick="MoveUp" />
+        <IconButton Icon="bi-arrow-down" Title="Move Down"
+                    Disabled="@(EditorState.SelectedFieldId is null)" OnClick="MoveDown" />
+    </div>
+    <div style="margin-left: auto; display: flex; align-items: center; gap: 10px; color: var(--text-muted); font-size: 12px;">
+        <span><i class="bi bi-ui-checks"></i> @FieldCount fields</span>
+        <span>•</span>
+        <span>Auto-saved</span>
+    </div>
+</div>
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+    [Inject] private IToastService ToastService { get; set; } = default!;
+
+    private int FieldCount => EditorState.CurrentModule?.Fields.Length ?? 0;
+
+    protected override void OnInitialized()
+    {
+        EditorState.OnStateChanged += StateHasChanged;
+    }
+
+    private void Undo()
+    {
+        EditorState.Undo();
+    }
+
+    private void Redo()
+    {
+        EditorState.Redo();
+    }
+
+    private void Duplicate()
+    {
+        if (EditorState.SelectedFieldId is not null)
+        {
+            EditorState.DuplicateField(EditorState.SelectedFieldId);
+            ToastService.ShowSuccess("Field duplicated");
+        }
+    }
+
+    private void Delete()
+    {
+        if (EditorState.SelectedFieldId is not null)
+        {
+            EditorState.DeleteField(EditorState.SelectedFieldId);
+            ToastService.ShowSuccess("Field deleted");
+        }
+    }
+
+    private void MoveUp()
+    {
+        if (EditorState.SelectedFieldId is not null)
+        {
+            EditorState.MoveField(EditorState.SelectedFieldId, MoveDirection.Up);
+        }
+    }
+
+    private void MoveDown()
+    {
+        if (EditorState.SelectedFieldId is not null)
+        {
+            EditorState.MoveField(EditorState.SelectedFieldId, MoveDirection.Down);
+        }
+    }
+
+    public void Dispose()
+    {
+        EditorState.OnStateChanged -= StateHasChanged;
+    }
+}

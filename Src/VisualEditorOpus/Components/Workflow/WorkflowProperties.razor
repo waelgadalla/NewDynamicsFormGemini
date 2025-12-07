@@ -1,0 +1,135 @@
+@* Workflow properties panel *@
+@implements IDisposable
+
+<div class="workflow-props-panel">
+    <div class="props-panel-header">
+        <h3>Workflow Properties</h3>
+    </div>
+
+    <div class="props-panel-body">
+        <PropertySection Title="General" Icon="bi-info-circle">
+            <div class="prop-group">
+                <label class="prop-label">Title (English)</label>
+                <input type="text" class="prop-input"
+                       value="@(EditorState.CurrentWorkflow?.TitleEn ?? "")"
+                       @onchange="HandleTitleEnChange" />
+            </div>
+            <div class="prop-group">
+                <label class="prop-label">Title (French)</label>
+                <input type="text" class="prop-input"
+                       value="@(EditorState.CurrentWorkflow?.TitleFr ?? "")"
+                       @onchange="HandleTitleFrChange" />
+            </div>
+        </PropertySection>
+
+        <PropertySection Title="Navigation" Icon="bi-signpost-split">
+            <div class="checkbox-group" @onclick="ToggleStepJumping">
+                <input type="checkbox" checked="@Navigation.AllowStepJumping" />
+                <span>Allow step jumping</span>
+            </div>
+            <div class="checkbox-group" @onclick="ToggleProgress">
+                <input type="checkbox" checked="@Navigation.ShowProgress" />
+                <span>Show progress indicator</span>
+            </div>
+            <div class="checkbox-group" @onclick="ToggleStepNumbers">
+                <input type="checkbox" checked="@Navigation.ShowStepNumbers" />
+                <span>Show step numbers</span>
+            </div>
+        </PropertySection>
+
+        <PropertySection Title="Settings" Icon="bi-gear">
+            <div class="checkbox-group" @onclick="ToggleRequireAllModules">
+                <input type="checkbox" checked="@Settings.RequireAllModulesComplete" />
+                <span>Require all modules complete</span>
+            </div>
+            <div class="checkbox-group" @onclick="ToggleModuleSkipping">
+                <input type="checkbox" checked="@Settings.AllowModuleSkipping" />
+                <span>Allow module skipping</span>
+            </div>
+        </PropertySection>
+
+        <PropertySection Title="Submission" Icon="bi-send">
+            <div class="prop-group">
+                <label class="prop-label">Submit Button Text (EN)</label>
+                <input type="text" class="prop-input" placeholder="Submit" />
+            </div>
+            <div class="prop-group">
+                <label class="prop-label">Submit Button Text (FR)</label>
+                <input type="text" class="prop-input" placeholder="Soumettre" />
+            </div>
+        </PropertySection>
+    </div>
+</div>
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private WorkflowNavigation Navigation => EditorState.CurrentWorkflow?.Navigation ?? new WorkflowNavigation();
+    private WorkflowSettings Settings => EditorState.CurrentWorkflow?.Settings ?? new WorkflowSettings();
+
+    protected override void OnInitialized()
+    {
+        EditorState.OnWorkflowChanged += HandleWorkflowChanged;
+    }
+
+    private void HandleTitleEnChange(ChangeEventArgs e)
+    {
+        if (EditorState.CurrentWorkflow is null) return;
+        var updated = EditorState.CurrentWorkflow with { TitleEn = e.Value?.ToString() ?? "" };
+        EditorState.UpdateWorkflow(updated);
+    }
+
+    private void HandleTitleFrChange(ChangeEventArgs e)
+    {
+        if (EditorState.CurrentWorkflow is null) return;
+        var updated = EditorState.CurrentWorkflow with { TitleFr = e.Value?.ToString() };
+        EditorState.UpdateWorkflow(updated);
+    }
+
+    private void ToggleStepJumping()
+    {
+        if (EditorState.CurrentWorkflow is null) return;
+        var updatedNav = Navigation with { AllowStepJumping = !Navigation.AllowStepJumping };
+        var updated = EditorState.CurrentWorkflow with { Navigation = updatedNav };
+        EditorState.UpdateWorkflow(updated);
+    }
+
+    private void ToggleProgress()
+    {
+        if (EditorState.CurrentWorkflow is null) return;
+        var updatedNav = Navigation with { ShowProgress = !Navigation.ShowProgress };
+        var updated = EditorState.CurrentWorkflow with { Navigation = updatedNav };
+        EditorState.UpdateWorkflow(updated);
+    }
+
+    private void ToggleStepNumbers()
+    {
+        if (EditorState.CurrentWorkflow is null) return;
+        var updatedNav = Navigation with { ShowStepNumbers = !Navigation.ShowStepNumbers };
+        var updated = EditorState.CurrentWorkflow with { Navigation = updatedNav };
+        EditorState.UpdateWorkflow(updated);
+    }
+
+    private void ToggleRequireAllModules()
+    {
+        if (EditorState.CurrentWorkflow is null) return;
+        var updatedSettings = Settings with { RequireAllModulesComplete = !Settings.RequireAllModulesComplete };
+        var updated = EditorState.CurrentWorkflow with { Settings = updatedSettings };
+        EditorState.UpdateWorkflow(updated);
+    }
+
+    private void ToggleModuleSkipping()
+    {
+        if (EditorState.CurrentWorkflow is null) return;
+        var updatedSettings = Settings with { AllowModuleSkipping = !Settings.AllowModuleSkipping };
+        var updated = EditorState.CurrentWorkflow with { Settings = updatedSettings };
+        EditorState.UpdateWorkflow(updated);
+    }
+
+    private void HandleWorkflowChanged() => StateHasChanged();
+
+    public void Dispose()
+    {
+        EditorState.OnWorkflowChanged -= HandleWorkflowChanged;
+    }
+}

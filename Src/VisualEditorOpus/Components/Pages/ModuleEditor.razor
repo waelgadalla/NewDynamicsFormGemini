@@ -1,0 +1,158 @@
+@page "/editor"
+@page "/editor/{ModuleId:int}"
+@layout EditorLayout
+
+<PageTitle>Module Editor - DynamicForms Editor</PageTitle>
+
+<FormCanvas />
+
+@code {
+    [Parameter] public int? ModuleId { get; set; }
+
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+    [Inject] private IToastService ToastService { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        // Load or create module
+        if (ModuleId.HasValue)
+        {
+            // TODO: Load from repository
+            LoadSampleModule();
+        }
+        else
+        {
+            // Create new module with sample fields
+            LoadSampleModule();
+        }
+    }
+
+    private void LoadSampleModule()
+    {
+        var module = new FormModuleSchema
+        {
+            Id = ModuleId ?? 1,
+            TitleEn = "Personal Information",
+            TitleFr = "Informations personnelles",
+            DescriptionEn = "Please provide your personal details below.",
+            Fields = new[]
+            {
+                new FormFieldSchema
+                {
+                    Id = "section_personal",
+                    FieldType = "Section",
+                    LabelEn = "Personal Details",
+                    LabelFr = "Détails personnels",
+                    Order = 1
+                },
+                new FormFieldSchema
+                {
+                    Id = "firstName",
+                    FieldType = "TextBox",
+                    LabelEn = "First Name",
+                    LabelFr = "Prénom",
+                    PlaceholderEn = "Enter your first name",
+                    ParentId = "section_personal",
+                    Order = 1,
+                    Validation = new FieldValidationConfig { IsRequired = true, RequiredMessageEn = "First name is required" }
+                },
+                new FormFieldSchema
+                {
+                    Id = "lastName",
+                    FieldType = "TextBox",
+                    LabelEn = "Last Name",
+                    LabelFr = "Nom de famille",
+                    PlaceholderEn = "Enter your last name",
+                    ParentId = "section_personal",
+                    Order = 2,
+                    Validation = new FieldValidationConfig { IsRequired = true }
+                },
+                new FormFieldSchema
+                {
+                    Id = "email",
+                    FieldType = "TextBox",
+                    LabelEn = "Email Address",
+                    LabelFr = "Adresse courriel",
+                    PlaceholderEn = "name@example.com",
+                    HelpEn = "We'll use this email for all communications",
+                    ParentId = "section_personal",
+                    Order = 3,
+                    Validation = new FieldValidationConfig
+                    {
+                        IsRequired = true,
+                        Pattern = @"^[^\s@]+@[^\s@]+\.[^\s@]+$",
+                        PatternMessageEn = "Please enter a valid email address"
+                    }
+                },
+                new FormFieldSchema
+                {
+                    Id = "phone",
+                    FieldType = "TextBox",
+                    LabelEn = "Phone Number",
+                    LabelFr = "Numéro de téléphone",
+                    PlaceholderEn = "(555) 123-4567",
+                    ParentId = "section_personal",
+                    Order = 4
+                },
+                new FormFieldSchema
+                {
+                    Id = "divider1",
+                    FieldType = "Divider",
+                    Order = 5
+                },
+                new FormFieldSchema
+                {
+                    Id = "gender",
+                    FieldType = "RadioGroup",
+                    LabelEn = "Gender",
+                    LabelFr = "Genre",
+                    Order = 6,
+                    Options = new[]
+                    {
+                        new FieldOption("male", "Male", "Homme"),
+                        new FieldOption("female", "Female", "Femme"),
+                        new FieldOption("other", "Other", "Autre"),
+                        new FieldOption("prefer_not", "Prefer not to say", "Préfère ne pas dire")
+                    }
+                },
+                new FormFieldSchema
+                {
+                    Id = "dob",
+                    FieldType = "DatePicker",
+                    LabelEn = "Date of Birth",
+                    LabelFr = "Date de naissance",
+                    Order = 7,
+                    Validation = new FieldValidationConfig { IsRequired = true }
+                },
+                new FormFieldSchema
+                {
+                    Id = "country",
+                    FieldType = "DropDown",
+                    LabelEn = "Country",
+                    LabelFr = "Pays",
+                    PlaceholderEn = "Select your country",
+                    Order = 8,
+                    Options = new[]
+                    {
+                        new FieldOption("CA", "Canada", "Canada"),
+                        new FieldOption("US", "United States", "États-Unis"),
+                        new FieldOption("UK", "United Kingdom", "Royaume-Uni"),
+                        new FieldOption("FR", "France", "France"),
+                        new FieldOption("DE", "Germany", "Allemagne")
+                    }
+                },
+                new FormFieldSchema
+                {
+                    Id = "newsletter",
+                    FieldType = "Checkbox",
+                    LabelEn = "Subscribe to newsletter",
+                    LabelFr = "S'abonner à l'infolettre",
+                    HelpEn = "Receive updates about new features and offers",
+                    Order = 9
+                }
+            }
+        };
+
+        EditorState.LoadModule(module);
+    }
+}

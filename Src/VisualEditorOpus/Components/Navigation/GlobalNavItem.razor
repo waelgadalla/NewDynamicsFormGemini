@@ -1,0 +1,31 @@
+@* Single navigation item with tooltip *@
+
+<button type="button"
+        class="nav-item @(IsActive ? "active" : "")"
+        title="@Label"
+        @onclick="HandleClick">
+    <i class="@Icon"></i>
+    <span class="nav-tooltip">@Label</span>
+</button>
+
+@code {
+    [Parameter] public required string Icon { get; set; }
+    [Parameter] public required string Label { get; set; }
+    [Parameter] public string? Route { get; set; }
+    [Parameter] public bool IsActive { get; set; }
+    [Parameter] public EventCallback OnClick { get; set; }
+
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+
+    private async Task HandleClick()
+    {
+        if (OnClick.HasDelegate)
+        {
+            await OnClick.InvokeAsync();
+        }
+        else if (!string.IsNullOrEmpty(Route))
+        {
+            Navigation.NavigateTo(Route);
+        }
+    }
+}

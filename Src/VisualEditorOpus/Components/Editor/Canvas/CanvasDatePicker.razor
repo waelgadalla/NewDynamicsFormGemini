@@ -1,0 +1,35 @@
+@* Canvas preview for date/time picker fields *@
+
+<label class="field-label">
+    @(FieldNode.Schema.LabelEn ?? FieldNode.Schema.Id)
+    @if (FieldNode.Schema.Validation?.IsRequired == true)
+    {
+        <span class="field-required">*</span>
+    }
+</label>
+<div style="position: relative;">
+    <input type="@GetInputType()" class="field-input-preview" disabled />
+    <i class="@GetIcon()" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+</div>
+@if (!string.IsNullOrEmpty(FieldNode.Schema.HelpEn))
+{
+    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">@FieldNode.Schema.HelpEn</div>
+}
+
+@code {
+    [Parameter] public required FormFieldNode FieldNode { get; set; }
+
+    private string GetInputType() => FieldNode.Schema.FieldType switch
+    {
+        "DatePicker" => "date",
+        "TimePicker" => "time",
+        "DateTimePicker" => "datetime-local",
+        _ => "date"
+    };
+
+    private string GetIcon() => FieldNode.Schema.FieldType switch
+    {
+        "TimePicker" => "bi bi-clock",
+        _ => "bi bi-calendar-event"
+    };
+}

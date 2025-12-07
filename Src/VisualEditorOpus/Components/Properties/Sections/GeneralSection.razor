@@ -1,0 +1,51 @@
+@* General properties section (ID, Type, Order) *@
+@implements IDisposable
+
+<PropertySection Title="General" Icon="bi-gear">
+    <div class="prop-group">
+        <label class="prop-label">Field ID</label>
+        <input type="text" class="prop-input text-mono"
+               value="@Field?.Id" disabled />
+    </div>
+    <div class="prop-row">
+        <div class="prop-group">
+            <label class="prop-label">Type</label>
+            <input type="text" class="prop-input"
+                   value="@Field?.FieldType" disabled />
+        </div>
+        <div class="prop-group">
+            <label class="prop-label">Order</label>
+            <input type="number" class="prop-input"
+                   value="@Field?.Order"
+                   @onchange="HandleOrderChange" />
+        </div>
+    </div>
+</PropertySection>
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private FormFieldSchema? Field => EditorState.SelectedField;
+
+    protected override void OnInitialized()
+    {
+        EditorState.OnFieldSelected += OnFieldSelected;
+    }
+
+    private void HandleOrderChange(ChangeEventArgs e)
+    {
+        if (Field is null) return;
+        if (int.TryParse(e.Value?.ToString(), out var order))
+        {
+            var updated = Field with { Order = order };
+            EditorState.UpdateField(updated);
+        }
+    }
+
+    private void OnFieldSelected(string? fieldId) => StateHasChanged();
+
+    public void Dispose()
+    {
+        EditorState.OnFieldSelected -= OnFieldSelected;
+    }
+}

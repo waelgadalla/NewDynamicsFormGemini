@@ -1,0 +1,131 @@
+@* CodeSet editor panel *@
+
+<div class="codeset-editor">
+    <div class="codeset-editor-header">
+        <h3>Edit CodeSet</h3>
+        <div class="codeset-editor-actions">
+            <Button Variant="ghost" Text="Cancel" OnClick="HandleCancel" />
+            <Button Variant="primary" Icon="bi-check" Text="Save" OnClick="HandleSave" />
+        </div>
+    </div>
+
+    <div class="codeset-editor-body">
+        <PropertySection Title="General" Icon="bi-info-circle">
+            <div class="prop-group">
+                <label class="prop-label">CodeSet ID</label>
+                <input type="text" class="prop-input" value="@EditedCodeSet.Id" disabled />
+            </div>
+            <div class="prop-group">
+                <label class="prop-label">Name</label>
+                <input type="text" class="prop-input"
+                       value="@EditedCodeSet.Name"
+                       @oninput="HandleNameChange" />
+            </div>
+            <div class="prop-group">
+                <label class="prop-label">Description</label>
+                <textarea class="prop-input" rows="2"
+                          @oninput="HandleDescriptionChange">@EditedCodeSet.Description</textarea>
+            </div>
+        </PropertySection>
+
+        <PropertySection Title="Options" Icon="bi-list-ul">
+            <div class="codeset-options-header">
+                <span>@Options.Count options</span>
+                <Button Variant="ghost" Size="xs" Icon="bi-plus" Text="Add Option" OnClick="AddOption" />
+            </div>
+            <CodeSetOptionsTable Options="@Options"
+                                 OnUpdate="UpdateOption"
+                                 OnRemove="RemoveOption"
+                                 OnReorder="ReorderOption" />
+        </PropertySection>
+    </div>
+</div>
+
+@code {
+    [Parameter] public required CodeSetInfo CodeSet { get; set; }
+    [Parameter] public EventCallback<CodeSetInfo> OnSave { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    private CodeSetInfo EditedCodeSet { get; set; } = null!;
+    private List<CodeSetOption> Options { get; set; } = new();
+
+    protected override void OnParametersSet()
+    {
+        EditedCodeSet = CodeSet;
+        LoadOptions();
+    }
+
+    private void LoadOptions()
+    {
+        // Mock options - in real app would load from provider
+        Options = new List<CodeSetOption>
+        {
+            new CodeSetOption("opt1", "Value 1", "Label 1 EN", "Label 1 FR", 1),
+            new CodeSetOption("opt2", "Value 2", "Label 2 EN", "Label 2 FR", 2),
+            new CodeSetOption("opt3", "Value 3", "Label 3 EN", "Label 3 FR", 3),
+        };
+    }
+
+    private void HandleNameChange(ChangeEventArgs e)
+    {
+        EditedCodeSet = EditedCodeSet with { Name = e.Value?.ToString() ?? "" };
+    }
+
+    private void HandleDescriptionChange(ChangeEventArgs e)
+    {
+        EditedCodeSet = EditedCodeSet with { Description = e.Value?.ToString() ?? "" };
+    }
+
+    private void AddOption()
+    {
+        var newOption = new CodeSetOption(
+            $"opt{Options.Count + 1}",
+            $"value{Options.Count + 1}",
+            $"Option {Options.Count + 1}",
+            $"Option {Options.Count + 1} FR",
+            Options.Count + 1
+        );
+        Options.Add(newOption);
+        StateHasChanged();
+    }
+
+    private void UpdateOption(CodeSetOption option)
+    {
+        var index = Options.FindIndex(o => o.Id == option.Id);
+        if (index >= 0)
+        {
+            Options[index] = option;
+        }
+    }
+
+    private void RemoveOption(string id)
+    {
+        Options.RemoveAll(o => o.Id == id);
+        StateHasChanged();
+    }
+
+    private void ReorderOption((string Id, int Direction) args)
+    {
+        var index = Options.FindIndex(o => o.Id == args.Id);
+        var newIndex = index + args.Direction;
+
+        if (newIndex >= 0 && newIndex < Options.Count)
+        {
+            var item = Options[index];
+            Options.RemoveAt(index);
+            Options.Insert(newIndex, item);
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleSave()
+    {
+        var updated = EditedCodeSet with { OptionCount = Options.Count };
+        await OnSave.InvokeAsync(updated);
+    }
+
+    private async Task HandleCancel()
+    {
+        await OnCancel.InvokeAsync();
+    }
+}

@@ -1,0 +1,103 @@
+@page "/workflow"
+@page "/workflow/{WorkflowId:int}"
+@layout MainLayout
+
+<PageTitle>Workflow Designer - DynamicForms Editor</PageTitle>
+
+<div class="workflow-designer">
+    <div class="app-header">
+        <div class="header-left">
+            <button class="btn btn-ghost btn-icon-sm" @onclick="GoBack" title="Back to Dashboard">
+                <i class="bi bi-arrow-left"></i>
+            </button>
+            <div class="header-title">
+                <i class="bi bi-diagram-3"></i>
+                <input type="text" class="title-input"
+                       value="@WorkflowTitle"
+                       @onchange="HandleTitleChange" />
+            </div>
+            <Badge Variant="@GetStatusVariant()" Text="@WorkflowStatus" />
+        </div>
+        <div class="header-actions">
+            <Button Variant="outline" Icon="bi-play" Text="Preview" OnClick="Preview" />
+            <Button Variant="outline" Icon="bi-gear" Text="Settings" OnClick="ShowSettings" />
+            <Button Variant="primary" Icon="bi-check" Text="Save Workflow" OnClick="Save" />
+        </div>
+    </div>
+
+    <div class="workflow-body">
+        <div class="workflow-sidebar">
+            <WorkflowModuleList />
+        </div>
+        <div class="workflow-main">
+            <WorkflowCanvas />
+        </div>
+        <div class="workflow-properties">
+            <WorkflowProperties />
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int? WorkflowId { get; set; }
+
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+    [Inject] private IToastService ToastService { get; set; } = default!;
+
+    private string WorkflowTitle => EditorState.CurrentWorkflow?.TitleEn ?? "New Workflow";
+    private string WorkflowStatus => EditorState.CurrentWorkflow?.ModuleIds.Length > 0 ? "draft" : "empty";
+
+    protected override void OnInitialized()
+    {
+        if (WorkflowId.HasValue)
+        {
+            LoadWorkflow(WorkflowId.Value);
+        }
+        else
+        {
+            CreateNewWorkflow();
+        }
+    }
+
+    private void LoadWorkflow(int id)
+    {
+        // Mock data - in real app this would load from repository
+        var workflow = new FormWorkflowSchema
+        {
+            Id = id,
+            TitleEn = "Employee Onboarding",
+            TitleFr = "Intégration des employés",
+            ModuleIds = new[] { 1, 2, 3 }
+        };
+        EditorState.LoadWorkflow(workflow);
+    }
+
+    private void CreateNewWorkflow()
+    {
+        EditorState.CreateNewWorkflow("Untitled Workflow");
+    }
+
+    private void HandleTitleChange(ChangeEventArgs e)
+    {
+        if (EditorState.CurrentWorkflow is null) return;
+        var newTitle = e.Value?.ToString() ?? "Untitled";
+        var updated = EditorState.CurrentWorkflow with { TitleEn = newTitle };
+        EditorState.UpdateWorkflow(updated);
+    }
+
+    private string GetStatusVariant() => WorkflowStatus switch
+    {
+        "published" => "published",
+        "draft" => "draft",
+        _ => "draft"
+    };
+
+    private void GoBack() => Navigation.NavigateTo("/");
+    private void Preview() => ToastService.ShowInfo("Preview mode coming soon");
+    private void ShowSettings() => ToastService.ShowInfo("Settings panel coming soon");
+    private void Save()
+    {
+        ToastService.ShowSuccess("Workflow saved successfully");
+    }
+}

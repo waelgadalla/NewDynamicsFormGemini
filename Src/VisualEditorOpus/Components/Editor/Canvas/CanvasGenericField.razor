@@ -1,0 +1,16 @@
+@* Fallback canvas preview for unknown field types *@
+
+<label class="field-label">
+    @(FieldNode.Schema.LabelEn ?? FieldNode.Schema.Id)
+    @if (FieldNode.Schema.Validation?.IsRequired == true)
+    {
+        <span class="field-required">*</span>
+    }
+</label>
+<div style="padding: 10px; background: var(--bg-tertiary); border-radius: 4px; font-size: 12px; color: var(--text-muted);">
+    <i class="bi bi-question-circle"></i> @FieldNode.Schema.FieldType
+</div>
+
+@code {
+    [Parameter] public required FormFieldNode FieldNode { get; set; }
+}

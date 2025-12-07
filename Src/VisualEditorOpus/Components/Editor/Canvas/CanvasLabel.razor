@@ -1,0 +1,9 @@
+@* Canvas preview for label/HTML fields *@
+
+<div style="font-size: 13px; color: var(--text-secondary);">
+    @(FieldNode.Schema.LabelEn ?? "Label text")
+</div>
+
+@code {
+    [Parameter] public required FormFieldNode FieldNode { get; set; }
+}

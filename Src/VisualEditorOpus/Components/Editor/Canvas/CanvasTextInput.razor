@@ -1,0 +1,26 @@
+@* Canvas preview for text input fields *@
+
+<label class="field-label">
+    @(FieldNode.Schema.LabelEn ?? FieldNode.Schema.Id)
+    @if (FieldNode.Schema.Validation?.IsRequired == true)
+    {
+        <span class="field-required">*</span>
+    }
+</label>
+<input type="@GetInputType()" class="field-input-preview"
+       placeholder="@(FieldNode.Schema.PlaceholderEn ?? "")" disabled />
+@if (!string.IsNullOrEmpty(FieldNode.Schema.HelpEn))
+{
+    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">@FieldNode.Schema.HelpEn</div>
+}
+
+@code {
+    [Parameter] public required FormFieldNode FieldNode { get; set; }
+
+    private string GetInputType() => FieldNode.Schema.FieldType switch
+    {
+        "Number" => "number",
+        "Currency" => "text",
+        _ => "text"
+    };
+}

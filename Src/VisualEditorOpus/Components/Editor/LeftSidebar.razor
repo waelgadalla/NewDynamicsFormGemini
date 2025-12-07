@@ -1,0 +1,55 @@
+@* Left sidebar with Fields/Outline/Issues tabs *@
+
+<div class="left-sidebar">
+    <div class="ls-tabs">
+        <button type="button" class="ls-tab @(ActiveTab == "fields" ? "active" : "")"
+                @onclick="SwitchToFields">
+            <i class="bi bi-plus-square"></i>
+            <span>Fields</span>
+        </button>
+        <button type="button" class="ls-tab @(ActiveTab == "outline" ? "active" : "")"
+                @onclick="SwitchToOutline">
+            <i class="bi bi-list-nested"></i>
+            <span>Outline</span>
+        </button>
+        <button type="button" class="ls-tab @(ActiveTab == "issues" ? "active" : "")"
+                @onclick="SwitchToIssues">
+            <i class="bi bi-shield-check"></i>
+            <span>Issues</span>
+            @if (IssueCount > 0)
+            {
+                <Badge Variant="count" Text="@IssueCount.ToString()" />
+            }
+        </button>
+    </div>
+
+    @if (ActiveTab == "fields")
+    {
+        <div class="tab-pane active">
+            <FieldPalette />
+        </div>
+    }
+    else if (ActiveTab == "outline")
+    {
+        <div class="tab-pane active">
+            <OutlineTree />
+        </div>
+    }
+    else if (ActiveTab == "issues")
+    {
+        <div class="tab-pane active">
+            <ValidationIssuesList />
+        </div>
+    }
+</div>
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private string ActiveTab { get; set; } = "fields";
+    private int IssueCount => EditorState.ValidationIssues.Count;
+
+    private void SwitchToFields() => ActiveTab = "fields";
+    private void SwitchToOutline() => ActiveTab = "outline";
+    private void SwitchToIssues() => ActiveTab = "issues";
+}

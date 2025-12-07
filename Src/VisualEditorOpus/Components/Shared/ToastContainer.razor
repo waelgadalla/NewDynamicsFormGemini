@@ -1,0 +1,36 @@
+@* Container for toast notifications *@
+@implements IDisposable
+
+<div class="toast-container">
+    @foreach (var toast in _toasts)
+    {
+        <Toast Message="@toast" />
+    }
+</div>
+
+@code {
+    [Inject] private IToastService ToastService { get; set; } = default!;
+
+    private readonly List<ToastMessage> _toasts = new();
+
+    protected override void OnInitialized()
+    {
+        ToastService.OnToastAdded += HandleToastAdded;
+    }
+
+    private async void HandleToastAdded(ToastMessage toast)
+    {
+        _toasts.Add(toast);
+        await InvokeAsync(StateHasChanged);
+
+        // Auto-remove after 3 seconds
+        await Task.Delay(3000);
+        _toasts.Remove(toast);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        ToastService.OnToastAdded -= HandleToastAdded;
+    }
+}

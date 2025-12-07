@@ -1,0 +1,59 @@
+@* List of validation issues/warnings *@
+@implements IDisposable
+
+<div class="sidebar-content">
+    @if (!EditorState.ValidationIssues.Any())
+    {
+        <div style="color: var(--text-muted); font-size: 12px; text-align: center; padding: 20px;">
+            <i class="bi bi-check-circle" style="font-size: 24px; display: block; margin-bottom: 8px; color: var(--success);"></i>
+            No issues found
+        </div>
+    }
+    else
+    {
+        @foreach (var issue in EditorState.ValidationIssues)
+        {
+            <div class="validation-item @GetSeverityClass(issue.Severity)"
+                 @onclick="() => SelectField(issue.FieldId)">
+                <i class="@GetSeverityIcon(issue.Severity) validation-icon"></i>
+                <div>
+                    <div class="validation-title">@issue.Title</div>
+                    <div class="validation-desc">@issue.Description</div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        EditorState.OnStateChanged += StateHasChanged;
+    }
+
+    private void SelectField(string fieldId)
+    {
+        EditorState.SelectField(fieldId);
+    }
+
+    private string GetSeverityClass(ValidationSeverity severity) => severity switch
+    {
+        ValidationSeverity.Error => "error",
+        ValidationSeverity.Warning => "warning",
+        _ => ""
+    };
+
+    private string GetSeverityIcon(ValidationSeverity severity) => severity switch
+    {
+        ValidationSeverity.Error => "bi bi-x-circle-fill",
+        ValidationSeverity.Warning => "bi bi-exclamation-triangle-fill",
+        _ => "bi bi-info-circle-fill"
+    };
+
+    public void Dispose()
+    {
+        EditorState.OnStateChanged -= StateHasChanged;
+    }
+}

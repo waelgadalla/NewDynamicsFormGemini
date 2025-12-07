@@ -1,0 +1,43 @@
+@* Floating action buttons for field operations *@
+
+<div class="field-actions">
+    <IconButton Icon="bi-gear" Title="Settings" Variant="action" OnClick="OpenSettings" StopPropagation="true" />
+    <IconButton Icon="bi-copy" Title="Duplicate" Variant="action" OnClick="Duplicate" StopPropagation="true" />
+    <IconButton Icon="bi-arrow-up" Title="Move Up" Variant="action" OnClick="MoveUp" StopPropagation="true" />
+    <IconButton Icon="bi-arrow-down" Title="Move Down" Variant="action" OnClick="MoveDown" StopPropagation="true" />
+    <IconButton Icon="bi-trash" Title="Delete" Variant="action" Danger="true" OnClick="Delete" StopPropagation="true" />
+</div>
+
+@code {
+    [Parameter] public required string FieldId { get; set; }
+
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+    [Inject] private IToastService ToastService { get; set; } = default!;
+
+    private void OpenSettings()
+    {
+        EditorState.SelectField(FieldId);
+    }
+
+    private void Duplicate()
+    {
+        EditorState.DuplicateField(FieldId);
+        ToastService.ShowSuccess("Field duplicated");
+    }
+
+    private void MoveUp()
+    {
+        EditorState.MoveField(FieldId, MoveDirection.Up);
+    }
+
+    private void MoveDown()
+    {
+        EditorState.MoveField(FieldId, MoveDirection.Down);
+    }
+
+    private void Delete()
+    {
+        EditorState.DeleteField(FieldId);
+        ToastService.ShowSuccess("Field deleted");
+    }
+}

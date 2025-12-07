@@ -1,0 +1,84 @@
+@* Layout section for field display settings *@
+@implements IDisposable
+
+<PropertySection Title="Layout" Icon="bi-layout-split">
+    <div class="prop-group">
+        <label class="prop-label">Width</label>
+        <select class="prop-select" value="@GetWidthValue()" @onchange="HandleWidthChange">
+            <option value="12">Full Width</option>
+            <option value="6">Half (1/2)</option>
+            <option value="4">Third (1/3)</option>
+            <option value="3">Quarter (1/4)</option>
+        </select>
+    </div>
+
+    <div class="prop-group">
+        <label class="prop-label">CSS Classes</label>
+        <input type="text" class="prop-input text-mono"
+               value="@Field?.CssClasses"
+               placeholder="custom-class another-class"
+               @onchange="HandleCssClassesChange" />
+    </div>
+
+    <div class="checkbox-group" @onclick="ToggleVisible">
+        <input type="checkbox" checked="@Field?.IsVisible" />
+        <span style="font-size: 12px;">Visible</span>
+    </div>
+
+    <div class="checkbox-group" @onclick="ToggleReadOnly">
+        <input type="checkbox" checked="@Field?.IsReadOnly" />
+        <span style="font-size: 12px;">Read Only</span>
+    </div>
+</PropertySection>
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private FormFieldSchema? Field => EditorState.SelectedField;
+
+    protected override void OnInitialized()
+    {
+        EditorState.OnFieldSelected += OnFieldSelected;
+    }
+
+    private string GetWidthValue() => Field?.WidthClass?.ToString() ?? "12";
+
+    private void HandleWidthChange(ChangeEventArgs e)
+    {
+        if (Field is null) return;
+        if (int.TryParse(e.Value?.ToString(), out var width))
+        {
+            var updated = Field with { WidthClass = width == 12 ? null : width };
+            EditorState.UpdateField(updated);
+        }
+    }
+
+    private void HandleCssClassesChange(ChangeEventArgs e)
+    {
+        if (Field is null) return;
+        var value = e.Value?.ToString();
+        var updated = Field with { CssClasses = string.IsNullOrWhiteSpace(value) ? null : value };
+        EditorState.UpdateField(updated);
+    }
+
+    private void ToggleVisible()
+    {
+        if (Field is null) return;
+        var updated = Field with { IsVisible = !Field.IsVisible };
+        EditorState.UpdateField(updated);
+    }
+
+    private void ToggleReadOnly()
+    {
+        if (Field is null) return;
+        var updated = Field with { IsReadOnly = !Field.IsReadOnly };
+        EditorState.UpdateField(updated);
+    }
+
+    private void OnFieldSelected(string? fieldId) => StateHasChanged();
+
+    public void Dispose()
+    {
+        EditorState.OnFieldSelected -= OnFieldSelected;
+    }
+}

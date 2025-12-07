@@ -1,0 +1,60 @@
+@* Editor header with title input and actions *@
+
+<div class="app-header">
+    <div class="header-left">
+        <button class="btn btn-ghost btn-icon-sm" @onclick="GoBack" title="Back to Workflow">
+            <i class="bi bi-arrow-left"></i>
+        </button>
+        <div class="header-title" style="font-size: 16px;">
+            <i class="bi bi-file-text"></i>
+            <input type="text" class="title-input"
+                   value="@(EditorState.CurrentModule?.TitleEn ?? "New Module")"
+                   @onchange="HandleTitleChange" />
+        </div>
+        <Badge Variant="info" Text="@StepBadge" />
+    </div>
+    <div class="header-actions">
+        <div class="view-switcher">
+            <button class="btn btn-sm @(ActiveView == "design" ? "active" : "")"
+                    @onclick="SwitchToDesign">Design</button>
+            <button class="btn btn-sm btn-ghost @(ActiveView == "preview" ? "active" : "")"
+                    @onclick="SwitchToPreview">Preview</button>
+            <button class="btn btn-sm btn-ghost @(ActiveView == "json" ? "active" : "")"
+                    @onclick="SwitchToJson">JSON</button>
+        </div>
+        <Button Variant="outline" Icon="bi-info-circle" OnClick="ShowMetadata" />
+        <Button Variant="primary" Icon="bi-check" Text="Save Module" OnClick="SaveModule" />
+    </div>
+</div>
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+    [Inject] private IToastService ToastService { get; set; } = default!;
+
+    private string ActiveView { get; set; } = "design";
+    private string StepBadge => "Step 1 of 4"; // TODO: Get from workflow context
+
+    private void GoBack() => Navigation.NavigateTo("/workflow");
+    private void SwitchToDesign() => ActiveView = "design";
+    private void SwitchToPreview() => ActiveView = "preview";
+    private void SwitchToJson() => ActiveView = "json";
+
+    private void HandleTitleChange(ChangeEventArgs e)
+    {
+        if (EditorState.CurrentModule is null) return;
+        var newTitle = e.Value?.ToString() ?? "Untitled";
+        var updatedModule = EditorState.CurrentModule with { TitleEn = newTitle };
+        EditorState.UpdateModule(updatedModule);
+    }
+
+    private void ShowMetadata()
+    {
+        // TODO: Open metadata modal
+    }
+
+    private void SaveModule()
+    {
+        ToastService.ShowSuccess("Module saved successfully");
+    }
+}

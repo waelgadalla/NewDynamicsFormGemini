@@ -1,0 +1,70 @@
+@* Single node in the outline tree (recursive) *@
+@implements IDisposable
+
+<div class="tree-node @(IsSelected ? "selected" : "")" @onclick="HandleClick" @onclick:stopPropagation="true">
+    @for (int i = 0; i < Level; i++)
+    {
+        <span class="tree-indent"></span>
+    }
+    @if (HasChildren)
+    {
+        <button type="button" class="tree-node-icon" @onclick="ToggleExpanded" @onclick:stopPropagation="true"
+                style="cursor: pointer; background: none; border: none; padding: 0;">
+            <i class="bi @(IsExpanded ? "bi-chevron-down" : "bi-chevron-right")"></i>
+        </button>
+    }
+    else
+    {
+        <span class="tree-node-icon"></span>
+    }
+    <i class="@FieldIcon tree-node-icon"></i>
+    <span>@DisplayLabel</span>
+</div>
+
+@if (IsExpanded && HasChildren)
+{
+    @foreach (var child in FieldNode.Children.OrderBy(c => c.Schema.Order))
+    {
+        <OutlineTreeNode FieldNode="@child" Level="@(Level + 1)" />
+    }
+}
+
+@code {
+    [Parameter] public required FormFieldNode FieldNode { get; set; }
+    [Parameter] public int Level { get; set; } = 0;
+
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private bool IsExpanded { get; set; } = true;
+    private bool IsSelected => EditorState.SelectedFieldId == FieldNode.Schema.Id;
+    private bool HasChildren => FieldNode.Children.Any();
+    private string FieldIcon => FieldTypeDefinition.GetIcon(FieldNode.Schema.FieldType);
+    private string DisplayLabel => string.IsNullOrWhiteSpace(FieldNode.Schema.LabelEn)
+        ? FieldNode.Schema.Id
+        : FieldNode.Schema.LabelEn;
+
+    protected override void OnInitialized()
+    {
+        EditorState.OnFieldSelected += OnFieldSelected;
+    }
+
+    private void HandleClick()
+    {
+        EditorState.SelectField(FieldNode.Schema.Id);
+    }
+
+    private void ToggleExpanded()
+    {
+        IsExpanded = !IsExpanded;
+    }
+
+    private void OnFieldSelected(string? fieldId)
+    {
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        EditorState.OnFieldSelected -= OnFieldSelected;
+    }
+}

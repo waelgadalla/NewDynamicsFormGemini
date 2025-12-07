@@ -1,0 +1,32 @@
+@* SVG connection line between workflow nodes *@
+
+<g class="workflow-connection">
+    <path d="@PathData"
+          stroke="var(--primary)"
+          stroke-width="2"
+          fill="none"
+          marker-end="url(#arrowhead)" />
+</g>
+
+@code {
+    [Parameter] public int Source { get; set; }
+    [Parameter] public int Target { get; set; }
+
+    // These would be calculated from actual node positions
+    private string PathData => GeneratePath();
+
+    private string GeneratePath()
+    {
+        // Simple bezier curve between nodes
+        // In a real implementation, these would come from actual DOM positions
+        var sourceIndex = Source;
+        var targetIndex = Target;
+
+        var sourceY = 100 + (sourceIndex * 150) + 50; // Bottom of source node
+        var targetY = 100 + (targetIndex * 150); // Top of target node
+        var x = 400;
+        var controlPointOffset = (targetY - sourceY) / 2;
+
+        return $"M {x} {sourceY} C {x} {sourceY + controlPointOffset}, {x} {targetY - controlPointOffset}, {x} {targetY}";
+    }
+}

@@ -1,0 +1,35 @@
+@* Hierarchical outline tree view of fields *@
+@implements IDisposable
+
+<div class="sidebar-content" style="padding: 8px;">
+    @if (RootFields.Any())
+    {
+        @foreach (var field in RootFields)
+        {
+            <OutlineTreeNode FieldNode="@field" Level="0" />
+        }
+    }
+    else
+    {
+        <div style="color: var(--text-muted); font-size: 12px; text-align: center; padding: 20px;">
+            No fields yet
+        </div>
+    }
+</div>
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private IEnumerable<FormFieldNode> RootFields => EditorState.CurrentModuleRuntime?.RootFields
+        .OrderBy(f => f.Schema.Order) ?? Enumerable.Empty<FormFieldNode>();
+
+    protected override void OnInitialized()
+    {
+        EditorState.OnStateChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        EditorState.OnStateChanged -= StateHasChanged;
+    }
+}

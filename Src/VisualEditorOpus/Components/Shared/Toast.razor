@@ -1,0 +1,26 @@
+@* Single toast notification *@
+
+<div class="toast @GetTypeClass()">
+    <i class="@GetIcon()"></i>
+    <span>@Message.Message</span>
+</div>
+
+@code {
+    [Parameter] public required ToastMessage Message { get; set; }
+
+    private string GetTypeClass() => Message.Type switch
+    {
+        ToastType.Success => "toast-success",
+        ToastType.Error => "toast-error",
+        ToastType.Warning => "toast-warning",
+        _ => ""
+    };
+
+    private string GetIcon() => Message.Type switch
+    {
+        ToastType.Success => "bi bi-check-circle-fill",
+        ToastType.Error => "bi bi-x-circle-fill",
+        ToastType.Warning => "bi bi-exclamation-triangle-fill",
+        _ => "bi bi-info-circle-fill"
+    };
+}

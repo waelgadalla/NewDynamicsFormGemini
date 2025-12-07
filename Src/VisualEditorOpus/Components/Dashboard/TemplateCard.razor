@@ -1,0 +1,22 @@
+@* Single template card in the quick start row *@
+
+<div class="template-card" @onclick="HandleClick">
+    <div class="template-icon">
+        <i class="@Icon"></i>
+    </div>
+    <div class="template-name">@Name</div>
+    <div class="template-desc">@Description</div>
+</div>
+
+@code {
+    [Parameter] public required string Icon { get; set; }
+    [Parameter] public required string Name { get; set; }
+    [Parameter] public required string Description { get; set; }
+    [Parameter] public required string TemplateId { get; set; }
+    [Parameter] public EventCallback<string> OnSelect { get; set; }
+
+    private async Task HandleClick()
+    {
+        await OnSelect.InvokeAsync(TemplateId);
+    }
+}

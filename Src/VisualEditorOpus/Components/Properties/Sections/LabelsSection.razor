@@ -1,0 +1,74 @@
+@* Labels section with bilingual inputs *@
+@implements IDisposable
+
+<PropertySection Title="Labels" Icon="bi-fonts">
+    <div class="prop-group">
+        <label class="prop-label">Label</label>
+        <BilingualInput ValueEn="@Field?.LabelEn"
+                        ValueFr="@Field?.LabelFr"
+                        ValueEnChanged="HandleLabelEnChange"
+                        ValueFrChanged="HandleLabelFrChange"
+                        PlaceholderEn="Enter label in English"
+                        PlaceholderFr="Entrez l'étiquette en français" />
+    </div>
+
+    <div class="prop-group">
+        <label class="prop-label">Description</label>
+        <BilingualInput ValueEn="@Field?.DescriptionEn"
+                        ValueFr="@Field?.DescriptionFr"
+                        ValueEnChanged="HandleDescEnChange"
+                        ValueFrChanged="HandleDescFrChange"
+                        PlaceholderEn="Description (optional)"
+                        PlaceholderFr="Description (optionnel)"
+                        Multiline="true" />
+    </div>
+
+    <div class="prop-group">
+        <label class="prop-label">Placeholder</label>
+        <BilingualInput ValueEn="@Field?.PlaceholderEn"
+                        ValueFr="@Field?.PlaceholderFr"
+                        ValueEnChanged="HandlePlaceholderEnChange"
+                        ValueFrChanged="HandlePlaceholderFrChange"
+                        PlaceholderEn="Placeholder text"
+                        PlaceholderFr="Texte d'espace réservé" />
+    </div>
+
+    <div class="prop-group">
+        <label class="prop-label">Help Text</label>
+        <BilingualInput ValueEn="@Field?.HelpEn"
+                        ValueFr="@Field?.HelpFr"
+                        ValueEnChanged="HandleHelpEnChange"
+                        ValueFrChanged="HandleHelpFrChange"
+                        PlaceholderEn="Help text"
+                        PlaceholderFr="Texte d'aide" />
+    </div>
+</PropertySection>
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private FormFieldSchema? Field => EditorState.SelectedField;
+
+    protected override void OnInitialized()
+    {
+        EditorState.OnFieldSelected += OnFieldSelected;
+    }
+
+    private void UpdateField(FormFieldSchema updated) => EditorState.UpdateField(updated);
+
+    private void HandleLabelEnChange(string? value) { if (Field != null) UpdateField(Field with { LabelEn = value }); }
+    private void HandleLabelFrChange(string? value) { if (Field != null) UpdateField(Field with { LabelFr = value }); }
+    private void HandleDescEnChange(string? value) { if (Field != null) UpdateField(Field with { DescriptionEn = value }); }
+    private void HandleDescFrChange(string? value) { if (Field != null) UpdateField(Field with { DescriptionFr = value }); }
+    private void HandlePlaceholderEnChange(string? value) { if (Field != null) UpdateField(Field with { PlaceholderEn = value }); }
+    private void HandlePlaceholderFrChange(string? value) { if (Field != null) UpdateField(Field with { PlaceholderFr = value }); }
+    private void HandleHelpEnChange(string? value) { if (Field != null) UpdateField(Field with { HelpEn = value }); }
+    private void HandleHelpFrChange(string? value) { if (Field != null) UpdateField(Field with { HelpFr = value }); }
+
+    private void OnFieldSelected(string? fieldId) => StateHasChanged();
+
+    public void Dispose()
+    {
+        EditorState.OnFieldSelected -= OnFieldSelected;
+    }
+}

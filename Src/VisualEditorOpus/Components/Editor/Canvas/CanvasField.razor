@@ -1,0 +1,112 @@
+@* Renders a single field in the canvas with selection and actions *@
+@implements IDisposable
+
+<div class="@GetFieldClasses()" @onclick="HandleClick" @onclick:stopPropagation="true"
+     @onmouseenter="() => IsHovered = true" @onmouseleave="() => IsHovered = false">
+
+    @switch (FieldNode.Schema.FieldType)
+    {
+        case "Section":
+        case "Panel":
+            <CanvasSection FieldNode="@FieldNode" />
+            break;
+        case "TextBox":
+        case "Number":
+        case "Currency":
+            <CanvasTextInput FieldNode="@FieldNode" />
+            break;
+        case "TextArea":
+            <CanvasTextArea FieldNode="@FieldNode" />
+            break;
+        case "DropDown":
+            <CanvasDropdown FieldNode="@FieldNode" />
+            break;
+        case "RadioGroup":
+            <CanvasRadioGroup FieldNode="@FieldNode" />
+            break;
+        case "CheckboxList":
+            <CanvasCheckboxList FieldNode="@FieldNode" />
+            break;
+        case "Checkbox":
+            <CanvasCheckbox FieldNode="@FieldNode" />
+            break;
+        case "DatePicker":
+        case "TimePicker":
+        case "DateTimePicker":
+            <CanvasDatePicker FieldNode="@FieldNode" />
+            break;
+        case "FileUpload":
+            <CanvasFileUpload FieldNode="@FieldNode" />
+            break;
+        case "Divider":
+            <hr style="margin: 16px 0; border: none; border-top: 1px solid var(--border-color);" />
+            break;
+        case "Label":
+            <CanvasLabel FieldNode="@FieldNode" />
+            break;
+        default:
+            <CanvasGenericField FieldNode="@FieldNode" />
+            break;
+    }
+
+    @if ((IsHovered || IsSelected) && FieldNode.Schema.FieldType != "Section" && FieldNode.Schema.FieldType != "Panel")
+    {
+        <FieldActions FieldId="@FieldNode.Schema.Id" />
+    }
+</div>
+
+@code {
+    [Parameter] public required FormFieldNode FieldNode { get; set; }
+
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private bool IsHovered { get; set; }
+    private bool IsSelected => EditorState.SelectedFieldId == FieldNode.Schema.Id;
+
+    protected override void OnInitialized()
+    {
+        EditorState.OnFieldSelected += OnFieldSelected;
+    }
+
+    private string GetFieldClasses()
+    {
+        var classes = new List<string>();
+
+        if (FieldNode.Schema.FieldType is "Section" or "Panel")
+        {
+            classes.Add("field-section");
+        }
+        else
+        {
+            classes.Add("field-item");
+        }
+
+        if (IsSelected) classes.Add("selected");
+
+        // Width class
+        if (FieldNode.Schema.WidthClass.HasValue)
+        {
+            var width = FieldNode.Schema.WidthClass.Value;
+            if (width == 6) classes.Add("width-half");
+            else if (width == 4) classes.Add("width-third");
+            else if (width == 3) classes.Add("width-quarter");
+        }
+
+        return string.Join(" ", classes);
+    }
+
+    private void HandleClick()
+    {
+        EditorState.SelectField(FieldNode.Schema.Id);
+    }
+
+    private void OnFieldSelected(string? fieldId)
+    {
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        EditorState.OnFieldSelected -= OnFieldSelected;
+    }
+}

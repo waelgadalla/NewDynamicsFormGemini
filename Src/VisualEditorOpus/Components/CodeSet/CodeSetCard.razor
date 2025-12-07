@@ -1,0 +1,45 @@
+@* CodeSet card in the list *@
+
+<div class="codeset-card @(IsSelected ? "selected" : "")" @onclick="HandleClick">
+    <div class="codeset-card-header">
+        <div class="codeset-card-icon">
+            <i class="bi bi-code-square"></i>
+        </div>
+        <div class="codeset-card-actions">
+            <button type="button" class="action-btn" @onclick="HandleDelete" @onclick:stopPropagation="true" title="Delete">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+    </div>
+    <div class="codeset-card-name">@CodeSet.Name</div>
+    <div class="codeset-card-description">@CodeSet.Description</div>
+    <div class="codeset-card-meta">
+        <span><i class="bi bi-list"></i> @CodeSet.OptionCount options</span>
+        <span><i class="bi bi-clock"></i> @GetTimeAgo()</span>
+    </div>
+</div>
+
+@code {
+    [Parameter] public required CodeSetInfo CodeSet { get; set; }
+    [Parameter] public bool IsSelected { get; set; }
+    [Parameter] public EventCallback<string> OnSelect { get; set; }
+    [Parameter] public EventCallback<string> OnDelete { get; set; }
+
+    private async Task HandleClick()
+    {
+        await OnSelect.InvokeAsync(CodeSet.Id);
+    }
+
+    private async Task HandleDelete()
+    {
+        await OnDelete.InvokeAsync(CodeSet.Id);
+    }
+
+    private string GetTimeAgo()
+    {
+        var diff = DateTime.Now - CodeSet.Modified;
+        if (diff.TotalDays > 1) return $"{(int)diff.TotalDays}d ago";
+        if (diff.TotalHours > 1) return $"{(int)diff.TotalHours}h ago";
+        return "Just now";
+    }
+}

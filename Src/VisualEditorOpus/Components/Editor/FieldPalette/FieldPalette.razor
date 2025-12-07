@@ -1,0 +1,75 @@
+@* Field palette showing all available field types organized by category *@
+
+<div class="sidebar-header">
+    <SearchBox Placeholder="Search fields..." @bind-Value="SearchTerm" />
+</div>
+<div class="sidebar-content">
+    @foreach (var category in FilteredCategories)
+    {
+        <div class="component-category">
+            <div class="category-title">@category.Key</div>
+            @foreach (var fieldDef in category)
+            {
+                <FieldPaletteItem Definition="@fieldDef" OnAdd="HandleAddField" />
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private string? SearchTerm { get; set; }
+
+    private IEnumerable<IGrouping<string, FieldTypeDefinition>> FilteredCategories
+    {
+        get
+        {
+            var categories = FieldTypeDefinition.GetByCategory();
+
+            if (string.IsNullOrWhiteSpace(SearchTerm))
+                return categories;
+
+            var term = SearchTerm.ToLowerInvariant();
+            return categories
+                .Select(g => new
+                {
+                    Key = g.Key,
+                    Items = g.Where(f =>
+                        f.DisplayName.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                        f.FieldType.Contains(term, StringComparison.OrdinalIgnoreCase)
+                    ).ToList()
+                })
+                .Where(g => g.Items.Count > 0)
+                .Select(g => g.Items.GroupBy(_ => g.Key).First());
+        }
+    }
+
+    private void HandleAddField(FieldTypeDefinition definition)
+    {
+        var parentId = GetParentIdForNewField();
+        EditorState.AddField(definition.FieldType, parentId);
+    }
+
+    private string? GetParentIdForNewField()
+    {
+        // If a section is selected, add to that section
+        if (EditorState.SelectedField?.FieldType is "Section" or "Panel")
+        {
+            return EditorState.SelectedFieldId;
+        }
+
+        // If a child of a section is selected, add to the parent section
+        if (EditorState.SelectedField?.ParentId is not null)
+        {
+            var parent = EditorState.CurrentModule?.Fields
+                .FirstOrDefault(f => f.Id == EditorState.SelectedField.ParentId);
+            if (parent?.FieldType is "Section" or "Panel")
+            {
+                return parent.Id;
+            }
+        }
+
+        return null; // Root level
+    }
+}

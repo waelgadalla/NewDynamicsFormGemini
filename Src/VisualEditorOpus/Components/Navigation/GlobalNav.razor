@@ -1,0 +1,64 @@
+@* Global navigation sidebar *@
+@implements IDisposable
+
+<nav class="global-nav">
+    <div class="nav-logo">
+        <i class="bi bi-ui-checks-grid"></i>
+    </div>
+
+    <GlobalNavItem Icon="bi-house-door" Label="Dashboard"
+                   Route="/" IsActive="@IsRoute("/")" />
+    <GlobalNavItem Icon="bi-diagram-3" Label="Workflow Designer"
+                   Route="/workflow" IsActive="@IsRoute("/workflow")" />
+    <GlobalNavItem Icon="bi-pencil-square" Label="Module Editor"
+                   Route="/editor" IsActive="@IsRoute("/editor")" />
+    <GlobalNavItem Icon="bi-list-check" Label="CodeSet Manager"
+                   Route="/codesets" IsActive="@IsRoute("/codesets")" />
+
+    <div class="nav-divider"></div>
+
+    <GlobalNavItem Icon="bi-gear" Label="Settings"
+                   Route="/settings" IsActive="@IsRoute("/settings")" />
+
+    <div class="nav-spacer"></div>
+
+    <GlobalNavItem Icon="@ThemeIcon" Label="Toggle Theme"
+                   OnClick="ToggleTheme" />
+</nav>
+
+@code {
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+    [Inject] private IThemeService ThemeService { get; set; } = default!;
+
+    private string ThemeIcon => ThemeService.IsDarkMode ? "bi-sun" : "bi-moon-stars";
+
+    protected override void OnInitialized()
+    {
+        Navigation.LocationChanged += OnLocationChanged;
+        ThemeService.OnThemeChanged += StateHasChanged;
+    }
+
+    private bool IsRoute(string route)
+    {
+        var currentPath = "/" + Navigation.ToBaseRelativePath(Navigation.Uri).Split('?')[0];
+        if (route == "/")
+            return currentPath == "/" || currentPath == "";
+        return currentPath.StartsWith(route, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs args)
+    {
+        StateHasChanged();
+    }
+
+    private void ToggleTheme()
+    {
+        ThemeService.Toggle();
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
+        ThemeService.OnThemeChanged -= StateHasChanged;
+    }
+}
