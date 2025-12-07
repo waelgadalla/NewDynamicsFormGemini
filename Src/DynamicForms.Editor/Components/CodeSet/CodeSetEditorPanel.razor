@@ -1,0 +1,113 @@
+@using DynamicForms.Editor.Services
+@using DynamicForms.Editor.Components.Shared
+@inject ICodeSetManagerService CodeSetManager
+
+<div class="codeset-editor">
+    <div class="editor-toolbar">
+        <div class="toolbar-title">
+            @if (CodeSetManager.SelectedCodeSet != null)
+            {
+                <span class="code-badge">@CodeSetManager.SelectedCodeSet.Code</span>
+                <span class="name-text">@CodeSetManager.SelectedCodeSet.NameEn</span>
+            }
+        </div>
+        <div class="toolbar-actions">
+            <Button Variant="outline" Class="btn-sm" OnClick="() => ShowImportModal = true">
+                <i class="bi bi-box-arrow-in-down"></i> Import
+            </Button>
+            <Button Variant="outline" Class="btn-sm" OnClick="ExportJson">
+                <i class="bi bi-box-arrow-up"></i> Export
+            </Button>
+             <Button Variant="outline" Class="btn-sm text-danger" OnClick="Delete">
+                <i class="bi bi-trash"></i> Delete
+            </Button>
+            <Button Variant="primary" Class="btn-sm" OnClick="Save">
+                <i class="bi bi-save"></i> Save
+            </Button>
+        </div>
+    </div>
+    
+    <div class="editor-content">
+        @if (CodeSetManager.SelectedCodeSet != null)
+        {
+            <CodeSetTabs CodeSet="CodeSetManager.SelectedCodeSet" />
+        }
+    </div>
+    
+    <ImportCodeSetModal @bind-IsVisible="ShowImportModal" />
+</div>
+
+@code {
+    private bool ShowImportModal { get; set; }
+
+    private void Save()
+    {
+        if (CodeSetManager.SelectedCodeSet != null)
+        {
+            CodeSetManager.SaveCodeSet(CodeSetManager.SelectedCodeSet);
+        }
+    }
+
+    private void Delete()
+    {
+         if (CodeSetManager.SelectedCodeSet != null)
+        {
+            // In a real app, confirm dialog first
+            CodeSetManager.DeleteCodeSet(CodeSetManager.SelectedCodeSet.Id);
+        }
+    }
+
+    private void ExportJson()
+    {
+        // Trigger download or show modal
+        // For now, maybe copy to clipboard or just show toast
+    }
+}
+
+<style>
+    .codeset-editor {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        background: var(--bg-canvas);
+    }
+    
+    .editor-toolbar {
+        height: 56px;
+        padding: 0 24px;
+        background: var(--bg-primary);
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .toolbar-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 600;
+        font-size: 16px;
+    }
+    
+    .code-badge {
+        background: var(--bg-tertiary);
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        color: var(--text-secondary);
+    }
+    
+    .toolbar-actions {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .editor-content {
+        flex: 1;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+</style>

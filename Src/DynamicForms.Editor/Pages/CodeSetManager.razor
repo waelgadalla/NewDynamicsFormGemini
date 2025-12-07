@@ -1,0 +1,54 @@
+@page "/codesets"
+@layout MainLayout
+@using DynamicForms.Editor.Components.CodeSet
+@using DynamicForms.Editor.Services
+@inject ICodeSetManagerService Service
+
+<div class="view-panel">
+    <div class="app-header">
+        <div class="header-left">
+            <div class="header-title"><i class="bi bi-list-check"></i> CodeSet Manager</div>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-primary btn-sm" @onclick="CreateNew">
+                <i class="bi bi-plus-lg"></i> New CodeSet
+            </button>
+        </div>
+    </div>
+
+    <div class="editor-container">
+        <CodeSetSidebar />
+        
+        <div class="editor-main-content w-100" style="margin-left: 0;">
+             @if (Service.SelectedCodeSet != null)
+            {
+                <CodeSetEditorPanel />
+            }
+            else
+            {
+                <div class="empty-canvas">
+                    <i class="bi bi-list-check"></i>
+                    <p>Select a CodeSet to edit or create a new one.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await Service.LoadCodeSetsAsync();
+        Service.OnStateChanged += StateHasChanged;
+    }
+
+    private void CreateNew()
+    {
+        Service.CreateNewCodeSet();
+    }
+
+    public void Dispose()
+    {
+        Service.OnStateChanged -= StateHasChanged;
+    }
+}

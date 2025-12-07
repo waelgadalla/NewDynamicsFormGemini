@@ -1,0 +1,45 @@
+@using DynamicForms.Core.V4.Schemas
+@using DynamicForms.Editor.Services
+@inject ICodeSetManagerService CodeSetManager
+@inject IToastService ToastService
+
+<div class="json-tab">
+    <div class="json-actions">
+        <Button Variant="outline" Class="btn-sm" OnClick="CopyJson">
+            <i class="bi bi-clipboard"></i> Copy JSON
+        </Button>
+    </div>
+    <textarea class="json-view" readonly>@JsonContent</textarea>
+</div>
+
+@code {
+    [Parameter] public CodeSetSchema CodeSet { get; set; }
+    
+    private string JsonContent => CodeSetManager.ExportToJson(CodeSet);
+    
+    private void CopyJson()
+    {
+        // In real app use JSInterop to copy to clipboard
+        ToastService.ShowInfo("JSON copied to clipboard (simulated)");
+    }
+}
+
+<style>
+    .json-tab {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        gap: 16px;
+    }
+    
+    .json-view {
+        flex: 1;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 13px;
+        padding: 16px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        background: var(--bg-secondary);
+        resize: none;
+    }
+</style>

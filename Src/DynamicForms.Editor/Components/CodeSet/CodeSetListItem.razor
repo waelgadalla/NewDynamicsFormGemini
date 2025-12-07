@@ -1,0 +1,64 @@
+@using DynamicForms.Core.V4.Schemas
+
+<div class="codeset-item @(IsSelected ? "selected" : "")" @onclick="OnClick">
+    <div class="codeset-info">
+        <div class="codeset-name">@CodeSet.NameEn</div>
+        <div class="codeset-code">@CodeSet.Code</div>
+    </div>
+    <div class="codeset-meta">
+        <Badge Variant="@(CodeSet.IsActive ? "success" : "draft")">
+            @(CodeSet.IsActive ? "Active" : "Inactive")
+        </Badge>
+        <div class="item-count">
+            @CodeSet.Items.Length items
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public CodeSetSchema CodeSet { get; set; }
+    [Parameter] public bool IsSelected { get; set; }
+    [Parameter] public EventCallback OnClick { get; set; }
+}
+
+<style>
+    .codeset-item {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border-color);
+        cursor: pointer;
+        transition: background-color 0.15s;
+    }
+    
+    .codeset-item:hover {
+        background-color: var(--bg-tertiary);
+    }
+    
+    .codeset-item.selected {
+        background-color: var(--primary-light);
+        border-right: 3px solid var(--primary);
+    }
+    
+    .codeset-name {
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 2px;
+    }
+    
+    .codeset-code {
+        font-size: 11px;
+        color: var(--text-secondary);
+        font-family: 'JetBrains Mono', monospace;
+    }
+    
+    .codeset-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 8px;
+    }
+    
+    .item-count {
+        font-size: 11px;
+        color: var(--text-muted);
+    }
+</style>

@@ -1,0 +1,74 @@
+@using DynamicForms.Core.V4.Schemas
+@using DynamicForms.Editor.Components.Shared
+@using DynamicForms.Editor.Services
+@inject ICodeSetManagerService CodeSetManager
+
+<div class="config-tab">
+    <div class="form-group">
+        <label class="form-label">Code (Unique ID)</label>
+        <input type="text" class="form-input" 
+               value="@CodeSet.Code" 
+               @onchange="@(e => Update(CodeSet with { Code = e.Value?.ToString() ?? "" }))" />
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Category</label>
+        <input type="text" class="form-input" 
+               value="@CodeSet.Category" 
+               @onchange="@(e => Update(CodeSet with { Category = e.Value?.ToString() }))" />
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Display Name</label>
+        <BilingualInput 
+            ValueEn="@CodeSet.NameEn" 
+            ValueEnChanged="@(v => Update(CodeSet with { NameEn = v ?? "" }))"
+            ValueFr="@CodeSet.NameFr"
+            ValueFrChanged="@(v => Update(CodeSet with { NameFr = v }))"
+            PlaceholderEn="e.g. Provinces"
+            PlaceholderFr="e.g. Provinces" />
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Description</label>
+        <BilingualInput 
+            ValueEn="@CodeSet.DescriptionEn" 
+            ValueEnChanged="@(v => Update(CodeSet with { DescriptionEn = v }))"
+            ValueFr="@CodeSet.DescriptionFr"
+            ValueFrChanged="@(v => Update(CodeSet with { DescriptionFr = v }))"
+            Multiline="true" />
+    </div>
+    
+    <div class="form-group">
+        <label class="form-checkbox">
+            <input type="checkbox" 
+                   checked="@CodeSet.IsActive" 
+                   @onchange="@(e => Update(CodeSet with { IsActive = (bool)(e.Value ?? true) }))" />
+            <span>Active</span>
+        </label>
+    </div>
+</div>
+
+@code {
+    [Parameter] public CodeSetSchema CodeSet { get; set; }
+    
+    private void Update(CodeSetSchema updated)
+    {
+        CodeSetManager.UpdateSelectedCodeSet(updated);
+    }
+}
+
+<style>
+    .config-tab {
+        max-width: 600px;
+    }
+    
+    .form-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        user-select: none;
+    }
+</style>

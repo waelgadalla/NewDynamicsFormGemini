@@ -1,0 +1,106 @@
+@using DynamicForms.Core.V4.Schemas
+@using DynamicForms.Editor.Components.Shared
+
+<div class="codeset-item-row">
+    <div class="col-drag">
+        <i class="bi bi-grip-vertical text-muted"></i>
+    </div>
+    
+    <div class="col-value">
+        <input type="text" class="form-input form-input-sm" 
+               value="@Item.Value" 
+               @onchange="@(e => Update(Item with { Value = e.Value?.ToString() ?? "" }))" 
+               placeholder="Value" />
+    </div>
+    
+    <div class="col-text">
+        <div class="input-group-vertical">
+            <input type="text" class="form-input form-input-sm" 
+                   value="@Item.TextEn" 
+                   @onchange="@(e => Update(Item with { TextEn = e.Value?.ToString() ?? "" }))" 
+                   placeholder="English" />
+            <input type="text" class="form-input form-input-sm mt-1" 
+                   value="@Item.TextFr" 
+                   @onchange="@(e => Update(Item with { TextFr = e.Value?.ToString() }))" 
+                   placeholder="Français" />
+        </div>
+    </div>
+    
+    <div class="col-default centered">
+        <input type="radio" name="defaultItem" 
+               checked="@Item.IsDefault" 
+               @onchange="@(e => SetDefault())" />
+    </div>
+    
+    <div class="col-active centered">
+        <input type="checkbox" 
+               checked="@Item.IsActive" 
+               @onchange="@(e => Update(Item with { IsActive = (bool)(e.Value ?? true) }))" />
+    </div>
+    
+    <div class="col-actions">
+        <Button Variant="ghost" Class="btn-icon-sm text-danger" OnClick="OnDelete">
+            <i class="bi bi-x-lg"></i>
+        </Button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public CodeSetItem Item { get; set; }
+    [Parameter] public EventCallback<CodeSetItem> OnChange { get; set; }
+    [Parameter] public EventCallback OnDelete { get; set; }
+    [Parameter] public EventCallback OnSetDefault { get; set; }
+
+    private async Task Update(CodeSetItem updated)
+    {
+        await OnChange.InvokeAsync(updated);
+    }
+    
+    private async Task SetDefault()
+    {
+        await OnSetDefault.InvokeAsync();
+    }
+}
+
+<style>
+    .codeset-item-row {
+        display: flex;
+        align-items: flex-start;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border-color);
+        gap: 12px;
+    }
+    
+    .col-drag {
+        width: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-top: 8px;
+        cursor: move;
+    }
+    
+    .col-value { width: 150px; }
+    .col-text { flex: 1; }
+    
+    .col-default, .col-active {
+        width: 60px;
+        display: flex;
+        justify-content: center;
+        padding-top: 8px;
+    }
+    
+    .col-actions {
+        width: 40px;
+        display: flex;
+        justify-content: flex-end;
+    }
+    
+    .form-input-sm {
+        padding: 4px 8px;
+        font-size: 13px;
+    }
+    
+    .mt-1 { margin-top: 4px; }
+    .centered { text-align: center; }
+</style>

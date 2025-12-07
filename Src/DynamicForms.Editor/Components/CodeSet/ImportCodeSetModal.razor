@@ -1,0 +1,34 @@
+@using DynamicForms.Editor.Services
+@using DynamicForms.Editor.Components.Modals
+@inject ICodeSetManagerService CodeSetManager
+
+<ModalBase Title="Import CodeSet" Icon="bi-box-arrow-in-down"
+           IsVisible="@IsVisible" IsVisibleChanged="IsVisibleChanged"
+           OnSave="Import" ShowFooter="true">
+    <div class="form-group">
+        <label class="form-label">Paste JSON here</label>
+        <textarea class="form-input" style="height: 300px; font-family: 'JetBrains Mono', monospace; font-size: 12px;" 
+                  @bind="JsonContent"
+                  placeholder="{ &quot;Id&quot;: ... }"></textarea>
+    </div>
+</ModalBase>
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
+    [Parameter] public EventCallback OnImported { get; set; }
+
+    private string JsonContent { get; set; } = "";
+
+    private async Task Import()
+    {
+        if (!string.IsNullOrWhiteSpace(JsonContent))
+        {
+            CodeSetManager.ImportFromJson(JsonContent);
+            JsonContent = "";
+            IsVisible = false;
+            await IsVisibleChanged.InvokeAsync(false);
+            await OnImported.InvokeAsync();
+        }
+    }
+}

@@ -1,0 +1,107 @@
+@using DynamicForms.Core.V4.Schemas
+@using DynamicForms.Editor.Components.Shared
+@using DynamicForms.Editor.Services
+@inject ICodeSetManagerService CodeSetManager
+
+<div class="items-tab">
+    <div class="items-header">
+        <div class="col-drag"></div>
+        <div class="col-value header-label">Value</div>
+        <div class="col-text header-label">Text (EN / FR)</div>
+        <div class="col-default header-label centered">Default</div>
+        <div class="col-active header-label centered">Active</div>
+        <div class="col-actions"></div>
+    </div>
+    
+    <div class="items-list">
+        @foreach (var item in CodeSet.Items.OrderBy(i => i.Order))
+        {
+            <CodeSetItemRow 
+                Item="item" 
+                OnChange="@(updated => UpdateItem(item, updated))"
+                OnDelete="@(() => DeleteItem(item))"
+                OnSetDefault="@(() => SetDefault(item))" />
+        }
+    </div>
+    
+    <div class="items-footer">
+        <Button Variant="outline" Class="btn-sm" OnClick="AddItem">
+            <i class="bi bi-plus-lg"></i> Add Item
+        </Button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public CodeSetSchema CodeSet { get; set; }
+    
+    private void UpdateItem(CodeSetItem original, CodeSetItem updated)
+    {
+        var newItems = CodeSet.Items.Select(i => i == original ? updated : i).ToArray();
+        UpdateCodeSet(newItems);
+    }
+    
+    private void DeleteItem(CodeSetItem item)
+    {
+        var newItems = CodeSet.Items.Where(i => i != item).ToArray();
+        UpdateCodeSet(newItems);
+    }
+    
+    private void SetDefault(CodeSetItem target)
+    {
+        var newItems = CodeSet.Items.Select(i => i == target 
+            ? i with { IsDefault = true } 
+            : i with { IsDefault = false }).ToArray();
+        UpdateCodeSet(newItems);
+    }
+    
+    private void AddItem()
+    {
+        var maxOrder = CodeSet.Items.Any() ? CodeSet.Items.Max(i => i.Order) : 0;
+        var newItem = new CodeSetItem
+        {
+            Value = $"VALUE_{maxOrder + 1}",
+            TextEn = "New Item",
+            Order = maxOrder + 10,
+            IsActive = true,
+            IsDefault = false
+        };
+        
+        var newItems = CodeSet.Items.Append(newItem).ToArray();
+        UpdateCodeSet(newItems);
+    }
+    
+    private void UpdateCodeSet(CodeSetItem[] items)
+    {
+        CodeSetManager.UpdateSelectedCodeSet(CodeSet with { Items = items });
+    }
+}
+
+<style>
+    .items-tab {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .items-header {
+        display: flex;
+        padding-bottom: 8px;
+        border-bottom: 2px solid var(--border-color);
+        gap: 12px;
+    }
+    
+    .header-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+    }
+    
+    /* Reuse column widths from Row component */
+    .col-drag { width: 24px; }
+    .col-value { width: 150px; }
+    .col-text { flex: 1; }
+    .col-default, .col-active { width: 60px; }
+    .col-actions { width: 40px; }
+    .centered { text-align: center; }
+</style>

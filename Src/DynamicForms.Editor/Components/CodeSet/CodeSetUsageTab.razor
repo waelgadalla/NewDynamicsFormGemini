@@ -1,0 +1,41 @@
+@using DynamicForms.Core.V4.Schemas
+
+<div class="usage-tab">
+    <div class="empty-state">
+        <i class="bi bi-diagram-3"></i>
+        <h3>Usage Tracking</h3>
+        <p>This feature will scan all modules to find where this CodeSet is used.</p>
+        <p class="text-muted">Coming soon in a future update.</p>
+    </div>
+</div>
+
+@code {
+    [Parameter] public CodeSetSchema CodeSet { get; set; }
+}
+
+<style>
+    .usage-tab {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .empty-state {
+        text-align: center;
+        color: var(--text-secondary);
+    }
+    
+    .empty-state i {
+        font-size: 48px;
+        margin-bottom: 16px;
+        color: var(--text-muted);
+    }
+    
+    .empty-state h3 {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--text-primary);
+    }
+</style>

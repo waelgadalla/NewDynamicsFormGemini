@@ -1,0 +1,56 @@
+@using DynamicForms.Editor.Services
+@using DynamicForms.Editor.Components.Shared
+@inject ICodeSetManagerService CodeSetManager
+
+<div class="codeset-sidebar">
+    <div class="sidebar-header">
+        <SearchBox @bind-Value="SearchTerm" Placeholder="Search CodeSets..." />
+    </div>
+    
+    <div class="codeset-list">
+        @foreach (var codeSet in FilteredCodeSets)
+        {
+            <CodeSetListItem 
+                CodeSet="codeSet" 
+                IsSelected="@(CodeSetManager.SelectedCodeSet?.Id == codeSet.Id)"
+                OnClick="() => SelectCodeSet(codeSet.Id)" />
+        }
+    </div>
+</div>
+
+@code {
+    private string SearchTerm { get; set; } = "";
+    
+    private IEnumerable<DynamicForms.Core.V4.Schemas.CodeSetSchema> FilteredCodeSets => 
+        string.IsNullOrWhiteSpace(SearchTerm)
+            ? CodeSetManager.CodeSets
+            : CodeSetManager.CodeSets.Where(c => 
+                c.NameEn.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) ||
+                c.Code.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase));
+    
+    private void SelectCodeSet(int id)
+    {
+        CodeSetManager.SelectCodeSet(id);
+    }
+}
+
+<style>
+    .codeset-sidebar {
+        width: 320px;
+        border-right: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        background: var(--bg-primary);
+        height: 100%;
+    }
+    
+    .sidebar-header {
+        padding: 16px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .codeset-list {
+        flex: 1;
+        overflow-y: auto;
+    }
+</style>
