@@ -165,9 +165,7 @@
 @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
 /* ===== MODULE EDITOR STYLES ===== */
-.editor-main-content {
-    margin-left: 0 !important; /* Override global .main-content margin */
-}
+/* .editor-main-content { margin-left: 0 !important; } -- REMOVED */
 
 .editor-toolbar {
     height: var(--toolbar-height); background: var(--bg-primary);
