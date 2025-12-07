@@ -1,6 +1,6 @@
 @using DynamicForms.Editor.Models
 
-<div class="component-item" @onclick="OnClick">
+<div class="component-item" @onclick="HandleClick">
     <div class="component-icon"><i class="bi @FieldType.Icon"></i></div>
     <div class="component-name">@FieldType.DisplayName</div>
 </div>
@@ -9,7 +9,7 @@
     [Parameter] public FieldTypeDefinition FieldType { get; set; } = default!;
     [Parameter] public EventCallback<FieldTypeDefinition> OnClick { get; set; }
 
-    private async Task OnClick()
+    private async Task HandleClick()
     {
         await OnClick.InvokeAsync(FieldType);
     }

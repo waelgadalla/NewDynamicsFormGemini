@@ -1,0 +1,91 @@
+@using DynamicForms.Core.V4.Schemas
+@using DynamicForms.Editor.Components.Shared
+@using DynamicForms.Editor.Services
+
+<div class="px-3 py-2">
+    <div class="prop-group">
+        <label class="form-label">Label</label>
+        <BilingualInput 
+            @bind-ValueEn="LabelEn" 
+            @bind-ValueFr="LabelFr" 
+            PlaceholderEn="Enter English label" 
+            PlaceholderFr="Saisir l'étiquette en français" />
+    </div>
+    <div class="prop-group">
+        <label class="form-label">Description</label>
+        <BilingualInput 
+            @bind-ValueEn="DescriptionEn" 
+            @bind-ValueFr="DescriptionFr" 
+            PlaceholderEn="Enter English description" 
+            PlaceholderFr="Saisir la description en français" 
+            Multiline="true" />
+    </div>
+    <div class="prop-group">
+        <label class="form-label">Help Text</label>
+        <BilingualInput 
+            @bind-ValueEn="HelpEn" 
+            @bind-ValueFr="HelpFr" 
+            PlaceholderEn="Enter English help text" 
+            PlaceholderFr="Saisir le texte d'aide en français" 
+            Multiline="true" />
+    </div>
+    <div class="prop-group">
+        <label class="form-label">Placeholder</label>
+        <BilingualInput 
+            @bind-ValueEn="PlaceholderEn" 
+            @bind-ValueFr="PlaceholderFr" 
+            PlaceholderEn="Enter English placeholder" 
+            PlaceholderFr="Saisir le texte d'exemple en français" />
+    </div>
+</div>
+
+@code {
+    [Parameter] public FormFieldSchema Field { get; set; } = default!;
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private string? LabelEn
+    {
+        get => Field.LabelEn;
+        set => UpdateField(Field with { LabelEn = value });
+    }
+    private string? LabelFr
+    {
+        get => Field.LabelFr;
+        set => UpdateField(Field with { LabelFr = value });
+    }
+    private string? DescriptionEn
+    {
+        get => Field.DescriptionEn;
+        set => UpdateField(Field with { DescriptionEn = value });
+    }
+    private string? DescriptionFr
+    {
+        get => Field.DescriptionFr;
+        set => UpdateField(Field with { DescriptionFr = value });
+    }
+    private string? HelpEn
+    {
+        get => Field.HelpEn;
+        set => UpdateField(Field with { HelpEn = value });
+    }
+    private string? HelpFr
+    {
+        get => Field.HelpFr;
+        set => UpdateField(Field with { HelpFr = value });
+    }
+    private string? PlaceholderEn
+    {
+        get => Field.PlaceholderEn;
+        set => UpdateField(Field with { PlaceholderEn = value });
+    }
+    private string? PlaceholderFr
+    {
+        get => Field.PlaceholderFr;
+        set => UpdateField(Field with { PlaceholderFr = value });
+    }
+
+    private void UpdateField(FormFieldSchema updatedField)
+    {
+        EditorState.UpdateField(updatedField);
+    }
+}

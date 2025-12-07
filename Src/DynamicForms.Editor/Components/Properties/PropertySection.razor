@@ -1,0 +1,27 @@
+<div class="property-section">
+    <div class="property-section-header" @onclick="ToggleCollapsed">
+        <div class="property-section-title">
+            <i class="bi @Icon"></i> @Title
+        </div>
+        <i class="bi @(IsCollapsed ? "bi-chevron-right" : "bi-chevron-down")"></i>
+    </div>
+    @if (!IsCollapsed)
+    {
+        <div class="property-section-body">
+            @ChildContent
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string Icon { get; set; } = "bi-gear";
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private bool IsCollapsed { get; set; } = false; // Start expanded
+
+    private void ToggleCollapsed()
+    {
+        IsCollapsed = !IsCollapsed;
+    }
+}

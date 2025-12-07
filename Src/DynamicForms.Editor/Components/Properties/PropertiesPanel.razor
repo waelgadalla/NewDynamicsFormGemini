@@ -1,0 +1,53 @@
+@using DynamicForms.Editor.Services
+@using DynamicForms.Editor.Models
+@using DynamicForms.Editor.Components.Properties.Sections
+
+@if (EditorState.SelectedField is not null)
+{
+    <div class="properties-panel">
+        <PropertySection Title="General" Icon="bi-sliders">
+            <GeneralSection Field="@EditorState.SelectedField" />
+        </PropertySection>
+        <PropertySection Title="Labels & Text" Icon="bi-translate">
+            <LabelsSection Field="@EditorState.SelectedField" />
+        </PropertySection>
+        <PropertySection Title="Validation" Icon="bi-shield-check">
+            <ValidationSection Field="@EditorState.SelectedField" />
+        </PropertySection>
+        <PropertySection Title="Layout & Display" Icon="bi-grid">
+            <LayoutSection Field="@EditorState.SelectedField" />
+        </PropertySection>
+
+        @* Placeholder for other sections which will be added in Phase 3 *@
+        <PropertySection Title="Options" Icon="bi-list-ul">
+            <p class="text-muted text-sm px-3">Options editor here (Phase 3)</p>
+        </PropertySection>
+        <PropertySection Title="Conditional Logic" Icon="bi-lightning">
+            <p class="text-muted text-sm px-3">Conditional logic builder here (Phase 3)</p>
+        </PropertySection>
+        <PropertySection Title="Computed Value" Icon="bi-calculator">
+            <p class="text-muted text-sm px-3">Computed value editor here (Phase 3)</p>
+        </PropertySection>
+        <PropertySection Title="Accessibility" Icon="bi-universal-access">
+            <p class="text-muted text-sm px-3">Accessibility editor here (Phase 3)</p>
+        </PropertySection>
+    </div>
+}
+else
+{
+    <div class="text-muted text-sm text-center p-3">Select a field to edit its properties.</div>
+}
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        EditorState.OnStateChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        EditorState.OnStateChanged -= StateHasChanged;
+    }
+}

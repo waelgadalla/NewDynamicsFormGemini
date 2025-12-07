@@ -1,0 +1,63 @@
+<div class="bilingual-input">
+    <div class="lang-tabs">
+        <button class="lang-tab @(ActiveLang == "en" ? "active" : "")" 
+                @onclick="@(() => SetActiveLang("en"))">EN</button>
+        <button class="lang-tab @(ActiveLang == "fr" ? "active" : "")" 
+                @onclick="@(() => SetActiveLang("fr"))">FR</button>
+    </div>
+    
+    @if (ActiveLang == "en")
+    {
+        @if (Multiline)
+        {
+            <textarea class="prop-input" 
+                      @bind="ValueEn" 
+                      @bind:event="oninput"
+                      placeholder="@PlaceholderEn"></textarea>
+        }
+        else
+        {
+            <input type="text" class="prop-input" 
+                   @bind="ValueEn" 
+                   @bind:event="oninput"
+                   placeholder="@PlaceholderEn" />
+        }
+    }
+    else
+    {
+        @if (Multiline)
+        {
+            <textarea class="prop-input" 
+                      @bind="ValueFr" 
+                      @bind:event="oninput"
+                      placeholder="@PlaceholderFr"></textarea>
+        }
+        else
+        {
+            <input type="text" class="prop-input" 
+                   @bind="ValueFr" 
+                   @bind:event="oninput"
+                   placeholder="@PlaceholderFr" />
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public string? ValueEn { get; set; }
+    [Parameter] public EventCallback<string?> ValueEnChanged { get; set; }
+    
+    [Parameter] public string? ValueFr { get; set; }
+    [Parameter] public EventCallback<string?> ValueFrChanged { get; set; }
+    
+    [Parameter] public string PlaceholderEn { get; set; } = "English";
+    [Parameter] public string PlaceholderFr { get; set; } = "Français";
+    [Parameter] public bool Multiline { get; set; }
+    
+    private string ActiveLang { get; set; } = "en";
+
+    private void SetActiveLang(string lang)
+    {
+        ActiveLang = lang;
+        // StateHasChanged(); // Blazor handles this automatically on event
+    }
+}

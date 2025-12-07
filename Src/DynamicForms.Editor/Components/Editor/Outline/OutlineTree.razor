@@ -1,5 +1,59 @@
+@using DynamicForms.Editor.Models
+@using DynamicForms.Editor.Components.Shared
+@using DynamicForms.Editor.Services
+@using DynamicForms.Core.V4.Runtime
+
 <div class="outline-tree">
-    <p class="text-muted text-sm">Outline Tree (Placeholder)</p>
-    <div class="tree-node"><span class="tree-node-icon"><i class="bi bi-file-earmark"></i></span>Module Name</div>
-    <div class="tree-node"><span class="tree-indent"></span><span class="tree-node-icon"><i class="bi bi-layout-three-columns"></i></span>Section 1</div>
+    <div class="sidebar-header">
+        <SearchBox Placeholder="Search..." @bind-Value="SearchTerm" />
+    </div>
+    <div class="sidebar-content">
+        @if (FilteredRootFields.Any())
+        {
+            @foreach (var fieldNode in FilteredRootFields)
+            {
+                <OutlineTreeNode FieldNode="@fieldNode" SearchTerm="@SearchTerm" />
+            }
+        }
+        else if (string.IsNullOrEmpty(SearchTerm))
+        {
+            <p class="text-muted text-sm text-center mt-3">No fields in this module.</p>
+        }
+        else
+        {
+            <p class="text-muted text-sm text-center mt-3">No matching fields found.</p>
+        }
+    </div>
 </div>
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private string SearchTerm { get; set; } = "";
+
+    private IEnumerable<FormFieldNode> AllFields => EditorState.CurrentModuleRuntime?.FieldNodes.Values ?? Enumerable.Empty<FormFieldNode>();
+    
+    private IEnumerable<FormFieldNode> RootFields => EditorState.CurrentModuleRuntime?.RootFields ?? Enumerable.Empty<FormFieldNode>();
+
+    private IEnumerable<FormFieldNode> FilteredRootFields =>
+        RootFields.Where(node => FilterNode(node, SearchTerm)).ToList();
+    
+    protected override void OnInitialized()
+    {
+        EditorState.OnStateChanged += StateHasChanged;
+    }
+
+    private bool FilterNode(FormFieldNode node, string term)
+    {
+        if (string.IsNullOrWhiteSpace(term)) return true;
+
+        if (node.Schema.Id.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+            (node.Schema.LabelEn?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false) ||
+            node.Schema.FieldType.Contains(term, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        return node.Children.Any(child => FilterNode(child, term));
+    }
+}

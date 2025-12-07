@@ -5,13 +5,13 @@
 
 <div class="left-sidebar">
     <div class="ls-tabs">
-        <div class="ls-tab @(ActiveTab == "fields" ? "active" : "")" @onclick="() => SetActiveTab("fields")">
+        <div class="ls-tab @(ActiveTab == "fields" ? "active" : "")" @onclick="@(() => SetActiveTab("fields"))">
             <i class="bi bi-plus-square"></i><span>Fields</span>
         </div>
-        <div class="ls-tab @(ActiveTab == "outline" ? "active" : "")" @onclick="() => SetActiveTab("outline")">
+        <div class="ls-tab @(ActiveTab == "outline" ? "active" : "")" @onclick="@(() => SetActiveTab("outline"))">
             <i class="bi bi-list-nested"></i><span>Outline</span>
         </div>
-        <div class="ls-tab @(ActiveTab == "validation" ? "active" : "")" @onclick="() => SetActiveTab("validation")">
+        <div class="ls-tab @(ActiveTab == "validation" ? "active" : "")" @onclick="@(() => SetActiveTab("validation"))">
             <i class="bi bi-shield-check"></i><span>Issues</span>
         </div>
     </div>

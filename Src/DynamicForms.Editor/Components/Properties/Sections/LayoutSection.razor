@@ -1,0 +1,67 @@
+@using DynamicForms.Core.V4.Schemas
+@using DynamicForms.Editor.Components.Shared
+@using DynamicForms.Editor.Services
+
+<div class="px-3 py-2">
+    <div class="prop-group">
+        <label class="form-label">Width (1-12 grid units)</label>
+        <input type="number" min="1" max="12" class="form-input" value="@WidthClass" @onchange="UpdateWidthClass" />
+    </div>
+
+    <div class="prop-group checkbox-group">
+        <input type="checkbox" checked="@Field.IsVisible" @onchange="ToggleIsVisible" /> 
+        <span class="prop-label m-0">Is Visible</span>
+    </div>
+
+    <div class="prop-group checkbox-group">
+        <input type="checkbox" checked="@Field.IsReadOnly" @onchange="ToggleIsReadOnly" /> 
+        <span class="prop-label m-0">Is Read-Only</span>
+    </div>
+
+    <div class="prop-group">
+        <label class="form-label">Custom CSS Classes</label>
+        <TextInput @bind-Value="CssClasses" Placeholder="e.g., my-custom-class" />
+    </div>
+</div>
+
+@code {
+    [Parameter] public FormFieldSchema Field { get; set; } = default!;
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private int? WidthClass
+    {
+        get => Field.WidthClass;
+        set => EditorState.UpdateField(Field with { WidthClass = value });
+    }
+    private void UpdateWidthClass(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int val) && val >=1 && val <= 12) WidthClass = val;
+        else WidthClass = null; // Or keep old value, or set to a default invalid value
+    }
+
+    private bool IsVisible
+    {
+        get => Field.IsVisible;
+        set => EditorState.UpdateField(Field with { IsVisible = value });
+    }
+    private void ToggleIsVisible(ChangeEventArgs e)
+    {
+        IsVisible = (bool)(e.Value ?? false);
+    }
+
+    private bool IsReadOnly
+    {
+        get => Field.IsReadOnly;
+        set => EditorState.UpdateField(Field with { IsReadOnly = value });
+    }
+    private void ToggleIsReadOnly(ChangeEventArgs e)
+    {
+        IsReadOnly = (bool)(e.Value ?? false);
+    }
+
+    private string? CssClasses
+    {
+        get => Field.CssClasses;
+        set => EditorState.UpdateField(Field with { CssClasses = value });
+    }
+}

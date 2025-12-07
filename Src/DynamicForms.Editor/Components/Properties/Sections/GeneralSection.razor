@@ -1,0 +1,56 @@
+@using DynamicForms.Core.V4.Schemas
+@using DynamicForms.Editor.Components.Shared
+@using DynamicForms.Editor.Services
+@using DynamicForms.Editor.Models
+
+<div class="px-3 py-2">
+    <TextInput Label="Field ID" @bind-Value="FieldId" Disabled="true" Class="text-mono" />
+    <div class="form-group">
+        <label class="form-label">Field Type</label>
+        <select class="form-select" @bind="FieldType" disabled>
+            <option value="@Field.FieldType">@FieldTypeDefinition.GetByType(Field.FieldType)?.DisplayName</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label class="form-label">Display Order</label>
+        <input type="number" class="form-input" value="@FieldOrder" @onchange="UpdateOrder" />
+    </div>
+</div>
+
+@code {
+    [Parameter] public FormFieldSchema Field { get; set; } = default!;
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private string FieldId
+    {
+        get => Field.Id;
+        set { /* Field ID is generally immutable */ }
+    }
+
+    private string FieldType
+    {
+        get => Field.FieldType;
+        set { /* Field Type is generally immutable */ }
+    }
+
+    private int FieldOrder
+    {
+        get => Field.Order;
+        set
+        {
+            if (Field.Order != value)
+            {
+                var newField = Field with { Order = value };
+                EditorState.UpdateField(newField);
+            }
+        }
+    }
+
+    private void UpdateOrder(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int newOrder))
+        {
+            FieldOrder = newOrder;
+        }
+    }
+}

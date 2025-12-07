@@ -1,0 +1,101 @@
+@using DynamicForms.Core.V4.Runtime
+@using DynamicForms.Editor.Models
+@using DynamicForms.Editor.Services
+@using DynamicForms.Editor.Components.Shared
+
+<div class="tree-node-wrapper">
+    <div class="tree-node @(IsSelected ? "selected" : "")" 
+         style="padding-left: @(FieldNode.Level * 15 + 8)px;"
+         @onclick="ToggleSelect">
+        
+        @if (FieldNode.Children.Any())
+        {
+            <span class="tree-node-icon" @onclick:stopPropagation="true" @onclick="ToggleExpand">
+                <i class="bi @(IsExpanded ? "bi-chevron-down" : "bi-chevron-right")"></i>
+            </span>
+        }
+        else
+        {
+            <span class="tree-node-icon"><i class="bi bi-dot"></i></span>
+        }
+
+        <span class="tree-node-icon"><i class="bi @FieldTypeDefinition.GetByType(FieldNode.Schema.FieldType)?.Icon"></i></span>
+        <span>@(FieldNode.Schema.LabelEn ?? FieldNode.Schema.Id)</span>
+        
+        @if (IsSelected)
+        {
+            <div class="ms-auto" style="display:flex; gap:4px;" @onclick:stopPropagation="true">
+                <IconButton Icon="bi-gear" Title="Edit" IsSmall="true" OnClick="OpenSettings" />
+                <IconButton Icon="bi-copy" Title="Duplicate" IsSmall="true" OnClick="DuplicateField" />
+                <IconButton Icon="bi-arrow-up" Title="Move Up" IsSmall="true" Disabled="true" /> @* TODO: Implement move logic *@
+                <IconButton Icon="bi-arrow-down" Title="Move Down" IsSmall="true" Disabled="true" /> @* TODO: Implement move logic *@
+                <IconButton Icon="bi-trash" Title="Delete" IsSmall="true" Variant="danger" OnClick="DeleteField" />
+            </div>
+        }
+    </div>
+
+    @if (IsExpanded && FieldNode.Children.Any())
+    {
+        <div class="tree-node-children">
+            @foreach (var childNode in FieldNode.Children.OrderBy(c => c.Schema.Order))
+            {
+                <OutlineTreeNode FieldNode="@childNode" SearchTerm="@SearchTerm" />
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public FormFieldNode FieldNode { get; set; } = default!;
+    [Parameter] public string SearchTerm { get; set; } = ""; // For highlighting or conditional display (not used directly for filtering in this component, but passed down)
+
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+    [Inject] private IToastService ToastService { get; set; } = default!;
+
+    private bool IsExpanded { get; set; } = true;
+    private bool IsSelected => EditorState.SelectedFieldId == FieldNode.Schema.Id;
+
+    protected override void OnInitialized()
+    {
+        EditorState.OnStateChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        EditorState.OnStateChanged -= StateHasChanged;
+    }
+
+    private void ToggleExpand()
+    {
+        IsExpanded = !IsExpanded;
+    }
+
+    private void ToggleSelect()
+    {
+        if (IsSelected)
+        {
+            EditorState.SelectField(null); // Deselect
+        }
+        else
+        {
+            EditorState.SelectField(FieldNode.Schema.Id); // Select this field
+        }
+    }
+
+    private void OpenSettings()
+    {
+        EditorState.SelectField(FieldNode.Schema.Id);
+        ToastService.ShowInfo($"Editing '{FieldNode.Schema.Id}' properties.");
+        // Logic to switch to properties tab if applicable
+    }
+
+    private void DuplicateField()
+    {
+        EditorState.DuplicateField(FieldNode.Schema.Id);
+    }
+
+    private void DeleteField()
+    {
+        EditorState.DeleteField(FieldNode.Schema.Id);
+    }
+}

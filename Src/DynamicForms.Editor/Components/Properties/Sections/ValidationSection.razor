@@ -1,0 +1,144 @@
+@using DynamicForms.Core.V4.Schemas
+@using DynamicForms.Editor.Components.Shared
+@using DynamicForms.Editor.Services
+
+<div class="px-3 py-2">
+    <div class="prop-group checkbox-group">
+        <input type="checkbox" checked="@(Field.Validation?.IsRequired ?? false)" @onchange="ToggleIsRequired" /> 
+        <span class="prop-label m-0">Is Required</span>
+    </div>
+
+    @if (Field.Validation?.IsRequired == true)
+    {
+        <div class="prop-group ps-4">
+            <label class="form-label">Required Message</label>
+            <BilingualInput 
+                @bind-ValueEn="RequiredMessageEn" 
+                @bind-ValueFr="RequiredMessageFr" 
+                PlaceholderEn="Enter English required message" 
+                PlaceholderFr="Saisir le message requis en français" />
+        </div>
+    }
+
+    <div class="prop-group">
+        <label class="form-label">Min Length</label>
+        <input type="number" class="form-input" value="@MinLength" @onchange="UpdateMinLength" />
+    </div>
+    <div class="prop-group">
+        <label class="form-label">Max Length</label>
+        <input type="number" class="form-input" value="@MaxLength" @onchange="UpdateMaxLength" />
+    </div>
+
+    <div class="prop-group">
+        <label class="form-label">Pattern (Regex)</label>
+        <TextInput @bind-Value="Pattern" Placeholder="e.g., ^[A-Za-z]+$" />
+    </div>
+    <div class="prop-group">
+        <label class="form-label">Pattern Message</label>
+        <BilingualInput 
+            @bind-ValueEn="PatternMessageEn" 
+            @bind-ValueFr="PatternMessageFr" 
+            PlaceholderEn="Enter English pattern message" 
+            PlaceholderFr="Saisir le message de modèle en français" />
+    </div>
+
+    <div class="prop-group">
+        <label class="form-label">Min Value</label>
+        <input type="number" step="any" class="form-input" value="@MinValue" @onchange="UpdateMinValue" />
+    </div>
+    <div class="prop-group">
+        <label class="form-label">Max Value</label>
+        <input type="number" step="any" class="form-input" value="@MaxValue" @onchange="UpdateMaxValue" />
+    </div>
+</div>
+
+@code {
+    [Parameter] public FormFieldSchema Field { get; set; } = default!;
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private FieldValidationConfig CurrentValidation => Field.Validation ?? new FieldValidationConfig();
+
+    private void ToggleIsRequired(ChangeEventArgs e)
+    {
+        var isRequired = (bool)(e.Value ?? false);
+        var newValidation = CurrentValidation with { IsRequired = isRequired };
+        EditorState.UpdateField(Field with { Validation = newValidation });
+    }
+
+    private string? RequiredMessageEn
+    {
+        get => CurrentValidation.RequiredMessageEn;
+        set => UpdateValidation(CurrentValidation with { RequiredMessageEn = value });
+    }
+    private string? RequiredMessageFr
+    {
+        get => CurrentValidation.RequiredMessageFr;
+        set => UpdateValidation(CurrentValidation with { RequiredMessageFr = value });
+    }
+
+    private int? MinLength
+    {
+        get => CurrentValidation.MinLength;
+        set => UpdateValidation(CurrentValidation with { MinLength = value });
+    }
+    private void UpdateMinLength(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int val)) UpdateValidation(CurrentValidation with { MinLength = val });
+        else UpdateValidation(CurrentValidation with { MinLength = null });
+    }
+
+    private int? MaxLength
+    {
+        get => CurrentValidation.MaxLength;
+        set => UpdateValidation(CurrentValidation with { MaxLength = value });
+    }
+    private void UpdateMaxLength(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int val)) UpdateValidation(CurrentValidation with { MaxLength = val });
+        else UpdateValidation(CurrentValidation with { MaxLength = null });
+    }
+
+    private string? Pattern
+    {
+        get => CurrentValidation.Pattern;
+        set => UpdateValidation(CurrentValidation with { Pattern = value });
+    }
+    private string? PatternMessageEn
+    {
+        get => CurrentValidation.PatternMessageEn;
+        set => UpdateValidation(CurrentValidation with { PatternMessageEn = value });
+    }
+    private string? PatternMessageFr
+    {
+        get => CurrentValidation.PatternMessageFr;
+        set => UpdateValidation(CurrentValidation with { PatternMessageFr = value });
+    }
+
+    private double? MinValue
+    {
+        get => CurrentValidation.MinValue;
+        set => UpdateValidation(CurrentValidation with { MinValue = value });
+    }
+    private void UpdateMinValue(ChangeEventArgs e)
+    {
+        if (double.TryParse(e.Value?.ToString(), out double val)) UpdateValidation(CurrentValidation with { MinValue = val });
+        else UpdateValidation(CurrentValidation with { MinValue = null });
+    }
+
+    private double? MaxValue
+    {
+        get => CurrentValidation.MaxValue;
+        set => UpdateValidation(CurrentValidation with { MaxValue = value });
+    }
+    private void UpdateMaxValue(ChangeEventArgs e)
+    {
+        if (double.TryParse(e.Value?.ToString(), out double val)) UpdateValidation(CurrentValidation with { MaxValue = val });
+        else UpdateValidation(CurrentValidation with { MaxValue = null });
+    }
+
+
+    private void UpdateValidation(FieldValidationConfig newValidation)
+    {
+        EditorState.UpdateField(Field with { Validation = newValidation });
+    }
+}
