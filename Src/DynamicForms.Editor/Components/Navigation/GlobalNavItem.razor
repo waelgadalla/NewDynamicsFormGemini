@@ -1,9 +1,19 @@
 @using Microsoft.AspNetCore.Components.Routing
 
-<div class="nav-item @(IsActive ? "active" : "")" @onclick="HandleClick" title="@Label">
-    <i class="bi @Icon"></i>
-    <span class="nav-tooltip">@Label</span>
-</div>
+@if (!string.IsNullOrEmpty(Route))
+{
+    <a class="nav-item @(IsActive ? "active" : "")" href="@Route" title="@Label">
+        <i class="bi @Icon"></i>
+        <span class="nav-tooltip">@Label</span>
+    </a>
+}
+else
+{
+    <div class="nav-item @(IsActive ? "active" : "")" @onclick="HandleClick" title="@Label">
+        <i class="bi @Icon"></i>
+        <span class="nav-tooltip">@Label</span>
+    </div>
+}
 
 @code {
     [Inject] private NavigationManager NavManager { get; set; } = default!;
@@ -14,15 +24,11 @@
     [Parameter] public bool IsActive { get; set; }
     [Parameter] public EventCallback OnClick { get; set; }
 
-    private void HandleClick()
+    private async Task HandleClick()
     {
-        if (!string.IsNullOrEmpty(Route))
+        if (OnClick.HasDelegate)
         {
-            NavManager.NavigateTo(Route);
-        }
-        else if (OnClick.HasDelegate)
-        {
-            OnClick.InvokeAsync();
+            await OnClick.InvokeAsync();
         }
     }
 }
