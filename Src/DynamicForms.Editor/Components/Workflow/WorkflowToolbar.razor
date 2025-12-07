@@ -1,0 +1,63 @@
+@using DynamicForms.Editor.Components.Shared
+@using DynamicForms.Editor.Services
+
+<div class="editor-toolbar justify-content-between">
+    <div class="d-flex gap-2 align-items-center">
+        <IconButton Icon="bi-play" Title="Simulate" OnClick="SimulateWorkflow" />
+        <div class="vr"></div>
+        <Button Variant="outline" Icon="bi-file-text" OnClick="AddModuleNode">Add Module</Button>
+        <Button Variant="outline" Icon="bi-diagram-2" OnClick="AddDecisionNode">Add Decision</Button>
+        <Button Variant="outline" Icon="bi-stop-circle" OnClick="AddEndNode">Add End</Button>
+        <div class="vr"></div>
+        <IconButton Icon="bi-code-square" Title="View JSON" OnClick="ShowJson" />
+    </div>
+    
+    <div class="d-flex gap-2">
+        <Button Variant="primary" Icon="bi-check-circle" OnClick="SaveWorkflow">Save & Publish</Button>
+    </div>
+</div>
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+    [Inject] private IToastService ToastService { get; set; } = default!;
+
+    private void AddModuleNode()
+    {
+        var id = $"module_{new Random().Next(100, 999)}";
+        var node = new DynamicForms.Editor.Models.WorkflowVisualNode(id, "New Module", "module", 100, 100);
+        EditorState.UpdateWorkflowNode(node);
+    }
+
+    private void AddDecisionNode()
+    {
+        var id = $"decision_{Guid.NewGuid().ToString().Substring(0, 4)}";
+        var node = new DynamicForms.Editor.Models.WorkflowVisualNode(id, "Decision", "decision", 150, 150);
+        EditorState.UpdateWorkflowNode(node);
+    }
+
+    private void AddEndNode()
+    {
+        var id = $"end_{Guid.NewGuid().ToString().Substring(0, 4)}";
+        var node = new DynamicForms.Editor.Models.WorkflowVisualNode(id, "End", "end", 200, 200);
+        EditorState.UpdateWorkflowNode(node);
+    }
+
+    private void SimulateWorkflow()
+    {
+        ToastService.ShowInfo("Simulation started (Stub)");
+    }
+
+    private void ShowJson()
+    {
+        ToastService.ShowInfo("JSON View (Stub)");
+    }
+
+    private void SaveWorkflow()
+    {
+        if (EditorState.CurrentWorkflow != null)
+        {
+            EditorState.UpdateWorkflow(EditorState.CurrentWorkflow);
+            ToastService.ShowSuccess("Workflow saved successfully.");
+        }
+    }
+}

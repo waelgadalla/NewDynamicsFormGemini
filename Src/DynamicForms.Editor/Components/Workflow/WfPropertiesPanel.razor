@@ -1,0 +1,206 @@
+@using DynamicForms.Editor.Models
+@using DynamicForms.Editor.Services
+@using DynamicForms.Editor.Components.Shared
+@using DynamicForms.Editor.Components.Modals
+@using DynamicForms.Core.V4.Schemas
+@using DynamicForms.Core.V4.Enums
+@using System.Text.Json
+
+<div class="wf-properties-panel">
+    <div class="wf-sidebar-header">
+        <div class="wf-sidebar-title">Properties</div>
+        <div class="wf-sidebar-subtitle">@(SelectedNode?.Title ?? EditorState.CurrentWorkflow?.TitleEn ?? "Workflow")</div>
+    </div>
+    
+    <div class="wf-sidebar-body">
+        @if (SelectedNode == null)
+        {
+            <div class="prop-section">
+                <div class="prop-section-header">Workflow Settings</div>
+                <div class="form-group">
+                    <label class="form-label">Title (EN)</label>
+                    <input type="text" class="form-input" @bind="WorkflowTitleEn" @bind:event="oninput" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Title (FR)</label>
+                    <input type="text" class="form-input" @bind="WorkflowTitleFr" @bind:event="oninput" />
+                </div>
+                 <div class="form-group">
+                    <label class="form-label">Description (EN)</label>
+                    <textarea class="form-input" @bind="WorkflowDescEn" @bind:event="oninput"></textarea>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="prop-section">
+                <div class="prop-section-header">Node Settings</div>
+                <div class="form-group">
+                    <label class="form-label">Node ID</label>
+                    <input type="text" class="form-input" value="@SelectedNode.Id" disabled />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Title</label>
+                    <input type="text" class="form-input" @bind="NodeTitle" @bind:event="oninput" />
+                </div>
+            </div>
+
+            @if (SelectedNode.Type == "module")
+            {
+                <div class="prop-section">
+                    <div class="prop-section-header">Module Configuration</div>
+                     <div class="form-group">
+                        <label class="form-label">Module ID</label>
+                        <input type="text" class="form-input" value="@(GetModuleIdFromNode(SelectedNode))" disabled />
+                    </div>
+                    <button class="btn btn-outline btn-sm w-100" @onclick="EditModuleLayout">
+                        <i class="bi bi-pencil-square"></i> Edit Form Layout
+                    </button>
+                </div>
+            }
+            else if (SelectedNode.Type == "decision")
+            {
+                <div class="prop-section">
+                    <div class="prop-section-header">Decision Logic</div>
+                    <p class="text-muted text-sm mb-3">Define the condition for the "True" (Yes) path.</p>
+                    
+                    @if (DecisionCondition != null)
+                    {
+                         <ConditionGroup Group="@DecisionCondition" 
+                                        AvailableFields="@AvailableFields" 
+                                        CrossModuleFields="@CrossModuleFields" />
+                         
+                         <button class="btn btn-primary btn-sm w-100 mt-2" @onclick="SaveDecisionLogic">
+                            <i class="bi bi-check-lg"></i> Apply Logic
+                         </button>
+                    }
+                </div>
+            }
+
+            <div class="mt-4 pt-3 border-top">
+                <button class="btn btn-outline-danger btn-sm w-100" @onclick="DeleteSelectedNode">
+                    <i class="bi bi-trash"></i> Delete Node
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+    [Inject] private NavigationManager NavManager { get; set; } = default!;
+
+    private WorkflowVisualNode? SelectedNode => EditorState.GetWorkflowNodes().FirstOrDefault(n => n.Id == EditorState.SelectedNodeId);
+
+    private void DeleteSelectedNode()
+    {
+        if (SelectedNode != null)
+        {
+            EditorState.RemoveNode(SelectedNode.Id);
+        }
+    }
+
+    // Workflow Properties
+    private string WorkflowTitleEn
+    {
+        get => EditorState.CurrentWorkflow?.TitleEn ?? "";
+        set => UpdateWorkflow(w => w with { TitleEn = value });
+    }
+    private string WorkflowTitleFr
+    {
+        get => EditorState.CurrentWorkflow?.TitleFr ?? "";
+        set => UpdateWorkflow(w => w with { TitleFr = value });
+    }
+     private string WorkflowDescEn
+    {
+        get => EditorState.CurrentWorkflow?.DescriptionEn ?? "";
+        set => UpdateWorkflow(w => w with { DescriptionEn = value });
+    }
+
+    // Node Properties
+    private string NodeTitle
+    {
+        get => SelectedNode?.Title ?? "";
+        set 
+        {
+            if (SelectedNode != null)
+            {
+                SelectedNode.Title = value;
+                EditorState.UpdateWorkflowNode(SelectedNode);
+            }
+        }
+    }
+
+    // Decision Logic State
+    private ConditionModel? DecisionCondition { get; set; }
+    
+    // Helpers for Field Pickers
+    // In a real app, we'd aggregate fields from ALL modules in the workflow for "AvailableFields".
+    // For MVP, we'll try to get fields from the PREVIOUS module if possible, or just all modules.
+    private IEnumerable<FormFieldSchema> AvailableFields => new List<FormFieldSchema>(); // TODO: Populate
+    private List<CrossModuleFieldReference> CrossModuleFields => new List<CrossModuleFieldReference>(); // TODO: Populate
+
+    protected override void OnParametersSet()
+    {
+        if (SelectedNode?.Type == "decision")
+        {
+            LoadDecisionLogic();
+        }
+    }
+
+    private void UpdateWorkflow(Func<FormWorkflowSchema, FormWorkflowSchema> updateFn)
+    {
+        if (EditorState.CurrentWorkflow is not null)
+        {
+            var updated = updateFn(EditorState.CurrentWorkflow);
+            EditorState.UpdateWorkflow(updated);
+        }
+    }
+
+    private string GetModuleIdFromNode(WorkflowVisualNode node)
+    {
+        return node.Id.StartsWith("module_") ? node.Id.Replace("module_", "") : node.Id;
+    }
+
+    private void EditModuleLayout()
+    {
+        if (SelectedNode == null) return;
+        // In a real app, navigate to /editor/{moduleId}
+        // NavManager.NavigateTo($"/editor/{GetModuleIdFromNode(SelectedNode)}");
+    }
+
+    private void LoadDecisionLogic()
+    {
+        if (SelectedNode == null) return;
+        
+        if (SelectedNode.Data.TryGetValue("Condition", out var conditionObj))
+        {
+            try 
+            {
+                var json = conditionObj.ToString();
+                if (!string.IsNullOrEmpty(json))
+                {
+                    DecisionCondition = System.Text.Json.JsonSerializer.Deserialize<ConditionModel>(json);
+                    return;
+                }
+            }
+            catch {}
+        }
+        
+        // Default new condition
+        DecisionCondition = new ConditionModel 
+        { 
+            LogicalOp = DynamicForms.Core.V4.Enums.LogicalOperator.And,
+            Conditions = new List<ConditionModel> { new ConditionModel { Operator = ConditionOperator.Equals } }
+        };
+    }
+
+    private void SaveDecisionLogic()
+    {
+        if (SelectedNode == null || DecisionCondition == null) return;
+        
+        var json = System.Text.Json.JsonSerializer.Serialize(DecisionCondition);
+        SelectedNode.Data["Condition"] = json;
+        EditorState.UpdateWorkflowNode(SelectedNode);
+    }
+}

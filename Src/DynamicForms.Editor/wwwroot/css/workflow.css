@@ -1,0 +1,247 @@
+/* ===== WORKFLOW DESIGNER STYLES ===== */
+
+.workflow-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    height: 100%;
+    position: relative;
+}
+
+.workflow-canvas {
+    flex: 1;
+    position: relative;
+    background-color: var(--bg-canvas);
+    background-image: radial-gradient(var(--grid-color) 1px, transparent 1px);
+    background-size: 20px 20px;
+    overflow: hidden;
+    cursor: grab;
+}
+
+.workflow-canvas:active {
+    cursor: grabbing;
+}
+
+/* Workflow Nodes */
+.wf-node {
+    position: absolute;
+    width: 220px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+    user-select: none;
+    cursor: pointer;
+    transition: box-shadow 0.2s, border-color 0.2s;
+    z-index: 10;
+}
+
+.wf-node:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-muted);
+}
+
+.wf-node.selected {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary-light);
+    z-index: 20;
+}
+
+.wf-node-header {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-secondary);
+    border-radius: 8px 8px 0 0;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.wf-node-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.wf-node-body {
+    padding: 12px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* Node Types */
+.wf-node-start .wf-node-header {
+    background: var(--success-light);
+    color: var(--success-dark); /* Ensure you have a darker variable or use hex */
+    border-bottom-color: transparent;
+}
+.wf-node-start .wf-node-header i { color: var(--success); }
+
+.wf-node-end .wf-node-header {
+    background: var(--bg-tertiary);
+}
+
+.wf-node-decision {
+    width: 180px; /* Decision nodes often smaller or diamond shaped */
+    /* For standard box with decision styling: */
+    border-top: 3px solid var(--warning);
+}
+.wf-node-decision .wf-decision-content {
+    padding: 12px;
+    text-align: center;
+}
+.wf-decision-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+.wf-decision-sub {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.wf-node-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+/* Connection Handles */
+.wf-handle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: var(--bg-primary);
+    border: 2px solid var(--text-muted);
+    border-radius: 50%;
+    z-index: 15;
+    transition: all 0.2s;
+}
+
+.wf-handle:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    transform: scale(1.2);
+}
+
+.wf-handle-top { left: 50%; top: -6px; transform: translateX(-50%); }
+.wf-handle-bottom { left: 50%; bottom: -6px; transform: translateX(-50%); }
+.wf-handle-left { left: -6px; top: 50%; transform: translateY(-50%); }
+.wf-handle-right { right: -6px; top: 50%; transform: translateY(-50%); }
+
+
+/* Connections (SVG) */
+.wf-connections {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Let clicks pass through to canvas */
+    z-index: 5;
+}
+
+.wf-connection {
+    fill: none;
+    stroke: var(--border-strong);
+    stroke-width: 2px;
+    transition: stroke 0.2s;
+    pointer-events: stroke; /* Allow clicking the line itself if needed */
+}
+
+.wf-connection:hover {
+    stroke: var(--primary);
+    cursor: pointer;
+}
+
+.wf-connection-draft {
+    stroke: var(--primary);
+    stroke-dasharray: 5, 5;
+    opacity: 0.6;
+}
+
+
+/* Workflow Properties Sidebar */
+.wf-properties-panel {
+    width: 300px; /* Fixed width sidebar */
+    background: var(--bg-primary);
+    border-left: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    z-index: 50;
+    box-shadow: -2px 0 8px rgba(0,0,0,0.05);
+}
+
+.wf-sidebar-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+}
+
+.wf-sidebar-title {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.wf-sidebar-subtitle {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.wf-sidebar-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+/* Zoom Controls */
+.wf-zoom-controls {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-md);
+    z-index: 100;
+}
+
+.zoom-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.zoom-btn:last-child { border-bottom: none; }
+.zoom-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+
+/* Minimap */
+.wf-minimap {
+    position: absolute;
+    bottom: 20px;
+    right: 20px; /* Adjust if properties panel overlaps */
+    width: 160px;
+    height: 100px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow-md);
+    z-index: 90;
+    overflow: hidden;
+    opacity: 0.9;
+}

@@ -1,11 +1,13 @@
 using DynamicForms.Core.V4.Schemas;
 using DynamicForms.Core.V4.Runtime;
-using DynamicForms.Core.V4.Services; // Add this line
+using DynamicForms.Core.V4.Services;
 using DynamicForms.Editor.Models;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using DynamicForms.Core.V4.Builders; // For FormFieldBuilder.CreateTextField etc.
+using DynamicForms.Core.V4.Builders;
+using System.Text.Json;
+using DynamicForms.Editor.Extensions;
 
 namespace DynamicForms.Editor.Services;
 
@@ -14,7 +16,7 @@ public class EditorStateService : IEditorStateService
     private readonly IFormHierarchyService _hierarchyService;
     private readonly ISchemaValidationService _validationService;
     private readonly IUndoRedoService _undoRedo;
-    private readonly IToastService _toastService; // Inject toast service for notifications
+    private readonly IToastService _toastService;
 
     private EditorState _state = new();
 
@@ -46,6 +48,7 @@ public class EditorStateService : IEditorStateService
     public FormModuleRuntime? CurrentModuleRuntime => _state.ModuleRuntime;
     public string? SelectedFieldId => _state.SelectedFieldId;
     public FormFieldSchema? SelectedField => _state.SelectedField;
+    public string? SelectedNodeId => _state.SelectedNodeId;
     public IReadOnlyList<ValidationIssue> ValidationIssues => _state.Issues;
     public bool CanUndo => _undoRedo.CanUndo;
     public bool CanRedo => _undoRedo.CanRedo;
@@ -61,24 +64,166 @@ public class EditorStateService : IEditorStateService
         }
     }
 
-    // === Workflow Operations (Placeholders for now, will be implemented in Phase 4) ===
-    public void LoadWorkflow(FormWorkflowSchema workflow) { /* TODO: Implement in Phase 4 */ }
-    public void UpdateWorkflow(FormWorkflowSchema workflow) { /* TODO: Implement in Phase 4 */ }
+    // === Workflow Operations ===
+    public void LoadWorkflow(FormWorkflowSchema workflow)
+    {
+        _undoRedo.SaveState(workflow); // Save initial workflow state
+        
+        var layout = DeserializeWorkflowLayout(workflow.ExtendedProperties);
+        
+        UpdateWorkflowState(workflow, layout.Nodes, layout.Connections);
+        _toastService.ShowInfo($"Workflow '{workflow.TitleEn}' loaded.");
+    }
+
+    public void UpdateWorkflow(FormWorkflowSchema workflow)
+    {
+        _undoRedo.SaveState(_state.Workflow!); // Save current workflow state before updating
+        
+        // When updating workflow metadata, preserve current node positions
+        UpdateWorkflowState(workflow, _state.WorkflowNodes, _state.WorkflowConnections);
+        _toastService.ShowSuccess($"Workflow '{workflow.TitleEn}' updated.");
+    }
+
+    private void UpdateWorkflowState(FormWorkflowSchema workflow, List<WorkflowVisualNode>? nodes = null, List<WorkflowVisualConnection>? connections = null)
+    {
+        SetState(_state with
+        {
+            Workflow = workflow,
+            SelectedNodeId = null, // Clear selection on full workflow reload/update
+            WorkflowNodes = nodes ?? new List<WorkflowVisualNode>(),
+            WorkflowConnections = connections ?? new List<WorkflowVisualConnection>()
+        });
+        OnStateChanged?.Invoke();
+    }
+
+    public void SelectNode(string? nodeId)
+    {
+        if (_state.SelectedNodeId == nodeId) return;
+        SetState(_state with { SelectedNodeId = nodeId });
+    }
+
     public void AddModuleToWorkflow(int moduleId) { /* TODO: Implement in Phase 4 */ }
     public void RemoveModuleFromWorkflow(int moduleId) { /* TODO: Implement in Phase 4 */ }
     public void ReorderModules(int[] newOrder) { /* TODO: Implement in Phase 4 */ }
 
+    // === Workflow Layout Operations ===
+    public List<WorkflowVisualNode> GetWorkflowNodes() => _state.WorkflowNodes;
+    public List<WorkflowVisualConnection> GetWorkflowConnections() => _state.WorkflowConnections;
+
+    public void UpdateWorkflowNode(WorkflowVisualNode node)
+    {
+        var currentNodes = _state.WorkflowNodes.ToList();
+        var existing = currentNodes.FirstOrDefault(n => n.Id == node.Id);
+        if (existing != null) currentNodes.Remove(existing);
+        currentNodes.Add(node);
+        SaveWorkflowLayout(currentNodes, _state.WorkflowConnections);
+    }
+
+    public void UpdateWorkflowNodePosition(string nodeId, double x, double y)
+    {
+        var currentNodes = _state.WorkflowNodes.ToList();
+        var existing = currentNodes.FirstOrDefault(n => n.Id == nodeId);
+        if (existing != null)
+        {
+            existing.X = x;
+            existing.Y = y;
+            SaveWorkflowLayout(currentNodes, _state.WorkflowConnections);
+        }
+    }
+
+    public void AddConnection(string sourceId, string targetId)
+    {
+        if (_state.WorkflowConnections.Any(c => c.SourceNodeId == sourceId && c.TargetNodeId == targetId)) return;
+
+        var newConnections = _state.WorkflowConnections.ToList();
+        newConnections.Add(new WorkflowVisualConnection(sourceId, targetId));
+        SaveWorkflowLayout(_state.WorkflowNodes, newConnections);
+    }
+
+    public void RemoveConnection(string sourceId, string targetId)
+    {
+        var newConnections = _state.WorkflowConnections.Where(c => !(c.SourceNodeId == sourceId && c.TargetNodeId == targetId)).ToList();
+        SaveWorkflowLayout(_state.WorkflowNodes, newConnections);
+    }
+
+    public void RemoveNode(string nodeId)
+    {
+        var currentNodes = _state.WorkflowNodes.Where(n => n.Id != nodeId).ToList();
+        // Also remove any connections involving this node
+        var currentConnections = _state.WorkflowConnections
+            .Where(c => c.SourceNodeId != nodeId && c.TargetNodeId != nodeId)
+            .ToList();
+            
+        if (_state.SelectedNodeId == nodeId)
+        {
+            SetState(_state with { SelectedNodeId = null }, suppressStateChanged: true);
+        }
+        
+        SaveWorkflowLayout(currentNodes, currentConnections);
+        _toastService.ShowInfo("Node removed.");
+    }
+
+    private void SaveWorkflowLayout(List<WorkflowVisualNode> nodes, List<WorkflowVisualConnection> connections)
+    {
+        SetState(_state with { WorkflowNodes = nodes, WorkflowConnections = connections }, suppressStateChanged: true);
+
+        if (_state.Workflow != null)
+        {
+             var layoutData = new WorkflowLayoutData { Nodes = nodes, Connections = connections };
+             var updatedExtendedProps = SerializeWorkflowLayout(layoutData);
+             var updatedWorkflow = _state.Workflow with { ExtendedProperties = updatedExtendedProps };
+             _state = _state with { Workflow = updatedWorkflow };
+        }
+    }
+
+    // === Helpers ===
+    private JsonElement? SerializeWorkflowLayout(WorkflowLayoutData layout)
+    {
+        var json = JsonSerializer.Serialize(layout, JsonSerializerOptionsProvider.Default);
+        return JsonDocument.Parse(json).RootElement;
+    }
+
+    private WorkflowLayoutData DeserializeWorkflowLayout(JsonElement? jsonElement)
+    {
+        if (jsonElement == null || jsonElement.Value.ValueKind == JsonValueKind.Null)
+        {
+            return new WorkflowLayoutData();
+        }
+        try
+        {
+            // Try to deserialize as new format
+            return JsonSerializer.Deserialize<WorkflowLayoutData>(jsonElement.Value, JsonSerializerOptionsProvider.Default)
+                ?? new WorkflowLayoutData();
+        }
+        catch
+        {
+            // Fallback for old format (list of nodes)
+            try 
+            {
+                var nodes = JsonSerializer.Deserialize<List<WorkflowVisualNode>>(jsonElement.Value, JsonSerializerOptionsProvider.Default);
+                return new WorkflowLayoutData { Nodes = nodes ?? new() };
+            }
+            catch { return new WorkflowLayoutData(); }
+        }
+    }
+
+    public class WorkflowLayoutData
+    {
+        public List<WorkflowVisualNode> Nodes { get; set; } = new();
+        public List<WorkflowVisualConnection> Connections { get; set; } = new();
+    }
+
     // === Module Operations ===
     public void LoadModule(FormModuleSchema module)
     {
-        _undoRedo.SaveState(module); // Save initial state for undo
+        _undoRedo.SaveState(module);
         UpdateModuleState(module);
         _toastService.ShowInfo($"Module '{module.TitleEn}' loaded.");
     }
 
     public void UpdateModule(FormModuleSchema module)
     {
-        _undoRedo.SaveState(_state.Module!); // Save current state before updating
+        _undoRedo.SaveState(_state.Module!);
         UpdateModuleState(module);
         _toastService.ShowSuccess($"Module '{module.TitleEn}' updated.");
     }
@@ -93,7 +238,7 @@ public class EditorStateService : IEditorStateService
             Module = module,
             ModuleRuntime = runtime,
             Issues = issues.ToImmutableList(),
-            SelectedFieldId = null // Clear selection on full module reload/update
+            SelectedFieldId = null
         });
 
         OnModuleChanged?.Invoke();
@@ -102,7 +247,7 @@ public class EditorStateService : IEditorStateService
     public FormModuleSchema CreateNewModule(string titleEn, string? titleFr = null)
     {
         var newModule = FormModuleSchema.Create(
-            id: new Random().Next(1000, 9999), // Simple ID for now
+            id: new Random().Next(1000, 9999),
             titleEn: titleEn,
             titleFr: titleFr
         );
@@ -114,7 +259,6 @@ public class EditorStateService : IEditorStateService
     public void SelectField(string? fieldId)
     {
         if (_state.SelectedFieldId == fieldId) return;
-
         SetState(_state with { SelectedFieldId = fieldId });
         OnFieldSelected?.Invoke(fieldId ?? "");
     }
@@ -155,7 +299,6 @@ public class EditorStateService : IEditorStateService
     {
         if (_state.Module is null) return;
 
-        // Also delete children (recursive)
         var idsToDelete = GetFieldAndDescendantIds(fieldId);
         var newFields = _state.Module.Fields
             .Where(f => !idsToDelete.Contains(f.Id))
@@ -164,7 +307,7 @@ public class EditorStateService : IEditorStateService
 
         if (_state.SelectedFieldId == fieldId)
         {
-            SetState(_state with { SelectedFieldId = null }, suppressStateChanged: true); // Update internally without triggering full refresh before module update
+            SetState(_state with { SelectedFieldId = null }, suppressStateChanged: true);
         }
         
         UpdateModule(newModule);
@@ -183,10 +326,10 @@ public class EditorStateService : IEditorStateService
 
         var duplicatedField = fieldToDuplicate with
         {
-            Id = GenerateFieldId(fieldToDuplicate.FieldType), // Generate new unique ID
+            Id = GenerateFieldId(fieldToDuplicate.FieldType),
             LabelEn = $"Copy of {fieldToDuplicate.LabelEn}",
             LabelFr = fieldToDuplicate.LabelFr is not null ? $"Copie de {fieldToDuplicate.LabelFr}" : null,
-            Order = fieldToDuplicate.Order + 1 // Place right after original
+            Order = fieldToDuplicate.Order + 1
         };
 
         var newFields = _state.Module.Fields.ToList();
@@ -206,7 +349,6 @@ public class EditorStateService : IEditorStateService
         _toastService.ShowSuccess($"Duplicated field '{fieldId}'. New ID: '{duplicatedField.Id}'");
     }
 
-
     public void MoveField(string fieldId, MoveDirection direction)
     {
         if (_state.Module is null) return;
@@ -214,7 +356,6 @@ public class EditorStateService : IEditorStateService
         var field = _state.Module.Fields.FirstOrDefault(f => f.Id == fieldId);
         if (field is null) return;
         
-        // Get siblings (fields with same parent)
         var siblings = _state.Module.Fields
             .Where(f => f.ParentId == field.ParentId)
             .OrderBy(f => f.Order)
@@ -225,12 +366,9 @@ public class EditorStateService : IEditorStateService
         
         if (newIndex < 0 || newIndex >= siblings.Count) return;
         
-        // Temporarily adjust orders and rebuild to ensure uniqueness and correct sorting
-        // More robust approach would be to swap elements and then reassign orders based on new positions
         var fieldToMove = siblings[index];
         var otherField = siblings[newIndex];
 
-        // Perform a swap by updating order property, then re-sort all fields
         var allFields = _state.Module.Fields.ToList();
         
         var updatedAllFields = allFields
@@ -242,10 +380,8 @@ public class EditorStateService : IEditorStateService
             })
             .ToList();
 
-        // Re-sort all fields based on their new order properties to ensure a stable ordering
         updatedAllFields.Sort((a, b) => a.Order.CompareTo(b.Order));
 
-        // Reassign explicit orders to be sequential (1, 2, 3...) within their parent groups
         var reorderedFields = new List<FormFieldSchema>();
         var groupedFields = updatedAllFields.GroupBy(f => f.ParentId);
         foreach (var group in groupedFields)
@@ -262,14 +398,12 @@ public class EditorStateService : IEditorStateService
         _toastService.ShowInfo($"Moved field '{fieldId}' {(direction == MoveDirection.Up ? "up" : "down")}.");
     }
 
-
     public void ChangeFieldParent(string fieldId, string? newParentId)
     {
         if (_state.Module is null) return;
         var fieldToMove = _state.Module.Fields.FirstOrDefault(f => f.Id == fieldId);
         if (fieldToMove is null) return;
 
-        // Ensure new parent exists if not null
         if (newParentId is not null && !_state.Module.Fields.Any(f => f.Id == newParentId))
         {
             _toastService.ShowError($"New parent field '{newParentId}' not found.");
@@ -282,7 +416,6 @@ public class EditorStateService : IEditorStateService
             return;
         }
 
-        // Prevent circular references
         if (newParentId is not null)
         {
             var tempModule = _state.Module with { Fields = _state.Module.Fields.Select(f => f.Id == fieldId ? f with { ParentId = newParentId } : f).ToArray() };
@@ -307,17 +440,14 @@ public class EditorStateService : IEditorStateService
         _toastService.ShowInfo($"Moved field '{fieldId}' to parent '{newParentId ?? "root"}'.");
     }
 
-    // === Clipboard Operations (Placeholders for now) ===
     public void CopyField(string fieldId)
     {
         if (_state.Module is null) return;
         var fieldToCopy = _state.Module.Fields.FirstOrDefault(f => f.Id == fieldId);
         if (fieldToCopy is null) return;
 
-        // Deep copy the field to clipboard
-        // Need a better deep copy mechanism for records with nested records
-        var json = System.Text.Json.JsonSerializer.Serialize(fieldToCopy);
-        var clipboardField = System.Text.Json.JsonSerializer.Deserialize<FormFieldSchema>(json);
+        var json = JsonSerializer.Serialize(fieldToCopy);
+        var clipboardField = JsonSerializer.Deserialize<FormFieldSchema>(json);
 
         SetState(_state with { ClipboardField = clipboardField });
         _toastService.ShowInfo($"Copied field '{fieldId}' to clipboard.");
@@ -334,7 +464,7 @@ public class EditorStateService : IEditorStateService
 
         var pastedField = _state.ClipboardField with
         {
-            Id = GenerateFieldId(_state.ClipboardField.FieldType), // New ID
+            Id = GenerateFieldId(_state.ClipboardField.FieldType),
             ParentId = parentId,
             LabelEn = $"Pasted {_state.ClipboardField.LabelEn}",
             LabelFr = _state.ClipboardField.LabelFr is not null ? $"Collé {_state.ClipboardField.LabelFr}" : null,
@@ -348,7 +478,6 @@ public class EditorStateService : IEditorStateService
         _toastService.ShowSuccess($"Pasted field '{pastedField.Id}'.");
     }
 
-    // === Validation ===
     public void RefreshValidation()
     {
         if (_state.Module is null) return;
@@ -357,7 +486,6 @@ public class EditorStateService : IEditorStateService
         _toastService.ShowInfo("Validation refreshed.");
     }
 
-    // === Undo/Redo ===
     public void Undo()
     {
         if (!CanUndo)
@@ -366,7 +494,7 @@ public class EditorStateService : IEditorStateService
             return;
         }
         var previousModule = _undoRedo.Undo(_state.Module!);
-        UpdateModuleState(previousModule); // Update state without saving to undo again
+        UpdateModuleState(previousModule);
         _toastService.ShowInfo("Undo successful.");
     }
 
@@ -378,11 +506,36 @@ public class EditorStateService : IEditorStateService
             return;
         }
         var nextModule = _undoRedo.Redo(_state.Module!);
-        UpdateModuleState(nextModule); // Update state without saving to undo again
+        UpdateModuleState(nextModule);
         _toastService.ShowInfo("Redo successful.");
     }
 
     // === Helpers ===
+    private JsonElement? SerializeWorkflowNodes(List<WorkflowVisualNode> nodes)
+    {
+        if (nodes == null || !nodes.Any()) return null;
+        var json = JsonSerializer.Serialize(nodes, JsonSerializerOptionsProvider.Default);
+        return JsonDocument.Parse(json).RootElement;
+    }
+
+    private List<WorkflowVisualNode> DeserializeWorkflowNodes(JsonElement? jsonElement)
+    {
+        if (jsonElement == null || jsonElement.Value.ValueKind == JsonValueKind.Null)
+        {
+            return new List<WorkflowVisualNode>();
+        }
+        try
+        {
+            return JsonSerializer.Deserialize<List<WorkflowVisualNode>>(jsonElement.Value, JsonSerializerOptionsProvider.Default)
+                ?? new List<WorkflowVisualNode>();
+        }
+        catch (JsonException ex)
+        {
+            _toastService.ShowError($"Error deserializing node positions: {ex.Message}");
+            return new List<WorkflowVisualNode>();
+        }
+    }
+
     private FormFieldSchema CreateDefaultField(string fieldType, string? parentId)
     {
         var maxOrder = _state.Module!.Fields
@@ -439,7 +592,6 @@ public class EditorStateService : IEditorStateService
         return ids;
     }
     
-    // Helper to check for circular references (copied from SchemaValidationService)
     private bool HasCircularReference(FormFieldSchema field, FormModuleSchema module)
     {
         var visited = new HashSet<string>();

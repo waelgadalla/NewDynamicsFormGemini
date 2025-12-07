@@ -14,6 +14,7 @@ public interface IEditorStateService
     FormModuleRuntime? CurrentModuleRuntime { get; }
     string? SelectedFieldId { get; }
     FormFieldSchema? SelectedField { get; }
+    string? SelectedNodeId { get; }
     
     // === Events ===
     event Action? OnStateChanged;
@@ -23,10 +24,20 @@ public interface IEditorStateService
     // === Workflow Operations ===
     void LoadWorkflow(FormWorkflowSchema workflow);
     void UpdateWorkflow(FormWorkflowSchema workflow);
+    void SelectNode(string? nodeId);
     void AddModuleToWorkflow(int moduleId);
     void RemoveModuleFromWorkflow(int moduleId);
     void ReorderModules(int[] newOrder);
     
+    // === Workflow Layout Operations ===
+    List<WorkflowVisualNode> GetWorkflowNodes();
+    List<WorkflowVisualConnection> GetWorkflowConnections(); // New
+    void UpdateWorkflowNode(WorkflowVisualNode node); // New
+    void UpdateWorkflowNodePosition(string nodeId, double x, double y);
+    void AddConnection(string sourceId, string targetId); // New
+    void RemoveConnection(string sourceId, string targetId); // New
+    void RemoveNode(string nodeId); // New
+
     // === Module Operations ===
     void LoadModule(FormModuleSchema module);
     void UpdateModule(FormModuleSchema module);

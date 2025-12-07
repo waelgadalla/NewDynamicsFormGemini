@@ -26,6 +26,9 @@ public record EditorState
     // UI State
     public bool IsLoading { get; init; }
     public string? ErrorMessage { get; init; }
+    // Workflow State
+    public List<WorkflowVisualNode> WorkflowNodes { get; init; } = new();
+    public List<WorkflowVisualConnection> WorkflowConnections { get; init; } = new();
     
     // Computed properties
     public FormFieldSchema? SelectedField => SelectedFieldId is not null && Module is not null

@@ -1,0 +1,183 @@
+@using DynamicForms.Editor.Models
+@using DynamicForms.Core.V4.Schemas
+@using DynamicForms.Core.V4.Runtime
+@using DynamicForms.Editor.Services
+@using DynamicForms.Editor.Components.Shared
+@using System.Text.Json;
+
+<div class="workflow-container">
+    <div class="workflow-canvas" @onmousedown="HandleCanvasMouseDown" @onmousemove="HandleCanvasMouseMove">
+        <svg class="wf-connections">
+            <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="var(--border-strong)" />
+                </marker>
+            </defs>
+
+            @foreach (var connection in Connections)
+            {
+                var source = Nodes.FirstOrDefault(n => n.Id == connection.SourceNodeId);
+                var target = Nodes.FirstOrDefault(n => n.Id == connection.TargetNodeId);
+                if (source is not null && target is not null)
+                {
+                    <WfConnection SourceNode="@source" TargetNode="@target" />
+                }
+            }
+
+            @if (_isConnecting && _connectingSource != null)
+            {
+                 <path d="M @(_connectingSource.X + 110) @(_connectingSource.Y + 60) L @_currentMouseX @_currentMouseY" 
+                       class="wf-connection wf-connection-draft" 
+                       marker-end="url(#arrowhead)"></path>
+            }
+        </svg>
+
+        @if (EditorState.CurrentWorkflow is not null)
+        {
+            @foreach (var node in Nodes)
+            {
+                <WfNode Node="@node"
+                        IsSelected="@(EditorState.SelectedNodeId == node.Id)"
+                        OnSelect="@(id => OnSelectNode(id))"
+                        OnMove="@OnNodeMove"
+                        OnConnectStart="@HandleConnectStart"
+                        OnConnectEnd="@HandleConnectEnd" />
+            }
+        }
+        
+        <WfZoomControls />
+        <WfMinimap />
+    </div>
+
+    <!-- Properties Panel integration -->
+    <WfPropertiesPanel />
+</div>
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+    [Inject] private IToastService ToastService { get; set; } = default!;
+    [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
+
+    private List<WorkflowVisualNode> Nodes => EditorState.GetWorkflowNodes();
+    private List<WorkflowVisualConnection> Connections => EditorState.GetWorkflowConnections();
+
+    // Connection State
+    private bool _isConnecting;
+    private WorkflowVisualNode? _connectingSource;
+    private double _currentMouseX;
+    private double _currentMouseY;
+
+    protected override void OnInitialized()
+    {
+        EditorState.OnStateChanged += StateHasChanged;
+        LoadMockWorkflow();
+    }
+
+    private void HandleCanvasMouseDown(MouseEventArgs e)
+    {
+        // Deselect node if clicked on canvas background
+        EditorState.SelectNode(null);
+        if (_isConnecting) CancelConnection();
+    }
+    
+    // Global mouse move to update connection line
+    private void HandleCanvasMouseMove(MouseEventArgs e)
+    {
+        if (_isConnecting)
+        {
+            _currentMouseX = e.ClientX; // Needs offset correction relative to canvas!
+            _currentMouseY = e.ClientY;
+            // Note: In a real app with Pan/Zoom, we need to transform screen coordinates to canvas coordinates.
+            // For MVP, assuming canvas is at (0,0) or fixed relative.
+            // Correction: The SVG and Nodes use absolute positioning within .workflow-canvas.
+            // We need to subtract the canvas bounding rect.
+            // This requires JS Interop or simpler assumption. 
+            // Let's rely on OnNodeMove style offset logic if needed, but for now raw ClientX might be off.
+            // Simplified: Just use e.OffsetX if target is the container? No, target changes.
+        }
+    }
+
+    private void HandleConnectStart(string nodeId)
+    {
+        _connectingSource = Nodes.FirstOrDefault(n => n.Id == nodeId);
+        if (_connectingSource != null)
+        {
+            _isConnecting = true;
+        }
+    }
+
+    private void HandleConnectEnd(string targetId)
+    {
+        if (_isConnecting && _connectingSource != null)
+        {
+            if (_connectingSource.Id != targetId)
+            {
+                EditorState.AddConnection(_connectingSource.Id, targetId);
+            }
+            CancelConnection();
+        }
+    }
+
+    private void CancelConnection()
+    {
+        _isConnecting = false;
+        _connectingSource = null;
+    }
+
+    private void OnSelectNode(string nodeId)
+    {
+        EditorState.SelectNode(nodeId);
+    }
+
+    private void OnNodeMove(Tuple<string, double, double> args)
+    {
+        var (nodeId, x, y) = args;
+        EditorState.UpdateWorkflowNodePosition(nodeId, x, y);
+    }
+
+    private void LoadMockWorkflow()
+    {
+        // Initialize a mock workflow if none exists and no nodes are loaded
+        if (EditorState.CurrentWorkflow is null)
+        {
+            var mockWorkflow = new FormWorkflowSchema
+            {
+                Id = 1,
+                TitleEn = "Employee Onboarding Workflow",
+                TitleFr = "Flux de travail d'intégration des employés",
+                ModuleIds = new int[] { 1 },
+                WorkflowRules = Array.Empty<ConditionalRule>()
+            };
+            
+            // Create default visual nodes if none exist
+            var defaultNodes = new List<WorkflowVisualNode>
+            {
+                new WorkflowVisualNode("start", "Start", "start", 50, 250),
+                new WorkflowVisualNode("module_1", "Module 1", "module", 250, 250),
+                new WorkflowVisualNode("decision_1", "Check Role", "decision", 500, 250),
+                new WorkflowVisualNode("end", "End", "end", 750, 250)
+            };
+            
+            // Default connections
+            var defaultConnections = new List<WorkflowVisualConnection>
+            {
+                new WorkflowVisualConnection("start", "module_1"),
+                new WorkflowVisualConnection("module_1", "decision_1")
+            };
+            
+            // We need to inject these nodes into the workflow load process
+            // Since LoadWorkflow expects them in ExtendedProperties, we simulate that or update state directly
+            // For MVP simplicity, we just trigger a load which will find nothing, then we populate state manually
+            EditorState.LoadWorkflow(mockWorkflow);
+            
+            // Manually populate nodes for this fresh mock
+            foreach(var node in defaultNodes) EditorState.UpdateWorkflowNode(node);
+            foreach(var conn in defaultConnections) EditorState.AddConnection(conn.SourceNodeId, conn.TargetNodeId);
+        }
+    }
+
+    public void Dispose()
+    {
+        EditorState.OnStateChanged -= StateHasChanged;
+    }
+}

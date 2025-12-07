@@ -1,0 +1,126 @@
+@using DynamicForms.Editor.Models
+@using DynamicForms.Core.V4.Schemas
+@using DynamicForms.Editor.Components.Shared
+@using Microsoft.AspNetCore.Components.Web
+
+<div class="wf-node wf-node-@Node.Type @(IsSelected ? "selected" : "")"
+     style="left: @(Node.X)px; top: @(Node.Y)px;"
+     @onmousedown="HandleMouseDown"
+     @onmouseup="HandleMouseUpOnNode">
+
+    @if (Node.Type == "start")
+    {
+        <div class="wf-node-header">
+            <div class="wf-node-header-left"><i class="bi bi-play-circle-fill"></i> @Node.Title</div>
+        </div>
+        <div class="wf-node-body">Triggered by: HR Manager</div>
+    }
+    else if (Node.Type == "module")
+    {
+        <div class="wf-node-header">
+            <div class="wf-node-header-left"><i class="bi bi-file-text"></i> @Node.Title</div>
+            <button class="btn btn-ghost btn-icon-sm"><i class="bi bi-pencil"></i></button>
+        </div>
+        <div class="wf-node-body">
+            <div style="margin-bottom: 6px;">Module ID: @Node.Id</div>
+            <span class="wf-node-badge">Step X</span>
+        </div>
+    }
+    else if (Node.Type == "decision")
+    {
+        <div class="wf-decision-content">
+            <div class="wf-decision-title">@Node.Title</div>
+            <div class="wf-decision-sub">Auto-Rule</div>
+        </div>
+    }
+    else if (Node.Type == "end")
+    {
+        <div class="wf-node-header">
+            <div class="wf-node-header-left"><i class="bi bi-stop-circle"></i> @Node.Title</div>
+        </div>
+        <div class="wf-node-body">End Action</div>
+    }
+
+    <!-- Connection Handles -->
+    @if (Node.Type != "start") 
+    { 
+        <div class="wf-handle wf-handle-top" @onmousedown="e => HandleConnectStart(e, true)" @onmousedown:stopPropagation="true"></div> 
+    }
+    @if (Node.Type != "end") 
+    { 
+        <div class="wf-handle wf-handle-bottom" @onmousedown="e => HandleConnectStart(e, false)" @onmousedown:stopPropagation="true"></div> 
+    }
+</div>
+
+@code {
+    [Parameter] public WorkflowVisualNode Node { get; set; } = default!;
+    [Parameter] public bool IsSelected { get; set; }
+    [Parameter] public EventCallback<string> OnSelect { get; set; }
+    [Parameter] public EventCallback<Tuple<string, double, double>> OnMove { get; set; }
+    [Parameter] public EventCallback<string> OnConnectStart { get; set; }
+    [Parameter] public EventCallback<string> OnConnectEnd { get; set; }
+
+    private double _offsetX, _offsetY;
+    private bool _isDragging;
+
+    private async Task HandleMouseDown(MouseEventArgs e)
+    {
+        if (e.Buttons == 1) // Left click on body
+        {
+            _isDragging = true;
+            _offsetX = e.ClientX - Node.X;
+            _offsetY = e.ClientY - Node.Y;
+            
+            await OnSelect.InvokeAsync(Node.Id);
+
+            await JSRuntime.InvokeVoidAsync("window.addEventListener", "mousemove", DotNetObjectReference.Create(this), "HandleMouseMove");
+            await JSRuntime.InvokeVoidAsync("window.addEventListener", "mouseup", DotNetObjectReference.Create(this), "HandleMouseUp");
+        }
+    }
+
+    // Triggered when MouseUp happens on this node (potential target)
+    private async Task HandleMouseUpOnNode(MouseEventArgs e)
+    {
+        await OnConnectEnd.InvokeAsync(Node.Id);
+    }
+    
+    // Triggered when MouseDown happens on a handle (start)
+    private async Task HandleConnectStart(MouseEventArgs e, bool isTop)
+    {
+        // For MVP, we treat any handle as a source, but usually top is input, bottom is output.
+        // Let's assume we drag FROM bottom handles mainly.
+        // If user clicks top handle, maybe they want to connect TO it? 
+        // For simplicity: Dragging always starts a connection FROM this node.
+        await OnConnectStart.InvokeAsync(Node.Id);
+    }
+
+    [JSInvokable]
+    public async Task HandleMouseMove(MouseEventArgs e)
+    {
+        if (_isDragging)
+        {
+            var newX = e.ClientX - _offsetX;
+            var newY = e.ClientY - _offsetY;
+            await OnMove.InvokeAsync(Tuple.Create(Node.Id, newX, newY));
+        }
+    }
+
+    [JSInvokable]
+    public async Task HandleMouseUp(MouseEventArgs e)
+    {
+        _isDragging = false;
+        await JSRuntime.InvokeVoidAsync("window.removeEventListener", "mousemove", DotNetObjectReference.Create(this), "HandleMouseMove");
+        await JSRuntime.InvokeVoidAsync("window.removeEventListener", "mouseup", DotNetObjectReference.Create(this), "HandleMouseUp");
+    }
+
+    [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
+
+    public void Dispose()
+    {
+        if (_isDragging)
+        {
+            JSRuntime.InvokeVoidAsync("window.removeEventListener", "mousemove", DotNetObjectReference.Create(this), "HandleMouseMove");
+            JSRuntime.InvokeVoidAsync("window.removeEventListener", "mouseup", DotNetObjectReference.Create(this), "HandleMouseUp");
+        }
+    }
+}

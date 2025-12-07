@@ -1,0 +1,32 @@
+@using DynamicForms.Editor.Models
+
+<g class="wf-connection-group">
+    <path d="@PathData" class="wf-connection" marker-end="url(#arrowhead)"></path>
+</g>
+
+@code {
+    [Parameter] public WorkflowVisualNode? SourceNode { get; set; }
+    [Parameter] public WorkflowVisualNode? TargetNode { get; set; }
+
+    private string PathData { get; set; } = "";
+
+    protected override void OnParametersSet()
+    {
+        if (SourceNode is not null && TargetNode is not null)
+        {
+            // Simple straight line for now, to be replaced with Bezier curves
+            // Assuming default width 220, height 80 (approx)
+            var startX = SourceNode.X + 110; 
+            var startY = SourceNode.Y + 80; // Bottom of node
+            
+            var endX = TargetNode.X + 110; 
+            var endY = TargetNode.Y;       // Top of node
+
+            // Bezier Control Points
+            var midY = (startY + endY) / 2;
+            
+            // Draw S-curve
+            PathData = $"M {startX} {startY} C {startX} {midY}, {endX} {midY}, {endX} {endY}";
+        }
+    }
+}

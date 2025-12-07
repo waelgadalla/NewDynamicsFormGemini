@@ -14,6 +14,7 @@ builder.Services.AddScoped<IThemeService, ThemeService>();
 builder.Services.AddScoped<IToastService, ToastService>();
 builder.Services.AddScoped<IUndoRedoService, UndoRedoService>();
 builder.Services.AddScoped<ISchemaValidationService, SchemaValidationService>();
+builder.Services.AddScoped<IWorkflowGraphService, WorkflowGraphService>();
 builder.Services.AddScoped<IEditorStateService, EditorStateService>();
 
 var app = builder.Build();

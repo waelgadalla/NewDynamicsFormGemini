@@ -1,0 +1,31 @@
+@using DynamicForms.Editor.Components.Shared
+
+<div class="wf-zoom-controls">
+    <IconButton Icon="bi-plus-lg" Title="Zoom In" IsSmall="true" Variant="outline" OnClick="ZoomIn" />
+    <IconButton Icon="bi-dash-lg" Title="Zoom Out" IsSmall="true" Variant="outline" OnClick="ZoomOut" />
+    <IconButton Icon="bi-arrows-fullscreen" Title="Fit to Screen" IsSmall="true" Variant="outline" OnClick="FitToScreen" />
+</div>
+
+@code {
+    [Parameter] public EventCallback<double> OnZoomChanged { get; set; }
+
+    private double CurrentZoom { get; set; } = 1.0;
+
+    private async Task ZoomIn()
+    {
+        CurrentZoom += 0.1;
+        await OnZoomChanged.InvokeAsync(CurrentZoom);
+    }
+
+    private async Task ZoomOut()
+    {
+        CurrentZoom = Math.Max(0.1, CurrentZoom - 0.1);
+        await OnZoomChanged.InvokeAsync(CurrentZoom);
+    }
+
+    private async Task FitToScreen()
+    {
+        CurrentZoom = 1.0;
+        await OnZoomChanged.InvokeAsync(CurrentZoom);
+    }
+}

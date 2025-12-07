@@ -1,0 +1,23 @@
+@page "/workflow"
+@layout MainLayout
+@using DynamicForms.Editor.Components.Workflow
+@using DynamicForms.Editor.Layouts
+
+<div class="view-panel">
+    <div class="app-header">
+        <div class="header-left">
+            <div class="header-title"><i class="bi bi-diagram-3"></i> Workflow Designer</div>
+        </div>
+        <div class="header-actions">
+            <!-- Header actions -->
+        </div>
+    </div>
+    
+    <WorkflowToolbar />
+
+    <WorkflowCanvas />
+</div>
+
+@code {
+    // Logic for the workflow designer page will go here
+}
