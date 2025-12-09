@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F.1 CodeSetDataIntegration - Interactive Mockup</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --primary-light: #eef2ff;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --info: #3b82f6;
+            --info-light: #dbeafe;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --bg-tertiary: #f3f4f6;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --border-color: #e5e7eb;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --primary: #818cf8;
+            --primary-hover: #6366f1;
+            --primary-light: #312e81;
+            --success: #34d399;
+            --success-light: #064e3b;
+            --warning: #fbbf24;
+            --warning-light: #78350f;
+            --danger: #f87171;
+            --danger-light: #7f1d1d;
+            --info: #60a5fa;
+            --info-light: #1e3a5f;
+            --bg-primary: #1f2937;
+            --bg-secondary: #374151;
+            --bg-tertiary: #111827;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --text-muted: #9ca3af;
+            --border-color: #4b5563;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .demo-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .demo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .demo-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .demo-controls {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-secondary);
+        }
+
+        /* Main Layout */
+        .editor-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr 320px;
+            gap: 1.5rem;
+            height: calc(100vh - 180px);
+        }
+
+        /* CodeSet Panel */
+        .codeset-panel {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+        }
+
+        .panel-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9375rem;
+            font-weight: 600;
+        }
+
+        .panel-title i {
+            color: var(--primary);
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        /* CodeSet List */
+        .codeset-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .codeset-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+            border: 1px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .codeset-item:hover {
+            border-color: var(--primary);
+        }
+
+        .codeset-item.active {
+            background: var(--primary-light);
+            border-color: var(--primary);
+        }
+
+        .codeset-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            color: var(--text-secondary);
+        }
+
+        .codeset-item.active .codeset-icon {
+            background: var(--primary);
+            color: white;
+        }
+
+        .codeset-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .codeset-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .codeset-count {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .codeset-status {
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background: var(--success);
+        }
+
+        .codeset-status.modified {
+            background: var(--warning);
+        }
+
+        .codeset-status.error {
+            background: var(--danger);
+        }
+
+        /* Add CodeSet Button */
+        .add-codeset-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: transparent;
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-size: 0.8125rem;
+        }
+
+        .add-codeset-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Data Grid */
+        .data-grid-container {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .grid-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+        }
+
+        .search-box {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+        }
+
+        .search-box i {
+            color: var(--text-muted);
+        }
+
+        .search-box input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .toolbar-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.25rem;
+            height: 2.25rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-icon:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .btn-icon.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        /* Data Table */
+        .data-table-wrapper {
+            flex: 1;
+            overflow: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8125rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table th {
+            background: var(--bg-secondary);
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-size: 0.6875rem;
+            letter-spacing: 0.05em;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .data-table th.sortable {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .data-table th.sortable:hover {
+            color: var(--text-primary);
+        }
+
+        .data-table th .sort-icon {
+            margin-left: 0.25rem;
+            opacity: 0.5;
+        }
+
+        .data-table th.sorted .sort-icon {
+            opacity: 1;
+            color: var(--primary);
+        }
+
+        .data-table tr:hover td {
+            background: var(--bg-secondary);
+        }
+
+        .data-table tr.selected td {
+            background: var(--primary-light);
+        }
+
+        .row-checkbox {
+            width: 1rem;
+            height: 1rem;
+            cursor: pointer;
+        }
+
+        .code-cell {
+            font-family: 'SF Mono', Monaco, monospace;
+            color: var(--primary);
+        }
+
+        .description-cell {
+            color: var(--text-secondary);
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-badge.active {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .status-badge.inactive {
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
+        }
+
+        .status-badge.deprecated {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        /* Grid Footer */
+        .grid-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .pagination button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+
+        .pagination button:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .pagination button.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .page-info {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        /* Properties Panel */
+        .properties-panel {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .property-section {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .property-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.875rem 1.25rem;
+            cursor: pointer;
+        }
+
+        .section-header:hover {
+            background: var(--bg-secondary);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .section-content {
+            padding: 0.75rem 1.25rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.375rem;
+        }
+
+        .form-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .form-input {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        /* Binding Indicator */
+        .binding-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.625rem 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+        }
+
+        .binding-icon {
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--info-light);
+            border-radius: 6px;
+            color: var(--info);
+        }
+
+        .binding-info {
+            flex: 1;
+        }
+
+        .binding-field {
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .binding-path {
+            font-size: 0.6875rem;
+            color: var(--text-muted);
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+
+        .btn-remove {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.5rem;
+            height: 1.5rem;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .btn-remove:hover {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+
+        /* Connection Line Animation */
+        .connection-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: var(--success-light);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: var(--success);
+        }
+
+        .connection-indicator i {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .empty-icon {
+            width: 4rem;
+            height: 4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-secondary);
+            border-radius: 50%;
+            margin-bottom: 1rem;
+        }
+
+        .empty-icon i {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+        }
+
+        .empty-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-description {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1 class="demo-title">F.1 CodeSetDataIntegration - Interactive Mockup</h1>
+            <div class="demo-controls">
+                <button class="btn btn-secondary" onclick="toggleTheme()">
+                    <i class="bi bi-moon"></i>
+                    Toggle Theme
+                </button>
+            </div>
+        </div>
+
+        <div class="editor-layout">
+            <!-- CodeSet List Panel -->
+            <div class="codeset-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i class="bi bi-collection"></i>
+                        CodeSets
+                    </div>
+                    <button class="btn-icon" title="Refresh">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                </div>
+                <div class="panel-content">
+                    <div class="codeset-list">
+                        <div class="codeset-item active" onclick="selectCodeSet(this, 'countries')">
+                            <div class="codeset-icon">
+                                <i class="bi bi-globe"></i>
+                            </div>
+                            <div class="codeset-info">
+                                <div class="codeset-name">Countries</div>
+                                <div class="codeset-count">195 items</div>
+                            </div>
+                            <div class="codeset-status"></div>
+                        </div>
+                        <div class="codeset-item" onclick="selectCodeSet(this, 'states')">
+                            <div class="codeset-icon">
+                                <i class="bi bi-geo-alt"></i>
+                            </div>
+                            <div class="codeset-info">
+                                <div class="codeset-name">US States</div>
+                                <div class="codeset-count">50 items</div>
+                            </div>
+                            <div class="codeset-status"></div>
+                        </div>
+                        <div class="codeset-item" onclick="selectCodeSet(this, 'departments')">
+                            <div class="codeset-icon">
+                                <i class="bi bi-building"></i>
+                            </div>
+                            <div class="codeset-info">
+                                <div class="codeset-name">Departments</div>
+                                <div class="codeset-count">12 items</div>
+                            </div>
+                            <div class="codeset-status modified"></div>
+                        </div>
+                        <div class="codeset-item" onclick="selectCodeSet(this, 'status')">
+                            <div class="codeset-icon">
+                                <i class="bi bi-flag"></i>
+                            </div>
+                            <div class="codeset-info">
+                                <div class="codeset-name">Status Codes</div>
+                                <div class="codeset-count">8 items</div>
+                            </div>
+                            <div class="codeset-status"></div>
+                        </div>
+                        <div class="codeset-item" onclick="selectCodeSet(this, 'priority')">
+                            <div class="codeset-icon">
+                                <i class="bi bi-exclamation-triangle"></i>
+                            </div>
+                            <div class="codeset-info">
+                                <div class="codeset-name">Priority Levels</div>
+                                <div class="codeset-count">5 items</div>
+                            </div>
+                            <div class="codeset-status error"></div>
+                        </div>
+                        <button class="add-codeset-btn">
+                            <i class="bi bi-plus-lg"></i>
+                            Add CodeSet
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Grid -->
+            <div class="data-grid-container">
+                <div class="grid-toolbar">
+                    <div class="search-box">
+                        <i class="bi bi-search"></i>
+                        <input type="text" placeholder="Search codes..." id="searchInput">
+                    </div>
+                    <div class="toolbar-actions">
+                        <button class="btn-icon" title="Add Row">
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
+                        <button class="btn-icon" title="Delete Selected">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                        <button class="btn-icon" title="Filter">
+                            <i class="bi bi-funnel"></i>
+                        </button>
+                        <button class="btn-icon active" title="Grid View">
+                            <i class="bi bi-grid-3x3-gap"></i>
+                        </button>
+                        <button class="btn-icon" title="List View">
+                            <i class="bi bi-list"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="data-table-wrapper">
+                    <table class="data-table" id="codesetTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;"><input type="checkbox" class="row-checkbox" onclick="toggleAll(this)"></th>
+                                <th class="sortable sorted" onclick="sortTable(1)">
+                                    Code <i class="bi bi-caret-up-fill sort-icon"></i>
+                                </th>
+                                <th class="sortable" onclick="sortTable(2)">
+                                    Display Name <i class="bi bi-caret-up-fill sort-icon"></i>
+                                </th>
+                                <th class="sortable" onclick="sortTable(3)">
+                                    Description <i class="bi bi-caret-up-fill sort-icon"></i>
+                                </th>
+                                <th class="sortable" onclick="sortTable(4)">
+                                    Status <i class="bi bi-caret-up-fill sort-icon"></i>
+                                </th>
+                                <th style="width: 80px;">Order</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="selected">
+                                <td><input type="checkbox" class="row-checkbox" checked></td>
+                                <td class="code-cell">US</td>
+                                <td>United States</td>
+                                <td class="description-cell">United States of America</td>
+                                <td><span class="status-badge active">Active</span></td>
+                                <td>1</td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" class="row-checkbox"></td>
+                                <td class="code-cell">CA</td>
+                                <td>Canada</td>
+                                <td class="description-cell">Canada</td>
+                                <td><span class="status-badge active">Active</span></td>
+                                <td>2</td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" class="row-checkbox"></td>
+                                <td class="code-cell">MX</td>
+                                <td>Mexico</td>
+                                <td class="description-cell">United Mexican States</td>
+                                <td><span class="status-badge active">Active</span></td>
+                                <td>3</td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" class="row-checkbox"></td>
+                                <td class="code-cell">GB</td>
+                                <td>United Kingdom</td>
+                                <td class="description-cell">United Kingdom of Great Britain</td>
+                                <td><span class="status-badge active">Active</span></td>
+                                <td>4</td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" class="row-checkbox"></td>
+                                <td class="code-cell">DE</td>
+                                <td>Germany</td>
+                                <td class="description-cell">Federal Republic of Germany</td>
+                                <td><span class="status-badge active">Active</span></td>
+                                <td>5</td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" class="row-checkbox"></td>
+                                <td class="code-cell">FR</td>
+                                <td>France</td>
+                                <td class="description-cell">French Republic</td>
+                                <td><span class="status-badge active">Active</span></td>
+                                <td>6</td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" class="row-checkbox"></td>
+                                <td class="code-cell">JP</td>
+                                <td>Japan</td>
+                                <td class="description-cell">Japan</td>
+                                <td><span class="status-badge active">Active</span></td>
+                                <td>7</td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" class="row-checkbox"></td>
+                                <td class="code-cell">AU</td>
+                                <td>Australia</td>
+                                <td class="description-cell">Commonwealth of Australia</td>
+                                <td><span class="status-badge active">Active</span></td>
+                                <td>8</td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" class="row-checkbox"></td>
+                                <td class="code-cell">BR</td>
+                                <td>Brazil</td>
+                                <td class="description-cell">Federative Republic of Brazil</td>
+                                <td><span class="status-badge deprecated">Deprecated</span></td>
+                                <td>9</td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" class="row-checkbox"></td>
+                                <td class="code-cell">IN</td>
+                                <td>India</td>
+                                <td class="description-cell">Republic of India</td>
+                                <td><span class="status-badge inactive">Inactive</span></td>
+                                <td>10</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="grid-footer">
+                    <span class="page-info">Showing 1-10 of 195 items</span>
+                    <div class="pagination">
+                        <button><i class="bi bi-chevron-double-left"></i></button>
+                        <button><i class="bi bi-chevron-left"></i></button>
+                        <button class="active">1</button>
+                        <button>2</button>
+                        <button>3</button>
+                        <button>...</button>
+                        <button>20</button>
+                        <button><i class="bi bi-chevron-right"></i></button>
+                        <button><i class="bi bi-chevron-double-right"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Properties Panel -->
+            <div class="properties-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i class="bi bi-sliders"></i>
+                        CodeSet Properties
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <div class="property-section">
+                        <div class="section-content">
+                            <div class="form-group">
+                                <label class="form-label">CodeSet Name</label>
+                                <input type="text" class="form-input" value="Countries">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Code Field</label>
+                                <input type="text" class="form-input" value="code" placeholder="e.g., code, id">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Display Field</label>
+                                <input type="text" class="form-input" value="displayName" placeholder="e.g., name, label">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Description Field</label>
+                                <input type="text" class="form-input" value="description" placeholder="Optional">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="property-section">
+                        <div class="section-header">
+                            <div class="section-title">
+                                <i class="bi bi-link-45deg"></i>
+                                Field Bindings
+                            </div>
+                        </div>
+                        <div class="section-content">
+                            <div class="connection-indicator">
+                                <i class="bi bi-broadcast"></i>
+                                <span>3 fields bound to this CodeSet</span>
+                            </div>
+                            <div class="binding-row">
+                                <div class="binding-icon">
+                                    <i class="bi bi-input-cursor-text"></i>
+                                </div>
+                                <div class="binding-info">
+                                    <div class="binding-field">Country Selector</div>
+                                    <div class="binding-path">Step1.PersonalInfo.Country</div>
+                                </div>
+                                <button class="btn-remove" title="Remove binding">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                            <div class="binding-row">
+                                <div class="binding-icon">
+                                    <i class="bi bi-input-cursor-text"></i>
+                                </div>
+                                <div class="binding-info">
+                                    <div class="binding-field">Billing Country</div>
+                                    <div class="binding-path">Step2.BillingAddress.Country</div>
+                                </div>
+                                <button class="btn-remove" title="Remove binding">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                            <div class="binding-row">
+                                <div class="binding-icon">
+                                    <i class="bi bi-input-cursor-text"></i>
+                                </div>
+                                <div class="binding-info">
+                                    <div class="binding-field">Shipping Country</div>
+                                    <div class="binding-path">Step2.ShippingAddress.Country</div>
+                                </div>
+                                <button class="btn-remove" title="Remove binding">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="property-section">
+                        <div class="section-header">
+                            <div class="section-title">
+                                <i class="bi bi-cloud"></i>
+                                Data Source
+                            </div>
+                        </div>
+                        <div class="section-content">
+                            <div class="form-group">
+                                <label class="form-label">Source Type</label>
+                                <select class="form-input">
+                                    <option selected>Static (Local)</option>
+                                    <option>API Endpoint</option>
+                                    <option>Database Query</option>
+                                    <option>File Upload</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Refresh Mode</label>
+                                <select class="form-input">
+                                    <option>On Demand</option>
+                                    <option selected>On Load</option>
+                                    <option>Periodic (5 min)</option>
+                                    <option>Real-time</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            document.body.dataset.theme = document.body.dataset.theme === 'dark' ? '' : 'dark';
+        }
+
+        function selectCodeSet(element, name) {
+            document.querySelectorAll('.codeset-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            element.classList.add('active');
+        }
+
+        function toggleAll(checkbox) {
+            const checkboxes = document.querySelectorAll('.data-table tbody .row-checkbox');
+            checkboxes.forEach(cb => cb.checked = checkbox.checked);
+            updateRowSelection();
+        }
+
+        function updateRowSelection() {
+            const rows = document.querySelectorAll('.data-table tbody tr');
+            rows.forEach(row => {
+                const checkbox = row.querySelector('.row-checkbox');
+                if (checkbox.checked) {
+                    row.classList.add('selected');
+                } else {
+                    row.classList.remove('selected');
+                }
+            });
+        }
+
+        document.querySelectorAll('.data-table tbody .row-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', updateRowSelection);
+        });
+
+        function sortTable(columnIndex) {
+            const headers = document.querySelectorAll('.data-table th.sortable');
+            headers.forEach((h, i) => {
+                if (i + 1 === columnIndex) {
+                    h.classList.add('sorted');
+                } else {
+                    h.classList.remove('sorted');
+                }
+            });
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('.data-table tbody tr');
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>

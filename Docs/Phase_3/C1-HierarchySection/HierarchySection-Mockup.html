@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C.1 Hierarchy Section - Mockup</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: rgba(99, 102, 241, 0.1);
+            --primary-hover: #5558E3;
+            --success: #10B981;
+            --success-light: rgba(16, 185, 129, 0.1);
+            --warning: #F59E0B;
+            --warning-light: rgba(245, 158, 11, 0.1);
+            --danger: #EF4444;
+            --danger-light: rgba(239, 68, 68, 0.1);
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --bg-tertiary: #F3F4F6;
+            --border-color: #E5E7EB;
+            --border-focus: #6366F1;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+        }
+
+        [data-theme="dark"] {
+            --primary: #818CF8;
+            --primary-light: rgba(129, 140, 248, 0.15);
+            --text-primary: #F9FAFB;
+            --text-secondary: #D1D5DB;
+            --text-muted: #9CA3AF;
+            --bg-primary: #111827;
+            --bg-secondary: #1F2937;
+            --bg-tertiary: #374151;
+            --border-color: #374151;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .demo-header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .demo-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .demo-header p {
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        .demo-section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            margin-bottom: 32px;
+        }
+
+        .demo-section h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .demo-section h2 i {
+            color: var(--primary);
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-primary);
+            transition: all 0.2s;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--primary);
+        }
+
+        /* ===== HIERARCHY SECTION STYLES ===== */
+
+        .property-section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .section-header:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .section-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-header-left i {
+            font-size: 16px;
+            color: var(--primary);
+        }
+
+        .section-header-left span {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .section-chevron {
+            font-size: 12px;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+
+        .section-header.expanded .section-chevron {
+            transform: rotate(180deg);
+        }
+
+        .section-content {
+            padding: 16px;
+        }
+
+        /* Hierarchy Status Badge */
+        .hierarchy-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            margin-bottom: 16px;
+        }
+
+        .hierarchy-status.has-parent {
+            background: var(--primary-light);
+        }
+
+        .hierarchy-status i {
+            font-size: 16px;
+            color: var(--text-muted);
+        }
+
+        .hierarchy-status.has-parent i {
+            color: var(--primary);
+        }
+
+        .hierarchy-status-text {
+            flex: 1;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .hierarchy-status.has-parent .hierarchy-status-text {
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        /* Breadcrumb Path */
+        .hierarchy-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 12px 14px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            margin-bottom: 16px;
+            overflow-x: auto;
+        }
+
+        .breadcrumb-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .breadcrumb-item i {
+            font-size: 12px;
+        }
+
+        .breadcrumb-separator {
+            color: var(--text-muted);
+            font-size: 10px;
+        }
+
+        .breadcrumb-item.current {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .breadcrumb-item.root i {
+            color: var(--warning);
+        }
+
+        /* Parent Selector */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .form-label i {
+            font-size: 12px;
+        }
+
+        /* Tree Selector */
+        .tree-selector {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .tree-node {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tree-node:last-child {
+            border-bottom: none;
+        }
+
+        .tree-node:hover {
+            background: var(--bg-secondary);
+        }
+
+        .tree-node.selected {
+            background: var(--primary-light);
+        }
+
+        .tree-node.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .tree-node-indent {
+            display: flex;
+            align-items: center;
+        }
+
+        .tree-indent-line {
+            width: 20px;
+            height: 100%;
+            border-left: 1px solid var(--border-color);
+            margin-left: 8px;
+        }
+
+        .tree-node-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: var(--radius-sm);
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .tree-node.selected .tree-node-icon {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tree-node-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .tree-node-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tree-node-type {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .tree-node-check {
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        /* Root Option */
+        .tree-node.root-option {
+            background: var(--bg-secondary);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .tree-node.root-option .tree-node-icon {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        /* Relationship Type Selector */
+        .relationship-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .relationship-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .relationship-option:hover {
+            border-color: var(--primary);
+            background: var(--bg-secondary);
+        }
+
+        .relationship-option.selected {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .relationship-option-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-sm);
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: var(--text-muted);
+        }
+
+        .relationship-option.selected .relationship-option-icon {
+            background: var(--primary);
+            color: white;
+        }
+
+        .relationship-option-content {
+            flex: 1;
+        }
+
+        .relationship-option-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .relationship-option-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Children List */
+        .children-list {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .children-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .children-header-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .children-count {
+            font-size: 11px;
+            color: var(--text-muted);
+            background: var(--bg-tertiary);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .child-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .child-item:last-child {
+            border-bottom: none;
+        }
+
+        .child-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: var(--radius-sm);
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .child-name {
+            flex: 1;
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+
+        .child-relationship {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        .child-relationship.container {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .child-relationship.conditional {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        /* Empty Children State */
+        .empty-children {
+            padding: 24px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .empty-children i {
+            font-size: 24px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        /* Quick Actions */
+        .hierarchy-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .action-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .action-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .action-btn.danger:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+            background: var(--danger-light);
+        }
+
+        /* Visual Hierarchy Tree */
+        .visual-tree {
+            padding: 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+        }
+
+        .visual-tree-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .tree-visual-node {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            position: relative;
+        }
+
+        .tree-visual-connector {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 24px;
+            padding-top: 4px;
+        }
+
+        .connector-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border-color);
+        }
+
+        .tree-visual-node.current .connector-dot {
+            background: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .connector-line {
+            width: 2px;
+            flex: 1;
+            background: var(--border-color);
+            margin: 4px 0;
+        }
+
+        .tree-visual-content {
+            flex: 1;
+            padding-bottom: 12px;
+        }
+
+        .tree-visual-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+        }
+
+        .tree-visual-node.current .tree-visual-label {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .tree-visual-label i {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .tree-visual-node.current .tree-visual-label i {
+            color: var(--primary);
+        }
+
+        .tree-visual-children {
+            margin-left: 36px;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">
+        <i class="bi bi-moon-fill"></i>
+        <span>Toggle Theme</span>
+    </button>
+
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>C.1 Hierarchy Section</h1>
+            <p>Parent-child field relationships and hierarchy management</p>
+        </div>
+
+        <!-- Section States -->
+        <div class="demo-section">
+            <h2><i class="bi bi-diagram-3"></i> Hierarchy Section States</h2>
+            <div class="demo-grid">
+                <!-- Root Level Field -->
+                <div>
+                    <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 12px;">Root Level Field (No Parent)</h3>
+                    <div class="property-section">
+                        <div class="section-header expanded">
+                            <div class="section-header-left">
+                                <i class="bi bi-diagram-3"></i>
+                                <span>Hierarchy</span>
+                            </div>
+                            <i class="bi bi-chevron-down section-chevron"></i>
+                        </div>
+                        <div class="section-content">
+                            <div class="hierarchy-status">
+                                <i class="bi bi-house"></i>
+                                <span class="hierarchy-status-text">This field is at the root level</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="bi bi-arrow-up-square"></i>
+                                    Parent Field
+                                </label>
+                                <div class="tree-selector">
+                                    <div class="tree-node root-option selected">
+                                        <div class="tree-node-icon">
+                                            <i class="bi bi-house"></i>
+                                        </div>
+                                        <div class="tree-node-content">
+                                            <div class="tree-node-label">Root (No Parent)</div>
+                                            <div class="tree-node-type">Top-level field</div>
+                                        </div>
+                                        <i class="bi bi-check-lg tree-node-check"></i>
+                                    </div>
+                                    <div class="tree-node">
+                                        <div class="tree-node-icon">
+                                            <i class="bi bi-card-list"></i>
+                                        </div>
+                                        <div class="tree-node-content">
+                                            <div class="tree-node-label">Personal Information</div>
+                                            <div class="tree-node-type">Section</div>
+                                        </div>
+                                    </div>
+                                    <div class="tree-node">
+                                        <div class="tree-node-indent">
+                                            <div class="tree-indent-line"></div>
+                                        </div>
+                                        <div class="tree-node-icon">
+                                            <i class="bi bi-input-cursor-text"></i>
+                                        </div>
+                                        <div class="tree-node-content">
+                                            <div class="tree-node-label">Full Name</div>
+                                            <div class="tree-node-type">Text</div>
+                                        </div>
+                                    </div>
+                                    <div class="tree-node">
+                                        <div class="tree-node-icon">
+                                            <i class="bi bi-briefcase"></i>
+                                        </div>
+                                        <div class="tree-node-content">
+                                            <div class="tree-node-label">Employment Details</div>
+                                            <div class="tree-node-type">Section</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="children-list" style="margin-top: 16px;">
+                                <div class="children-header">
+                                    <span class="children-header-title">Child Fields</span>
+                                    <span class="children-count">0 fields</span>
+                                </div>
+                                <div class="empty-children">
+                                    <i class="bi bi-diagram-3"></i>
+                                    No child fields
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nested Field with Parent -->
+                <div>
+                    <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 12px;">Field with Parent</h3>
+                    <div class="property-section">
+                        <div class="section-header expanded">
+                            <div class="section-header-left">
+                                <i class="bi bi-diagram-3"></i>
+                                <span>Hierarchy</span>
+                            </div>
+                            <i class="bi bi-chevron-down section-chevron"></i>
+                        </div>
+                        <div class="section-content">
+                            <div class="hierarchy-status has-parent">
+                                <i class="bi bi-diagram-3"></i>
+                                <span class="hierarchy-status-text">Nested under "Personal Information"</span>
+                            </div>
+
+                            <div class="hierarchy-breadcrumb">
+                                <div class="breadcrumb-item root">
+                                    <i class="bi bi-house"></i>
+                                    Root
+                                </div>
+                                <i class="bi bi-chevron-right breadcrumb-separator"></i>
+                                <div class="breadcrumb-item">
+                                    <i class="bi bi-card-list"></i>
+                                    Personal Information
+                                </div>
+                                <i class="bi bi-chevron-right breadcrumb-separator"></i>
+                                <div class="breadcrumb-item current">
+                                    <i class="bi bi-input-cursor-text"></i>
+                                    Full Name
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="bi bi-arrow-up-square"></i>
+                                    Parent Field
+                                </label>
+                                <div class="tree-selector">
+                                    <div class="tree-node root-option">
+                                        <div class="tree-node-icon">
+                                            <i class="bi bi-house"></i>
+                                        </div>
+                                        <div class="tree-node-content">
+                                            <div class="tree-node-label">Root (No Parent)</div>
+                                            <div class="tree-node-type">Top-level field</div>
+                                        </div>
+                                    </div>
+                                    <div class="tree-node selected">
+                                        <div class="tree-node-icon">
+                                            <i class="bi bi-card-list"></i>
+                                        </div>
+                                        <div class="tree-node-content">
+                                            <div class="tree-node-label">Personal Information</div>
+                                            <div class="tree-node-type">Section</div>
+                                        </div>
+                                        <i class="bi bi-check-lg tree-node-check"></i>
+                                    </div>
+                                    <div class="tree-node disabled">
+                                        <div class="tree-node-indent">
+                                            <div class="tree-indent-line"></div>
+                                        </div>
+                                        <div class="tree-node-icon">
+                                            <i class="bi bi-input-cursor-text"></i>
+                                        </div>
+                                        <div class="tree-node-content">
+                                            <div class="tree-node-label">Full Name</div>
+                                            <div class="tree-node-type">(Current field)</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="bi bi-link-45deg"></i>
+                                    Relationship Type
+                                </label>
+                                <div class="relationship-selector">
+                                    <div class="relationship-option selected">
+                                        <div class="relationship-option-icon">
+                                            <i class="bi bi-box"></i>
+                                        </div>
+                                        <div class="relationship-option-content">
+                                            <div class="relationship-option-label">Container</div>
+                                            <div class="relationship-option-desc">Grouped within parent</div>
+                                        </div>
+                                    </div>
+                                    <div class="relationship-option">
+                                        <div class="relationship-option-icon">
+                                            <i class="bi bi-question-circle"></i>
+                                        </div>
+                                        <div class="relationship-option-content">
+                                            <div class="relationship-option-label">Conditional</div>
+                                            <div class="relationship-option-desc">Shown based on parent</div>
+                                        </div>
+                                    </div>
+                                    <div class="relationship-option">
+                                        <div class="relationship-option-icon">
+                                            <i class="bi bi-arrow-down-circle"></i>
+                                        </div>
+                                        <div class="relationship-option-content">
+                                            <div class="relationship-option-label">Cascade</div>
+                                            <div class="relationship-option-desc">Value depends on parent</div>
+                                        </div>
+                                    </div>
+                                    <div class="relationship-option">
+                                        <div class="relationship-option-icon">
+                                            <i class="bi bi-shield-check"></i>
+                                        </div>
+                                        <div class="relationship-option-content">
+                                            <div class="relationship-option-label">Validation</div>
+                                            <div class="relationship-option-desc">Validates with parent</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="hierarchy-actions">
+                                <button class="action-btn">
+                                    <i class="bi bi-arrow-up"></i>
+                                    Move Up
+                                </button>
+                                <button class="action-btn danger">
+                                    <i class="bi bi-box-arrow-up"></i>
+                                    Unparent
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Parent Field with Children -->
+        <div class="demo-section">
+            <h2><i class="bi bi-collection"></i> Parent Field with Children</h2>
+            <div class="demo-grid">
+                <div>
+                    <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 12px;">Section Field (Has Children)</h3>
+                    <div class="property-section">
+                        <div class="section-header expanded">
+                            <div class="section-header-left">
+                                <i class="bi bi-diagram-3"></i>
+                                <span>Hierarchy</span>
+                            </div>
+                            <i class="bi bi-chevron-down section-chevron"></i>
+                        </div>
+                        <div class="section-content">
+                            <div class="hierarchy-status">
+                                <i class="bi bi-house"></i>
+                                <span class="hierarchy-status-text">This field is at the root level</span>
+                            </div>
+
+                            <div class="children-list">
+                                <div class="children-header">
+                                    <span class="children-header-title">Child Fields</span>
+                                    <span class="children-count">4 fields</span>
+                                </div>
+                                <div class="child-item">
+                                    <div class="child-icon">
+                                        <i class="bi bi-input-cursor-text"></i>
+                                    </div>
+                                    <span class="child-name">First Name</span>
+                                    <span class="child-relationship container">Container</span>
+                                </div>
+                                <div class="child-item">
+                                    <div class="child-icon">
+                                        <i class="bi bi-input-cursor-text"></i>
+                                    </div>
+                                    <span class="child-name">Last Name</span>
+                                    <span class="child-relationship container">Container</span>
+                                </div>
+                                <div class="child-item">
+                                    <div class="child-icon">
+                                        <i class="bi bi-envelope"></i>
+                                    </div>
+                                    <span class="child-name">Email Address</span>
+                                    <span class="child-relationship container">Container</span>
+                                </div>
+                                <div class="child-item">
+                                    <div class="child-icon">
+                                        <i class="bi bi-telephone"></i>
+                                    </div>
+                                    <span class="child-name">Phone Number</span>
+                                    <span class="child-relationship conditional">Conditional</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 12px;">Visual Tree View</h3>
+                    <div class="visual-tree">
+                        <div class="visual-tree-title">Position in Form</div>
+
+                        <div class="tree-visual-node">
+                            <div class="tree-visual-connector">
+                                <div class="connector-dot"></div>
+                                <div class="connector-line"></div>
+                            </div>
+                            <div class="tree-visual-content">
+                                <div class="tree-visual-label">
+                                    <i class="bi bi-card-list"></i>
+                                    Personal Information
+                                </div>
+                                <div class="tree-visual-children">
+                                    <div class="tree-visual-node current">
+                                        <div class="tree-visual-connector">
+                                            <div class="connector-dot"></div>
+                                            <div class="connector-line"></div>
+                                        </div>
+                                        <div class="tree-visual-content">
+                                            <div class="tree-visual-label">
+                                                <i class="bi bi-input-cursor-text"></i>
+                                                Full Name
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tree-visual-node">
+                                        <div class="tree-visual-connector">
+                                            <div class="connector-dot"></div>
+                                        </div>
+                                        <div class="tree-visual-content">
+                                            <div class="tree-visual-label">
+                                                <i class="bi bi-envelope"></i>
+                                                Email
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tree-visual-node">
+                            <div class="tree-visual-connector">
+                                <div class="connector-dot"></div>
+                            </div>
+                            <div class="tree-visual-content">
+                                <div class="tree-visual-label">
+                                    <i class="bi bi-briefcase"></i>
+                                    Employment Details
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Relationship Types Reference -->
+        <div class="demo-section">
+            <h2><i class="bi bi-link-45deg"></i> Relationship Types Reference</h2>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
+                <div style="padding: 20px; background: var(--bg-secondary); border-radius: var(--radius-lg); text-align: center;">
+                    <div style="width: 48px; height: 48px; background: var(--primary-light); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
+                        <i class="bi bi-box" style="font-size: 24px; color: var(--primary);"></i>
+                    </div>
+                    <div style="font-size: 15px; font-weight: 600; margin-bottom: 4px;">Container</div>
+                    <div style="font-size: 12px; color: var(--text-secondary);">Child is visually grouped within parent section</div>
+                </div>
+                <div style="padding: 20px; background: var(--bg-secondary); border-radius: var(--radius-lg); text-align: center;">
+                    <div style="width: 48px; height: 48px; background: var(--warning-light); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
+                        <i class="bi bi-question-circle" style="font-size: 24px; color: var(--warning);"></i>
+                    </div>
+                    <div style="font-size: 15px; font-weight: 600; margin-bottom: 4px;">Conditional</div>
+                    <div style="font-size: 12px; color: var(--text-secondary);">Child visibility depends on parent's value</div>
+                </div>
+                <div style="padding: 20px; background: var(--bg-secondary); border-radius: var(--radius-lg); text-align: center;">
+                    <div style="width: 48px; height: 48px; background: var(--success-light); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
+                        <i class="bi bi-arrow-down-circle" style="font-size: 24px; color: var(--success);"></i>
+                    </div>
+                    <div style="font-size: 15px; font-weight: 600; margin-bottom: 4px;">Cascade</div>
+                    <div style="font-size: 12px; color: var(--text-secondary);">Child's options depend on parent's selection</div>
+                </div>
+                <div style="padding: 20px; background: var(--bg-secondary); border-radius: var(--radius-lg); text-align: center;">
+                    <div style="width: 48px; height: 48px; background: var(--danger-light); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
+                        <i class="bi bi-shield-check" style="font-size: 24px; color: var(--danger);"></i>
+                    </div>
+                    <div style="font-size: 15px; font-weight: 600; margin-bottom: 4px;">Validation</div>
+                    <div style="font-size: 12px; color: var(--text-secondary);">Child validation rules reference parent</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            body.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+        }
+
+        // Interactive demo
+        document.querySelectorAll('.tree-node:not(.disabled)').forEach(node => {
+            node.addEventListener('click', function() {
+                const parent = this.closest('.tree-selector');
+                parent.querySelectorAll('.tree-node').forEach(n => n.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.querySelectorAll('.relationship-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const parent = this.closest('.relationship-selector');
+                parent.querySelectorAll('.relationship-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.querySelectorAll('.section-header').forEach(header => {
+            header.addEventListener('click', function() {
+                this.classList.toggle('expanded');
+                const content = this.nextElementSibling;
+                content.style.display = content.style.display === 'none' ? 'block' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>

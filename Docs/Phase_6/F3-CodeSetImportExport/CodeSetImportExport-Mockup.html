@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F.3 CodeSetImportExport - Interactive Mockup</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --primary-light: #eef2ff;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --info: #3b82f6;
+            --info-light: #dbeafe;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --bg-tertiary: #f3f4f6;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --border-color: #e5e7eb;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --primary: #818cf8;
+            --primary-hover: #6366f1;
+            --primary-light: #312e81;
+            --success: #34d399;
+            --success-light: #064e3b;
+            --warning: #fbbf24;
+            --warning-light: #78350f;
+            --danger: #f87171;
+            --danger-light: #7f1d1d;
+            --info: #60a5fa;
+            --info-light: #1e3a5f;
+            --bg-primary: #1f2937;
+            --bg-secondary: #374151;
+            --bg-tertiary: #111827;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --text-muted: #9ca3af;
+            --border-color: #4b5563;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .demo-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .demo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .demo-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .demo-controls {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-secondary);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        /* Modal */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: var(--bg-primary);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .modal-title i {
+            color: var(--primary);
+        }
+
+        .btn-close {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .btn-close:hover {
+            background: var(--bg-secondary);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+        }
+
+        /* Import/Export Tabs */
+        .ie-tabs {
+            display: flex;
+            gap: 0.25rem;
+            margin-bottom: 1.5rem;
+            background: var(--bg-secondary);
+            padding: 0.25rem;
+            border-radius: 10px;
+        }
+
+        .ie-tab {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .ie-tab:hover {
+            color: var(--text-primary);
+        }
+
+        .ie-tab.active {
+            background: var(--bg-primary);
+            color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* File Drop Zone */
+        .drop-zone {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .drop-zone:hover,
+        .drop-zone.dragover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .drop-zone-icon {
+            width: 4rem;
+            height: 4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-secondary);
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+        }
+
+        .drop-zone-icon i {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+        }
+
+        .drop-zone:hover .drop-zone-icon,
+        .drop-zone.dragover .drop-zone-icon {
+            background: var(--primary);
+        }
+
+        .drop-zone:hover .drop-zone-icon i,
+        .drop-zone.dragover .drop-zone-icon i {
+            color: white;
+        }
+
+        .drop-zone-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .drop-zone-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .drop-zone-formats {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .format-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.625rem;
+            background: var(--bg-secondary);
+            border-radius: 9999px;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        /* File Preview */
+        .file-preview {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .file-preview-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .file-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--success-light);
+            border-radius: 8px;
+            color: var(--success);
+        }
+
+        .file-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .file-size {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .file-remove {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.75rem;
+            height: 1.75rem;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .file-remove:hover {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+
+        /* Preview Table */
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .preview-table th,
+        .preview-table td {
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .preview-table th {
+            background: var(--bg-tertiary);
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-size: 0.625rem;
+        }
+
+        .preview-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .preview-more {
+            text-align: center;
+            padding: 0.75rem;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        /* Import Options */
+        .import-options {
+            margin-top: 1.5rem;
+        }
+
+        .option-group {
+            margin-bottom: 1rem;
+        }
+
+        .option-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .option-select {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .option-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* Export Options */
+        .export-formats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .format-card {
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .format-card:hover {
+            border-color: var(--primary);
+        }
+
+        .format-card.selected {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .format-card-icon {
+            width: 3rem;
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+        }
+
+        .format-card.selected .format-card-icon {
+            background: var(--primary);
+            color: white;
+        }
+
+        .format-card-icon i {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+        }
+
+        .format-card.selected .format-card-icon i {
+            color: white;
+        }
+
+        .format-card-title {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .format-card-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Export Settings */
+        .export-settings {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            padding: 1rem;
+        }
+
+        .settings-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.625rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .setting-row:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 2.5rem;
+            height: 1.5rem;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background: var(--bg-tertiary);
+            border-radius: 9999px;
+            transition: 0.2s;
+            border: 1px solid var(--border-color);
+        }
+
+        .toggle-slider::before {
+            position: absolute;
+            content: "";
+            height: 1rem;
+            width: 1rem;
+            left: 0.1875rem;
+            bottom: 0.1875rem;
+            background: white;
+            border-radius: 50%;
+            transition: 0.2s;
+            box-shadow: var(--shadow-sm);
+        }
+
+        input:checked + .toggle-slider {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        input:checked + .toggle-slider::before {
+            transform: translateX(1rem);
+        }
+
+        /* Progress */
+        .import-progress {
+            margin-top: 1.5rem;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Status Messages */
+        .status-message {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .status-message.success {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .status-message.error {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+
+        .status-message.warning {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .status-icon {
+            font-size: 1.25rem;
+        }
+
+        .status-text {
+            flex: 1;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1 class="demo-title">F.3 CodeSetImportExport - Interactive Mockup</h1>
+            <div class="demo-controls">
+                <button class="btn btn-secondary" onclick="toggleTheme()">
+                    <i class="bi bi-moon"></i>
+                    Toggle Theme
+                </button>
+                <button class="btn btn-primary" onclick="showModal('import')">
+                    <i class="bi bi-upload"></i>
+                    Import
+                </button>
+                <button class="btn btn-secondary" onclick="showModal('export')">
+                    <i class="bi bi-download"></i>
+                    Export
+                </button>
+            </div>
+        </div>
+
+        <!-- Import Modal -->
+        <div class="modal-backdrop" id="importModal" style="display: none;">
+            <div class="modal">
+                <div class="modal-header">
+                    <div class="modal-title">
+                        <i class="bi bi-upload"></i>
+                        Import CodeSet
+                    </div>
+                    <button class="btn-close" onclick="hideModal('import')">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                        <input type="file" id="fileInput" style="display: none;" accept=".json,.csv,.xlsx">
+                        <div class="drop-zone-icon">
+                            <i class="bi bi-cloud-upload"></i>
+                        </div>
+                        <div class="drop-zone-title">Drag & drop your file here</div>
+                        <div class="drop-zone-subtitle">or click to browse</div>
+                        <div class="drop-zone-formats">
+                            <span class="format-badge"><i class="bi bi-filetype-json"></i> JSON</span>
+                            <span class="format-badge"><i class="bi bi-filetype-csv"></i> CSV</span>
+                            <span class="format-badge"><i class="bi bi-file-earmark-excel"></i> Excel</span>
+                        </div>
+                    </div>
+
+                    <div class="file-preview" id="filePreview" style="display: none;">
+                        <div class="file-preview-header">
+                            <div class="file-info">
+                                <div class="file-icon">
+                                    <i class="bi bi-file-earmark-check"></i>
+                                </div>
+                                <div>
+                                    <div class="file-name">countries.csv</div>
+                                    <div class="file-size">12.4 KB - 195 rows</div>
+                                </div>
+                            </div>
+                            <button class="file-remove" onclick="removeFile()">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                        <table class="preview-table">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Display Name</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>US</td>
+                                    <td>United States</td>
+                                    <td>United States of America</td>
+                                </tr>
+                                <tr>
+                                    <td>CA</td>
+                                    <td>Canada</td>
+                                    <td>Canada</td>
+                                </tr>
+                                <tr>
+                                    <td>MX</td>
+                                    <td>Mexico</td>
+                                    <td>United Mexican States</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="preview-more">+ 192 more rows</div>
+                    </div>
+
+                    <div class="import-options" id="importOptions" style="display: none;">
+                        <div class="option-group">
+                            <label class="option-label">Import Mode</label>
+                            <select class="option-select">
+                                <option>Create new CodeSet</option>
+                                <option>Merge with existing CodeSet</option>
+                                <option>Replace existing CodeSet</option>
+                            </select>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">Field Mapping</label>
+                            <select class="option-select">
+                                <option>Auto-detect (recommended)</option>
+                                <option>Manual mapping</option>
+                            </select>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-checkbox">
+                                <input type="checkbox" checked>
+                                Skip duplicate codes
+                            </label>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-checkbox">
+                                <input type="checkbox" checked>
+                                Validate data before import
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="import-progress" id="importProgress" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 75%;"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span>Importing... 146 of 195</span>
+                            <span>75%</span>
+                        </div>
+                    </div>
+
+                    <div class="status-message success" id="importSuccess" style="display: none;">
+                        <i class="bi bi-check-circle-fill status-icon"></i>
+                        <span class="status-text">Successfully imported 195 items into "Countries" CodeSet</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="hideModal('import')">Cancel</button>
+                    <button class="btn btn-primary" onclick="startImport()">
+                        <i class="bi bi-upload"></i>
+                        Import
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Modal -->
+        <div class="modal-backdrop" id="exportModal" style="display: none;">
+            <div class="modal">
+                <div class="modal-header">
+                    <div class="modal-title">
+                        <i class="bi bi-download"></i>
+                        Export CodeSet
+                    </div>
+                    <button class="btn-close" onclick="hideModal('export')">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="export-formats">
+                        <div class="format-card selected" onclick="selectFormat(this)">
+                            <div class="format-card-icon">
+                                <i class="bi bi-filetype-json"></i>
+                            </div>
+                            <div class="format-card-title">JSON</div>
+                            <div class="format-card-desc">Best for API integration</div>
+                        </div>
+                        <div class="format-card" onclick="selectFormat(this)">
+                            <div class="format-card-icon">
+                                <i class="bi bi-filetype-csv"></i>
+                            </div>
+                            <div class="format-card-title">CSV</div>
+                            <div class="format-card-desc">Spreadsheet compatible</div>
+                        </div>
+                        <div class="format-card" onclick="selectFormat(this)">
+                            <div class="format-card-icon">
+                                <i class="bi bi-file-earmark-excel"></i>
+                            </div>
+                            <div class="format-card-title">Excel</div>
+                            <div class="format-card-desc">Full Excel workbook</div>
+                        </div>
+                        <div class="format-card" onclick="selectFormat(this)">
+                            <div class="format-card-icon">
+                                <i class="bi bi-code-slash"></i>
+                            </div>
+                            <div class="format-card-title">XML</div>
+                            <div class="format-card-desc">Legacy system support</div>
+                        </div>
+                    </div>
+
+                    <div class="export-settings">
+                        <div class="settings-title">Export Options</div>
+                        <div class="setting-row">
+                            <span class="setting-label">Include metadata</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-row">
+                            <span class="setting-label">Include inactive items</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-row">
+                            <span class="setting-label">Include deprecated items</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-row">
+                            <span class="setting-label">Pretty print (JSON)</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="hideModal('export')">Cancel</button>
+                    <button class="btn btn-success">
+                        <i class="bi bi-download"></i>
+                        Download
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            document.body.dataset.theme = document.body.dataset.theme === 'dark' ? '' : 'dark';
+        }
+
+        function showModal(type) {
+            document.getElementById(type + 'Modal').style.display = 'flex';
+        }
+
+        function hideModal(type) {
+            document.getElementById(type + 'Modal').style.display = 'none';
+        }
+
+        function selectFormat(element) {
+            document.querySelectorAll('.format-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            element.classList.add('selected');
+        }
+
+        // File drop zone handling
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            handleFile(e.dataTransfer.files[0]);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            document.getElementById('filePreview').style.display = 'block';
+            document.getElementById('importOptions').style.display = 'block';
+        }
+
+        function removeFile() {
+            document.getElementById('filePreview').style.display = 'none';
+            document.getElementById('importOptions').style.display = 'none';
+            fileInput.value = '';
+        }
+
+        function startImport() {
+            document.getElementById('importProgress').style.display = 'block';
+            document.getElementById('importOptions').style.display = 'none';
+
+            // Simulate progress
+            let progress = 0;
+            const progressFill = document.querySelector('.progress-fill');
+            const progressText = document.querySelector('.progress-text span:first-child');
+
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    showImportSuccess();
+                }
+                progressFill.style.width = progress + '%';
+                progressText.textContent = `Importing... ${Math.floor(progress * 1.95)} of 195`;
+            }, 200);
+        }
+
+        function showImportSuccess() {
+            document.getElementById('importProgress').style.display = 'none';
+            document.getElementById('importSuccess').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>

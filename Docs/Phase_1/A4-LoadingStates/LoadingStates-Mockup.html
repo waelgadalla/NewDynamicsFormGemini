@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading States - Interactive Demo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-dark: #4F46E5;
+            --primary-light: #EEF2FF;
+            --success: #10B981;
+            --success-light: #D1FAE5;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8FAFC;
+            --bg-tertiary: #F1F5F9;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --text-muted: #94A3B8;
+            --border-color: #E2E8F0;
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.08);
+            --font-sans: 'DM Sans', -apple-system, sans-serif;
+            --radius-sm: 4px;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+            --radius-xl: 10px;
+            --radius-2xl: 12px;
+        }
+        [data-theme="dark"] {
+            --primary: #818CF8;
+            --primary-light: rgba(99, 102, 241, 0.15);
+            --bg-primary: #1E293B;
+            --bg-secondary: #0F172A;
+            --bg-tertiary: #334155;
+            --text-primary: #F1F5F9;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            --border-color: #334155;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-sans); background: var(--bg-secondary); color: var(--text-primary); padding: 32px; }
+
+        .container { max-width: 1200px; margin: 0 auto; }
+        .page-header {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .page-title { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 12px; }
+        .page-title i { color: var(--primary); }
+
+        .section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+        .section-header {
+            padding: 16px 24px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-header i { color: var(--primary); }
+        .section-body { padding: 24px; }
+
+        .demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; }
+        .demo-item { text-align: center; }
+        .demo-label { font-size: 12px; color: var(--text-secondary); margin-top: 16px; font-weight: 600; }
+
+        /* ===== SPINNER ANIMATIONS ===== */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        /* ===== SPINNER VARIANTS ===== */
+
+        /* Basic Spinner */
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        .spinner-sm { width: 20px; height: 20px; border-width: 2px; }
+        .spinner-lg { width: 48px; height: 48px; border-width: 4px; }
+        .spinner-white { border-color: rgba(255,255,255,0.3); border-top-color: white; }
+
+        /* Dots Spinner */
+        .dots-spinner {
+            display: flex;
+            gap: 6px;
+        }
+        .dots-spinner span {
+            width: 10px;
+            height: 10px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .dots-spinner span:nth-child(1) { animation-delay: -0.32s; }
+        .dots-spinner span:nth-child(2) { animation-delay: -0.16s; }
+        .dots-spinner span:nth-child(3) { animation-delay: 0s; }
+
+        /* Pulse Ring */
+        .pulse-ring {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        /* Bar Loader */
+        .bar-loader {
+            width: 100px;
+            height: 4px;
+            background: var(--bg-tertiary);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+        .bar-loader::after {
+            content: "";
+            position: absolute;
+            width: 40%;
+            height: 100%;
+            background: var(--primary);
+            border-radius: 2px;
+            animation: bar-slide 1s ease-in-out infinite;
+        }
+        @keyframes bar-slide {
+            0% { left: -40%; }
+            100% { left: 100%; }
+        }
+
+        /* ===== SKELETON LOADERS ===== */
+        .skeleton {
+            background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-secondary) 50%, var(--bg-tertiary) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite linear;
+            border-radius: var(--radius-md);
+        }
+
+        /* Skeleton Shapes */
+        .skeleton-text { height: 14px; margin-bottom: 8px; }
+        .skeleton-text-sm { height: 12px; margin-bottom: 6px; }
+        .skeleton-title { height: 20px; width: 60%; margin-bottom: 12px; }
+        .skeleton-avatar { width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0; }
+        .skeleton-avatar-sm { width: 32px; height: 32px; }
+        .skeleton-btn { height: 36px; width: 100px; }
+        .skeleton-icon { width: 44px; height: 44px; border-radius: var(--radius-lg); }
+
+        /* Skeleton Card */
+        .skeleton-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: 20px;
+        }
+        .skeleton-card-header { display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start; }
+        .skeleton-card-body { display: flex; flex-direction: column; gap: 8px; }
+
+        /* Skeleton Field Item */
+        .skeleton-field {
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            margin-bottom: 12px;
+        }
+        .skeleton-field-label { height: 14px; width: 30%; margin-bottom: 8px; }
+        .skeleton-field-input { height: 36px; }
+
+        /* Skeleton List Item */
+        .skeleton-list-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Skeleton Table */
+        .skeleton-table { width: 100%; }
+        .skeleton-table-header {
+            display: grid;
+            grid-template-columns: 1fr 2fr 2fr 1fr;
+            gap: 16px;
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md) var(--radius-md) 0 0;
+        }
+        .skeleton-table-row {
+            display: grid;
+            grid-template-columns: 1fr 2fr 2fr 1fr;
+            gap: 16px;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* ===== BUTTON LOADING STATES ===== */
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+            min-width: 120px;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); }
+        .btn-success { background: var(--success); color: white; }
+
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .btn-loading {
+            position: relative;
+        }
+        .btn-loading .btn-text { opacity: 0; }
+        .btn-loading .btn-spinner {
+            position: absolute;
+        }
+
+        /* ===== FULL PAGE LOADER ===== */
+        .page-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .page-loader-icon {
+            width: 64px;
+            height: 64px;
+            background: var(--primary);
+            border-radius: var(--radius-xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            margin-bottom: 20px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        .page-loader-text { color: var(--text-secondary); font-size: 14px; }
+
+        /* ===== INLINE LOADER ===== */
+        .inline-loader {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        /* ===== PROGRESS BAR ===== */
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        .progress-bar-indeterminate .progress-bar-fill {
+            width: 30%;
+            animation: bar-slide 1.5s ease-in-out infinite;
+        }
+
+        /* ===== OVERLAY LOADER ===== */
+        .overlay-loader {
+            position: relative;
+        }
+        .overlay-loader::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: inherit;
+        }
+        [data-theme="dark"] .overlay-loader::after {
+            background: rgba(30, 41, 59, 0.8);
+        }
+        .overlay-loader .spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+        }
+
+        .demo-row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+        .demo-box {
+            width: 100px;
+            height: 100px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle { position: fixed; top: 20px; right: 20px; z-index: 100; }
+    </style>
+</head>
+<body>
+    <button class="btn btn-outline theme-toggle" onclick="toggleTheme()"><i class="bi bi-moon"></i></button>
+
+    <div class="container">
+        <div class="page-header">
+            <div class="page-title">
+                <i class="bi bi-hourglass-split"></i>
+                Loading States Demo
+            </div>
+        </div>
+
+        <!-- Spinners -->
+        <div class="section">
+            <div class="section-header"><i class="bi bi-arrow-repeat"></i> Spinner Variants</div>
+            <div class="section-body">
+                <div class="demo-grid">
+                    <div class="demo-item">
+                        <div class="demo-box">
+                            <div class="spinner-sm spinner"></div>
+                        </div>
+                        <div class="demo-label">Small (20px)</div>
+                    </div>
+                    <div class="demo-item">
+                        <div class="demo-box">
+                            <div class="spinner"></div>
+                        </div>
+                        <div class="demo-label">Default (32px)</div>
+                    </div>
+                    <div class="demo-item">
+                        <div class="demo-box">
+                            <div class="spinner-lg spinner"></div>
+                        </div>
+                        <div class="demo-label">Large (48px)</div>
+                    </div>
+                    <div class="demo-item">
+                        <div class="demo-box" style="background: var(--primary);">
+                            <div class="spinner spinner-white"></div>
+                        </div>
+                        <div class="demo-label">White (on dark)</div>
+                    </div>
+                    <div class="demo-item">
+                        <div class="demo-box">
+                            <div class="dots-spinner">
+                                <span></span><span></span><span></span>
+                            </div>
+                        </div>
+                        <div class="demo-label">Dots</div>
+                    </div>
+                    <div class="demo-item">
+                        <div class="demo-box">
+                            <div class="bar-loader"></div>
+                        </div>
+                        <div class="demo-label">Bar Loader</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Button Loading States -->
+        <div class="section">
+            <div class="section-header"><i class="bi bi-hand-index"></i> Button Loading States</div>
+            <div class="section-body">
+                <div class="demo-row">
+                    <button class="btn btn-primary">
+                        <i class="bi bi-save"></i> Save Changes
+                    </button>
+                    <button class="btn btn-primary btn-loading" disabled>
+                        <span class="btn-text">Save Changes</span>
+                        <div class="spinner spinner-sm spinner-white btn-spinner"></div>
+                    </button>
+                    <button class="btn btn-success">
+                        <i class="bi bi-check"></i> Saved!
+                    </button>
+                </div>
+                <div class="demo-row">
+                    <button class="btn btn-outline">
+                        <i class="bi bi-upload"></i> Upload
+                    </button>
+                    <button class="btn btn-outline btn-loading" disabled>
+                        <span class="btn-text">Upload</span>
+                        <div class="spinner spinner-sm btn-spinner"></div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="section">
+            <div class="section-header"><i class="bi bi-bar-chart-steps"></i> Progress Bars</div>
+            <div class="section-body">
+                <div style="max-width: 400px; display: flex; flex-direction: column; gap: 16px;">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="font-size: 13px;">Uploading...</span>
+                            <span style="font-size: 13px; color: var(--text-secondary);">45%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-bar-fill" style="width: 45%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="margin-bottom: 8px; font-size: 13px;">Indeterminate</div>
+                        <div class="progress-bar progress-bar-indeterminate">
+                            <div class="progress-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Skeleton Loaders -->
+        <div class="section">
+            <div class="section-header"><i class="bi bi-collection"></i> Skeleton Loaders</div>
+            <div class="section-body">
+                <div class="demo-grid" style="grid-template-columns: repeat(2, 1fr);">
+                    <!-- Skeleton Card -->
+                    <div>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px; text-transform: uppercase;">Card Skeleton</div>
+                        <div class="skeleton-card">
+                            <div class="skeleton-card-header">
+                                <div class="skeleton skeleton-icon"></div>
+                                <div style="flex: 1;">
+                                    <div class="skeleton skeleton-title"></div>
+                                    <div class="skeleton skeleton-text-sm" style="width: 40%;"></div>
+                                </div>
+                            </div>
+                            <div class="skeleton-card-body">
+                                <div class="skeleton skeleton-text"></div>
+                                <div class="skeleton skeleton-text"></div>
+                                <div class="skeleton skeleton-text" style="width: 70%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Skeleton Field List -->
+                    <div>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px; text-transform: uppercase;">Field List Skeleton</div>
+                        <div class="skeleton-field">
+                            <div class="skeleton skeleton-field-label"></div>
+                            <div class="skeleton skeleton-field-input"></div>
+                        </div>
+                        <div class="skeleton-field">
+                            <div class="skeleton skeleton-field-label"></div>
+                            <div class="skeleton skeleton-field-input"></div>
+                        </div>
+                    </div>
+
+                    <!-- Skeleton List -->
+                    <div>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px; text-transform: uppercase;">List Skeleton</div>
+                        <div style="border: 1px solid var(--border-color); border-radius: var(--radius-lg); overflow: hidden;">
+                            <div class="skeleton-list-item">
+                                <div class="skeleton skeleton-avatar-sm"></div>
+                                <div style="flex: 1;">
+                                    <div class="skeleton skeleton-text" style="width: 60%; margin-bottom: 4px;"></div>
+                                    <div class="skeleton skeleton-text-sm" style="width: 40%;"></div>
+                                </div>
+                            </div>
+                            <div class="skeleton-list-item">
+                                <div class="skeleton skeleton-avatar-sm"></div>
+                                <div style="flex: 1;">
+                                    <div class="skeleton skeleton-text" style="width: 50%; margin-bottom: 4px;"></div>
+                                    <div class="skeleton skeleton-text-sm" style="width: 30%;"></div>
+                                </div>
+                            </div>
+                            <div class="skeleton-list-item" style="border-bottom: none;">
+                                <div class="skeleton skeleton-avatar-sm"></div>
+                                <div style="flex: 1;">
+                                    <div class="skeleton skeleton-text" style="width: 70%; margin-bottom: 4px;"></div>
+                                    <div class="skeleton skeleton-text-sm" style="width: 35%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Skeleton Table -->
+                    <div>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px; text-transform: uppercase;">Table Skeleton</div>
+                        <div class="skeleton-table" style="border: 1px solid var(--border-color); border-radius: var(--radius-lg); overflow: hidden;">
+                            <div class="skeleton-table-header">
+                                <div class="skeleton skeleton-text-sm"></div>
+                                <div class="skeleton skeleton-text-sm"></div>
+                                <div class="skeleton skeleton-text-sm"></div>
+                                <div class="skeleton skeleton-text-sm"></div>
+                            </div>
+                            <div class="skeleton-table-row">
+                                <div class="skeleton skeleton-text"></div>
+                                <div class="skeleton skeleton-text"></div>
+                                <div class="skeleton skeleton-text"></div>
+                                <div class="skeleton skeleton-text"></div>
+                            </div>
+                            <div class="skeleton-table-row">
+                                <div class="skeleton skeleton-text"></div>
+                                <div class="skeleton skeleton-text"></div>
+                                <div class="skeleton skeleton-text"></div>
+                                <div class="skeleton skeleton-text"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inline & Overlay Loaders -->
+        <div class="section">
+            <div class="section-header"><i class="bi bi-layers"></i> Inline & Overlay Loaders</div>
+            <div class="section-body">
+                <div class="demo-row">
+                    <div class="inline-loader">
+                        <div class="spinner spinner-sm"></div>
+                        <span>Loading fields...</span>
+                    </div>
+                </div>
+                <div class="demo-row" style="margin-top: 24px;">
+                    <div class="skeleton-card overlay-loader" style="width: 300px;">
+                        <div class="spinner"></div>
+                        <div class="skeleton-card-header">
+                            <div class="skeleton skeleton-avatar"></div>
+                            <div style="flex: 1;">
+                                <div class="skeleton skeleton-title"></div>
+                                <div class="skeleton skeleton-text-sm" style="width: 40%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            document.body.dataset.theme = document.body.dataset.theme === 'dark' ? '' : 'dark';
+        }
+    </script>
+</body>
+</html>

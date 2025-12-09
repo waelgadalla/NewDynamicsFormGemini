@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D.1 View Switcher - Mockup</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: rgba(99, 102, 241, 0.1);
+            --primary-hover: #5558E3;
+            --success: #10B981;
+            --success-light: rgba(16, 185, 129, 0.1);
+            --warning: #F59E0B;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --bg-tertiary: #F3F4F6;
+            --border-color: #E5E7EB;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+        }
+
+        [data-theme="dark"] {
+            --primary: #818CF8;
+            --primary-light: rgba(129, 140, 248, 0.15);
+            --text-primary: #F9FAFB;
+            --text-secondary: #D1D5DB;
+            --text-muted: #9CA3AF;
+            --bg-primary: #111827;
+            --bg-secondary: #1F2937;
+            --bg-tertiary: #374151;
+            --border-color: #374151;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .demo-header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .demo-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .demo-header p {
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        .demo-section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            margin-bottom: 32px;
+        }
+
+        .demo-section h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .demo-section h2 i {
+            color: var(--primary);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        /* ===== VIEW SWITCHER STYLES ===== */
+
+        /* Toolbar with View Switcher */
+        .editor-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            margin-bottom: 16px;
+        }
+
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toolbar-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .toolbar-badge {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* View Switcher - Tab Style */
+        .view-switcher {
+            display: flex;
+            gap: 4px;
+            padding: 4px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+        }
+
+        .view-tab {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .view-tab:hover {
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+        }
+
+        .view-tab.active {
+            background: var(--bg-primary);
+            color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .view-tab i {
+            font-size: 14px;
+        }
+
+        /* View Switcher - Segmented Style */
+        .view-switcher-segmented {
+            display: flex;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .view-segment {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 20px;
+            border: none;
+            background: var(--bg-primary);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .view-segment:last-child {
+            border-right: none;
+        }
+
+        .view-segment:hover {
+            background: var(--bg-secondary);
+        }
+
+        .view-segment.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* View Switcher - Icon Only */
+        .view-switcher-icons {
+            display: flex;
+            gap: 2px;
+            padding: 4px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+        }
+
+        .view-icon-btn {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            background: transparent;
+            border-radius: var(--radius-sm);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.15s;
+            font-size: 16px;
+        }
+
+        .view-icon-btn:hover {
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+        }
+
+        .view-icon-btn.active {
+            background: var(--bg-primary);
+            color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* View Indicator Dot */
+        .view-dot {
+            position: relative;
+        }
+
+        .view-dot::after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+
+        /* Toolbar Actions */
+        .toolbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toolbar-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .toolbar-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .toolbar-btn.primary {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .toolbar-btn.primary:hover {
+            background: var(--primary-hover);
+        }
+
+        /* View Content Panels */
+        .view-content {
+            min-height: 300px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 12px;
+            color: var(--text-muted);
+        }
+
+        .view-content i {
+            font-size: 48px;
+        }
+
+        .view-content span {
+            font-size: 14px;
+        }
+
+        /* Keyboard Shortcut Hints */
+        .shortcut-hints {
+            display: flex;
+            gap: 24px;
+            margin-top: 24px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+        }
+
+        .shortcut-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .shortcut-key {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 24px;
+            height: 24px;
+            padding: 0 6px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: monospace;
+            color: var(--text-secondary);
+        }
+
+        .shortcut-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">
+        <i class="bi bi-moon-fill"></i>
+        <span>Toggle Theme</span>
+    </button>
+
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>D.1 View Switcher</h1>
+            <p>Toggle between Design, Preview, and JSON views</p>
+        </div>
+
+        <!-- Tab Style Switcher -->
+        <div class="demo-section">
+            <h2><i class="bi bi-toggles"></i> Tab Style (Recommended)</h2>
+            <div class="editor-toolbar">
+                <div class="toolbar-left">
+                    <span class="toolbar-title">Employee Form</span>
+                    <span class="toolbar-badge">5 Fields</span>
+                </div>
+                <div class="view-switcher">
+                    <button class="view-tab active">
+                        <i class="bi bi-pencil-square"></i>
+                        Design
+                    </button>
+                    <button class="view-tab">
+                        <i class="bi bi-eye"></i>
+                        Preview
+                    </button>
+                    <button class="view-tab">
+                        <i class="bi bi-code-slash"></i>
+                        JSON
+                    </button>
+                </div>
+                <div class="toolbar-actions">
+                    <button class="toolbar-btn">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                        Undo
+                    </button>
+                    <button class="toolbar-btn primary">
+                        <i class="bi bi-save"></i>
+                        Save
+                    </button>
+                </div>
+            </div>
+            <div class="view-content">
+                <i class="bi bi-pencil-square"></i>
+                <span>Design View - Form Editor Canvas</span>
+            </div>
+        </div>
+
+        <!-- Segmented Style -->
+        <div class="demo-section">
+            <h2><i class="bi bi-segmented-nav"></i> Segmented Style</h2>
+            <div class="editor-toolbar">
+                <div class="toolbar-left">
+                    <span class="toolbar-title">Contact Form</span>
+                </div>
+                <div class="view-switcher-segmented">
+                    <button class="view-segment active">
+                        <i class="bi bi-pencil-square"></i>
+                        Design
+                    </button>
+                    <button class="view-segment">
+                        <i class="bi bi-eye"></i>
+                        Preview
+                    </button>
+                    <button class="view-segment">
+                        <i class="bi bi-code-slash"></i>
+                        JSON
+                    </button>
+                </div>
+                <div class="toolbar-actions">
+                    <button class="toolbar-btn primary">
+                        <i class="bi bi-download"></i>
+                        Export
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Icon Only Style -->
+        <div class="demo-section">
+            <h2><i class="bi bi-grid-3x3-gap"></i> Icon Only Style (Compact)</h2>
+            <div class="editor-toolbar">
+                <div class="toolbar-left">
+                    <span class="toolbar-title">Survey Form</span>
+                    <span class="toolbar-badge">Draft</span>
+                </div>
+                <div class="view-switcher-icons">
+                    <button class="view-icon-btn active" title="Design View (Ctrl+1)">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <button class="view-icon-btn view-dot" title="Preview (Ctrl+2)">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                    <button class="view-icon-btn" title="JSON View (Ctrl+3)">
+                        <i class="bi bi-code-slash"></i>
+                    </button>
+                </div>
+                <div class="toolbar-actions">
+                    <button class="toolbar-btn">
+                        <i class="bi bi-share"></i>
+                    </button>
+                    <button class="toolbar-btn primary">
+                        <i class="bi bi-save"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- All States -->
+        <div class="demo-section">
+            <h2><i class="bi bi-collection"></i> View States</h2>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                <div>
+                    <h3 style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">Design View</h3>
+                    <div class="view-switcher">
+                        <button class="view-tab active">
+                            <i class="bi bi-pencil-square"></i>
+                            Design
+                        </button>
+                        <button class="view-tab">
+                            <i class="bi bi-eye"></i>
+                            Preview
+                        </button>
+                        <button class="view-tab">
+                            <i class="bi bi-code-slash"></i>
+                            JSON
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <h3 style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">Preview View</h3>
+                    <div class="view-switcher">
+                        <button class="view-tab">
+                            <i class="bi bi-pencil-square"></i>
+                            Design
+                        </button>
+                        <button class="view-tab active">
+                            <i class="bi bi-eye"></i>
+                            Preview
+                        </button>
+                        <button class="view-tab">
+                            <i class="bi bi-code-slash"></i>
+                            JSON
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <h3 style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">JSON View</h3>
+                    <div class="view-switcher">
+                        <button class="view-tab">
+                            <i class="bi bi-pencil-square"></i>
+                            Design
+                        </button>
+                        <button class="view-tab">
+                            <i class="bi bi-eye"></i>
+                            Preview
+                        </button>
+                        <button class="view-tab active">
+                            <i class="bi bi-code-slash"></i>
+                            JSON
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="shortcut-hints">
+                <div class="shortcut-item">
+                    <span class="shortcut-key">Ctrl</span>
+                    <span class="shortcut-key">1</span>
+                    <span class="shortcut-label">Design View</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">Ctrl</span>
+                    <span class="shortcut-key">2</span>
+                    <span class="shortcut-label">Preview</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">Ctrl</span>
+                    <span class="shortcut-key">3</span>
+                    <span class="shortcut-label">JSON View</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            document.body.setAttribute('data-theme',
+                document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+        }
+
+        document.querySelectorAll('.view-tab, .view-segment, .view-icon-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const parent = this.closest('.view-switcher, .view-switcher-segmented, .view-switcher-icons');
+                parent.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

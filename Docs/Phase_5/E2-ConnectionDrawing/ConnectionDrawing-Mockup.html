@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E.2 Connection Drawing - Mockup</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: rgba(99, 102, 241, 0.1);
+            --success: #10B981;
+            --warning: #F59E0B;
+            --error: #EF4444;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --bg-tertiary: #F3F4F6;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --border-color: #E5E7EB;
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            /* Connection colors */
+            --connection-default: #6B7280;
+            --connection-success: #10B981;
+            --connection-warning: #F59E0B;
+            --connection-error: #EF4444;
+            --connection-active: #6366F1;
+        }
+
+        [data-theme="dark"] {
+            --primary: #818CF8;
+            --primary-light: rgba(129, 140, 248, 0.15);
+            --bg-primary: #1F2937;
+            --bg-secondary: #111827;
+            --bg-tertiary: #374151;
+            --text-primary: #F9FAFB;
+            --text-secondary: #D1D5DB;
+            --text-muted: #9CA3AF;
+            --border-color: #374151;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 24px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .page-title span {
+            color: var(--primary);
+        }
+
+        .theme-toggle {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ===== DEMO CONTROLS ===== */
+        .demo-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .demo-btn {
+            padding: 10px 16px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.15s;
+        }
+
+        .demo-btn:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .demo-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        /* ===== WORKFLOW CANVAS ===== */
+        .workflow-canvas {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            height: 600px;
+            position: relative;
+            overflow: hidden;
+            background-image:
+                radial-gradient(circle, var(--border-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* ===== SVG CONNECTIONS ===== */
+        .connections-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .connections-layer svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Connection path styles */
+        .connection-path {
+            fill: none;
+            stroke: var(--connection-default);
+            stroke-width: 2;
+            pointer-events: stroke;
+            cursor: pointer;
+            transition: stroke 0.2s, stroke-width 0.2s;
+        }
+
+        .connection-path:hover {
+            stroke: var(--connection-active);
+            stroke-width: 3;
+        }
+
+        .connection-path.selected {
+            stroke: var(--connection-active);
+            stroke-width: 3;
+        }
+
+        .connection-path.success {
+            stroke: var(--connection-success);
+        }
+
+        .connection-path.warning {
+            stroke: var(--connection-warning);
+        }
+
+        .connection-path.error {
+            stroke: var(--connection-error);
+        }
+
+        /* Arrow marker */
+        .connection-arrow {
+            fill: var(--connection-default);
+        }
+
+        .connection-path:hover + .connection-arrow,
+        .connection-path.selected + .connection-arrow {
+            fill: var(--connection-active);
+        }
+
+        /* Animated dashed line for drawing */
+        .connection-drawing {
+            stroke-dasharray: 5;
+            animation: dash 0.5s linear infinite;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -10;
+            }
+        }
+
+        /* Connection label */
+        .connection-label {
+            font-size: 11px;
+            font-weight: 600;
+            fill: var(--text-secondary);
+            pointer-events: none;
+        }
+
+        .connection-label-bg {
+            fill: var(--bg-primary);
+            rx: 4;
+        }
+
+        /* ===== SIMPLE NODE REPRESENTATION ===== */
+        .wf-node {
+            position: absolute;
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            min-width: 160px;
+            cursor: move;
+        }
+
+        .wf-node-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .wf-node-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            color: white;
+        }
+
+        .wf-node-body {
+            padding: 10px 14px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Node type colors */
+        .wf-node.start { border-color: var(--success); }
+        .wf-node.start .wf-node-icon { background: var(--success); }
+        .wf-node.start .wf-node-header { background: rgba(16, 185, 129, 0.1); }
+
+        .wf-node.step { border-color: var(--primary); }
+        .wf-node.step .wf-node-icon { background: var(--primary); }
+        .wf-node.step .wf-node-header { background: var(--primary-light); }
+
+        .wf-node.decision { border-color: var(--warning); }
+        .wf-node.decision .wf-node-icon { background: var(--warning); }
+        .wf-node.decision .wf-node-header { background: rgba(245, 158, 11, 0.1); }
+
+        .wf-node.end { border-color: #6B7280; }
+        .wf-node.end .wf-node-icon { background: #6B7280; }
+        .wf-node.end .wf-node-header { background: rgba(107, 114, 128, 0.1); }
+
+        /* Connection handles */
+        .wf-handle {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            cursor: crosshair;
+            z-index: 10;
+        }
+
+        .wf-handle:hover {
+            transform: scale(1.3);
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .wf-handle.top { top: -6px; left: 50%; transform: translateX(-50%); }
+        .wf-handle.bottom { bottom: -6px; left: 50%; transform: translateX(-50%); }
+        .wf-handle.left { left: -6px; top: 50%; transform: translateY(-50%); }
+        .wf-handle.right { right: -6px; top: 50%; transform: translateY(-50%); }
+
+        .wf-handle.top:hover { transform: translateX(-50%) scale(1.3); }
+        .wf-handle.bottom:hover { transform: translateX(-50%) scale(1.3); }
+        .wf-handle.left:hover { transform: translateY(-50%) scale(1.3); }
+        .wf-handle.right:hover { transform: translateY(-50%) scale(1.3); }
+
+        /* ===== CONNECTION TYPE SHOWCASE ===== */
+        .showcase-section {
+            margin-bottom: 24px;
+        }
+
+        .showcase-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .showcase-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        .showcase-item {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+        }
+
+        .showcase-item-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .showcase-item-preview {
+            height: 100px;
+            position: relative;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        /* ===== CONNECTION DELETE BUTTON ===== */
+        .connection-delete {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: var(--error);
+            border: 2px solid var(--bg-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 100;
+        }
+
+        .connection-delete.visible {
+            opacity: 1;
+        }
+
+        .connection-delete:hover {
+            transform: scale(1.1);
+        }
+
+        /* ===== BRANCH LABELS ===== */
+        .branch-label {
+            position: absolute;
+            padding: 2px 8px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 10px;
+            font-weight: 600;
+            z-index: 50;
+        }
+
+        .branch-label.yes {
+            color: var(--success);
+            border-color: var(--success);
+        }
+
+        .branch-label.no {
+            color: var(--error);
+            border-color: var(--error);
+        }
+    </style>
+</head>
+<body>
+    <div class="page-header">
+        <h1 class="page-title">E.2 <span>Connection Drawing</span> - Mockup</h1>
+        <button class="theme-toggle" onclick="toggleTheme()">
+            <i class="bi bi-moon"></i>
+            Toggle Theme
+        </button>
+    </div>
+
+    <!-- Connection Type Showcase -->
+    <div class="showcase-section">
+        <div class="showcase-title">Connection Types</div>
+        <div class="showcase-grid">
+            <div class="showcase-item">
+                <div class="showcase-item-title">Bezier Curve (Default)</div>
+                <div class="showcase-item-preview">
+                    <svg width="100%" height="100%">
+                        <defs>
+                            <marker id="arrow1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#6B7280"/>
+                            </marker>
+                        </defs>
+                        <path d="M30,20 C80,20 170,80 220,80" stroke="#6B7280" stroke-width="2" fill="none" marker-end="url(#arrow1)"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="showcase-item">
+                <div class="showcase-item-title">Step Line (Orthogonal)</div>
+                <div class="showcase-item-preview">
+                    <svg width="100%" height="100%">
+                        <defs>
+                            <marker id="arrow2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#6B7280"/>
+                            </marker>
+                        </defs>
+                        <path d="M30,20 L30,50 L220,50 L220,80" stroke="#6B7280" stroke-width="2" fill="none" marker-end="url(#arrow2)"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="showcase-item">
+                <div class="showcase-item-title">Smooth Step</div>
+                <div class="showcase-item-preview">
+                    <svg width="100%" height="100%">
+                        <defs>
+                            <marker id="arrow3" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#6B7280"/>
+                            </marker>
+                        </defs>
+                        <path d="M30,20 L30,35 Q30,50 45,50 L205,50 Q220,50 220,65 L220,80" stroke="#6B7280" stroke-width="2" fill="none" marker-end="url(#arrow3)"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="showcase-item">
+                <div class="showcase-item-title">Straight Line</div>
+                <div class="showcase-item-preview">
+                    <svg width="100%" height="100%">
+                        <defs>
+                            <marker id="arrow4" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#6B7280"/>
+                            </marker>
+                        </defs>
+                        <path d="M30,20 L220,80" stroke="#6B7280" stroke-width="2" fill="none" marker-end="url(#arrow4)"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Demo Controls -->
+    <div class="demo-controls">
+        <button class="demo-btn active" onclick="setConnectionType('bezier')">
+            <i class="bi bi-bezier2"></i> Bezier
+        </button>
+        <button class="demo-btn" onclick="setConnectionType('step')">
+            <i class="bi bi-distribute-vertical"></i> Step
+        </button>
+        <button class="demo-btn" onclick="setConnectionType('smooth')">
+            <i class="bi bi-graph-up"></i> Smooth Step
+        </button>
+        <button class="demo-btn" onclick="setConnectionType('straight')">
+            <i class="bi bi-slash-lg"></i> Straight
+        </button>
+        <span style="border-left: 1px solid var(--border-color); margin: 0 8px;"></span>
+        <button class="demo-btn" onclick="toggleAnimation()">
+            <i class="bi bi-play-fill"></i> Animate
+        </button>
+        <button class="demo-btn" onclick="addConnection()">
+            <i class="bi bi-plus-lg"></i> Add Connection
+        </button>
+        <button class="demo-btn" onclick="deleteSelected()">
+            <i class="bi bi-trash"></i> Delete
+        </button>
+    </div>
+
+    <!-- Workflow Canvas -->
+    <div class="workflow-canvas" id="canvas">
+        <!-- SVG Layer for Connections -->
+        <svg class="connections-layer" id="connectionsLayer">
+            <defs>
+                <!-- Arrow markers -->
+                <marker id="arrowDefault" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="var(--connection-default)"/>
+                </marker>
+                <marker id="arrowSuccess" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="var(--connection-success)"/>
+                </marker>
+                <marker id="arrowWarning" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="var(--connection-warning)"/>
+                </marker>
+                <marker id="arrowActive" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="var(--connection-active)"/>
+                </marker>
+            </defs>
+
+            <!-- Connections will be drawn here -->
+            <g id="connectionPaths">
+                <!-- Start -> Step 1 -->
+                <path class="connection-path" id="conn1"
+                      d="M 140,95 C 140,140 140,140 140,175"
+                      marker-end="url(#arrowDefault)"
+                      onclick="selectConnection('conn1')"/>
+
+                <!-- Step 1 -> Decision -->
+                <path class="connection-path" id="conn2"
+                      d="M 140,255 C 140,300 140,300 140,335"
+                      marker-end="url(#arrowDefault)"
+                      onclick="selectConnection('conn2')"/>
+
+                <!-- Decision -> Step 2 (Yes branch) -->
+                <path class="connection-path success" id="conn3"
+                      d="M 220,375 C 270,375 270,375 320,375"
+                      marker-end="url(#arrowSuccess)"
+                      onclick="selectConnection('conn3')"/>
+
+                <!-- Decision -> End (No branch) -->
+                <path class="connection-path warning" id="conn4"
+                      d="M 140,415 C 140,480 300,480 300,520"
+                      marker-end="url(#arrowWarning)"
+                      onclick="selectConnection('conn4')"/>
+
+                <!-- Step 2 -> End -->
+                <path class="connection-path" id="conn5"
+                      d="M 400,415 C 400,480 300,480 300,520"
+                      marker-end="url(#arrowDefault)"
+                      onclick="selectConnection('conn5')"/>
+            </g>
+
+            <!-- Labels -->
+            <g id="connectionLabels">
+                <rect class="connection-label-bg" x="225" y="360" width="30" height="16"/>
+                <text class="connection-label" x="240" y="372" text-anchor="middle">Yes</text>
+
+                <rect class="connection-label-bg" x="125" y="440" width="24" height="16"/>
+                <text class="connection-label" x="137" y="452" text-anchor="middle">No</text>
+            </g>
+
+            <!-- Drawing preview line -->
+            <path class="connection-path connection-drawing" id="drawingPath" d="" style="display: none;"/>
+        </svg>
+
+        <!-- Connection Delete Button -->
+        <div class="connection-delete" id="deleteBtn">
+            <i class="bi bi-x"></i>
+        </div>
+
+        <!-- Nodes -->
+        <div class="wf-node start" style="left: 60px; top: 40px;">
+            <div class="wf-node-header">
+                <div class="wf-node-icon"><i class="bi bi-play-fill"></i></div>
+                <span>Start</span>
+            </div>
+            <div class="wf-node-body">On form submit</div>
+            <div class="wf-handle bottom" onmousedown="startDrawing(event, 'start', 'bottom')"></div>
+        </div>
+
+        <div class="wf-node step" style="left: 60px; top: 175px;">
+            <div class="wf-node-header">
+                <div class="wf-node-icon"><i class="bi bi-ui-checks"></i></div>
+                <span>Personal Info</span>
+            </div>
+            <div class="wf-node-body">8 fields</div>
+            <div class="wf-handle top" onmousedown="startDrawing(event, 'step1', 'top')"></div>
+            <div class="wf-handle bottom" onmousedown="startDrawing(event, 'step1', 'bottom')"></div>
+        </div>
+
+        <div class="wf-node decision" style="left: 60px; top: 335px;">
+            <div class="wf-node-header">
+                <div class="wf-node-icon"><i class="bi bi-signpost-split"></i></div>
+                <span>Needs Approval?</span>
+            </div>
+            <div class="wf-node-body">Amount > $5000</div>
+            <div class="wf-handle top" onmousedown="startDrawing(event, 'decision', 'top')"></div>
+            <div class="wf-handle bottom" onmousedown="startDrawing(event, 'decision', 'bottom')"></div>
+            <div class="wf-handle left" onmousedown="startDrawing(event, 'decision', 'left')"></div>
+            <div class="wf-handle right" onmousedown="startDrawing(event, 'decision', 'right')"></div>
+        </div>
+
+        <div class="wf-node step" style="left: 320px; top: 335px;">
+            <div class="wf-node-header">
+                <div class="wf-node-icon"><i class="bi bi-ui-checks"></i></div>
+                <span>Manager Approval</span>
+            </div>
+            <div class="wf-node-body">Approval form</div>
+            <div class="wf-handle top" onmousedown="startDrawing(event, 'step2', 'top')"></div>
+            <div class="wf-handle bottom" onmousedown="startDrawing(event, 'step2', 'bottom')"></div>
+            <div class="wf-handle left" onmousedown="startDrawing(event, 'step2', 'left')"></div>
+        </div>
+
+        <div class="wf-node end" style="left: 220px; top: 520px;">
+            <div class="wf-node-header">
+                <div class="wf-node-icon"><i class="bi bi-stop-fill"></i></div>
+                <span>Complete</span>
+            </div>
+            <div class="wf-node-body">Submit data</div>
+            <div class="wf-handle top" onmousedown="startDrawing(event, 'end', 'top')"></div>
+        </div>
+    </div>
+
+    <script>
+        let selectedConnection = null;
+        let isDrawing = false;
+        let drawingStart = null;
+        let connectionType = 'bezier';
+
+        function selectConnection(connId) {
+            // Deselect previous
+            if (selectedConnection) {
+                document.getElementById(selectedConnection).classList.remove('selected');
+            }
+
+            // Select new
+            selectedConnection = connId;
+            const path = document.getElementById(connId);
+            path.classList.add('selected');
+
+            // Show delete button at midpoint
+            const pathLength = path.getTotalLength();
+            const midPoint = path.getPointAtLength(pathLength / 2);
+            const deleteBtn = document.getElementById('deleteBtn');
+            deleteBtn.style.left = (midPoint.x - 12) + 'px';
+            deleteBtn.style.top = (midPoint.y - 12) + 'px';
+            deleteBtn.classList.add('visible');
+        }
+
+        function deleteSelected() {
+            if (selectedConnection) {
+                document.getElementById(selectedConnection).remove();
+                document.getElementById('deleteBtn').classList.remove('visible');
+                selectedConnection = null;
+            }
+        }
+
+        function startDrawing(event, nodeId, handle) {
+            event.stopPropagation();
+            isDrawing = true;
+            const rect = event.target.getBoundingClientRect();
+            const canvasRect = document.getElementById('canvas').getBoundingClientRect();
+            drawingStart = {
+                x: rect.left - canvasRect.left + 6,
+                y: rect.top - canvasRect.top + 6,
+                nodeId,
+                handle
+            };
+            document.getElementById('drawingPath').style.display = 'block';
+        }
+
+        document.getElementById('canvas').addEventListener('mousemove', (e) => {
+            if (!isDrawing) return;
+
+            const canvasRect = document.getElementById('canvas').getBoundingClientRect();
+            const endX = e.clientX - canvasRect.left;
+            const endY = e.clientY - canvasRect.top;
+
+            const path = generatePath(drawingStart.x, drawingStart.y, endX, endY);
+            document.getElementById('drawingPath').setAttribute('d', path);
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isDrawing) {
+                isDrawing = false;
+                document.getElementById('drawingPath').style.display = 'none';
+                document.getElementById('drawingPath').setAttribute('d', '');
+            }
+        });
+
+        function generatePath(x1, y1, x2, y2) {
+            switch (connectionType) {
+                case 'bezier':
+                    const midY = (y1 + y2) / 2;
+                    return `M ${x1},${y1} C ${x1},${midY} ${x2},${midY} ${x2},${y2}`;
+                case 'step':
+                    const stepY = (y1 + y2) / 2;
+                    return `M ${x1},${y1} L ${x1},${stepY} L ${x2},${stepY} L ${x2},${y2}`;
+                case 'smooth':
+                    const sY = (y1 + y2) / 2;
+                    const radius = 10;
+                    return `M ${x1},${y1} L ${x1},${sY - radius} Q ${x1},${sY} ${x1 + radius},${sY} L ${x2 - radius},${sY} Q ${x2},${sY} ${x2},${sY + radius} L ${x2},${y2}`;
+                case 'straight':
+                    return `M ${x1},${y1} L ${x2},${y2}`;
+                default:
+                    return `M ${x1},${y1} L ${x2},${y2}`;
+            }
+        }
+
+        function setConnectionType(type) {
+            connectionType = type;
+            document.querySelectorAll('.demo-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.demo-btn').classList.add('active');
+        }
+
+        function toggleAnimation() {
+            const paths = document.querySelectorAll('.connection-path:not(.connection-drawing)');
+            paths.forEach(path => {
+                path.classList.toggle('connection-drawing');
+            });
+        }
+
+        function addConnection() {
+            alert('Click and drag from a handle to another handle to create a connection.');
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            body.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+        }
+
+        // Hide delete button when clicking elsewhere
+        document.getElementById('canvas').addEventListener('click', (e) => {
+            if (!e.target.classList.contains('connection-path')) {
+                if (selectedConnection) {
+                    document.getElementById(selectedConnection).classList.remove('selected');
+                }
+                document.getElementById('deleteBtn').classList.remove('visible');
+                selectedConnection = null;
+            }
+        });
+    </script>
+</body>
+</html>

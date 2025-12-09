@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ModalBase Component - Interactive Mockup</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ===== DESIGN TOKENS ===== */
+        :root {
+            --primary: #6366F1;
+            --primary-dark: #4F46E5;
+            --primary-light: #EEF2FF;
+            --success: #10B981;
+            --success-light: #D1FAE5;
+            --danger: #EF4444;
+            --danger-light: #FEE2E2;
+            --warning: #F59E0B;
+            --warning-light: #FEF3C7;
+            --info: #3B82F6;
+            --info-light: #DBEAFE;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8FAFC;
+            --bg-tertiary: #F1F5F9;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --text-muted: #94A3B8;
+            --border-color: #E2E8F0;
+            --border-strong: #CBD5E1;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 12px 32px rgba(0,0,0,0.12);
+            --shadow-xl: 0 20px 40px rgba(0,0,0,0.15);
+            --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --radius-sm: 4px;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+            --radius-xl: 10px;
+            --radius-2xl: 12px;
+            --transition-fast: 0.15s ease;
+            --transition-normal: 0.2s ease;
+        }
+
+        [data-theme="dark"] {
+            --primary: #818CF8;
+            --primary-dark: #6366F1;
+            --primary-light: rgba(99, 102, 241, 0.15);
+            --bg-primary: #1E293B;
+            --bg-secondary: #0F172A;
+            --bg-tertiary: #334155;
+            --text-primary: #F1F5F9;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            --border-color: #334155;
+            --border-strong: #475569;
+            --shadow-lg: 0 12px 32px rgba(0,0,0,0.4);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 40px;
+        }
+
+        /* ===== DEMO CONTROLS ===== */
+        .demo-controls {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .demo-controls h2 {
+            font-size: 18px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .demo-controls h2 i { color: var(--primary); }
+
+        .control-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .control-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .control-item { flex: 1; min-width: 150px; }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: inherit;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+        .btn-outline { background: var(--bg-primary); border: 1px solid var(--border-color); color: var(--text-primary); }
+        .btn-outline:hover { border-color: var(--border-strong); background: var(--bg-tertiary); }
+        .btn-ghost { background: transparent; color: var(--text-secondary); }
+        .btn-ghost:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-danger:hover { background: #DC2626; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-success:hover { background: #059669; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+        /* ===== MODAL BACKDROP ===== */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity var(--transition-normal), visibility var(--transition-normal);
+        }
+
+        .modal-backdrop.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* ===== MODAL CONTAINER ===== */
+        .modal {
+            background: var(--bg-primary);
+            border-radius: var(--radius-2xl);
+            width: 100%;
+            max-height: 85vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-xl);
+            transform: scale(0.95) translateY(10px);
+            transition: transform var(--transition-normal);
+        }
+
+        .modal-backdrop.active .modal {
+            transform: scale(1) translateY(0);
+        }
+
+        /* Size variants */
+        .modal-sm { max-width: 400px; }
+        .modal-md { max-width: 560px; }
+        .modal-lg { max-width: 720px; }
+        .modal-xl { max-width: 900px; }
+        .modal-fullscreen {
+            max-width: calc(100vw - 40px);
+            max-height: calc(100vh - 40px);
+            height: calc(100vh - 40px);
+        }
+
+        /* ===== MODAL HEADER ===== */
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-title i {
+            font-size: 18px;
+            color: var(--primary);
+        }
+
+        .modal-title .badge {
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: var(--radius-sm);
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all var(--transition-fast);
+        }
+
+        .modal-close:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        /* ===== MODAL BODY ===== */
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .modal-body::-webkit-scrollbar { width: 6px; }
+        .modal-body::-webkit-scrollbar-track { background: transparent; }
+        .modal-body::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+
+        /* ===== MODAL FOOTER ===== */
+        .modal-footer {
+            padding: 12px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            flex-shrink: 0;
+        }
+
+        .modal-footer.spread {
+            justify-content: space-between;
+        }
+
+        .modal-footer .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* ===== FORM ELEMENTS ===== */
+        .form-group { margin-bottom: 16px; }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: inherit;
+            transition: border-color var(--transition-fast);
+        }
+
+        .form-textarea { min-height: 100px; resize: vertical; }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* ===== KEYBOARD HINT ===== */
+        .keyboard-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        kbd {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 2px 6px;
+            font-size: 10px;
+            font-family: inherit;
+        }
+
+        /* ===== DEMO PAGE CONTENT ===== */
+        .page-content {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .page-content h3 {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* ===== VARIANT EXAMPLES ===== */
+        .variant-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        /* Theme toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        /* Loading state */
+        .modal-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            gap: 16px;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Focus trap indicator */
+        .focus-indicator {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            font-size: 10px;
+            background: var(--info-light);
+            color: var(--info);
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Toggle -->
+    <button class="btn btn-outline theme-toggle" onclick="toggleTheme()">
+        <i class="bi bi-moon"></i> Toggle Theme
+    </button>
+
+    <!-- Demo Controls -->
+    <div class="demo-controls">
+        <h2><i class="bi bi-window"></i> ModalBase Component - Interactive Demo</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 20px;">
+            This is the foundation modal component. All other modals extend this base.
+        </p>
+
+        <div class="control-group">
+            <div class="control-item">
+                <label>Modal Size</label>
+                <select id="modalSize" onchange="updateModal()">
+                    <option value="modal-sm">Small (400px)</option>
+                    <option value="modal-md" selected>Medium (560px)</option>
+                    <option value="modal-lg">Large (720px)</option>
+                    <option value="modal-xl">Extra Large (900px)</option>
+                    <option value="modal-fullscreen">Fullscreen</option>
+                </select>
+            </div>
+            <div class="control-item">
+                <label>Modal Title</label>
+                <input type="text" id="modalTitle" value="Modal Title" oninput="updateModal()">
+            </div>
+            <div class="control-item">
+                <label>Icon</label>
+                <select id="modalIcon" onchange="updateModal()">
+                    <option value="bi-window">Window</option>
+                    <option value="bi-gear">Settings</option>
+                    <option value="bi-plus-circle">Add</option>
+                    <option value="bi-pencil">Edit</option>
+                    <option value="bi-trash">Delete</option>
+                    <option value="bi-exclamation-triangle">Warning</option>
+                    <option value="bi-info-circle">Info</option>
+                    <option value="bi-code-slash">Code</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <div class="control-item">
+                <label>Footer Style</label>
+                <select id="footerStyle" onchange="updateModal()">
+                    <option value="standard">Standard (Right-aligned)</option>
+                    <option value="spread">Spread (Space-between)</option>
+                    <option value="none">No Footer</option>
+                </select>
+            </div>
+            <div class="control-item">
+                <label>Click Outside to Close</label>
+                <select id="closeOnBackdrop">
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
+                </select>
+            </div>
+            <div class="control-item">
+                <label>Show Loading State</label>
+                <select id="showLoading" onchange="updateModal()">
+                    <option value="false">No</option>
+                    <option value="true">Yes</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="variant-grid">
+            <button class="btn btn-primary" onclick="openModal()">
+                <i class="bi bi-window"></i> Open Modal
+            </button>
+            <button class="btn btn-outline" onclick="openConfirmModal()">
+                <i class="bi bi-exclamation-triangle"></i> Confirm Dialog
+            </button>
+            <button class="btn btn-outline" onclick="openFormModal()">
+                <i class="bi bi-ui-checks"></i> Form Modal
+            </button>
+            <button class="btn btn-outline" onclick="openInfoModal()">
+                <i class="bi bi-info-circle"></i> Info Modal
+            </button>
+        </div>
+    </div>
+
+    <!-- Page Content (behind modal) -->
+    <div class="page-content">
+        <h3>Page Content (will be covered by modal backdrop)</h3>
+    </div>
+
+    <!-- Modal Backdrop -->
+    <div class="modal-backdrop" id="modalBackdrop" onclick="handleBackdropClick(event)">
+        <!-- Modal Container -->
+        <div class="modal modal-md" id="modal" onclick="event.stopPropagation()">
+            <!-- Header -->
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="bi bi-window" id="modalIconEl"></i>
+                    <span id="modalTitleEl">Modal Title</span>
+                </div>
+                <button class="modal-close" onclick="closeModal()" title="Close (Esc)">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body" id="modalBody">
+                <div id="modalContent">
+                    <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                        This is the modal body content. It can contain any content including forms,
+                        text, images, or other components.
+                    </p>
+
+                    <div class="form-group">
+                        <label class="form-label">Sample Input</label>
+                        <input type="text" class="form-input" placeholder="Type something...">
+                        <p class="form-hint">This is a hint text to help users</p>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">First Name</label>
+                            <input type="text" class="form-input" placeholder="John">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" class="form-input" placeholder="Doe">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-textarea" placeholder="Enter a description..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Loading State (hidden by default) -->
+                <div class="modal-loading" id="loadingState" style="display: none;">
+                    <div class="spinner"></div>
+                    <p style="color: var(--text-secondary);">Loading...</p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer" id="modalFooter">
+                <span class="keyboard-hint">
+                    <kbd>Esc</kbd> to close
+                </span>
+                <div class="btn-group">
+                    <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+                    <button class="btn btn-primary">
+                        <i class="bi bi-check-lg"></i> Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Modal state
+        let isOpen = false;
+
+        // Open modal
+        function openModal() {
+            document.getElementById('modalBackdrop').classList.add('active');
+            isOpen = true;
+            // Focus first input
+            setTimeout(() => {
+                const firstInput = document.querySelector('.modal-body input, .modal-body button');
+                if (firstInput) firstInput.focus();
+            }, 100);
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('modalBackdrop').classList.remove('active');
+            isOpen = false;
+        }
+
+        // Handle backdrop click
+        function handleBackdropClick(event) {
+            const closeOnBackdrop = document.getElementById('closeOnBackdrop').value === 'true';
+            if (closeOnBackdrop && event.target === event.currentTarget) {
+                closeModal();
+            }
+        }
+
+        // Update modal based on controls
+        function updateModal() {
+            const modal = document.getElementById('modal');
+            const size = document.getElementById('modalSize').value;
+            const title = document.getElementById('modalTitle').value;
+            const icon = document.getElementById('modalIcon').value;
+            const footerStyle = document.getElementById('footerStyle').value;
+            const showLoading = document.getElementById('showLoading').value === 'true';
+
+            // Update size
+            modal.className = 'modal ' + size;
+
+            // Update title
+            document.getElementById('modalTitleEl').textContent = title;
+
+            // Update icon
+            document.getElementById('modalIconEl').className = 'bi ' + icon;
+
+            // Update footer
+            const footer = document.getElementById('modalFooter');
+            if (footerStyle === 'none') {
+                footer.style.display = 'none';
+            } else {
+                footer.style.display = 'flex';
+                footer.className = footerStyle === 'spread' ? 'modal-footer spread' : 'modal-footer';
+            }
+
+            // Update loading
+            document.getElementById('modalContent').style.display = showLoading ? 'none' : 'block';
+            document.getElementById('loadingState').style.display = showLoading ? 'flex' : 'none';
+        }
+
+        // Keyboard handler
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && isOpen) {
+                closeModal();
+            }
+        });
+
+        // Theme toggle
+        function toggleTheme() {
+            document.body.dataset.theme = document.body.dataset.theme === 'dark' ? '' : 'dark';
+        }
+
+        // Preset modals
+        function openConfirmModal() {
+            document.getElementById('modalSize').value = 'modal-sm';
+            document.getElementById('modalTitle').value = 'Confirm Action';
+            document.getElementById('modalIcon').value = 'bi-exclamation-triangle';
+            document.getElementById('footerStyle').value = 'standard';
+            document.getElementById('showLoading').value = 'false';
+            updateModal();
+
+            document.getElementById('modalContent').innerHTML = `
+                <div style="text-align: center; padding: 20px 0;">
+                    <i class="bi bi-exclamation-triangle" style="font-size: 48px; color: var(--warning); margin-bottom: 16px; display: block;"></i>
+                    <h3 style="margin-bottom: 8px;">Are you sure?</h3>
+                    <p style="color: var(--text-secondary);">This action cannot be undone.</p>
+                </div>
+            `;
+
+            document.getElementById('modalFooter').innerHTML = `
+                <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-danger">
+                    <i class="bi bi-trash"></i> Delete
+                </button>
+            `;
+
+            openModal();
+        }
+
+        function openFormModal() {
+            document.getElementById('modalSize').value = 'modal-lg';
+            document.getElementById('modalTitle').value = 'Edit Settings';
+            document.getElementById('modalIcon').value = 'bi-gear';
+            document.getElementById('footerStyle').value = 'spread';
+            document.getElementById('showLoading').value = 'false';
+            updateModal();
+
+            document.getElementById('modalContent').innerHTML = `
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Module Name (EN)</label>
+                        <input type="text" class="form-input" value="Personal Information">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Module Name (FR)</label>
+                        <input type="text" class="form-input" value="Informations personnelles">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-textarea">Enter your personal details including name, address, and contact information.</textarea>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Table Name</label>
+                        <input type="text" class="form-input" value="PersonalInfo" style="font-family: monospace;">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Schema</label>
+                        <select class="form-select">
+                            <option>dbo</option>
+                            <option>forms</option>
+                            <option>app</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('modalFooter').innerHTML = `
+                <button class="btn btn-ghost" onclick="closeModal()">
+                    <i class="bi bi-x"></i> Cancel
+                </button>
+                <div class="btn-group">
+                    <button class="btn btn-outline">
+                        <i class="bi bi-arrow-counterclockwise"></i> Reset
+                    </button>
+                    <button class="btn btn-primary">
+                        <i class="bi bi-check-lg"></i> Save Changes
+                    </button>
+                </div>
+            `;
+
+            openModal();
+        }
+
+        function openInfoModal() {
+            document.getElementById('modalSize').value = 'modal-md';
+            document.getElementById('modalTitle').value = 'Keyboard Shortcuts';
+            document.getElementById('modalIcon').value = 'bi-info-circle';
+            document.getElementById('footerStyle').value = 'standard';
+            document.getElementById('showLoading').value = 'false';
+            updateModal();
+
+            document.getElementById('modalContent').innerHTML = `
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color);">
+                        <span>Undo</span>
+                        <span><kbd>Ctrl</kbd> + <kbd>Z</kbd></span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color);">
+                        <span>Redo</span>
+                        <span><kbd>Ctrl</kbd> + <kbd>Y</kbd></span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color);">
+                        <span>Copy Field</span>
+                        <span><kbd>Ctrl</kbd> + <kbd>C</kbd></span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color);">
+                        <span>Paste Field</span>
+                        <span><kbd>Ctrl</kbd> + <kbd>V</kbd></span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color);">
+                        <span>Delete Field</span>
+                        <span><kbd>Delete</kbd></span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                        <span>Close Modal</span>
+                        <span><kbd>Esc</kbd></span>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('modalFooter').innerHTML = `
+                <button class="btn btn-primary" onclick="closeModal()">Got it!</button>
+            `;
+
+            openModal();
+        }
+    </script>
+</body>
+</html>

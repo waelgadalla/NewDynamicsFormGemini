@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empty States & Onboarding - Interactive Demo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-dark: #4F46E5;
+            --primary-light: #EEF2FF;
+            --success: #10B981;
+            --success-light: #D1FAE5;
+            --danger: #EF4444;
+            --danger-light: #FEE2E2;
+            --warning: #F59E0B;
+            --warning-light: #FEF3C7;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8FAFC;
+            --bg-tertiary: #F1F5F9;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --text-muted: #94A3B8;
+            --border-color: #E2E8F0;
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.08);
+            --font-sans: 'DM Sans', -apple-system, sans-serif;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+            --radius-xl: 10px;
+            --radius-2xl: 12px;
+        }
+        [data-theme="dark"] {
+            --primary: #818CF8;
+            --primary-light: rgba(99, 102, 241, 0.15);
+            --bg-primary: #1E293B;
+            --bg-secondary: #0F172A;
+            --bg-tertiary: #334155;
+            --text-primary: #F1F5F9;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            --border-color: #334155;
+            --success-light: rgba(16, 185, 129, 0.15);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-sans); background: var(--bg-secondary); color: var(--text-primary); padding: 32px; }
+
+        .container { max-width: 1200px; margin: 0 auto; }
+        .page-header {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .page-title { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 12px; }
+        .page-title i { color: var(--primary); }
+
+        .section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+        .section-header {
+            padding: 16px 24px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-header i { color: var(--primary); }
+        .section-body { padding: 24px; }
+
+        .demo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+
+        /* ===== EMPTY STATE STYLES ===== */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 24px;
+            text-align: center;
+        }
+
+        .empty-state-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .empty-state-icon i {
+            font-size: 32px;
+            color: var(--text-muted);
+        }
+        .empty-state-icon.success { background: var(--success-light); }
+        .empty-state-icon.success i { color: var(--success); }
+        .empty-state-icon.primary { background: var(--primary-light); }
+        .empty-state-icon.primary i { color: var(--primary); }
+
+        .empty-state-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .empty-state-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            max-width: 320px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .empty-state-action {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+        .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-sm { padding: 8px 16px; font-size: 13px; }
+
+        /* Canvas Empty State */
+        .canvas-empty {
+            background: var(--bg-secondary);
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius-xl);
+            min-height: 300px;
+        }
+        .canvas-empty:hover { border-color: var(--primary); }
+
+        /* Workflow Empty State */
+        .workflow-empty {
+            background: radial-gradient(var(--border-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            background-color: var(--bg-tertiary);
+            border-radius: var(--radius-lg);
+            min-height: 300px;
+        }
+
+        /* Search Empty State */
+        .search-empty {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-lg);
+            min-height: 200px;
+        }
+
+        /* Success Empty State */
+        .success-state {
+            background: linear-gradient(135deg, var(--success-light), transparent);
+            border-radius: var(--radius-lg);
+            min-height: 200px;
+        }
+
+        /* Illustration styles */
+        .illustration {
+            width: 120px;
+            height: 100px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .illustration-canvas {
+            width: 100%;
+            height: 100%;
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            position: relative;
+            overflow: hidden;
+        }
+        .illustration-field {
+            position: absolute;
+            height: 16px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            left: 10%;
+            right: 10%;
+        }
+        .illustration-field:nth-child(1) { top: 15%; width: 50%; }
+        .illustration-field:nth-child(2) { top: 40%; }
+        .illustration-field:nth-child(3) { top: 65%; width: 70%; }
+        .illustration-plus {
+            position: absolute;
+            bottom: -8px;
+            right: -8px;
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Quick Start Cards */
+        .quick-start {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 24px;
+            max-width: 500px;
+        }
+        .quick-start-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .quick-start-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        .quick-start-card i {
+            font-size: 24px;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+        .quick-start-card span {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* First Time Onboarding */
+        .onboarding-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        .onboarding-overlay.active { opacity: 1; visibility: visible; }
+
+        .onboarding-card {
+            background: var(--bg-primary);
+            border-radius: var(--radius-2xl);
+            max-width: 480px;
+            width: 100%;
+            padding: 32px;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+        }
+        .onboarding-icon {
+            width: 64px;
+            height: 64px;
+            background: var(--primary-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+        .onboarding-icon i { font-size: 28px; color: var(--primary); }
+        .onboarding-title { font-size: 24px; font-weight: 700; margin-bottom: 12px; }
+        .onboarding-desc { color: var(--text-secondary); margin-bottom: 24px; line-height: 1.6; }
+        .onboarding-steps {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+        .onboarding-step {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border-color);
+        }
+        .onboarding-step.active { background: var(--primary); width: 24px; border-radius: 4px; }
+        .onboarding-actions { display: flex; gap: 12px; justify-content: center; }
+
+        /* Checklist */
+        .checklist {
+            text-align: left;
+            margin: 20px 0;
+        }
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: var(--radius-md);
+            margin-bottom: 8px;
+            background: var(--bg-tertiary);
+        }
+        .checklist-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        .checklist-icon.done { background: var(--success); color: white; }
+        .checklist-icon.pending { background: var(--border-color); color: var(--text-muted); }
+        .checklist-text { flex: 1; font-size: 14px; }
+        .checklist-text.done { text-decoration: line-through; color: var(--text-muted); }
+
+        .theme-toggle { position: fixed; top: 20px; right: 20px; z-index: 100; }
+    </style>
+</head>
+<body>
+    <button class="btn btn-outline theme-toggle" onclick="toggleTheme()"><i class="bi bi-moon"></i></button>
+
+    <div class="container">
+        <div class="page-header">
+            <div class="page-title">
+                <i class="bi bi-inbox"></i>
+                Empty States & Onboarding Demo
+            </div>
+            <button class="btn btn-primary" onclick="showOnboarding()">
+                <i class="bi bi-play"></i> Show Onboarding
+            </button>
+        </div>
+
+        <!-- Canvas Empty State -->
+        <div class="section">
+            <div class="section-header"><i class="bi bi-file-earmark"></i> Empty Canvas</div>
+            <div class="section-body">
+                <div class="canvas-empty">
+                    <div class="empty-state">
+                        <div class="illustration">
+                            <div class="illustration-canvas">
+                                <div class="illustration-field"></div>
+                                <div class="illustration-field"></div>
+                                <div class="illustration-field"></div>
+                            </div>
+                            <div class="illustration-plus"><i class="bi bi-plus"></i></div>
+                        </div>
+                        <div class="empty-state-title">Start Building Your Form</div>
+                        <div class="empty-state-description">
+                            Drag fields from the left panel or click below to add your first field.
+                        </div>
+                        <div class="empty-state-action">
+                            <button class="btn btn-primary">
+                                <i class="bi bi-plus-lg"></i> Add First Field
+                            </button>
+                            <button class="btn btn-outline">
+                                <i class="bi bi-cloud-arrow-down"></i> Import JSON
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-grid">
+            <!-- Workflow Empty State -->
+            <div class="section">
+                <div class="section-header"><i class="bi bi-diagram-3"></i> Empty Workflow</div>
+                <div class="section-body" style="padding: 0;">
+                    <div class="workflow-empty">
+                        <div class="empty-state">
+                            <div class="empty-state-icon primary">
+                                <i class="bi bi-diagram-3"></i>
+                            </div>
+                            <div class="empty-state-title">Create Your Workflow</div>
+                            <div class="empty-state-description">
+                                Add modules to build a multi-step workflow. Drag to arrange the order.
+                            </div>
+                            <div class="empty-state-action">
+                                <button class="btn btn-primary btn-sm">
+                                    <i class="bi bi-plus"></i> Add Module
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Empty State -->
+            <div class="section">
+                <div class="section-header"><i class="bi bi-search"></i> No Search Results</div>
+                <div class="section-body" style="padding: 0;">
+                    <div class="search-empty">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <i class="bi bi-search"></i>
+                            </div>
+                            <div class="empty-state-title">No Results Found</div>
+                            <div class="empty-state-description">
+                                We couldn't find any fields matching "xyz". Try a different search term.
+                            </div>
+                            <div class="empty-state-action">
+                                <button class="btn btn-outline btn-sm">
+                                    <i class="bi bi-x"></i> Clear Search
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Validation Success State -->
+            <div class="section">
+                <div class="section-header"><i class="bi bi-shield-check"></i> Validation Success</div>
+                <div class="section-body" style="padding: 0;">
+                    <div class="success-state">
+                        <div class="empty-state">
+                            <div class="empty-state-icon success">
+                                <i class="bi bi-check-lg"></i>
+                            </div>
+                            <div class="empty-state-title">All Checks Passed!</div>
+                            <div class="empty-state-description">
+                                Your form is valid and ready to publish. No issues detected.
+                            </div>
+                            <div class="empty-state-action">
+                                <button class="btn btn-primary btn-sm" style="background: var(--success);">
+                                    <i class="bi bi-rocket"></i> Publish Form
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CodeSet Empty State -->
+            <div class="section">
+                <div class="section-header"><i class="bi bi-list-ul"></i> Empty CodeSet</div>
+                <div class="section-body" style="padding: 0;">
+                    <div class="empty-state" style="background: var(--bg-tertiary); border-radius: var(--radius-lg); min-height: 200px;">
+                        <div class="empty-state-icon">
+                            <i class="bi bi-list-ul"></i>
+                        </div>
+                        <div class="empty-state-title">No Options Yet</div>
+                        <div class="empty-state-description">
+                            Add options to this code set or import from CSV.
+                        </div>
+                        <div class="empty-state-action">
+                            <button class="btn btn-primary btn-sm">
+                                <i class="bi bi-plus"></i> Add Option
+                            </button>
+                            <button class="btn btn-outline btn-sm">
+                                <i class="bi bi-upload"></i> Import CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Start Section -->
+        <div class="section">
+            <div class="section-header"><i class="bi bi-lightning"></i> Dashboard Empty State with Quick Start</div>
+            <div class="section-body">
+                <div class="empty-state" style="padding-top: 32px;">
+                    <div class="empty-state-icon primary">
+                        <i class="bi bi-grid-1x2"></i>
+                    </div>
+                    <div class="empty-state-title">Welcome to Form Builder</div>
+                    <div class="empty-state-description">
+                        You don't have any forms yet. Get started by creating your first form or explore templates.
+                    </div>
+                    <div class="quick-start">
+                        <div class="quick-start-card">
+                            <i class="bi bi-file-earmark-plus"></i>
+                            <span>Blank Form</span>
+                        </div>
+                        <div class="quick-start-card">
+                            <i class="bi bi-person-badge"></i>
+                            <span>Contact Form</span>
+                        </div>
+                        <div class="quick-start-card">
+                            <i class="bi bi-clipboard-check"></i>
+                            <span>Survey</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Onboarding Checklist -->
+        <div class="section">
+            <div class="section-header"><i class="bi bi-list-check"></i> Onboarding Checklist</div>
+            <div class="section-body">
+                <div style="max-width: 500px; margin: 0 auto;">
+                    <div class="empty-state-title" style="text-align: left; margin-bottom: 16px;">Getting Started</div>
+                    <div class="checklist">
+                        <div class="checklist-item">
+                            <div class="checklist-icon done"><i class="bi bi-check"></i></div>
+                            <span class="checklist-text done">Create your account</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checklist-icon done"><i class="bi bi-check"></i></div>
+                            <span class="checklist-text done">Explore the editor</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checklist-icon pending">3</div>
+                            <span class="checklist-text">Add your first field</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checklist-icon pending">4</div>
+                            <span class="checklist-text">Configure validation rules</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checklist-icon pending">5</div>
+                            <span class="checklist-text">Preview and publish</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- First-Time Onboarding Overlay -->
+    <div class="onboarding-overlay" id="onboardingOverlay" onclick="hideOnboarding(event)">
+        <div class="onboarding-card" onclick="event.stopPropagation()">
+            <div class="onboarding-icon">
+                <i class="bi bi-stars"></i>
+            </div>
+            <div class="onboarding-title">Welcome to Form Builder!</div>
+            <div class="onboarding-desc">
+                Create professional forms with our drag-and-drop editor. Let's take a quick tour to get you started.
+            </div>
+            <div class="onboarding-steps">
+                <div class="onboarding-step active"></div>
+                <div class="onboarding-step"></div>
+                <div class="onboarding-step"></div>
+                <div class="onboarding-step"></div>
+            </div>
+            <div class="onboarding-actions">
+                <button class="btn btn-outline" onclick="hideOnboarding()">Skip Tour</button>
+                <button class="btn btn-primary" onclick="hideOnboarding()">
+                    <i class="bi bi-arrow-right"></i> Get Started
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            document.body.dataset.theme = document.body.dataset.theme === 'dark' ? '' : 'dark';
+        }
+
+        function showOnboarding() {
+            document.getElementById('onboardingOverlay').classList.add('active');
+        }
+
+        function hideOnboarding(e) {
+            if (!e || e.target === e.currentTarget) {
+                document.getElementById('onboardingOverlay').classList.remove('active');
+            }
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') hideOnboarding();
+        });
+    </script>
+</body>
+</html>

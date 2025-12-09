@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E.1 Workflow Node Types - Mockup</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: rgba(99, 102, 241, 0.1);
+            --primary-hover: #5558E3;
+            --success: #10B981;
+            --success-light: rgba(16, 185, 129, 0.1);
+            --warning: #F59E0B;
+            --warning-light: rgba(245, 158, 11, 0.1);
+            --error: #EF4444;
+            --error-light: rgba(239, 68, 68, 0.1);
+            --info: #3B82F6;
+            --info-light: rgba(59, 130, 246, 0.1);
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --bg-tertiary: #F3F4F6;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --border-color: #E5E7EB;
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+            /* Node colors */
+            --node-start: #10B981;
+            --node-start-light: rgba(16, 185, 129, 0.1);
+            --node-end: #6B7280;
+            --node-end-light: rgba(107, 114, 128, 0.1);
+            --node-step: #6366F1;
+            --node-step-light: rgba(99, 102, 241, 0.1);
+            --node-decision: #F59E0B;
+            --node-decision-light: rgba(245, 158, 11, 0.1);
+            --node-action: #8B5CF6;
+            --node-action-light: rgba(139, 92, 246, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --primary: #818CF8;
+            --primary-light: rgba(129, 140, 248, 0.15);
+            --bg-primary: #1F2937;
+            --bg-secondary: #111827;
+            --bg-tertiary: #374151;
+            --text-primary: #F9FAFB;
+            --text-secondary: #D1D5DB;
+            --text-muted: #9CA3AF;
+            --border-color: #374151;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 24px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .page-title span {
+            color: var(--primary);
+        }
+
+        .theme-toggle {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ===== WORKFLOW CANVAS ===== */
+        .workflow-canvas {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            min-height: 600px;
+            position: relative;
+            overflow: hidden;
+            background-image:
+                radial-gradient(circle, var(--border-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* ===== NODE BASE STYLES ===== */
+        .wf-node {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            cursor: move;
+            transition: all 0.2s;
+            min-width: 200px;
+        }
+
+        .wf-node:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .wf-node.selected {
+            box-shadow: 0 0 0 3px var(--primary-light), var(--shadow-lg);
+        }
+
+        .wf-node-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        }
+
+        .wf-node-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-md);
+            font-size: 16px;
+        }
+
+        .wf-node-title {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .wf-node-menu {
+            padding: 4px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            border-radius: var(--radius-sm);
+        }
+
+        .wf-node-menu:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .wf-node-body {
+            padding: 12px 16px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .wf-node-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 16px;
+            background: var(--bg-tertiary);
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* ===== CONNECTION HANDLES ===== */
+        .wf-handle {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            cursor: crosshair;
+            transition: all 0.15s;
+            z-index: 10;
+        }
+
+        .wf-handle:hover {
+            transform: scale(1.3);
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .wf-handle.top {
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .wf-handle.bottom {
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .wf-handle.left {
+            left: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .wf-handle.right {
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .wf-handle:hover {
+            transform: scale(1.3);
+        }
+
+        .wf-handle.top:hover,
+        .wf-handle.bottom:hover {
+            transform: translateX(-50%) scale(1.3);
+        }
+
+        .wf-handle.left:hover,
+        .wf-handle.right:hover {
+            transform: translateY(-50%) scale(1.3);
+        }
+
+        /* ===== START NODE ===== */
+        .wf-node-start {
+            border-color: var(--node-start);
+        }
+
+        .wf-node-start .wf-node-header {
+            background: var(--node-start-light);
+        }
+
+        .wf-node-start .wf-node-icon {
+            background: var(--node-start);
+            color: white;
+        }
+
+        .wf-node-start .wf-handle {
+            border-color: var(--node-start);
+        }
+
+        /* ===== END NODE ===== */
+        .wf-node-end {
+            border-color: var(--node-end);
+        }
+
+        .wf-node-end .wf-node-header {
+            background: var(--node-end-light);
+        }
+
+        .wf-node-end .wf-node-icon {
+            background: var(--node-end);
+            color: white;
+        }
+
+        .wf-node-end .wf-handle {
+            border-color: var(--node-end);
+        }
+
+        /* ===== STEP NODE ===== */
+        .wf-node-step {
+            border-color: var(--node-step);
+        }
+
+        .wf-node-step .wf-node-header {
+            background: var(--node-step-light);
+        }
+
+        .wf-node-step .wf-node-icon {
+            background: var(--node-step);
+            color: white;
+        }
+
+        .wf-node-step .wf-handle {
+            border-color: var(--node-step);
+        }
+
+        /* ===== DECISION NODE ===== */
+        .wf-node-decision {
+            border-color: var(--node-decision);
+            min-width: 220px;
+        }
+
+        .wf-node-decision .wf-node-header {
+            background: var(--node-decision-light);
+        }
+
+        .wf-node-decision .wf-node-icon {
+            background: var(--node-decision);
+            color: white;
+            transform: rotate(45deg);
+        }
+
+        .wf-node-decision .wf-node-icon i {
+            transform: rotate(-45deg);
+        }
+
+        .wf-node-decision .wf-handle {
+            border-color: var(--node-decision);
+        }
+
+        .decision-branches {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .decision-branch {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .decision-branch.yes {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .decision-branch.no {
+            background: var(--error-light);
+            color: var(--error);
+        }
+
+        /* ===== ACTION NODE ===== */
+        .wf-node-action {
+            border-color: var(--node-action);
+        }
+
+        .wf-node-action .wf-node-header {
+            background: var(--node-action-light);
+        }
+
+        .wf-node-action .wf-node-icon {
+            background: var(--node-action);
+            color: white;
+        }
+
+        .wf-node-action .wf-handle {
+            border-color: var(--node-action);
+        }
+
+        /* ===== NODE PALETTE ===== */
+        .node-palette {
+            position: fixed;
+            left: 24px;
+            top: 100px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            box-shadow: var(--shadow-lg);
+            z-index: 100;
+        }
+
+        .palette-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .palette-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .palette-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            cursor: grab;
+            transition: all 0.15s;
+        }
+
+        .palette-item:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--primary);
+        }
+
+        .palette-item:active {
+            cursor: grabbing;
+        }
+
+        .palette-item-icon {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            color: white;
+        }
+
+        .palette-item-icon.start { background: var(--node-start); }
+        .palette-item-icon.end { background: var(--node-end); }
+        .palette-item-icon.step { background: var(--node-step); }
+        .palette-item-icon.decision {
+            background: var(--node-decision);
+            transform: rotate(45deg);
+        }
+        .palette-item-icon.decision i { transform: rotate(-45deg); }
+        .palette-item-icon.action { background: var(--node-action); }
+
+        .palette-item-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        /* ===== NODE PROPERTIES PANEL ===== */
+        .node-properties {
+            position: fixed;
+            right: 24px;
+            top: 100px;
+            width: 320px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            z-index: 100;
+        }
+
+        .properties-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .properties-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .properties-title-icon {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            color: white;
+            background: var(--node-decision);
+        }
+
+        .properties-close {
+            padding: 4px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 18px;
+        }
+
+        .properties-body {
+            padding: 16px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .property-group {
+            margin-bottom: 16px;
+        }
+
+        .property-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .property-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .property-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .property-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        .property-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+        }
+
+        .property-checkbox input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+        }
+
+        .property-checkbox-label {
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+
+        /* ===== TRIGGER CONFIGURATION ===== */
+        .trigger-config {
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            margin-top: 8px;
+        }
+
+        .trigger-type {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .trigger-type-btn {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .trigger-type-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        /* ===== CONDITION PREVIEW ===== */
+        .condition-preview {
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            border-left: 3px solid var(--node-decision);
+        }
+
+        .condition-preview-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .condition-preview-text {
+            font-size: 13px;
+            color: var(--text-primary);
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+
+        .condition-edit-btn {
+            margin-top: 10px;
+            padding: 8px 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .condition-edit-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        /* ===== DEMO SECTION ===== */
+        .demo-section {
+            margin-bottom: 24px;
+        }
+
+        .demo-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .node-showcase {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            padding: 24px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+        }
+
+        .showcase-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .showcase-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        /* Static nodes for showcase */
+        .showcase-node {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            min-width: 180px;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-header">
+        <h1 class="page-title">E.1 <span>Workflow Node Types</span> - Mockup</h1>
+        <button class="theme-toggle" onclick="toggleTheme()">
+            <i class="bi bi-moon"></i>
+            Toggle Theme
+        </button>
+    </div>
+
+    <!-- Node Showcase -->
+    <div class="demo-section">
+        <div class="demo-title">Node Type Showcase</div>
+        <div class="node-showcase">
+            <!-- Start Node -->
+            <div class="showcase-item">
+                <span class="showcase-label">Start Node</span>
+                <div class="showcase-node wf-node-start">
+                    <div class="wf-node-header">
+                        <div class="wf-node-icon">
+                            <i class="bi bi-play-fill"></i>
+                        </div>
+                        <span class="wf-node-title">Start</span>
+                    </div>
+                    <div class="wf-node-body">
+                        Workflow begins here
+                    </div>
+                    <div class="wf-node-footer">
+                        <span>Trigger: Form Submit</span>
+                    </div>
+                    <div class="wf-handle bottom"></div>
+                </div>
+            </div>
+
+            <!-- Step Node -->
+            <div class="showcase-item">
+                <span class="showcase-label">Step Node</span>
+                <div class="showcase-node wf-node-step">
+                    <div class="wf-node-header">
+                        <div class="wf-node-icon">
+                            <i class="bi bi-ui-checks"></i>
+                        </div>
+                        <span class="wf-node-title">Employee Info</span>
+                    </div>
+                    <div class="wf-node-body">
+                        Fill in employee details
+                    </div>
+                    <div class="wf-node-footer">
+                        <span>12 fields</span>
+                        <span>Required</span>
+                    </div>
+                    <div class="wf-handle top"></div>
+                    <div class="wf-handle bottom"></div>
+                </div>
+            </div>
+
+            <!-- Decision Node -->
+            <div class="showcase-item">
+                <span class="showcase-label">Decision Node</span>
+                <div class="showcase-node wf-node-decision">
+                    <div class="wf-node-header">
+                        <div class="wf-node-icon">
+                            <i class="bi bi-signpost-split"></i>
+                        </div>
+                        <span class="wf-node-title">Approval Check</span>
+                    </div>
+                    <div class="wf-node-body">
+                        <div>If Amount > $5000</div>
+                        <div class="decision-branches">
+                            <span class="decision-branch yes">
+                                <i class="bi bi-check-circle-fill"></i> Yes
+                            </span>
+                            <span class="decision-branch no">
+                                <i class="bi bi-x-circle-fill"></i> No
+                            </span>
+                        </div>
+                    </div>
+                    <div class="wf-handle top"></div>
+                    <div class="wf-handle bottom"></div>
+                    <div class="wf-handle left"></div>
+                    <div class="wf-handle right"></div>
+                </div>
+            </div>
+
+            <!-- Action Node -->
+            <div class="showcase-item">
+                <span class="showcase-label">Action Node</span>
+                <div class="showcase-node wf-node-action">
+                    <div class="wf-node-header">
+                        <div class="wf-node-icon">
+                            <i class="bi bi-lightning-fill"></i>
+                        </div>
+                        <span class="wf-node-title">Send Email</span>
+                    </div>
+                    <div class="wf-node-body">
+                        Notify manager@company.com
+                    </div>
+                    <div class="wf-node-footer">
+                        <span>Email Action</span>
+                    </div>
+                    <div class="wf-handle top"></div>
+                    <div class="wf-handle bottom"></div>
+                </div>
+            </div>
+
+            <!-- End Node -->
+            <div class="showcase-item">
+                <span class="showcase-label">End Node</span>
+                <div class="showcase-node wf-node-end">
+                    <div class="wf-node-header">
+                        <div class="wf-node-icon">
+                            <i class="bi bi-stop-fill"></i>
+                        </div>
+                        <span class="wf-node-title">End</span>
+                    </div>
+                    <div class="wf-node-body">
+                        Workflow complete
+                    </div>
+                    <div class="wf-node-footer">
+                        <span>Action: Submit</span>
+                    </div>
+                    <div class="wf-handle top"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Node Palette -->
+    <div class="node-palette">
+        <div class="palette-title">Add Node</div>
+        <div class="palette-items">
+            <div class="palette-item" draggable="true">
+                <div class="palette-item-icon start">
+                    <i class="bi bi-play-fill"></i>
+                </div>
+                <span class="palette-item-label">Start</span>
+            </div>
+            <div class="palette-item" draggable="true">
+                <div class="palette-item-icon step">
+                    <i class="bi bi-ui-checks"></i>
+                </div>
+                <span class="palette-item-label">Step</span>
+            </div>
+            <div class="palette-item" draggable="true">
+                <div class="palette-item-icon decision">
+                    <i class="bi bi-signpost-split"></i>
+                </div>
+                <span class="palette-item-label">Decision</span>
+            </div>
+            <div class="palette-item" draggable="true">
+                <div class="palette-item-icon action">
+                    <i class="bi bi-lightning-fill"></i>
+                </div>
+                <span class="palette-item-label">Action</span>
+            </div>
+            <div class="palette-item" draggable="true">
+                <div class="palette-item-icon end">
+                    <i class="bi bi-stop-fill"></i>
+                </div>
+                <span class="palette-item-label">End</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Node Properties Panel -->
+    <div class="node-properties">
+        <div class="properties-header">
+            <div class="properties-title">
+                <div class="properties-title-icon">
+                    <i class="bi bi-signpost-split"></i>
+                </div>
+                <span>Decision Node</span>
+            </div>
+            <button class="properties-close">&times;</button>
+        </div>
+        <div class="properties-body">
+            <div class="property-group">
+                <div class="property-label">Node Name</div>
+                <input type="text" class="property-input" value="Approval Check">
+            </div>
+
+            <div class="property-group">
+                <div class="property-label">Description</div>
+                <input type="text" class="property-input" value="Check if amount requires approval">
+            </div>
+
+            <div class="property-group">
+                <div class="property-label">Condition</div>
+                <div class="condition-preview">
+                    <div class="condition-preview-title">IF</div>
+                    <div class="condition-preview-text">Amount > 5000</div>
+                </div>
+                <button class="condition-edit-btn">
+                    <i class="bi bi-pencil"></i>
+                    Edit Condition
+                </button>
+            </div>
+
+            <div class="property-group">
+                <div class="property-label">Yes Branch Label</div>
+                <input type="text" class="property-input" value="Needs Approval">
+            </div>
+
+            <div class="property-group">
+                <div class="property-label">No Branch Label</div>
+                <input type="text" class="property-input" value="Auto Approve">
+            </div>
+
+            <div class="property-group">
+                <label class="property-checkbox">
+                    <input type="checkbox" checked>
+                    <span class="property-checkbox-label">Log decision result</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workflow Canvas Demo -->
+    <div class="demo-section">
+        <div class="demo-title">Workflow Canvas (Interactive Demo)</div>
+        <div class="workflow-canvas" id="canvas">
+            <!-- Start Node -->
+            <div class="wf-node wf-node-start" style="left: 50px; top: 50px;" onclick="selectNode(this)">
+                <div class="wf-node-header">
+                    <div class="wf-node-icon">
+                        <i class="bi bi-play-fill"></i>
+                    </div>
+                    <span class="wf-node-title">Start</span>
+                    <button class="wf-node-menu"><i class="bi bi-three-dots-vertical"></i></button>
+                </div>
+                <div class="wf-node-body">
+                    Form submission triggers workflow
+                </div>
+                <div class="wf-node-footer">
+                    <span>Trigger: On Submit</span>
+                </div>
+                <div class="wf-handle bottom"></div>
+            </div>
+
+            <!-- Step Node 1 -->
+            <div class="wf-node wf-node-step" style="left: 50px; top: 200px;" onclick="selectNode(this)">
+                <div class="wf-node-header">
+                    <div class="wf-node-icon">
+                        <i class="bi bi-ui-checks"></i>
+                    </div>
+                    <span class="wf-node-title">Personal Info</span>
+                    <button class="wf-node-menu"><i class="bi bi-three-dots-vertical"></i></button>
+                </div>
+                <div class="wf-node-body">
+                    Collect employee personal details
+                </div>
+                <div class="wf-node-footer">
+                    <span>8 fields</span>
+                    <span>Required</span>
+                </div>
+                <div class="wf-handle top"></div>
+                <div class="wf-handle bottom"></div>
+            </div>
+
+            <!-- Decision Node -->
+            <div class="wf-node wf-node-decision selected" style="left: 50px; top: 370px;" onclick="selectNode(this)">
+                <div class="wf-node-header">
+                    <div class="wf-node-icon">
+                        <i class="bi bi-signpost-split"></i>
+                    </div>
+                    <span class="wf-node-title">Department Check</span>
+                    <button class="wf-node-menu"><i class="bi bi-three-dots-vertical"></i></button>
+                </div>
+                <div class="wf-node-body">
+                    <div>If Department == "Engineering"</div>
+                    <div class="decision-branches">
+                        <span class="decision-branch yes">
+                            <i class="bi bi-check-circle-fill"></i> Yes
+                        </span>
+                        <span class="decision-branch no">
+                            <i class="bi bi-x-circle-fill"></i> No
+                        </span>
+                    </div>
+                </div>
+                <div class="wf-handle top"></div>
+                <div class="wf-handle bottom"></div>
+                <div class="wf-handle left"></div>
+                <div class="wf-handle right"></div>
+            </div>
+
+            <!-- Step Node 2 (Engineering Path) -->
+            <div class="wf-node wf-node-step" style="left: 320px; top: 370px;" onclick="selectNode(this)">
+                <div class="wf-node-header">
+                    <div class="wf-node-icon">
+                        <i class="bi bi-ui-checks"></i>
+                    </div>
+                    <span class="wf-node-title">Tech Stack</span>
+                    <button class="wf-node-menu"><i class="bi bi-three-dots-vertical"></i></button>
+                </div>
+                <div class="wf-node-body">
+                    Select programming languages
+                </div>
+                <div class="wf-node-footer">
+                    <span>4 fields</span>
+                </div>
+                <div class="wf-handle top"></div>
+                <div class="wf-handle bottom"></div>
+                <div class="wf-handle left"></div>
+            </div>
+
+            <!-- Action Node -->
+            <div class="wf-node wf-node-action" style="left: 320px; top: 200px;" onclick="selectNode(this)">
+                <div class="wf-node-header">
+                    <div class="wf-node-icon">
+                        <i class="bi bi-lightning-fill"></i>
+                    </div>
+                    <span class="wf-node-title">Notify IT</span>
+                    <button class="wf-node-menu"><i class="bi bi-three-dots-vertical"></i></button>
+                </div>
+                <div class="wf-node-body">
+                    Send email to IT department
+                </div>
+                <div class="wf-node-footer">
+                    <span>Email Action</span>
+                </div>
+                <div class="wf-handle top"></div>
+                <div class="wf-handle bottom"></div>
+            </div>
+
+            <!-- End Node -->
+            <div class="wf-node wf-node-end" style="left: 180px; top: 520px;" onclick="selectNode(this)">
+                <div class="wf-node-header">
+                    <div class="wf-node-icon">
+                        <i class="bi bi-stop-fill"></i>
+                    </div>
+                    <span class="wf-node-title">Complete</span>
+                    <button class="wf-node-menu"><i class="bi bi-three-dots-vertical"></i></button>
+                </div>
+                <div class="wf-node-body">
+                    Submit and save data
+                </div>
+                <div class="wf-node-footer">
+                    <span>Action: Save</span>
+                </div>
+                <div class="wf-handle top"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function selectNode(node) {
+            document.querySelectorAll('.wf-node').forEach(n => n.classList.remove('selected'));
+            node.classList.add('selected');
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            body.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+        }
+
+        // Simple drag functionality for demo
+        document.querySelectorAll('.wf-node').forEach(node => {
+            let isDragging = false;
+            let startX, startY, initialX, initialY;
+
+            node.addEventListener('mousedown', (e) => {
+                if (e.target.closest('.wf-node-menu') || e.target.closest('.wf-handle')) return;
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                initialX = node.offsetLeft;
+                initialY = node.offsetTop;
+                node.style.zIndex = 1000;
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                node.style.left = (initialX + dx) + 'px';
+                node.style.top = (initialY + dy) + 'px';
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+                node.style.zIndex = '';
+            });
+        });
+    </script>
+</body>
+</html>

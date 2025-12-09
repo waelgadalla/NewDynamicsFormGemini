@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C.4 Database Section - Mockup</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: rgba(99, 102, 241, 0.1);
+            --primary-hover: #5558E3;
+            --success: #10B981;
+            --success-light: rgba(16, 185, 129, 0.1);
+            --warning: #F59E0B;
+            --warning-light: rgba(245, 158, 11, 0.1);
+            --danger: #EF4444;
+            --danger-light: rgba(239, 68, 68, 0.1);
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --bg-tertiary: #F3F4F6;
+            --border-color: #E5E7EB;
+            --border-focus: #6366F1;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+        }
+
+        [data-theme="dark"] {
+            --primary: #818CF8;
+            --primary-light: rgba(129, 140, 248, 0.15);
+            --text-primary: #F9FAFB;
+            --text-secondary: #D1D5DB;
+            --text-muted: #9CA3AF;
+            --bg-primary: #111827;
+            --bg-secondary: #1F2937;
+            --bg-tertiary: #374151;
+            --border-color: #374151;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .demo-header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .demo-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .demo-header p {
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        .demo-section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            margin-bottom: 32px;
+        }
+
+        .demo-section h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .demo-section h2 i {
+            color: var(--primary);
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 24px;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-primary);
+            transition: all 0.2s;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--primary);
+        }
+
+        /* ===== PROPERTY SECTION ===== */
+
+        .property-section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .section-header:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .section-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-header-left i {
+            font-size: 16px;
+            color: var(--primary);
+        }
+
+        .section-header-left span {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .section-chevron {
+            font-size: 12px;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+
+        .section-header.expanded .section-chevron {
+            transform: rotate(180deg);
+        }
+
+        .section-content {
+            padding: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .form-label i {
+            font-size: 12px;
+        }
+
+        /* ===== DATABASE SECTION STYLES ===== */
+
+        /* Database Status */
+        .db-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            margin-bottom: 16px;
+        }
+
+        .db-status.configured {
+            background: var(--success-light);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .db-status.not-configured {
+            background: var(--bg-tertiary);
+        }
+
+        .db-status-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .db-status.configured .db-status-icon {
+            background: var(--success);
+            color: white;
+        }
+
+        .db-status.not-configured .db-status-icon {
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
+        }
+
+        .db-status-content {
+            flex: 1;
+        }
+
+        .db-status-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .db-status-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Input Fields */
+        .form-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            transition: all 0.15s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-input.monospace {
+            font-family: 'Fira Code', 'Cascadia Code', monospace;
+        }
+
+        /* Select Dropdown */
+        .form-select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%236B7280' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 12px;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        /* Input Row */
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* Toggle Switch */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            margin-bottom: 8px;
+        }
+
+        .toggle-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toggle-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .toggle-text {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .toggle-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .toggle-switch {
+            width: 44px;
+            height: 24px;
+            background: var(--border-color);
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.2s;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .toggle-switch.active {
+            background: var(--primary);
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(20px);
+        }
+
+        /* Type Badge */
+        .type-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .type-badge.nvarchar {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .type-badge.int {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .type-badge.datetime {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .type-badge.bit {
+            background: rgba(236, 72, 153, 0.1);
+            color: #EC4899;
+        }
+
+        .type-badge.decimal {
+            background: rgba(139, 92, 246, 0.1);
+            color: #8B5CF6;
+        }
+
+        /* SQL Preview */
+        .sql-preview {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            margin-top: 16px;
+        }
+
+        .sql-preview-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .sql-preview-code {
+            font-family: 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 12px;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            padding: 12px 14px;
+            border-radius: var(--radius-sm);
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        .sql-preview-code .keyword {
+            color: #2563EB;
+            font-weight: 600;
+        }
+
+        .sql-preview-code .type {
+            color: var(--primary);
+        }
+
+        .sql-preview-code .constraint {
+            color: var(--warning);
+        }
+
+        .sql-preview-code .value {
+            color: var(--success);
+        }
+
+        /* Column Type Selector */
+        .column-type-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .column-type-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .column-type-option:hover {
+            border-color: var(--primary);
+            background: var(--bg-secondary);
+        }
+
+        .column-type-option.selected {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .column-type-option-icon {
+            font-size: 20px;
+            color: var(--text-muted);
+        }
+
+        .column-type-option.selected .column-type-option-icon {
+            color: var(--primary);
+        }
+
+        .column-type-option-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .column-type-option-type {
+            font-size: 10px;
+            font-family: monospace;
+            color: var(--text-muted);
+        }
+
+        /* Help Text */
+        .help-text {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 6px;
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+        }
+
+        .help-text i {
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .quick-action-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .quick-action-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        /* Input with suffix */
+        .input-with-suffix {
+            position: relative;
+        }
+
+        .input-suffix {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: var(--text-muted);
+            font-family: monospace;
+        }
+
+        .form-input.has-suffix {
+            padding-right: 80px;
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">
+        <i class="bi bi-moon-fill"></i>
+        <span>Toggle Theme</span>
+    </button>
+
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>C.4 Database Section</h1>
+            <p>Database column mapping and configuration</p>
+        </div>
+
+        <!-- Full Section -->
+        <div class="demo-section">
+            <h2><i class="bi bi-database"></i> Database Section States</h2>
+            <div class="demo-grid">
+                <!-- Configured State -->
+                <div>
+                    <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 12px;">Configured Field</h3>
+                    <div class="property-section">
+                        <div class="section-header expanded">
+                            <div class="section-header-left">
+                                <i class="bi bi-database"></i>
+                                <span>Database Mapping</span>
+                            </div>
+                            <i class="bi bi-chevron-down section-chevron"></i>
+                        </div>
+                        <div class="section-content">
+                            <!-- Database Status -->
+                            <div class="db-status configured">
+                                <div class="db-status-icon">
+                                    <i class="bi bi-check-lg"></i>
+                                </div>
+                                <div class="db-status-content">
+                                    <div class="db-status-title">Column Configured</div>
+                                    <div class="db-status-desc">Maps to dbo.Employees.FullName</div>
+                                </div>
+                            </div>
+
+                            <!-- Column Name -->
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="bi bi-type"></i>
+                                    Column Name
+                                </label>
+                                <input type="text" class="form-input monospace" value="FullName" placeholder="e.g., FirstName">
+                                <div class="help-text">
+                                    <i class="bi bi-info-circle"></i>
+                                    <span>Name of the column in the database table</span>
+                                </div>
+                            </div>
+
+                            <!-- Column Type -->
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="bi bi-braces"></i>
+                                    Column Type
+                                </label>
+                                <div class="column-type-grid">
+                                    <div class="column-type-option selected">
+                                        <div class="column-type-option-icon">Aa</div>
+                                        <div class="column-type-option-label">Text</div>
+                                        <div class="column-type-option-type">NVARCHAR</div>
+                                    </div>
+                                    <div class="column-type-option">
+                                        <div class="column-type-option-icon">123</div>
+                                        <div class="column-type-option-label">Number</div>
+                                        <div class="column-type-option-type">INT</div>
+                                    </div>
+                                    <div class="column-type-option">
+                                        <div class="column-type-option-icon">1.5</div>
+                                        <div class="column-type-option-label">Decimal</div>
+                                        <div class="column-type-option-type">DECIMAL</div>
+                                    </div>
+                                    <div class="column-type-option">
+                                        <div class="column-type-option-icon">📅</div>
+                                        <div class="column-type-option-label">Date</div>
+                                        <div class="column-type-option-type">DATETIME</div>
+                                    </div>
+                                    <div class="column-type-option">
+                                        <div class="column-type-option-icon">✓</div>
+                                        <div class="column-type-option-label">Boolean</div>
+                                        <div class="column-type-option-type">BIT</div>
+                                    </div>
+                                    <div class="column-type-option">
+                                        <div class="column-type-option-icon">📝</div>
+                                        <div class="column-type-option-label">Long Text</div>
+                                        <div class="column-type-option-type">NVARCHAR(MAX)</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Max Length (for text types) -->
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="bi bi-rulers"></i>
+                                    Max Length
+                                </label>
+                                <div class="input-with-suffix">
+                                    <input type="number" class="form-input has-suffix" value="255" placeholder="255">
+                                    <span class="input-suffix">characters</span>
+                                </div>
+                            </div>
+
+                            <!-- Toggles Row -->
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="bi bi-sliders"></i>
+                                    Constraints
+                                </label>
+                                <div class="toggle-row">
+                                    <div class="toggle-label">
+                                        <div class="toggle-icon">
+                                            <i class="bi bi-asterisk"></i>
+                                        </div>
+                                        <div>
+                                            <div class="toggle-text">Nullable</div>
+                                            <div class="toggle-desc">Allow NULL values in column</div>
+                                        </div>
+                                    </div>
+                                    <div class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                                </div>
+                                <div class="toggle-row">
+                                    <div class="toggle-label">
+                                        <div class="toggle-icon">
+                                            <i class="bi bi-key"></i>
+                                        </div>
+                                        <div>
+                                            <div class="toggle-text">Primary Key</div>
+                                            <div class="toggle-desc">Column is part of primary key</div>
+                                        </div>
+                                    </div>
+                                    <div class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                                </div>
+                            </div>
+
+                            <!-- Default Value -->
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="bi bi-input-cursor"></i>
+                                    Default Value
+                                </label>
+                                <input type="text" class="form-input monospace" value="" placeholder="e.g., GETDATE() or 'Unknown'">
+                            </div>
+
+                            <!-- SQL Preview -->
+                            <div class="sql-preview">
+                                <div class="sql-preview-title">
+                                    <i class="bi bi-code-slash"></i>
+                                    Generated DDL
+                                </div>
+                                <div class="sql-preview-code">[<span class="value">FullName</span>] <span class="type">NVARCHAR</span>(<span class="value">255</span>) <span class="constraint">NOT NULL</span></div>
+                            </div>
+
+                            <!-- Quick Actions -->
+                            <div class="quick-actions">
+                                <button class="quick-action-btn">
+                                    <i class="bi bi-magic"></i>
+                                    Auto-Detect
+                                </button>
+                                <button class="quick-action-btn">
+                                    <i class="bi bi-clipboard"></i>
+                                    Copy DDL
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Not Configured State -->
+                <div>
+                    <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 12px;">Not Configured Field</h3>
+                    <div class="property-section">
+                        <div class="section-header expanded">
+                            <div class="section-header-left">
+                                <i class="bi bi-database"></i>
+                                <span>Database Mapping</span>
+                            </div>
+                            <i class="bi bi-chevron-down section-chevron"></i>
+                        </div>
+                        <div class="section-content">
+                            <!-- Database Status -->
+                            <div class="db-status not-configured">
+                                <div class="db-status-icon">
+                                    <i class="bi bi-database-dash"></i>
+                                </div>
+                                <div class="db-status-content">
+                                    <div class="db-status-title">No Column Mapping</div>
+                                    <div class="db-status-desc">Field won't be persisted to database</div>
+                                </div>
+                            </div>
+
+                            <!-- Column Name -->
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="bi bi-type"></i>
+                                    Column Name
+                                </label>
+                                <input type="text" class="form-input monospace" value="" placeholder="e.g., FirstName">
+                                <div class="help-text">
+                                    <i class="bi bi-info-circle"></i>
+                                    <span>Leave empty if field shouldn't be stored</span>
+                                </div>
+                            </div>
+
+                            <!-- Quick Actions -->
+                            <div class="quick-actions">
+                                <button class="quick-action-btn" style="flex: 1;">
+                                    <i class="bi bi-magic"></i>
+                                    Generate from Field Name
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Column Types Reference -->
+        <div class="demo-section">
+            <h2><i class="bi bi-grid-3x3"></i> SQL Server Column Types</h2>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                <div style="padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-lg);">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                        <span class="type-badge nvarchar">NVARCHAR</span>
+                    </div>
+                    <div style="font-size: 13px; font-weight: 600; margin-bottom: 4px;">Unicode Text</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">Variable-length Unicode string. Use for text, email, names.</div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px; font-family: monospace;">
+                        NVARCHAR(50) | NVARCHAR(MAX)
+                    </div>
+                </div>
+                <div style="padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-lg);">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                        <span class="type-badge int">INT</span>
+                    </div>
+                    <div style="font-size: 13px; font-weight: 600; margin-bottom: 4px;">Integer</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">Whole numbers from -2B to +2B. Use for counts, IDs.</div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px; font-family: monospace;">
+                        INT | BIGINT | SMALLINT
+                    </div>
+                </div>
+                <div style="padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-lg);">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                        <span class="type-badge decimal">DECIMAL</span>
+                    </div>
+                    <div style="font-size: 13px; font-weight: 600; margin-bottom: 4px;">Decimal Number</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">Precise decimal values. Use for currency, measurements.</div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px; font-family: monospace;">
+                        DECIMAL(18,2) | MONEY
+                    </div>
+                </div>
+                <div style="padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-lg);">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                        <span class="type-badge datetime">DATETIME</span>
+                    </div>
+                    <div style="font-size: 13px; font-weight: 600; margin-bottom: 4px;">Date & Time</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">Date and time values. Use for timestamps, dates.</div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px; font-family: monospace;">
+                        DATETIME2 | DATE | TIME
+                    </div>
+                </div>
+                <div style="padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-lg);">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                        <span class="type-badge bit">BIT</span>
+                    </div>
+                    <div style="font-size: 13px; font-weight: 600; margin-bottom: 4px;">Boolean</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">True/false values. Use for checkboxes, flags.</div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px; font-family: monospace;">
+                        BIT
+                    </div>
+                </div>
+                <div style="padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-lg);">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                        <span class="type-badge" style="background: rgba(99, 102, 241, 0.1); color: #6366F1;">UNIQUEID</span>
+                    </div>
+                    <div style="font-size: 13px; font-weight: 600; margin-bottom: 4px;">Unique Identifier</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">GUID values. Use for unique references.</div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px; font-family: monospace;">
+                        UNIQUEIDENTIFIER
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            body.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+        }
+
+        document.querySelectorAll('.section-header').forEach(header => {
+            header.addEventListener('click', function() {
+                this.classList.toggle('expanded');
+                const content = this.nextElementSibling;
+                content.style.display = content.style.display === 'none' ? 'block' : 'none';
+            });
+        });
+
+        document.querySelectorAll('.column-type-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const parent = this.closest('.column-type-grid');
+                parent.querySelectorAll('.column-type-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C.6 TypeConfig Button - Mockup</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: rgba(99, 102, 241, 0.1);
+            --primary-hover: #5558E3;
+            --success: #10B981;
+            --success-light: rgba(16, 185, 129, 0.1);
+            --warning: #F59E0B;
+            --warning-light: rgba(245, 158, 11, 0.1);
+            --danger: #EF4444;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --bg-tertiary: #F3F4F6;
+            --border-color: #E5E7EB;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+        }
+
+        [data-theme="dark"] {
+            --primary: #818CF8;
+            --primary-light: rgba(129, 140, 248, 0.15);
+            --text-primary: #F9FAFB;
+            --text-secondary: #D1D5DB;
+            --text-muted: #9CA3AF;
+            --bg-primary: #111827;
+            --bg-secondary: #1F2937;
+            --bg-tertiary: #374151;
+            --border-color: #374151;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .demo-header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .demo-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .demo-header p {
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        .demo-section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            margin-bottom: 32px;
+        }
+
+        .demo-section h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .demo-section h2 i {
+            color: var(--primary);
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        /* ===== TYPE CONFIG BUTTON STYLES ===== */
+
+        /* Button Variants */
+        .type-config-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            background: var(--bg-primary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .type-config-btn:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .type-config-btn.configured {
+            border-color: var(--success);
+            background: var(--success-light);
+        }
+
+        .type-config-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .type-config-btn:hover .type-config-icon {
+            background: var(--primary);
+            color: white;
+        }
+
+        .type-config-btn.configured .type-config-icon {
+            background: var(--success);
+            color: white;
+        }
+
+        .type-config-content {
+            flex: 1;
+            text-align: left;
+        }
+
+        .type-config-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .type-config-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .type-config-btn.configured .type-config-desc {
+            color: var(--success);
+        }
+
+        .type-config-arrow {
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        .type-config-btn:hover .type-config-arrow {
+            color: var(--primary);
+        }
+
+        /* Badge */
+        .type-config-badge {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .type-config-btn.configured .type-config-badge {
+            background: var(--success);
+            color: white;
+        }
+
+        /* Summary Preview */
+        .config-summary {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .config-tag {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        /* Field Type Cards */
+        .field-type-card {
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+        }
+
+        .field-type-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .field-type-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-md);
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 16px;
+        }
+
+        .field-type-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Config Options List */
+        .config-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .config-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+        }
+
+        .config-option i {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .config-option-label {
+            flex: 1;
+            color: var(--text-primary);
+        }
+
+        .config-option-value {
+            color: var(--text-secondary);
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">
+        <i class="bi bi-moon-fill"></i>
+        <span>Toggle Theme</span>
+    </button>
+
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>C.6 TypeConfig Button</h1>
+            <p>Configure button for field type-specific settings</p>
+        </div>
+
+        <!-- Button States -->
+        <div class="demo-section">
+            <h2><i class="bi bi-gear"></i> Button States</h2>
+            <div class="demo-grid">
+                <!-- Not Configured -->
+                <div class="field-type-card">
+                    <div class="field-type-header">
+                        <div class="field-type-icon">
+                            <i class="bi bi-input-cursor-text"></i>
+                        </div>
+                        <span class="field-type-name">Text Field</span>
+                    </div>
+                    <button class="type-config-btn">
+                        <div class="type-config-icon">
+                            <i class="bi bi-sliders"></i>
+                        </div>
+                        <div class="type-config-content">
+                            <div class="type-config-title">Configure Text Options</div>
+                            <div class="type-config-desc">Set input mask, format, limits</div>
+                        </div>
+                        <i class="bi bi-chevron-right type-config-arrow"></i>
+                    </button>
+                </div>
+
+                <!-- Configured -->
+                <div class="field-type-card">
+                    <div class="field-type-header">
+                        <div class="field-type-icon">
+                            <i class="bi bi-123"></i>
+                        </div>
+                        <span class="field-type-name">Number Field</span>
+                    </div>
+                    <button class="type-config-btn configured">
+                        <div class="type-config-icon">
+                            <i class="bi bi-check-lg"></i>
+                        </div>
+                        <div class="type-config-content">
+                            <div class="type-config-title">Number Options</div>
+                            <div class="type-config-desc">Configured with 3 settings</div>
+                            <div class="config-summary">
+                                <span class="config-tag">Min: 0</span>
+                                <span class="config-tag">Max: 100</span>
+                                <span class="config-tag">Step: 1</span>
+                            </div>
+                        </div>
+                        <span class="type-config-badge">Configured</span>
+                        <i class="bi bi-chevron-right type-config-arrow"></i>
+                    </button>
+                </div>
+
+                <!-- Date Configured -->
+                <div class="field-type-card">
+                    <div class="field-type-header">
+                        <div class="field-type-icon">
+                            <i class="bi bi-calendar"></i>
+                        </div>
+                        <span class="field-type-name">Date Field</span>
+                    </div>
+                    <button class="type-config-btn configured">
+                        <div class="type-config-icon">
+                            <i class="bi bi-check-lg"></i>
+                        </div>
+                        <div class="type-config-content">
+                            <div class="type-config-title">Date Options</div>
+                            <div class="type-config-desc">Date range and format configured</div>
+                            <div class="config-summary">
+                                <span class="config-tag">Format: YYYY-MM-DD</span>
+                                <span class="config-tag">Min: Today</span>
+                            </div>
+                        </div>
+                        <span class="type-config-badge">Configured</span>
+                        <i class="bi bi-chevron-right type-config-arrow"></i>
+                    </button>
+                </div>
+
+                <!-- File Not Configured -->
+                <div class="field-type-card">
+                    <div class="field-type-header">
+                        <div class="field-type-icon">
+                            <i class="bi bi-paperclip"></i>
+                        </div>
+                        <span class="field-type-name">File Upload</span>
+                    </div>
+                    <button class="type-config-btn">
+                        <div class="type-config-icon">
+                            <i class="bi bi-upload"></i>
+                        </div>
+                        <div class="type-config-content">
+                            <div class="type-config-title">Configure File Options</div>
+                            <div class="type-config-desc">Set allowed types, size limits</div>
+                        </div>
+                        <i class="bi bi-chevron-right type-config-arrow"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Type-Specific Configs -->
+        <div class="demo-section">
+            <h2><i class="bi bi-list-nested"></i> Type-Specific Configuration Panels</h2>
+            <div class="demo-grid">
+                <!-- Text Config -->
+                <div class="field-type-card">
+                    <div class="field-type-header">
+                        <div class="field-type-icon">
+                            <i class="bi bi-input-cursor-text"></i>
+                        </div>
+                        <span class="field-type-name">Text Config</span>
+                    </div>
+                    <div class="config-options">
+                        <div class="config-option">
+                            <i class="bi bi-text-paragraph"></i>
+                            <span class="config-option-label">Input Mask</span>
+                            <span class="config-option-value">(###) ###-####</span>
+                        </div>
+                        <div class="config-option">
+                            <i class="bi bi-rulers"></i>
+                            <span class="config-option-label">Max Length</span>
+                            <span class="config-option-value">100</span>
+                        </div>
+                        <div class="config-option">
+                            <i class="bi bi-regex"></i>
+                            <span class="config-option-label">Pattern</span>
+                            <span class="config-option-value">^[A-Z].*</span>
+                        </div>
+                        <div class="config-option">
+                            <i class="bi bi-spellcheck"></i>
+                            <span class="config-option-label">Autocomplete</span>
+                            <span class="config-option-value">email</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Number Config -->
+                <div class="field-type-card">
+                    <div class="field-type-header">
+                        <div class="field-type-icon">
+                            <i class="bi bi-123"></i>
+                        </div>
+                        <span class="field-type-name">Number Config</span>
+                    </div>
+                    <div class="config-options">
+                        <div class="config-option">
+                            <i class="bi bi-arrow-down-short"></i>
+                            <span class="config-option-label">Minimum</span>
+                            <span class="config-option-value">0</span>
+                        </div>
+                        <div class="config-option">
+                            <i class="bi bi-arrow-up-short"></i>
+                            <span class="config-option-label">Maximum</span>
+                            <span class="config-option-value">999999</span>
+                        </div>
+                        <div class="config-option">
+                            <i class="bi bi-plus-slash-minus"></i>
+                            <span class="config-option-label">Step</span>
+                            <span class="config-option-value">0.01</span>
+                        </div>
+                        <div class="config-option">
+                            <i class="bi bi-currency-dollar"></i>
+                            <span class="config-option-label">Format</span>
+                            <span class="config-option-value">Currency</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Date Config -->
+                <div class="field-type-card">
+                    <div class="field-type-header">
+                        <div class="field-type-icon">
+                            <i class="bi bi-calendar"></i>
+                        </div>
+                        <span class="field-type-name">Date Config</span>
+                    </div>
+                    <div class="config-options">
+                        <div class="config-option">
+                            <i class="bi bi-calendar-event"></i>
+                            <span class="config-option-label">Display Format</span>
+                            <span class="config-option-value">MMMM d, yyyy</span>
+                        </div>
+                        <div class="config-option">
+                            <i class="bi bi-calendar-minus"></i>
+                            <span class="config-option-label">Min Date</span>
+                            <span class="config-option-value">Today</span>
+                        </div>
+                        <div class="config-option">
+                            <i class="bi bi-calendar-plus"></i>
+                            <span class="config-option-label">Max Date</span>
+                            <span class="config-option-value">+1 year</span>
+                        </div>
+                        <div class="config-option">
+                            <i class="bi bi-x-circle"></i>
+                            <span class="config-option-label">Disabled Days</span>
+                            <span class="config-option-value">Weekends</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- File Config -->
+                <div class="field-type-card">
+                    <div class="field-type-header">
+                        <div class="field-type-icon">
+                            <i class="bi bi-paperclip"></i>
+                        </div>
+                        <span class="field-type-name">File Config</span>
+                    </div>
+                    <div class="config-options">
+                        <div class="config-option">
+                            <i class="bi bi-file-earmark"></i>
+                            <span class="config-option-label">Allowed Types</span>
+                            <span class="config-option-value">.pdf, .doc, .docx</span>
+                        </div>
+                        <div class="config-option">
+                            <i class="bi bi-hdd"></i>
+                            <span class="config-option-label">Max Size</span>
+                            <span class="config-option-value">10 MB</span>
+                        </div>
+                        <div class="config-option">
+                            <i class="bi bi-files"></i>
+                            <span class="config-option-label">Max Files</span>
+                            <span class="config-option-value">5</span>
+                        </div>
+                        <div class="config-option">
+                            <i class="bi bi-cloud-arrow-up"></i>
+                            <span class="config-option-label">Storage</span>
+                            <span class="config-option-value">Azure Blob</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Field Types with TypeConfig -->
+        <div class="demo-section">
+            <h2><i class="bi bi-grid-3x3-gap"></i> Field Types with TypeConfig</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;">
+                <div style="padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
+                    <i class="bi bi-input-cursor-text" style="font-size: 20px; color: var(--primary);"></i>
+                    <div>
+                        <div style="font-size: 13px; font-weight: 600;">Text</div>
+                        <div style="font-size: 11px; color: var(--text-muted);">Mask, pattern, autocomplete</div>
+                    </div>
+                </div>
+                <div style="padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
+                    <i class="bi bi-123" style="font-size: 20px; color: var(--primary);"></i>
+                    <div>
+                        <div style="font-size: 13px; font-weight: 600;">Number</div>
+                        <div style="font-size: 11px; color: var(--text-muted);">Min, max, step, format</div>
+                    </div>
+                </div>
+                <div style="padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
+                    <i class="bi bi-calendar" style="font-size: 20px; color: var(--primary);"></i>
+                    <div>
+                        <div style="font-size: 13px; font-weight: 600;">Date</div>
+                        <div style="font-size: 11px; color: var(--text-muted);">Range, format, disabled days</div>
+                    </div>
+                </div>
+                <div style="padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
+                    <i class="bi bi-clock" style="font-size: 20px; color: var(--primary);"></i>
+                    <div>
+                        <div style="font-size: 13px; font-weight: 600;">Time</div>
+                        <div style="font-size: 11px; color: var(--text-muted);">24h/12h, step, range</div>
+                    </div>
+                </div>
+                <div style="padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
+                    <i class="bi bi-paperclip" style="font-size: 20px; color: var(--primary);"></i>
+                    <div>
+                        <div style="font-size: 13px; font-weight: 600;">File</div>
+                        <div style="font-size: 11px; color: var(--text-muted);">Types, size, count</div>
+                    </div>
+                </div>
+                <div style="padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
+                    <i class="bi bi-image" style="font-size: 20px; color: var(--primary);"></i>
+                    <div>
+                        <div style="font-size: 13px; font-weight: 600;">Image</div>
+                        <div style="font-size: 11px; color: var(--text-muted);">Dimensions, format, crop</div>
+                    </div>
+                </div>
+                <div style="padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
+                    <i class="bi bi-pen" style="font-size: 20px; color: var(--primary);"></i>
+                    <div>
+                        <div style="font-size: 13px; font-weight: 600;">Signature</div>
+                        <div style="font-size: 11px; color: var(--text-muted);">Canvas size, stroke</div>
+                    </div>
+                </div>
+                <div style="padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
+                    <i class="bi bi-collection" style="font-size: 20px; color: var(--primary);"></i>
+                    <div>
+                        <div style="font-size: 13px; font-weight: 600;">Repeater</div>
+                        <div style="font-size: 11px; color: var(--text-muted);">Min/max rows, layout</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            document.body.setAttribute('data-theme',
+                document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+        }
+    </script>
+</body>
+</html>

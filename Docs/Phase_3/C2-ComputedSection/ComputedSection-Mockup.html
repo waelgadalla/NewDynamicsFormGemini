@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C.2 Computed Section - Mockup</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: rgba(99, 102, 241, 0.1);
+            --primary-hover: #5558E3;
+            --success: #10B981;
+            --success-light: rgba(16, 185, 129, 0.1);
+            --warning: #F59E0B;
+            --warning-light: rgba(245, 158, 11, 0.1);
+            --danger: #EF4444;
+            --danger-light: rgba(239, 68, 68, 0.1);
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --bg-tertiary: #F3F4F6;
+            --border-color: #E5E7EB;
+            --border-focus: #6366F1;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+        }
+
+        [data-theme="dark"] {
+            --primary: #818CF8;
+            --primary-light: rgba(129, 140, 248, 0.15);
+            --text-primary: #F9FAFB;
+            --text-secondary: #D1D5DB;
+            --text-muted: #9CA3AF;
+            --bg-primary: #111827;
+            --bg-secondary: #1F2937;
+            --bg-tertiary: #374151;
+            --border-color: #374151;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .demo-header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .demo-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .demo-header p {
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        .demo-section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            margin-bottom: 32px;
+        }
+
+        .demo-section h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .demo-section h2 i {
+            color: var(--primary);
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-primary);
+            transition: all 0.2s;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--primary);
+        }
+
+        /* ===== PROPERTY SECTION ===== */
+
+        .property-section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .section-header:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .section-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-header-left i {
+            font-size: 16px;
+            color: var(--primary);
+        }
+
+        .section-header-left span {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .section-chevron {
+            font-size: 12px;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+
+        .section-header.expanded .section-chevron {
+            transform: rotate(180deg);
+        }
+
+        .section-content {
+            padding: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .form-label i {
+            font-size: 12px;
+        }
+
+        /* ===== COMPUTED SECTION STYLES ===== */
+
+        /* Status Badge */
+        .computed-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 14px;
+            border-radius: var(--radius-md);
+            margin-bottom: 16px;
+        }
+
+        .computed-status.no-formula {
+            background: var(--bg-tertiary);
+        }
+
+        .computed-status.has-formula {
+            background: var(--primary-light);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .computed-status.has-error {
+            background: var(--danger-light);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .computed-status i {
+            font-size: 18px;
+        }
+
+        .computed-status.no-formula i {
+            color: var(--text-muted);
+        }
+
+        .computed-status.has-formula i {
+            color: var(--primary);
+        }
+
+        .computed-status.has-error i {
+            color: var(--danger);
+        }
+
+        .computed-status-content {
+            flex: 1;
+        }
+
+        .computed-status-title {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .computed-status.no-formula .computed-status-title {
+            color: var(--text-secondary);
+        }
+
+        .computed-status.has-formula .computed-status-title {
+            color: var(--primary);
+        }
+
+        .computed-status.has-error .computed-status-title {
+            color: var(--danger);
+        }
+
+        .computed-status-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Formula Display */
+        .formula-display {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            margin-bottom: 16px;
+        }
+
+        .formula-code {
+            font-family: 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 13px;
+            color: var(--text-primary);
+            background: var(--bg-tertiary);
+            padding: 12px 14px;
+            border-radius: var(--radius-sm);
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .formula-code .keyword {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .formula-code .field-ref {
+            color: var(--success);
+        }
+
+        .formula-code .operator {
+            color: var(--warning);
+        }
+
+        .formula-code .number {
+            color: #F472B6;
+        }
+
+        .formula-code .string {
+            color: #34D399;
+        }
+
+        /* Dependent Fields */
+        .dependent-fields {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .dependent-fields-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .dependent-field-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .dependent-field-tag {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .dependent-field-tag i {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        .dependent-field-tag.linked {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .dependent-field-tag.linked i {
+            color: var(--primary);
+        }
+
+        /* Edit Button */
+        .edit-formula-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px;
+            border: 1px dashed var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .edit-formula-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .edit-formula-btn i {
+            font-size: 16px;
+        }
+
+        /* Action Buttons */
+        .formula-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .action-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .action-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .action-btn.danger:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+            background: var(--danger-light);
+        }
+
+        .action-btn.primary {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .action-btn.primary:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Preview Box */
+        .formula-preview {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            margin-top: 16px;
+        }
+
+        .preview-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .preview-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .preview-calculation {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Formula Examples */
+        .formula-examples {
+            margin-top: 16px;
+            padding: 14px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+        }
+
+        .examples-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .example-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .example-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .example-item:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .example-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: var(--radius-sm);
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .example-item:hover .example-icon {
+            background: var(--primary);
+            color: white;
+        }
+
+        .example-content {
+            flex: 1;
+        }
+
+        .example-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .example-formula {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: monospace;
+        }
+
+        /* Error State */
+        .formula-error {
+            display: flex;
+            gap: 10px;
+            padding: 12px;
+            background: var(--danger-light);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: var(--radius-md);
+            margin-top: 12px;
+        }
+
+        .formula-error i {
+            color: var(--danger);
+            font-size: 16px;
+        }
+
+        .formula-error-content {
+            flex: 1;
+        }
+
+        .formula-error-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--danger);
+        }
+
+        .formula-error-message {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">
+        <i class="bi bi-moon-fill"></i>
+        <span>Toggle Theme</span>
+    </button>
+
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>C.2 Computed Section</h1>
+            <p>Formula editor for calculated fields</p>
+        </div>
+
+        <!-- Section States -->
+        <div class="demo-section">
+            <h2><i class="bi bi-calculator"></i> Computed Section States</h2>
+            <div class="demo-grid">
+                <!-- No Formula State -->
+                <div>
+                    <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 12px;">No Formula (Empty State)</h3>
+                    <div class="property-section">
+                        <div class="section-header expanded">
+                            <div class="section-header-left">
+                                <i class="bi bi-calculator"></i>
+                                <span>Computed Value</span>
+                            </div>
+                            <i class="bi bi-chevron-down section-chevron"></i>
+                        </div>
+                        <div class="section-content">
+                            <div class="computed-status no-formula">
+                                <i class="bi bi-calculator"></i>
+                                <div class="computed-status-content">
+                                    <div class="computed-status-title">No Formula Defined</div>
+                                    <div class="computed-status-desc">Add a formula to compute this field's value automatically</div>
+                                </div>
+                            </div>
+
+                            <button class="edit-formula-btn">
+                                <i class="bi bi-plus-lg"></i>
+                                Add Formula
+                            </button>
+
+                            <div class="formula-examples">
+                                <div class="examples-title">
+                                    <i class="bi bi-lightbulb"></i>
+                                    Quick Templates
+                                </div>
+                                <div class="example-item">
+                                    <div class="example-icon">
+                                        <i class="bi bi-plus-slash-minus"></i>
+                                    </div>
+                                    <div class="example-content">
+                                        <div class="example-name">Sum Fields</div>
+                                        <div class="example-formula">[field1] + [field2]</div>
+                                    </div>
+                                </div>
+                                <div class="example-item">
+                                    <div class="example-icon">
+                                        <i class="bi bi-percent"></i>
+                                    </div>
+                                    <div class="example-content">
+                                        <div class="example-name">Percentage</div>
+                                        <div class="example-formula">[field1] * 0.1</div>
+                                    </div>
+                                </div>
+                                <div class="example-item">
+                                    <div class="example-icon">
+                                        <i class="bi bi-type"></i>
+                                    </div>
+                                    <div class="example-content">
+                                        <div class="example-name">Concatenate</div>
+                                        <div class="example-formula">CONCAT([first], " ", [last])</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- With Formula State -->
+                <div>
+                    <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 12px;">With Formula</h3>
+                    <div class="property-section">
+                        <div class="section-header expanded">
+                            <div class="section-header-left">
+                                <i class="bi bi-calculator"></i>
+                                <span>Computed Value</span>
+                            </div>
+                            <i class="bi bi-chevron-down section-chevron"></i>
+                        </div>
+                        <div class="section-content">
+                            <div class="computed-status has-formula">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <div class="computed-status-content">
+                                    <div class="computed-status-title">Formula Active</div>
+                                    <div class="computed-status-desc">Value computed from 3 dependent fields</div>
+                                </div>
+                            </div>
+
+                            <div class="formula-display">
+                                <div class="formula-code">
+                                    [<span class="field-ref">Quantity</span>] <span class="operator">*</span> [<span class="field-ref">UnitPrice</span>] <span class="operator">*</span> (<span class="number">1</span> <span class="operator">-</span> [<span class="field-ref">Discount</span>])
+                                </div>
+                                <div class="dependent-fields">
+                                    <div class="dependent-fields-label">Dependent Fields</div>
+                                    <div class="dependent-field-tags">
+                                        <span class="dependent-field-tag linked">
+                                            <i class="bi bi-link-45deg"></i>
+                                            Quantity
+                                        </span>
+                                        <span class="dependent-field-tag linked">
+                                            <i class="bi bi-link-45deg"></i>
+                                            UnitPrice
+                                        </span>
+                                        <span class="dependent-field-tag linked">
+                                            <i class="bi bi-link-45deg"></i>
+                                            Discount
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="formula-preview">
+                                <div class="preview-label">
+                                    <i class="bi bi-eye"></i>
+                                    Live Preview
+                                </div>
+                                <div class="preview-value">$425.00</div>
+                                <div class="preview-calculation">5 × $100.00 × (1 - 0.15) = $425.00</div>
+                            </div>
+
+                            <div class="formula-actions">
+                                <button class="action-btn primary">
+                                    <i class="bi bi-pencil"></i>
+                                    Edit Formula
+                                </button>
+                                <button class="action-btn danger">
+                                    <i class="bi bi-trash"></i>
+                                    Remove
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error State -->
+        <div class="demo-section">
+            <h2><i class="bi bi-exclamation-triangle"></i> Error State</h2>
+            <div class="demo-grid">
+                <div>
+                    <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 12px;">Invalid Formula</h3>
+                    <div class="property-section">
+                        <div class="section-header expanded">
+                            <div class="section-header-left">
+                                <i class="bi bi-calculator"></i>
+                                <span>Computed Value</span>
+                            </div>
+                            <i class="bi bi-chevron-down section-chevron"></i>
+                        </div>
+                        <div class="section-content">
+                            <div class="computed-status has-error">
+                                <i class="bi bi-exclamation-circle-fill"></i>
+                                <div class="computed-status-content">
+                                    <div class="computed-status-title">Formula Error</div>
+                                    <div class="computed-status-desc">There's a problem with your formula</div>
+                                </div>
+                            </div>
+
+                            <div class="formula-display">
+                                <div class="formula-code" style="border: 1px solid rgba(239, 68, 68, 0.3);">
+                                    [<span class="field-ref">Quantity</span>] <span class="operator">*</span> [<span class="field-ref" style="color: var(--danger); text-decoration: line-through;">UnknownField</span>]
+                                </div>
+                            </div>
+
+                            <div class="formula-error">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                <div class="formula-error-content">
+                                    <div class="formula-error-title">Reference Error</div>
+                                    <div class="formula-error-message">Field "UnknownField" does not exist in this module</div>
+                                </div>
+                            </div>
+
+                            <div class="formula-actions">
+                                <button class="action-btn primary">
+                                    <i class="bi bi-pencil"></i>
+                                    Fix Formula
+                                </button>
+                                <button class="action-btn danger">
+                                    <i class="bi bi-trash"></i>
+                                    Remove
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 12px;">Circular Reference</h3>
+                    <div class="property-section">
+                        <div class="section-header expanded">
+                            <div class="section-header-left">
+                                <i class="bi bi-calculator"></i>
+                                <span>Computed Value</span>
+                            </div>
+                            <i class="bi bi-chevron-down section-chevron"></i>
+                        </div>
+                        <div class="section-content">
+                            <div class="computed-status has-error">
+                                <i class="bi bi-exclamation-circle-fill"></i>
+                                <div class="computed-status-content">
+                                    <div class="computed-status-title">Circular Reference</div>
+                                    <div class="computed-status-desc">Formula creates an infinite loop</div>
+                                </div>
+                            </div>
+
+                            <div class="formula-display">
+                                <div class="formula-code" style="border: 1px solid rgba(239, 68, 68, 0.3);">
+                                    [<span class="field-ref">Total</span>] <span class="operator">+</span> [<span class="field-ref">Tax</span>]
+                                </div>
+                            </div>
+
+                            <div class="formula-error">
+                                <i class="bi bi-arrow-repeat"></i>
+                                <div class="formula-error-content">
+                                    <div class="formula-error-title">Circular Reference Detected</div>
+                                    <div class="formula-error-message">This formula references itself through: Total → SubTotal → Total</div>
+                                </div>
+                            </div>
+
+                            <div class="formula-actions">
+                                <button class="action-btn primary">
+                                    <i class="bi bi-pencil"></i>
+                                    Fix Formula
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formula Syntax Reference -->
+        <div class="demo-section">
+            <h2><i class="bi bi-code-square"></i> Formula Syntax Reference</h2>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                <div style="padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-lg);">
+                    <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                        <i class="bi bi-link-45deg" style="color: var(--primary);"></i>
+                        Field References
+                    </h4>
+                    <div class="formula-code" style="font-size: 12px; margin-bottom: 8px;">[FieldName]</div>
+                    <p style="font-size: 12px; color: var(--text-secondary);">Reference other fields by their name in square brackets</p>
+                </div>
+                <div style="padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-lg);">
+                    <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                        <i class="bi bi-plus-slash-minus" style="color: var(--warning);"></i>
+                        Operators
+                    </h4>
+                    <div class="formula-code" style="font-size: 12px; margin-bottom: 8px;">+ - * / % ^</div>
+                    <p style="font-size: 12px; color: var(--text-secondary);">Math operators: add, subtract, multiply, divide, modulo, power</p>
+                </div>
+                <div style="padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-lg);">
+                    <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                        <i class="bi bi-braces" style="color: var(--success);"></i>
+                        Functions
+                    </h4>
+                    <div class="formula-code" style="font-size: 12px; margin-bottom: 8px;">SUM, AVG, IF, CONCAT</div>
+                    <p style="font-size: 12px; color: var(--text-secondary);">Built-in functions for common calculations</p>
+                </div>
+            </div>
+
+            <div style="margin-top: 24px; padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-lg);">
+                <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">Example Formulas</h4>
+                <div style="display: grid; gap: 8px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-primary); border-radius: var(--radius-md);">
+                        <span style="font-size: 13px; color: var(--text-secondary);">Total Price</span>
+                        <span class="formula-code" style="font-size: 12px;">[Quantity] * [Price]</span>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-primary); border-radius: var(--radius-md);">
+                        <span style="font-size: 13px; color: var(--text-secondary);">Tax Amount</span>
+                        <span class="formula-code" style="font-size: 12px;">[SubTotal] * 0.13</span>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-primary); border-radius: var(--radius-md);">
+                        <span style="font-size: 13px; color: var(--text-secondary);">Full Name</span>
+                        <span class="formula-code" style="font-size: 12px;">CONCAT([FirstName], " ", [LastName])</span>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-primary); border-radius: var(--radius-md);">
+                        <span style="font-size: 13px; color: var(--text-secondary);">Discount Amount</span>
+                        <span class="formula-code" style="font-size: 12px;">IF([IsMember], [Total] * 0.1, 0)</span>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-primary); border-radius: var(--radius-md);">
+                        <span style="font-size: 13px; color: var(--text-secondary);">Average Score</span>
+                        <span class="formula-code" style="font-size: 12px;">AVG([Score1], [Score2], [Score3])</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            body.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+        }
+
+        document.querySelectorAll('.section-header').forEach(header => {
+            header.addEventListener('click', function() {
+                this.classList.toggle('expanded');
+                const content = this.nextElementSibling;
+                content.style.display = content.style.display === 'none' ? 'block' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>

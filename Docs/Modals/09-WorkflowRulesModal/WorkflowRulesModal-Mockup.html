@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WorkflowRulesModal - Interactive Mockup</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: #EEF2FF;
+            --success: #10B981;
+            --success-light: #D1FAE5;
+            --danger: #EF4444;
+            --danger-light: #FEE2E2;
+            --warning: #F59E0B;
+            --warning-light: #FEF3C7;
+            --info: #3B82F6;
+            --info-light: #DBEAFE;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8FAFC;
+            --bg-tertiary: #F1F5F9;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --text-muted: #94A3B8;
+            --border-color: #E2E8F0;
+            --shadow-xl: 0 20px 40px rgba(0,0,0,0.15);
+            --font-sans: 'DM Sans', -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+            --radius-2xl: 12px;
+        }
+        [data-theme="dark"] {
+            --primary: #818CF8;
+            --bg-primary: #1E293B;
+            --bg-secondary: #0F172A;
+            --bg-tertiary: #334155;
+            --text-primary: #F1F5F9;
+            --text-secondary: #94A3B8;
+            --border-color: #334155;
+            --info-light: rgba(59, 130, 246, 0.15);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-sans); background: var(--bg-secondary); color: var(--text-primary); min-height: 100vh; padding: 40px; }
+
+        .demo-header {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .demo-header h2 { font-size: 20px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+        .demo-header h2 i { color: var(--primary); }
+        .demo-header p { color: var(--text-secondary); margin-bottom: 16px; }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-ghost { background: transparent; color: var(--text-secondary); }
+        .btn-outline { background: var(--bg-primary); border: 1px solid var(--border-color); color: var(--text-primary); }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        .btn-danger { background: var(--danger); color: white; }
+
+        .modal-backdrop {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.2s;
+        }
+        .modal-backdrop.active { opacity: 1; visibility: visible; }
+        .modal {
+            background: var(--bg-primary);
+            border-radius: var(--radius-2xl);
+            max-width: 900px;
+            width: 100%;
+            max-height: 85vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-xl);
+        }
+        .modal-header { padding: 16px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .modal-title { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .modal-title i { color: var(--primary); }
+        .modal-close { width: 32px; height: 32px; border: none; background: transparent; border-radius: var(--radius-md); color: var(--text-secondary); cursor: pointer; }
+        .modal-body { flex: 1; overflow-y: auto; padding: 20px; }
+        .modal-footer { padding: 12px 20px; border-top: 1px solid var(--border-color); display: flex; gap: 8px; justify-content: flex-end; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; }
+        .form-input, .form-select { width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 14px; background: var(--bg-primary); color: var(--text-primary); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+        /* Rules list */
+        .rules-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .rules-header h4 { font-size: 14px; display: flex; align-items: center; gap: 8px; }
+
+        .rules-list {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .rule-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-primary);
+        }
+        .rule-item:last-child { border-bottom: none; }
+        .rule-item:hover { background: var(--bg-tertiary); }
+
+        .rule-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        .rule-icon.skip { background: var(--warning-light); color: var(--warning); }
+        .rule-icon.goto { background: var(--info-light); color: var(--info); }
+        .rule-icon.complete { background: var(--success-light); color: var(--success); }
+
+        .rule-content { flex: 1; }
+        .rule-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+        .rule-description { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+        .rule-condition { font-size: 12px; color: var(--text-muted); margin-top: 8px; font-family: var(--font-mono); background: var(--bg-tertiary); padding: 6px 10px; border-radius: var(--radius-sm); display: inline-block; }
+
+        .rule-actions {
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .rule-item:hover .rule-actions { opacity: 1; }
+
+        .rule-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        .toggle {
+            width: 32px;
+            height: 18px;
+            background: var(--border-strong);
+            border-radius: 9px;
+            position: relative;
+            cursor: pointer;
+        }
+        .toggle::after {
+            content: "";
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 14px;
+            height: 14px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.2s;
+        }
+        .toggle.active { background: var(--primary); }
+        .toggle.active::after { transform: translateX(14px); }
+
+        /* Action type selection */
+        .action-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+        .action-card {
+            padding: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            text-align: center;
+            cursor: pointer;
+        }
+        .action-card:hover { border-color: var(--primary); }
+        .action-card.selected { border-color: var(--primary); background: var(--primary-light); }
+        .action-card-icon { font-size: 24px; margin-bottom: 8px; }
+        .action-card-icon.skip { color: var(--warning); }
+        .action-card-icon.goto { color: var(--info); }
+        .action-card-icon.complete { color: var(--success); }
+        .action-card-name { font-weight: 600; font-size: 13px; margin-bottom: 4px; }
+        .action-card-desc { font-size: 11px; color: var(--text-muted); }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+        .empty-state i { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+        .empty-state p { margin-bottom: 16px; }
+
+        .badge {
+            display: inline-flex;
+            padding: 2px 8px;
+            font-size: 10px;
+            font-weight: 600;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+        .badge-warning { background: var(--warning-light); color: var(--warning); }
+
+        .theme-toggle { position: fixed; top: 20px; right: 20px; z-index: 100; }
+    </style>
+</head>
+<body>
+    <button class="btn btn-outline theme-toggle" onclick="toggleTheme()"><i class="bi bi-moon"></i></button>
+
+    <div class="demo-header">
+        <h2><i class="bi bi-signpost-split"></i> WorkflowRulesModal - Interactive Demo</h2>
+        <p>Configure workflow-level rules for step skipping, navigation, and completion based on conditions.</p>
+        <button class="btn btn-primary" onclick="openModal()">
+            <i class="bi bi-gear"></i> Manage Workflow Rules
+        </button>
+    </div>
+
+    <div class="modal-backdrop" id="modalBackdrop" onclick="handleBackdropClick(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="bi bi-signpost-split"></i>
+                    <span>Workflow Rules</span>
+                    <span class="badge badge-warning">3 Active</span>
+                </div>
+                <button class="modal-close" onclick="closeModal()"><i class="bi bi-x-lg"></i></button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Rules Header -->
+                <div class="rules-header">
+                    <h4><i class="bi bi-list-check"></i> Conditional Rules</h4>
+                    <button class="btn btn-sm btn-primary" onclick="showAddRule()">
+                        <i class="bi bi-plus"></i> Add Rule
+                    </button>
+                </div>
+
+                <!-- Rules List -->
+                <div class="rules-list">
+                    <div class="rule-item">
+                        <div class="rule-icon skip">
+                            <i class="bi bi-skip-forward"></i>
+                        </div>
+                        <div class="rule-content">
+                            <div class="rule-title">Skip Employment Details</div>
+                            <div class="rule-description">Skip Step 3 (Employment Details) when applicant is under 18 years old</div>
+                            <div class="rule-condition">Step1.age &lt; 18</div>
+                        </div>
+                        <div class="rule-toggle">
+                            <span>Active</span>
+                            <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+                        </div>
+                        <div class="rule-actions">
+                            <button class="btn btn-sm btn-ghost"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-ghost"><i class="bi bi-trash"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="rule-item">
+                        <div class="rule-icon goto">
+                            <i class="bi bi-arrow-right-circle"></i>
+                        </div>
+                        <div class="rule-content">
+                            <div class="rule-title">Jump to Summary</div>
+                            <div class="rule-description">Go directly to Summary step when express application is selected</div>
+                            <div class="rule-condition">Step1.applicationType = "express"</div>
+                        </div>
+                        <div class="rule-toggle">
+                            <span>Active</span>
+                            <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+                        </div>
+                        <div class="rule-actions">
+                            <button class="btn btn-sm btn-ghost"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-ghost"><i class="bi bi-trash"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="rule-item">
+                        <div class="rule-icon complete">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                        <div class="rule-content">
+                            <div class="rule-title">Auto-Complete for Renewals</div>
+                            <div class="rule-description">Complete workflow immediately when renewal flag is set and no changes detected</div>
+                            <div class="rule-condition">Step1.isRenewal = true AND Step1.hasChanges = false</div>
+                        </div>
+                        <div class="rule-toggle">
+                            <span>Active</span>
+                            <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+                        </div>
+                        <div class="rule-actions">
+                            <button class="btn btn-sm btn-ghost"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-ghost"><i class="bi bi-trash"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Rule Section (hidden by default) -->
+                <div id="addRuleSection" style="display: none; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-color);">
+                    <h4 style="font-size: 14px; margin-bottom: 16px;"><i class="bi bi-plus-circle"></i> Add New Rule</h4>
+
+                    <!-- Action Type Selection -->
+                    <div class="form-group">
+                        <label class="form-label">Action Type</label>
+                        <div class="action-cards">
+                            <div class="action-card selected" onclick="selectAction(this)">
+                                <div class="action-card-icon skip"><i class="bi bi-skip-forward"></i></div>
+                                <div class="action-card-name">Skip Step</div>
+                                <div class="action-card-desc">Skip a specific step/module</div>
+                            </div>
+                            <div class="action-card" onclick="selectAction(this)">
+                                <div class="action-card-icon goto"><i class="bi bi-arrow-right-circle"></i></div>
+                                <div class="action-card-name">Go To Step</div>
+                                <div class="action-card-desc">Navigate to a specific step</div>
+                            </div>
+                            <div class="action-card" onclick="selectAction(this)">
+                                <div class="action-card-icon complete"><i class="bi bi-check-circle"></i></div>
+                                <div class="action-card-name">Complete</div>
+                                <div class="action-card-desc">Complete the workflow</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Rule Description</label>
+                            <input type="text" class="form-input" placeholder="e.g., Skip employment step for minors">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Target Step</label>
+                            <select class="form-select">
+                                <option value="">Select step...</option>
+                                <option value="2">Step 2: Personal Details</option>
+                                <option value="3">Step 3: Employment</option>
+                                <option value="4">Step 4: Documents</option>
+                                <option value="5">Step 5: Summary</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Condition</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" class="form-input" placeholder="e.g., Step1.age < 18" style="font-family: var(--font-mono);">
+                            <button class="btn btn-outline">
+                                <i class="bi bi-diagram-3"></i> Builder
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                        <button class="btn btn-ghost" onclick="hideAddRule()">Cancel</button>
+                        <button class="btn btn-primary">
+                            <i class="bi bi-plus"></i> Add Rule
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeModal()">Close</button>
+                <button class="btn btn-primary">
+                    <i class="bi bi-check-lg"></i> Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isOpen = false;
+        function openModal() { document.getElementById('modalBackdrop').classList.add('active'); isOpen = true; }
+        function closeModal() { document.getElementById('modalBackdrop').classList.remove('active'); isOpen = false; }
+        function handleBackdropClick(event) { if (event.target === event.currentTarget) closeModal(); }
+        document.addEventListener('keydown', e => { if (e.key === 'Escape' && isOpen) closeModal(); });
+
+        function showAddRule() { document.getElementById('addRuleSection').style.display = 'block'; }
+        function hideAddRule() { document.getElementById('addRuleSection').style.display = 'none'; }
+
+        function selectAction(el) {
+            document.querySelectorAll('.action-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        function toggleTheme() {
+            document.body.dataset.theme = document.body.dataset.theme === 'dark' ? '' : 'dark';
+        }
+    </script>
+</body>
+</html>

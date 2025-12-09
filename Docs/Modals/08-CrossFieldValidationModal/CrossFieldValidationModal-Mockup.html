@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrossFieldValidationModal - Interactive Mockup</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: #EEF2FF;
+            --success: #10B981;
+            --success-light: #D1FAE5;
+            --danger: #EF4444;
+            --danger-light: #FEE2E2;
+            --warning: #F59E0B;
+            --warning-light: #FEF3C7;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8FAFC;
+            --bg-tertiary: #F1F5F9;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --text-muted: #94A3B8;
+            --border-color: #E2E8F0;
+            --shadow-xl: 0 20px 40px rgba(0,0,0,0.15);
+            --font-sans: 'DM Sans', -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+            --radius-2xl: 12px;
+        }
+        [data-theme="dark"] {
+            --primary: #818CF8;
+            --bg-primary: #1E293B;
+            --bg-secondary: #0F172A;
+            --bg-tertiary: #334155;
+            --text-primary: #F1F5F9;
+            --text-secondary: #94A3B8;
+            --border-color: #334155;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-sans); background: var(--bg-secondary); color: var(--text-primary); min-height: 100vh; padding: 40px; }
+
+        .demo-header {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .demo-header h2 { font-size: 20px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+        .demo-header h2 i { color: var(--primary); }
+        .demo-header p { color: var(--text-secondary); margin-bottom: 16px; }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-ghost { background: transparent; color: var(--text-secondary); }
+        .btn-outline { background: var(--bg-primary); border: 1px solid var(--border-color); color: var(--text-primary); }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        .btn-danger { background: var(--danger); color: white; }
+
+        .modal-backdrop {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.2s;
+        }
+        .modal-backdrop.active { opacity: 1; visibility: visible; }
+        .modal {
+            background: var(--bg-primary);
+            border-radius: var(--radius-2xl);
+            max-width: 650px;
+            width: 100%;
+            max-height: 85vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-xl);
+        }
+        .modal-header { padding: 16px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; }
+        .modal-title { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .modal-title i { color: var(--primary); }
+        .modal-close { width: 32px; height: 32px; border: none; background: transparent; border-radius: var(--radius-md); color: var(--text-secondary); cursor: pointer; }
+        .modal-body { flex: 1; overflow-y: auto; padding: 20px; }
+        .modal-footer { padding: 12px 20px; border-top: 1px solid var(--border-color); display: flex; gap: 8px; justify-content: flex-end; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; }
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        .form-textarea { min-height: 60px; resize: vertical; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-hint { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
+        /* Validation type cards */
+        .type-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+        .type-card {
+            padding: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .type-card:hover { border-color: var(--primary); }
+        .type-card.selected { border-color: var(--primary); background: var(--primary-light); }
+        .type-card-icon { font-size: 24px; color: var(--primary); margin-bottom: 8px; }
+        .type-card-name { font-weight: 600; font-size: 13px; margin-bottom: 4px; }
+        .type-card-desc { font-size: 11px; color: var(--text-muted); }
+
+        /* Field selector */
+        .field-selector {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .field-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+        }
+        .field-option:last-child { border-bottom: none; }
+        .field-option:hover { background: var(--bg-tertiary); }
+        .field-option.selected { background: var(--primary-light); }
+        .field-option input { width: 16px; height: 16px; accent-color: var(--primary); }
+        .field-option-name { font-weight: 500; font-size: 13px; }
+        .field-option-type { font-size: 11px; color: var(--text-muted); }
+
+        /* Selected fields tags */
+        .selected-fields { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+        .field-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .field-tag button { background: none; border: none; color: inherit; cursor: pointer; font-size: 14px; }
+
+        /* Preview */
+        .validation-preview {
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-lg);
+            margin-top: 20px;
+        }
+        .preview-title { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 12px; }
+        .preview-rule { font-size: 14px; line-height: 1.6; }
+        .preview-rule .field { color: var(--primary); font-weight: 500; }
+        .preview-rule .type { color: var(--warning); font-weight: 600; }
+
+        .theme-toggle { position: fixed; top: 20px; right: 20px; z-index: 100; }
+    </style>
+</head>
+<body>
+    <button class="btn btn-outline theme-toggle" onclick="toggleTheme()"><i class="bi bi-moon"></i></button>
+
+    <div class="demo-header">
+        <h2><i class="bi bi-link-45deg"></i> CrossFieldValidationModal - Interactive Demo</h2>
+        <p>Configure validation rules that span multiple fields (e.g., "at least one phone number required").</p>
+        <button class="btn btn-primary" onclick="openModal()">
+            <i class="bi bi-plus"></i> Add Cross-Field Validation
+        </button>
+    </div>
+
+    <div class="modal-backdrop" id="modalBackdrop" onclick="handleBackdropClick(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="bi bi-link-45deg"></i>
+                    <span>Cross-Field Validation</span>
+                </div>
+                <button class="modal-close" onclick="closeModal()"><i class="bi bi-x-lg"></i></button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Validation Type Selection -->
+                <div class="form-group">
+                    <label class="form-label">Validation Type</label>
+                    <div class="type-cards">
+                        <div class="type-card selected" onclick="selectType(this)">
+                            <div class="type-card-icon"><i class="bi bi-1-circle"></i></div>
+                            <div class="type-card-name">At Least One</div>
+                            <div class="type-card-desc">One or more fields must have a value</div>
+                        </div>
+                        <div class="type-card" onclick="selectType(this)">
+                            <div class="type-card-icon"><i class="bi bi-check-all"></i></div>
+                            <div class="type-card-name">All or None</div>
+                            <div class="type-card-desc">Either all fields filled or all empty</div>
+                        </div>
+                        <div class="type-card" onclick="selectType(this)">
+                            <div class="type-card-icon"><i class="bi bi-x-circle"></i></div>
+                            <div class="type-card-name">Mutually Exclusive</div>
+                            <div class="type-card-desc">Only one field can have a value</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Field Selection -->
+                <div class="form-group">
+                    <label class="form-label">Select Fields</label>
+                    <div class="selected-fields">
+                        <span class="field-tag">homePhone <button>&times;</button></span>
+                        <span class="field-tag">mobilePhone <button>&times;</button></span>
+                        <span class="field-tag">workPhone <button>&times;</button></span>
+                    </div>
+                    <div class="field-selector">
+                        <label class="field-option selected">
+                            <input type="checkbox" checked>
+                            <div>
+                                <div class="field-option-name">homePhone</div>
+                                <div class="field-option-type">TextBox</div>
+                            </div>
+                        </label>
+                        <label class="field-option selected">
+                            <input type="checkbox" checked>
+                            <div>
+                                <div class="field-option-name">mobilePhone</div>
+                                <div class="field-option-type">TextBox</div>
+                            </div>
+                        </label>
+                        <label class="field-option selected">
+                            <input type="checkbox" checked>
+                            <div>
+                                <div class="field-option-name">workPhone</div>
+                                <div class="field-option-type">TextBox</div>
+                            </div>
+                        </label>
+                        <label class="field-option">
+                            <input type="checkbox">
+                            <div>
+                                <div class="field-option-name">email</div>
+                                <div class="field-option-type">TextBox</div>
+                            </div>
+                        </label>
+                        <label class="field-option">
+                            <input type="checkbox">
+                            <div>
+                                <div class="field-option-name">fax</div>
+                                <div class="field-option-type">TextBox</div>
+                            </div>
+                        </label>
+                    </div>
+                    <p class="form-hint">Select 2 or more fields to include in this validation</p>
+                </div>
+
+                <!-- Error Messages -->
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Error Message (English)</label>
+                        <textarea class="form-textarea">At least one phone number is required.</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Error Message (French)</label>
+                        <textarea class="form-textarea">Au moins un numéro de téléphone est requis.</textarea>
+                    </div>
+                </div>
+
+                <!-- Preview -->
+                <div class="validation-preview">
+                    <div class="preview-title">Rule Preview</div>
+                    <div class="preview-rule">
+                        <span class="type">AT LEAST ONE</span> of the following fields must have a value:<br>
+                        <span class="field">homePhone</span>, <span class="field">mobilePhone</span>, <span class="field">workPhone</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary">
+                    <i class="bi bi-check-lg"></i> Save Validation
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isOpen = false;
+        function openModal() { document.getElementById('modalBackdrop').classList.add('active'); isOpen = true; }
+        function closeModal() { document.getElementById('modalBackdrop').classList.remove('active'); isOpen = false; }
+        function handleBackdropClick(event) { if (event.target === event.currentTarget) closeModal(); }
+        document.addEventListener('keydown', e => { if (e.key === 'Escape' && isOpen) closeModal(); });
+        function selectType(el) {
+            document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+        function toggleTheme() {
+            document.body.dataset.theme = document.body.dataset.theme === 'dark' ? '' : 'dark';
+        }
+    </script>
+</body>
+</html>

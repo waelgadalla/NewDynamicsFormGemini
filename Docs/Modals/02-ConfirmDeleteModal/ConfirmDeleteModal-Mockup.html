@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConfirmDeleteModal - Interactive Mockup</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ===== DESIGN TOKENS ===== */
+        :root {
+            --primary: #6366F1;
+            --primary-dark: #4F46E5;
+            --primary-light: #EEF2FF;
+            --success: #10B981;
+            --success-light: #D1FAE5;
+            --danger: #EF4444;
+            --danger-dark: #DC2626;
+            --danger-light: #FEE2E2;
+            --warning: #F59E0B;
+            --warning-light: #FEF3C7;
+            --info: #3B82F6;
+            --info-light: #DBEAFE;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8FAFC;
+            --bg-tertiary: #F1F5F9;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --text-muted: #94A3B8;
+            --border-color: #E2E8F0;
+            --border-strong: #CBD5E1;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-lg: 0 12px 32px rgba(0,0,0,0.12);
+            --shadow-xl: 0 20px 40px rgba(0,0,0,0.15);
+            --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --radius-sm: 4px;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+            --radius-xl: 10px;
+            --radius-2xl: 12px;
+            --transition-fast: 0.15s ease;
+            --transition-normal: 0.2s ease;
+        }
+
+        [data-theme="dark"] {
+            --primary: #818CF8;
+            --bg-primary: #1E293B;
+            --bg-secondary: #0F172A;
+            --bg-tertiary: #334155;
+            --text-primary: #F1F5F9;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            --border-color: #334155;
+            --danger-light: rgba(239, 68, 68, 0.15);
+            --warning-light: rgba(245, 158, 11, 0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 40px;
+        }
+
+        /* ===== DEMO CONTROLS ===== */
+        .demo-controls {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .demo-controls h2 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .demo-controls h2 i { color: var(--danger); }
+        .demo-controls p { color: var(--text-secondary); margin-bottom: 20px; }
+
+        .control-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .control-item { flex: 1; min-width: 200px; }
+
+        .control-item label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: inherit;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-danger:hover { background: var(--danger-dark); transform: translateY(-1px); }
+        .btn-ghost { background: transparent; color: var(--text-secondary); }
+        .btn-ghost:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+        .btn-outline { background: var(--bg-primary); border: 1px solid var(--border-color); color: var(--text-primary); }
+        .btn-outline:hover { border-color: var(--border-strong); background: var(--bg-tertiary); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-group { display: flex; gap: 12px; flex-wrap: wrap; }
+
+        /* ===== MODAL ===== */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity var(--transition-normal), visibility var(--transition-normal);
+        }
+
+        .modal-backdrop.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--bg-primary);
+            border-radius: var(--radius-2xl);
+            max-width: 420px;
+            width: 100%;
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
+            transform: scale(0.95) translateY(10px);
+            transition: transform var(--transition-normal);
+        }
+
+        .modal-backdrop.active .modal {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-title i { color: var(--danger); }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all var(--transition-fast);
+        }
+
+        .modal-close:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 24px 20px;
+            text-align: center;
+        }
+
+        .modal-footer {
+            padding: 12px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        /* ===== DELETE MODAL SPECIFIC ===== */
+        .delete-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--danger-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+        .delete-icon i {
+            font-size: 28px;
+            color: var(--danger);
+        }
+
+        .delete-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .delete-message {
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .delete-item-name {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 10px 16px;
+            font-family: monospace;
+            font-size: 13px;
+            word-break: break-all;
+        }
+
+        .delete-warning {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            background: var(--warning-light);
+            border: 1px solid var(--warning);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            margin-top: 16px;
+            text-align: left;
+        }
+
+        .delete-warning i {
+            color: var(--warning);
+            font-size: 18px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .delete-warning-text {
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+
+        .children-list {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            margin-top: 12px;
+            text-align: left;
+        }
+
+        .children-list-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .children-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 0;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .children-item:last-child { border-bottom: none; }
+        .children-item i { color: var(--text-muted); font-size: 14px; }
+
+        /* Keyboard hint */
+        kbd {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 2px 6px;
+            font-size: 11px;
+            font-family: inherit;
+        }
+
+        .keyboard-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-right: auto;
+        }
+
+        /* Theme toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        /* Page content */
+        .page-content {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .page-content h3 { color: var(--text-muted); font-weight: 500; }
+
+        /* Loading state */
+        .btn-loading {
+            position: relative;
+            color: transparent !important;
+        }
+
+        .btn-loading::after {
+            content: "";
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Toggle -->
+    <button class="btn btn-outline theme-toggle" onclick="toggleTheme()">
+        <i class="bi bi-moon"></i> Toggle Theme
+    </button>
+
+    <!-- Demo Controls -->
+    <div class="demo-controls">
+        <h2><i class="bi bi-trash"></i> ConfirmDeleteModal - Interactive Demo</h2>
+        <p>A simple confirmation dialog for delete operations with clear messaging and danger styling.</p>
+
+        <div class="control-group">
+            <div class="control-item">
+                <label>Delete Type</label>
+                <select id="deleteType" onchange="updatePreview()">
+                    <option value="field">Field</option>
+                    <option value="field-with-children">Field with Children</option>
+                    <option value="module">Module</option>
+                    <option value="workflow">Workflow</option>
+                    <option value="codeset">CodeSet</option>
+                    <option value="rule">Conditional Rule</option>
+                </select>
+            </div>
+            <div class="control-item">
+                <label>Item Name</label>
+                <input type="text" id="itemName" value="firstName" oninput="updatePreview()">
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-danger" onclick="openModal()">
+                <i class="bi bi-trash"></i> Open Delete Confirmation
+            </button>
+            <button class="btn btn-outline" onclick="openModalWithLoading()">
+                <i class="bi bi-hourglass-split"></i> With Loading State
+            </button>
+        </div>
+    </div>
+
+    <!-- Page Content -->
+    <div class="page-content">
+        <h3>Application content behind the modal</h3>
+    </div>
+
+    <!-- Modal Backdrop -->
+    <div class="modal-backdrop" id="modalBackdrop" onclick="handleBackdropClick(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="bi bi-trash"></i>
+                    <span id="modalTitle">Delete Field</span>
+                </div>
+                <button class="modal-close" onclick="closeModal()" title="Close (Esc)">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <div class="modal-body" id="modalBody">
+                <div class="delete-icon">
+                    <i class="bi bi-trash"></i>
+                </div>
+
+                <div class="delete-title">Are you sure?</div>
+
+                <div class="delete-message" id="deleteMessage">
+                    You are about to delete this field. This action cannot be undone.
+                </div>
+
+                <div class="delete-item-name" id="deleteItemName">firstName</div>
+
+                <div id="warningSection" style="display: none;">
+                    <div class="delete-warning">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <div class="delete-warning-text" id="warningText">
+                            This field has child fields that will also be deleted.
+                        </div>
+                    </div>
+
+                    <div class="children-list" id="childrenList">
+                        <div class="children-list-title">Fields to be deleted (3)</div>
+                        <div class="children-item">
+                            <i class="bi bi-input-cursor-text"></i>
+                            <span>firstName</span>
+                        </div>
+                        <div class="children-item">
+                            <i class="bi bi-input-cursor-text"></i>
+                            <span>lastName</span>
+                        </div>
+                        <div class="children-item">
+                            <i class="bi bi-envelope"></i>
+                            <span>email</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <span class="keyboard-hint"><kbd>Esc</kbd> to cancel</span>
+                <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-danger" id="deleteBtn" onclick="handleDelete()">
+                    <i class="bi bi-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isOpen = false;
+
+        function openModal() {
+            updatePreview();
+            document.getElementById('modalBackdrop').classList.add('active');
+            isOpen = true;
+        }
+
+        function closeModal() {
+            document.getElementById('modalBackdrop').classList.remove('active');
+            isOpen = false;
+            // Reset loading state
+            const btn = document.getElementById('deleteBtn');
+            btn.classList.remove('btn-loading');
+            btn.disabled = false;
+        }
+
+        function handleBackdropClick(event) {
+            if (event.target === event.currentTarget) {
+                closeModal();
+            }
+        }
+
+        function updatePreview() {
+            const deleteType = document.getElementById('deleteType').value;
+            const itemName = document.getElementById('itemName').value || 'item';
+
+            const config = {
+                'field': {
+                    title: 'Delete Field',
+                    message: 'You are about to delete this field. This action cannot be undone.',
+                    showWarning: false,
+                    showChildren: false
+                },
+                'field-with-children': {
+                    title: 'Delete Field',
+                    message: 'You are about to delete this field and all its children. This action cannot be undone.',
+                    showWarning: true,
+                    warningText: 'This field contains 3 child fields that will also be deleted.',
+                    showChildren: true
+                },
+                'module': {
+                    title: 'Delete Module',
+                    message: 'You are about to delete this entire module including all its fields. This action cannot be undone.',
+                    showWarning: true,
+                    warningText: 'This module contains 12 fields that will be permanently deleted.',
+                    showChildren: false
+                },
+                'workflow': {
+                    title: 'Delete Workflow',
+                    message: 'You are about to delete this workflow. The modules within will not be deleted.',
+                    showWarning: false,
+                    showChildren: false
+                },
+                'codeset': {
+                    title: 'Delete CodeSet',
+                    message: 'You are about to delete this CodeSet. Fields using this CodeSet will lose their options.',
+                    showWarning: true,
+                    warningText: 'This CodeSet is used by 5 fields across 2 modules.',
+                    showChildren: false
+                },
+                'rule': {
+                    title: 'Delete Rule',
+                    message: 'You are about to delete this conditional rule.',
+                    showWarning: false,
+                    showChildren: false
+                }
+            };
+
+            const c = config[deleteType];
+            document.getElementById('modalTitle').textContent = c.title;
+            document.getElementById('deleteMessage').textContent = c.message;
+            document.getElementById('deleteItemName').textContent = itemName;
+
+            const warningSection = document.getElementById('warningSection');
+            if (c.showWarning) {
+                warningSection.style.display = 'block';
+                document.getElementById('warningText').textContent = c.warningText;
+            } else {
+                warningSection.style.display = 'none';
+            }
+
+            document.getElementById('childrenList').style.display = c.showChildren ? 'block' : 'none';
+        }
+
+        function handleDelete() {
+            const btn = document.getElementById('deleteBtn');
+            btn.classList.add('btn-loading');
+            btn.disabled = true;
+
+            // Simulate async delete
+            setTimeout(() => {
+                closeModal();
+                alert('Item deleted successfully!');
+            }, 1500);
+        }
+
+        function openModalWithLoading() {
+            openModal();
+            // Auto-click delete after opening
+            setTimeout(() => {
+                handleDelete();
+            }, 500);
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && isOpen) {
+                closeModal();
+            }
+        });
+
+        function toggleTheme() {
+            document.body.dataset.theme = document.body.dataset.theme === 'dark' ? '' : 'dark';
+        }
+    </script>
+</body>
+</html>

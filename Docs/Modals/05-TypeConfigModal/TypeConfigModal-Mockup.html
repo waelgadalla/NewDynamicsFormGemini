@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TypeConfigModal - Interactive Mockup</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <style>
+        /* ===== DESIGN TOKENS ===== */
+        :root {
+            --primary: #6366F1;
+            --primary-dark: #4F46E5;
+            --primary-light: #EEF2FF;
+            --success: #10B981;
+            --success-light: #D1FAE5;
+            --danger: #EF4444;
+            --danger-light: #FEE2E2;
+            --warning: #F59E0B;
+            --warning-light: #FEF3C7;
+            --info: #3B82F6;
+            --info-light: #DBEAFE;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8FAFC;
+            --bg-tertiary: #F1F5F9;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --text-muted: #94A3B8;
+            --border-color: #E2E8F0;
+            --border-strong: #CBD5E1;
+            --shadow-lg: 0 12px 32px rgba(0,0,0,0.12);
+            --shadow-xl: 0 20px 40px rgba(0,0,0,0.15);
+            --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius-sm: 4px;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+            --radius-xl: 10px;
+            --radius-2xl: 12px;
+            --transition-fast: 0.15s ease;
+            --transition-normal: 0.2s ease;
+        }
+
+        [data-theme="dark"] {
+            --primary: #818CF8;
+            --primary-dark: #6366F1;
+            --primary-light: rgba(99, 102, 241, 0.15);
+            --bg-primary: #1E293B;
+            --bg-secondary: #0F172A;
+            --bg-tertiary: #334155;
+            --text-primary: #F1F5F9;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            --border-color: #334155;
+            --border-strong: #475569;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 40px;
+        }
+
+        /* ===== DEMO HEADER ===== */
+        .demo-header {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .demo-header h2 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .demo-header h2 i { color: var(--primary); }
+        .demo-header p { color: var(--text-secondary); margin-bottom: 16px; }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-outline { background: var(--bg-primary); border: 1px solid var(--border-color); color: var(--text-primary); }
+        .btn-outline:hover { border-color: var(--border-strong); background: var(--bg-tertiary); }
+        .btn-ghost { background: transparent; color: var(--text-secondary); }
+        .btn-ghost:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+        .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        /* ===== MODAL ===== */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity var(--transition-normal), visibility var(--transition-normal);
+        }
+
+        .modal-backdrop.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--bg-primary);
+            border-radius: var(--radius-2xl);
+            max-width: 600px;
+            width: 100%;
+            max-height: 85vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-xl);
+            transform: scale(0.95) translateY(10px);
+            transition: transform var(--transition-normal);
+        }
+
+        .modal-backdrop.active .modal {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-title i { color: var(--primary); }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .modal-close:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 12px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        /* ===== FORM ELEMENTS ===== */
+        .form-group { margin-bottom: 20px; }
+        .form-group:last-child { margin-bottom: 0; }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: inherit;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* Toggle/Switch */
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            margin-bottom: 12px;
+        }
+
+        .toggle-group:last-child { margin-bottom: 0; }
+
+        .toggle-label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .toggle-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .toggle {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: var(--border-strong);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background var(--transition-fast);
+        }
+
+        .toggle.active { background: var(--primary); }
+
+        .toggle::after {
+            content: "";
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform var(--transition-fast);
+        }
+
+        .toggle.active::after {
+            transform: translateX(20px);
+        }
+
+        /* Section divider */
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 24px 0;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .section-divider::before,
+        .section-divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        /* Tag input for extensions */
+        .tag-input-wrapper {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            min-height: 42px;
+        }
+
+        .tag-input-wrapper:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .tag button {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            padding: 0;
+            font-size: 14px;
+            line-height: 1;
+            opacity: 0.7;
+        }
+
+        .tag button:hover { opacity: 1; }
+
+        .tag-input {
+            flex: 1;
+            min-width: 100px;
+            border: none;
+            background: none;
+            font-size: 13px;
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        /* Preview section */
+        .config-preview {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            margin-top: 20px;
+        }
+
+        .config-preview-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .config-preview code {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            line-height: 1.5;
+            white-space: pre;
+            color: var(--text-secondary);
+        }
+
+        /* Column editor for DataGrid */
+        .column-list {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .column-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-primary);
+        }
+
+        .column-item:last-child { border-bottom: none; }
+
+        .column-item:hover { background: var(--bg-tertiary); }
+
+        .column-drag {
+            color: var(--text-muted);
+            cursor: grab;
+        }
+
+        .column-info { flex: 1; }
+
+        .column-name {
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .column-type {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .column-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .add-column-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border: 1px dashed var(--border-strong);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            margin-top: 12px;
+        }
+
+        .add-column-btn:hover {
+            background: var(--primary-light);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Theme toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        /* Type badge */
+        .type-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Toggle -->
+    <button class="btn btn-outline theme-toggle" onclick="toggleTheme()">
+        <i class="bi bi-moon"></i>
+    </button>
+
+    <!-- Demo Header -->
+    <div class="demo-header">
+        <h2><i class="bi bi-sliders"></i> TypeConfigModal - Interactive Demo</h2>
+        <p>Dynamic configuration modal that shows different editors based on field type (DatePicker, FileUpload, AutoComplete, DataGrid).</p>
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="openModal('date')">
+                <i class="bi bi-calendar"></i> Date Config
+            </button>
+            <button class="btn btn-outline" onclick="openModal('fileupload')">
+                <i class="bi bi-upload"></i> File Upload Config
+            </button>
+            <button class="btn btn-outline" onclick="openModal('autocomplete')">
+                <i class="bi bi-search"></i> AutoComplete Config
+            </button>
+            <button class="btn btn-outline" onclick="openModal('datagrid')">
+                <i class="bi bi-table"></i> DataGrid Config
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-backdrop" id="modalBackdrop" onclick="handleBackdropClick(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="bi bi-sliders" id="modalIcon"></i>
+                    <span id="modalTitle">Field Configuration</span>
+                </div>
+                <button class="modal-close" onclick="closeModal()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <div class="modal-body" id="modalBody">
+                <!-- Content will be dynamically inserted -->
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary">
+                    <i class="bi bi-check-lg"></i> Save Configuration
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Templates -->
+    <template id="dateConfigTemplate">
+        <div class="type-badge" style="margin-bottom: 20px;">
+            <i class="bi bi-calendar"></i> DatePicker Configuration
+        </div>
+
+        <div class="toggle-group">
+            <div>
+                <div class="toggle-label">Allow Future Dates</div>
+                <div class="toggle-desc">Users can select dates after today</div>
+            </div>
+            <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+        </div>
+
+        <div class="toggle-group">
+            <div>
+                <div class="toggle-label">Allow Past Dates</div>
+                <div class="toggle-desc">Users can select dates before today</div>
+            </div>
+            <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+        </div>
+
+        <div class="section-divider">Date Constraints</div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">Minimum Date</label>
+                <select class="form-select">
+                    <option value="">No minimum</option>
+                    <option value="Now">Today</option>
+                    <option value="Now-30d">30 days ago</option>
+                    <option value="Now-1y">1 year ago</option>
+                    <option value="custom">Custom date...</option>
+                </select>
+                <p class="form-hint">Earliest date that can be selected</p>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Maximum Date</label>
+                <select class="form-select">
+                    <option value="">No maximum</option>
+                    <option value="Now">Today</option>
+                    <option value="Now+30d" selected>30 days from now</option>
+                    <option value="Now+1y">1 year from now</option>
+                    <option value="custom">Custom date...</option>
+                </select>
+                <p class="form-hint">Latest date that can be selected</p>
+            </div>
+        </div>
+
+        <div class="config-preview">
+            <div class="config-preview-title">Configuration Preview</div>
+            <code>{
+  "$type": "date",
+  "AllowFuture": true,
+  "AllowPast": true,
+  "MinDate": null,
+  "MaxDate": "Now+30d"
+}</code>
+        </div>
+    </template>
+
+    <template id="fileUploadConfigTemplate">
+        <div class="type-badge" style="margin-bottom: 20px;">
+            <i class="bi bi-upload"></i> FileUpload Configuration
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Allowed File Extensions</label>
+            <div class="tag-input-wrapper">
+                <span class="tag">.pdf <button onclick="this.parentElement.remove()">&times;</button></span>
+                <span class="tag">.doc <button onclick="this.parentElement.remove()">&times;</button></span>
+                <span class="tag">.docx <button onclick="this.parentElement.remove()">&times;</button></span>
+                <span class="tag">.jpg <button onclick="this.parentElement.remove()">&times;</button></span>
+                <span class="tag">.png <button onclick="this.parentElement.remove()">&times;</button></span>
+                <input type="text" class="tag-input" placeholder="Type extension and press Enter">
+            </div>
+            <p class="form-hint">Press Enter to add each extension</p>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Maximum File Size</label>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <input type="number" class="form-input" value="10" style="width: 100px;">
+                <select class="form-select" style="width: 100px;">
+                    <option value="KB">KB</option>
+                    <option value="MB" selected>MB</option>
+                    <option value="GB">GB</option>
+                </select>
+            </div>
+            <p class="form-hint">Maximum size per file</p>
+        </div>
+
+        <div class="toggle-group">
+            <div>
+                <div class="toggle-label">Allow Multiple Files</div>
+                <div class="toggle-desc">Users can upload more than one file</div>
+            </div>
+            <div class="toggle" onclick="this.classList.toggle('active')"></div>
+        </div>
+
+        <div class="toggle-group">
+            <div>
+                <div class="toggle-label">Virus Scan Required</div>
+                <div class="toggle-desc">Files must pass virus scan before accepting</div>
+            </div>
+            <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+        </div>
+
+        <div class="config-preview">
+            <div class="config-preview-title">Configuration Preview</div>
+            <code>{
+  "$type": "fileupload",
+  "AllowedExtensions": [".pdf", ".doc", ".docx", ".jpg", ".png"],
+  "MaxFileSizeBytes": 10485760,
+  "AllowMultiple": false,
+  "ScanRequired": true
+}</code>
+        </div>
+    </template>
+
+    <template id="autocompleteConfigTemplate">
+        <div class="type-badge" style="margin-bottom: 20px;">
+            <i class="bi bi-search"></i> AutoComplete Configuration
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Data Source URL</label>
+            <input type="text" class="form-input" value="/api/v1/species/search" placeholder="/api/endpoint">
+            <p class="form-hint">API endpoint that returns search results</p>
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">Query Parameter</label>
+                <input type="text" class="form-input" value="q" placeholder="q">
+                <p class="form-hint">URL parameter for search term</p>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Minimum Characters</label>
+                <input type="number" class="form-input" value="3" min="1" max="10">
+                <p class="form-hint">Characters before search triggers</p>
+            </div>
+        </div>
+
+        <div class="section-divider">Field Mapping</div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">Value Field</label>
+                <input type="text" class="form-input" value="Id" placeholder="Id">
+                <p class="form-hint">Property to save as value</p>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Display Field</label>
+                <input type="text" class="form-input" value="Name" placeholder="Name">
+                <p class="form-hint">Property to show in dropdown</p>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Item Template (Optional)</label>
+            <input type="text" class="form-input" value="{{Name}} ({{ScientificName}})" placeholder="{{Name}}">
+            <p class="form-hint">Handlebars template for dropdown items</p>
+        </div>
+
+        <div class="config-preview">
+            <div class="config-preview-title">Configuration Preview</div>
+            <code>{
+  "$type": "autocomplete",
+  "DataSourceUrl": "/api/v1/species/search",
+  "QueryParameter": "q",
+  "MinCharacters": 3,
+  "ValueField": "Id",
+  "DisplayField": "Name",
+  "ItemTemplate": "{{Name}} ({{ScientificName}})"
+}</code>
+        </div>
+    </template>
+
+    <template id="datagridConfigTemplate">
+        <div class="type-badge" style="margin-bottom: 20px;">
+            <i class="bi bi-table"></i> DataGrid Configuration
+        </div>
+
+        <div class="toggle-group">
+            <div>
+                <div class="toggle-label">Allow Add Rows</div>
+                <div class="toggle-desc">Users can add new rows</div>
+            </div>
+            <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+        </div>
+
+        <div class="toggle-group">
+            <div>
+                <div class="toggle-label">Allow Edit Rows</div>
+                <div class="toggle-desc">Users can edit existing rows</div>
+            </div>
+            <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+        </div>
+
+        <div class="toggle-group">
+            <div>
+                <div class="toggle-label">Allow Delete Rows</div>
+                <div class="toggle-desc">Users can delete rows</div>
+            </div>
+            <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">Maximum Rows</label>
+                <input type="number" class="form-input" value="10" placeholder="No limit">
+                <p class="form-hint">Leave empty for unlimited</p>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Editor Mode</label>
+                <select class="form-select">
+                    <option value="Modal" selected>Modal Dialog</option>
+                    <option value="Inline">Inline Editing</option>
+                </select>
+                <p class="form-hint">How row editing appears</p>
+            </div>
+        </div>
+
+        <div class="section-divider">Columns</div>
+
+        <div class="column-list">
+            <div class="column-item">
+                <i class="bi bi-grip-vertical column-drag"></i>
+                <div class="column-info">
+                    <div class="column-name">Description</div>
+                    <div class="column-type">TextBox - Required</div>
+                </div>
+                <div class="column-actions">
+                    <button class="btn btn-sm btn-ghost"><i class="bi bi-pencil"></i></button>
+                    <button class="btn btn-sm btn-ghost"><i class="bi bi-trash"></i></button>
+                </div>
+            </div>
+            <div class="column-item">
+                <i class="bi bi-grip-vertical column-drag"></i>
+                <div class="column-info">
+                    <div class="column-name">Quantity</div>
+                    <div class="column-type">Number - Required</div>
+                </div>
+                <div class="column-actions">
+                    <button class="btn btn-sm btn-ghost"><i class="bi bi-pencil"></i></button>
+                    <button class="btn btn-sm btn-ghost"><i class="bi bi-trash"></i></button>
+                </div>
+            </div>
+            <div class="column-item">
+                <i class="bi bi-grip-vertical column-drag"></i>
+                <div class="column-info">
+                    <div class="column-name">UnitPrice</div>
+                    <div class="column-type">Currency - Required</div>
+                </div>
+                <div class="column-actions">
+                    <button class="btn btn-sm btn-ghost"><i class="bi bi-pencil"></i></button>
+                    <button class="btn btn-sm btn-ghost"><i class="bi bi-trash"></i></button>
+                </div>
+            </div>
+            <div class="column-item">
+                <i class="bi bi-grip-vertical column-drag"></i>
+                <div class="column-info">
+                    <div class="column-name">Total</div>
+                    <div class="column-type">Currency - Computed</div>
+                </div>
+                <div class="column-actions">
+                    <button class="btn btn-sm btn-ghost"><i class="bi bi-pencil"></i></button>
+                    <button class="btn btn-sm btn-ghost"><i class="bi bi-trash"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <button class="add-column-btn">
+            <i class="bi bi-plus"></i> Add Column
+        </button>
+
+        <div class="config-preview">
+            <div class="config-preview-title">Configuration Preview</div>
+            <code>{
+  "$type": "datagrid",
+  "AllowAdd": true,
+  "AllowEdit": true,
+  "AllowDelete": true,
+  "MaxRows": 10,
+  "EditorMode": "Modal",
+  "Columns": [
+    { "Id": "description", "FieldType": "TextBox", ... },
+    { "Id": "quantity", "FieldType": "Number", ... },
+    { "Id": "unitPrice", "FieldType": "Currency", ... },
+    { "Id": "total", "FieldType": "Currency", ... }
+  ]
+}</code>
+        </div>
+    </template>
+
+    <script>
+        let isOpen = false;
+        let currentType = '';
+
+        function openModal(type) {
+            currentType = type;
+            const templates = {
+                'date': { icon: 'bi-calendar', title: 'Date Configuration', template: 'dateConfigTemplate' },
+                'fileupload': { icon: 'bi-upload', title: 'File Upload Configuration', template: 'fileUploadConfigTemplate' },
+                'autocomplete': { icon: 'bi-search', title: 'AutoComplete Configuration', template: 'autocompleteConfigTemplate' },
+                'datagrid': { icon: 'bi-table', title: 'DataGrid Configuration', template: 'datagridConfigTemplate' }
+            };
+
+            const config = templates[type];
+            document.getElementById('modalIcon').className = 'bi ' + config.icon;
+            document.getElementById('modalTitle').textContent = config.title;
+
+            const template = document.getElementById(config.template);
+            document.getElementById('modalBody').innerHTML = template.innerHTML;
+
+            document.getElementById('modalBackdrop').classList.add('active');
+            isOpen = true;
+        }
+
+        function closeModal() {
+            document.getElementById('modalBackdrop').classList.remove('active');
+            isOpen = false;
+        }
+
+        function handleBackdropClick(event) {
+            if (event.target === event.currentTarget) {
+                closeModal();
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && isOpen) {
+                closeModal();
+            }
+        });
+
+        function toggleTheme() {
+            document.body.dataset.theme = document.body.dataset.theme === 'dark' ? '' : 'dark';
+        }
+    </script>
+</body>
+</html>
