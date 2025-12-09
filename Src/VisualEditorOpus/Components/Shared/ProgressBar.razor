@@ -1,0 +1,74 @@
+@* Progress bar component with determinate and indeterminate modes *@
+
+<div class="progress-bar @(IsIndeterminate ? "progress-bar-indeterminate" : "") @(ShowLabel ? "progress-bar-labeled" : "") @CssClass"
+     role="progressbar"
+     aria-valuenow="@Value"
+     aria-valuemin="0"
+     aria-valuemax="@Max"
+     aria-label="@AriaLabel">
+    <div class="progress-bar-fill @ColorClass" style="@FillStyle"></div>
+</div>
+
+@if (ShowLabel)
+{
+    <div class="progress-bar-label">
+        <span>@Label</span>
+        @if (!IsIndeterminate)
+        {
+            <span class="progress-bar-percentage">@Percentage%</span>
+        }
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// Current progress value
+    /// </summary>
+    [Parameter] public int Value { get; set; } = 0;
+
+    /// <summary>
+    /// Maximum progress value
+    /// </summary>
+    [Parameter] public int Max { get; set; } = 100;
+
+    /// <summary>
+    /// Whether to show indeterminate animation
+    /// </summary>
+    [Parameter] public bool IsIndeterminate { get; set; }
+
+    /// <summary>
+    /// Whether to show the label
+    /// </summary>
+    [Parameter] public bool ShowLabel { get; set; }
+
+    /// <summary>
+    /// Label text to display
+    /// </summary>
+    [Parameter] public string? Label { get; set; }
+
+    /// <summary>
+    /// Color variant: "primary", "success", "warning", "danger"
+    /// </summary>
+    [Parameter] public string Color { get; set; } = "primary";
+
+    /// <summary>
+    /// Additional CSS classes
+    /// </summary>
+    [Parameter] public string? CssClass { get; set; }
+
+    /// <summary>
+    /// Accessible label for screen readers
+    /// </summary>
+    [Parameter] public string AriaLabel { get; set; } = "Progress";
+
+    private string FillStyle => IsIndeterminate ? "" : $"width: {Percentage}%";
+    private int Percentage => Max > 0 ? (int)((double)Value / Max * 100) : 0;
+
+    private string ColorClass => Color switch
+    {
+        "success" => "progress-bar-success",
+        "warning" => "progress-bar-warning",
+        "danger" => "progress-bar-danger",
+        _ => ""
+    };
+}

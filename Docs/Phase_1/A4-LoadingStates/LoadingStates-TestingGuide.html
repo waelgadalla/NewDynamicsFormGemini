@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading States - Testing Guide</title>
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: #EEF2FF;
+            --success: #10B981;
+            --success-light: #D1FAE5;
+            --danger: #EF4444;
+            --danger-light: #FEE2E2;
+            --warning: #F59E0B;
+            --warning-light: #FEF3C7;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8FAFC;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --border-color: #E2E8F0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-top: 32px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 24px;
+            margin-bottom: 12px;
+        }
+
+        .card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .checklist li:last-child {
+            border-bottom: none;
+        }
+
+        .checklist input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            cursor: pointer;
+            accent-color: var(--success);
+        }
+
+        .checklist label {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .checklist .item-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .checklist .item-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .expected-result {
+            background: var(--success-light);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #065F46;
+            margin-top: 8px;
+        }
+
+        .code-block {
+            background: #1E293B;
+            color: #E2E8F0;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Fira Code', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+
+        .progress-bar {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            height: 8px;
+            margin-top: 24px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: var(--success);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .note {
+            background: var(--warning-light);
+            border-left: 4px solid var(--warning);
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            font-size: 13px;
+            margin: 16px 0;
+        }
+
+        .component-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+
+        .component-table th,
+        .component-table td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .component-table th {
+            background: var(--bg-secondary);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .component-table td {
+            font-size: 13px;
+        }
+
+        .component-table code {
+            background: var(--bg-secondary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Loading States Testing Guide</h1>
+        <p class="subtitle">Complete testing checklist for the Loading States implementation</p>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <p class="progress-text"><span id="completedCount">0</span> of <span id="totalCount">0</span> tasks completed</p>
+
+        <!-- Components Created -->
+        <h2>Components Created</h2>
+        <div class="card">
+            <div class="card-title">Loading Components</div>
+            <table class="component-table">
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Location</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>LoadingSpinner.razor</code></td>
+                        <td>Components/Shared/</td>
+                        <td>Animated border spinner (sm/md/lg)</td>
+                    </tr>
+                    <tr>
+                        <td><code>SkeletonLoader.razor</code></td>
+                        <td>Components/Shared/</td>
+                        <td>Shimmer placeholder (multiple variants)</td>
+                    </tr>
+                    <tr>
+                        <td><code>ButtonLoading.razor</code></td>
+                        <td>Components/Shared/</td>
+                        <td>Button with integrated loading state</td>
+                    </tr>
+                    <tr>
+                        <td><code>ProgressBar.razor</code></td>
+                        <td>Components/Shared/</td>
+                        <td>Determinate/indeterminate progress</td>
+                    </tr>
+                    <tr>
+                        <td><code>InlineLoader.razor</code></td>
+                        <td>Components/Shared/</td>
+                        <td>Inline spinner with text</td>
+                    </tr>
+                    <tr>
+                        <td><code>PageLoader.razor</code></td>
+                        <td>Components/Shared/</td>
+                        <td>Full page loading overlay</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Enums Created</div>
+            <table class="component-table">
+                <thead>
+                    <tr>
+                        <th>Enum</th>
+                        <th>Values</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>SpinnerSize</code></td>
+                        <td>Small (20px), Medium (32px), Large (48px)</td>
+                    </tr>
+                    <tr>
+                        <td><code>SpinnerColor</code></td>
+                        <td>Primary, White</td>
+                    </tr>
+                    <tr>
+                        <td><code>SkeletonVariant</code></td>
+                        <td>Text, Title, Avatar, Button, Icon, Card, Field, ListItem, TableRow</td>
+                    </tr>
+                    <tr>
+                        <td><code>SkeletonSize</code></td>
+                        <td>Small, Medium</td>
+                    </tr>
+                    <tr>
+                        <td><code>ButtonVariant</code></td>
+                        <td>Primary, Outline, Ghost, Success, Danger</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Section 1: Manual Testing Steps -->
+        <h2>Section 1: Manual Testing Steps</h2>
+
+        <h3>1.1 LoadingSpinner Tests</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test1" class="test-item">
+                    <label for="test1">
+                        <div class="item-title">Test Small Spinner (20px)</div>
+                        <div class="item-desc">Render <code>&lt;LoadingSpinner Size="SpinnerSize.Small" /&gt;</code></div>
+                        <div class="expected-result">Expected: Spinner is 20px x 20px with 2px border</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test2" class="test-item">
+                    <label for="test2">
+                        <div class="item-title">Test Medium Spinner (32px)</div>
+                        <div class="item-desc">Render <code>&lt;LoadingSpinner /&gt;</code> (default)</div>
+                        <div class="expected-result">Expected: Spinner is 32px x 32px with 3px border</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test3" class="test-item">
+                    <label for="test3">
+                        <div class="item-title">Test Large Spinner (48px)</div>
+                        <div class="item-desc">Render <code>&lt;LoadingSpinner Size="SpinnerSize.Large" /&gt;</code></div>
+                        <div class="expected-result">Expected: Spinner is 48px x 48px with 4px border</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test4" class="test-item">
+                    <label for="test4">
+                        <div class="item-title">Test White Spinner</div>
+                        <div class="item-desc">Render spinner with <code>Color="SpinnerColor.White"</code> on dark background</div>
+                        <div class="expected-result">Expected: White border-top, semi-transparent border</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test5" class="test-item">
+                    <label for="test5">
+                        <div class="item-title">Test Spin Animation</div>
+                        <div class="item-desc">Observe the spinner rotation</div>
+                        <div class="expected-result">Expected: Smooth 360-degree rotation, 0.8s per revolution</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.2 SkeletonLoader Tests</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test6" class="test-item">
+                    <label for="test6">
+                        <div class="item-title">Test Text Skeleton</div>
+                        <div class="item-desc">Render <code>&lt;SkeletonLoader Variant="SkeletonVariant.Text" /&gt;</code></div>
+                        <div class="expected-result">Expected: 14px height bar with shimmer animation</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test7" class="test-item">
+                    <label for="test7">
+                        <div class="item-title">Test Title Skeleton</div>
+                        <div class="item-desc">Render <code>&lt;SkeletonLoader Variant="SkeletonVariant.Title" /&gt;</code></div>
+                        <div class="expected-result">Expected: 20px height, 60% width bar</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test8" class="test-item">
+                    <label for="test8">
+                        <div class="item-title">Test Avatar Skeleton</div>
+                        <div class="item-desc">Render <code>&lt;SkeletonLoader Variant="SkeletonVariant.Avatar" /&gt;</code></div>
+                        <div class="expected-result">Expected: 48px circle with shimmer</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test9" class="test-item">
+                    <label for="test9">
+                        <div class="item-title">Test Card Skeleton</div>
+                        <div class="item-desc">Render <code>&lt;SkeletonLoader Variant="SkeletonVariant.Card" /&gt;</code></div>
+                        <div class="expected-result">Expected: Card with icon, title, and text placeholders</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test10" class="test-item">
+                    <label for="test10">
+                        <div class="item-title">Test Field Skeleton</div>
+                        <div class="item-desc">Render <code>&lt;SkeletonLoader Variant="SkeletonVariant.Field" /&gt;</code></div>
+                        <div class="expected-result">Expected: Label and input field placeholders</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test11" class="test-item">
+                    <label for="test11">
+                        <div class="item-title">Test Shimmer Animation</div>
+                        <div class="item-desc">Observe the gradient movement</div>
+                        <div class="expected-result">Expected: Smooth left-to-right shimmer, 1.5s cycle</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.3 ButtonLoading Tests</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test12" class="test-item">
+                    <label for="test12">
+                        <div class="item-title">Test Normal State</div>
+                        <div class="item-desc">Render button with IsLoading=false</div>
+                        <div class="expected-result">Expected: Normal button with content visible</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test13" class="test-item">
+                    <label for="test13">
+                        <div class="item-title">Test Loading State</div>
+                        <div class="item-desc">Set IsLoading=true</div>
+                        <div class="expected-result">Expected: Content hidden, spinner centered, button disabled</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test14" class="test-item">
+                    <label for="test14">
+                        <div class="item-title">Test Primary Button Loading</div>
+                        <div class="item-desc">Primary button should use white spinner</div>
+                        <div class="expected-result">Expected: White spinner on indigo background</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test15" class="test-item">
+                    <label for="test15">
+                        <div class="item-title">Test Outline Button Loading</div>
+                        <div class="item-desc">Outline button should use primary spinner</div>
+                        <div class="expected-result">Expected: Indigo spinner on transparent background</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.4 ProgressBar Tests</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test16" class="test-item">
+                    <label for="test16">
+                        <div class="item-title">Test Determinate Progress (0%)</div>
+                        <div class="item-desc">Set Value=0, Max=100</div>
+                        <div class="expected-result">Expected: Empty progress bar</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test17" class="test-item">
+                    <label for="test17">
+                        <div class="item-title">Test Determinate Progress (50%)</div>
+                        <div class="item-desc">Set Value=50, Max=100</div>
+                        <div class="expected-result">Expected: Bar filled to 50%</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test18" class="test-item">
+                    <label for="test18">
+                        <div class="item-title">Test Determinate Progress (100%)</div>
+                        <div class="item-desc">Set Value=100, Max=100</div>
+                        <div class="expected-result">Expected: Fully filled progress bar</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test19" class="test-item">
+                    <label for="test19">
+                        <div class="item-title">Test Indeterminate Progress</div>
+                        <div class="item-desc">Set IsIndeterminate=true</div>
+                        <div class="expected-result">Expected: Sliding bar animation (30% width, moves left to right)</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test20" class="test-item">
+                    <label for="test20">
+                        <div class="item-title">Test Progress Label</div>
+                        <div class="item-desc">Set ShowLabel=true, Label="Uploading..."</div>
+                        <div class="expected-result">Expected: Label and percentage displayed below bar</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.5 InlineLoader Tests</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test21" class="test-item">
+                    <label for="test21">
+                        <div class="item-title">Test Default InlineLoader</div>
+                        <div class="item-desc">Render <code>&lt;InlineLoader /&gt;</code></div>
+                        <div class="expected-result">Expected: Small spinner + "Loading..." text inline</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test22" class="test-item">
+                    <label for="test22">
+                        <div class="item-title">Test Custom Text</div>
+                        <div class="item-desc">Render with Text="Loading fields..."</div>
+                        <div class="expected-result">Expected: Small spinner + custom text</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.6 PageLoader Tests</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test23" class="test-item">
+                    <label for="test23">
+                        <div class="item-title">Test Visibility</div>
+                        <div class="item-desc">Toggle IsVisible property</div>
+                        <div class="expected-result">Expected: Full viewport overlay appears/disappears</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test24" class="test-item">
+                    <label for="test24">
+                        <div class="item-title">Test Icon Display</div>
+                        <div class="item-desc">Verify icon animates with pulse effect</div>
+                        <div class="expected-result">Expected: Icon pulses (scale + opacity animation)</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test25" class="test-item">
+                    <label for="test25">
+                        <div class="item-title">Test Z-Index</div>
+                        <div class="item-desc">Ensure page loader is above all other content</div>
+                        <div class="expected-result">Expected: Loader overlays entire page (z-index: 9999)</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.7 Accessibility & Performance Tests</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test26" class="test-item">
+                    <label for="test26">
+                        <div class="item-title">Test ARIA Labels</div>
+                        <div class="item-desc">Inspect spinner elements for aria-label and role="status"</div>
+                        <div class="expected-result">Expected: All spinners have proper ARIA attributes</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test27" class="test-item">
+                    <label for="test27">
+                        <div class="item-title">Test Screen Reader</div>
+                        <div class="item-desc">Use screen reader to navigate to loading elements</div>
+                        <div class="expected-result">Expected: Screen reader announces "Loading..."</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test28" class="test-item">
+                    <label for="test28">
+                        <div class="item-title">Test Reduced Motion</div>
+                        <div class="item-desc">Enable "Reduce motion" in OS settings</div>
+                        <div class="expected-result">Expected: Animations disabled, static states shown</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test29" class="test-item">
+                    <label for="test29">
+                        <div class="item-title">Test Dark Mode</div>
+                        <div class="item-desc">Switch to dark mode and verify all loading states</div>
+                        <div class="expected-result">Expected: Colors adapt, animations remain smooth</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Section 2: Manual Implementation Tasks -->
+        <h2>Section 2: Manual Implementation Tasks</h2>
+
+        <div class="note">
+            These are patterns for integrating loading states in your application.
+        </div>
+
+        <div class="card">
+            <div class="card-title">Usage Patterns</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="task1" class="test-item">
+                    <label for="task1">
+                        <div class="item-title">Spinner in Save Button</div>
+                        <div class="item-desc">Use ButtonLoading for async save operations</div>
+                        <div class="code-block">&lt;ButtonLoading IsLoading="@isSaving" OnClick="SaveAsync"&gt;
+    &lt;i class="bi bi-save"&gt;&lt;/i&gt; Save Changes
+&lt;/ButtonLoading&gt;</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task2" class="test-item">
+                    <label for="task2">
+                        <div class="item-title">Skeleton for Data Loading</div>
+                        <div class="item-desc">Show skeleton while fetching data</div>
+                        <div class="code-block">@if (isLoading)
+{
+    @for (int i = 0; i &lt; 3; i++)
+    {
+        &lt;SkeletonLoader Variant="SkeletonVariant.Field" /&gt;
+    }
+}
+else
+{
+    @foreach (var field in fields)
+    {
+        &lt;FieldItem Field="field" /&gt;
+    }
+}</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task3" class="test-item">
+                    <label for="task3">
+                        <div class="item-title">Progress Bar for Uploads</div>
+                        <div class="item-desc">Show upload progress percentage</div>
+                        <div class="code-block">&lt;ProgressBar Value="@uploadProgress" Max="100"
+             ShowLabel="true" Label="Uploading..." /&gt;</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task4" class="test-item">
+                    <label for="task4">
+                        <div class="item-title">Page Loader for Initial Load</div>
+                        <div class="item-desc">Show full page loader during app initialization</div>
+                        <div class="code-block">&lt;PageLoader IsVisible="@isInitializing"
+            Text="Loading application..." /&gt;</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task5" class="test-item">
+                    <label for="task5">
+                        <div class="item-title">Inline Loader for Sections</div>
+                        <div class="item-desc">Show inline loader for section content</div>
+                        <div class="code-block">&lt;InlineLoader Text="Loading fields..." /&gt;</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Best Practices</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="task6" class="test-item">
+                    <label for="task6">
+                        <div class="item-title">Debounce Short Operations</div>
+                        <div class="item-desc">Avoid showing loader for operations &lt; 200ms</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task7" class="test-item">
+                    <label for="task7">
+                        <div class="item-title">Use Skeleton for Content Areas</div>
+                        <div class="item-desc">Skeleton loaders for lists, cards, tables</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task8" class="test-item">
+                    <label for="task8">
+                        <div class="item-title">Use Spinner for Quick Actions</div>
+                        <div class="item-desc">Spinner for buttons, inline actions</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task9" class="test-item">
+                    <label for="task9">
+                        <div class="item-title">Use Progress Bar for Uploads</div>
+                        <div class="item-desc">Determinate progress for file uploads, exports</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Section 3: Verification Checklist -->
+        <h2>Section 3: Final Verification Checklist</h2>
+
+        <div class="card">
+            <div class="card-title">Spinner</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="verify1" class="test-item">
+                    <label for="verify1">
+                        <div class="item-title">LoadingSpinner animates smoothly</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify2" class="test-item">
+                    <label for="verify2">
+                        <div class="item-title">All spinner sizes correct (20, 32, 48px)</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify3" class="test-item">
+                    <label for="verify3">
+                        <div class="item-title">White spinner visible on dark backgrounds</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Skeleton</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="verify4" class="test-item">
+                    <label for="verify4">
+                        <div class="item-title">SkeletonLoader shimmer animates</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify5" class="test-item">
+                    <label for="verify5">
+                        <div class="item-title">All skeleton variants display correctly</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify6" class="test-item">
+                    <label for="verify6">
+                        <div class="item-title">Custom width parameter works</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Button & Progress</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="verify7" class="test-item">
+                    <label for="verify7">
+                        <div class="item-title">ButtonLoading state works</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify8" class="test-item">
+                    <label for="verify8">
+                        <div class="item-title">Button disabled during loading</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify9" class="test-item">
+                    <label for="verify9">
+                        <div class="item-title">ProgressBar shows correct percentage</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify10" class="test-item">
+                    <label for="verify10">
+                        <div class="item-title">Indeterminate progress animates</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Page & Inline Loaders</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="verify11" class="test-item">
+                    <label for="verify11">
+                        <div class="item-title">InlineLoader displays with text</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify12" class="test-item">
+                    <label for="verify12">
+                        <div class="item-title">PageLoader covers full viewport</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify13" class="test-item">
+                    <label for="verify13">
+                        <div class="item-title">PageLoader z-index is highest</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Accessibility</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="verify14" class="test-item">
+                    <label for="verify14">
+                        <div class="item-title">Screen reader announces loading state</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify15" class="test-item">
+                    <label for="verify15">
+                        <div class="item-title">prefers-reduced-motion respected</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify16" class="test-item">
+                    <label for="verify16">
+                        <div class="item-title">Dark mode styling correct</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+    <script>
+        // Progress tracking
+        const checkboxes = document.querySelectorAll('.test-item');
+        const progressFill = document.getElementById('progressFill');
+        const completedCount = document.getElementById('completedCount');
+        const totalCount = document.getElementById('totalCount');
+
+        totalCount.textContent = checkboxes.length;
+
+        function updateProgress() {
+            const completed = document.querySelectorAll('.test-item:checked').length;
+            const percentage = (completed / checkboxes.length) * 100;
+
+            progressFill.style.width = percentage + '%';
+            completedCount.textContent = completed;
+
+            // Save to localStorage
+            const state = {};
+            checkboxes.forEach((cb, i) => {
+                state[cb.id] = cb.checked;
+            });
+            localStorage.setItem('loadingStatesTestingProgress', JSON.stringify(state));
+        }
+
+        // Load saved state
+        const savedState = JSON.parse(localStorage.getItem('loadingStatesTestingProgress') || '{}');
+        checkboxes.forEach(cb => {
+            if (savedState[cb.id]) {
+                cb.checked = true;
+            }
+            cb.addEventListener('change', updateProgress);
+        });
+
+        updateProgress();
+    </script>
+</body>
+</html>

@@ -1,0 +1,541 @@
+/* ===== ERROR HANDLING STYLES ===== */
+
+/* ===== ERROR BOUNDARY ===== */
+.error-boundary {
+    background: var(--danger-light);
+    border: 1px solid var(--danger);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    text-align: center;
+}
+
+.error-boundary-icon {
+    width: 64px;
+    height: 64px;
+    background: var(--bg-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    color: var(--danger);
+    font-size: 28px;
+    box-shadow: var(--shadow-md);
+}
+
+.error-boundary-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #991B1B;
+    margin-bottom: 8px;
+}
+
+[data-theme="dark"] .error-boundary-title {
+    color: #FCA5A5;
+}
+
+.error-boundary-message {
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+}
+
+.error-boundary-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.error-boundary-details-toggle {
+    margin-top: 16px;
+    text-align: left;
+}
+
+.error-boundary-details-toggle summary {
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--text-secondary);
+    padding: 8px 0;
+}
+
+.error-boundary-details-toggle summary:hover {
+    color: var(--text-primary);
+}
+
+.error-boundary-details {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: #991B1B;
+    text-align: left;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+[data-theme="dark"] .error-boundary-details {
+    background: rgba(0, 0, 0, 0.2);
+    color: #FCA5A5;
+}
+
+.error-boundary-details pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* ===== ALERT BANNERS ===== */
+.alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: var(--radius-lg);
+    margin-bottom: 16px;
+    animation: alertFadeIn 0.2s ease;
+}
+
+.alert.dismissing {
+    animation: alertFadeOut 0.2s ease forwards;
+}
+
+@keyframes alertFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes alertFadeOut {
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+.alert-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 14px;
+}
+
+.alert-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.alert-title {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.alert-message {
+    font-size: 13px;
+    opacity: 0.9;
+    line-height: 1.5;
+}
+
+.alert-actions {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+}
+
+.alert-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    opacity: 0.7;
+    padding: 4px;
+    color: inherit;
+    transition: opacity 0.2s;
+}
+
+.alert-close:hover {
+    opacity: 1;
+}
+
+/* Alert Variants */
+.alert-error {
+    background: var(--danger-light);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #991B1B;
+}
+
+.alert-error .alert-icon {
+    background: var(--danger);
+    color: white;
+}
+
+[data-theme="dark"] .alert-error {
+    color: #FCA5A5;
+}
+
+.alert-warning {
+    background: var(--warning-light);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: #92400E;
+}
+
+.alert-warning .alert-icon {
+    background: var(--warning);
+    color: white;
+}
+
+[data-theme="dark"] .alert-warning {
+    color: #FCD34D;
+}
+
+.alert-info {
+    background: var(--primary-light);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    color: #3730A3;
+}
+
+.alert-info .alert-icon {
+    background: var(--primary);
+    color: white;
+}
+
+[data-theme="dark"] .alert-info {
+    color: #A5B4FC;
+}
+
+.alert-success {
+    background: var(--success-light);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #065F46;
+}
+
+.alert-success .alert-icon {
+    background: var(--success);
+    color: white;
+}
+
+[data-theme="dark"] .alert-success {
+    color: #6EE7B7;
+}
+
+/* ===== INLINE ERRORS ===== */
+.form-error {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--danger);
+    animation: formErrorFadeIn 0.2s ease;
+}
+
+@keyframes formErrorFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-error i {
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.form-input.error {
+    border-color: var(--danger);
+    background: var(--danger-light);
+}
+
+.form-input.error:focus {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+/* ===== VALIDATION SUMMARY ===== */
+.validation-summary {
+    background: var(--danger-light);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    margin-bottom: 20px;
+    animation: alertFadeIn 0.2s ease;
+}
+
+.validation-summary-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: #991B1B;
+    margin-bottom: 12px;
+}
+
+[data-theme="dark"] .validation-summary-header {
+    color: #FCA5A5;
+}
+
+.validation-summary-header i {
+    font-size: 18px;
+    color: var(--danger);
+}
+
+.validation-summary-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.validation-summary-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 6px 0;
+    font-size: 13px;
+    color: #991B1B;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: background-color 0.2s;
+}
+
+[data-theme="dark"] .validation-summary-list li {
+    color: #FCA5A5;
+}
+
+.validation-summary-list li:hover {
+    text-decoration: underline;
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+.validation-summary-list li:focus {
+    outline: 2px solid var(--danger);
+    outline-offset: 2px;
+}
+
+.validation-summary-list li i {
+    font-size: 12px;
+    color: var(--danger);
+    margin-top: 2px;
+}
+
+.validation-summary-field {
+    font-weight: 500;
+}
+
+/* ===== NETWORK STATUS ===== */
+.network-status {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text-primary);
+    color: var(--bg-primary);
+    padding: 12px 20px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    animation: networkStatusSlideUp 0.3s var(--ease-bounce);
+    z-index: var(--z-toast);
+}
+
+@keyframes networkStatusSlideUp {
+    from {
+        transform: translateX(-50%) translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+}
+
+.network-status.offline {
+    background: var(--danger);
+    color: white;
+}
+
+.network-status.reconnecting {
+    background: var(--warning);
+    color: white;
+}
+
+.network-status.online {
+    background: var(--success);
+    color: white;
+}
+
+.network-status i {
+    font-size: 18px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.status-dot.pulse {
+    animation: statusDotPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes statusDotPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+/* ===== RETRY PANEL ===== */
+.retry-panel {
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    text-align: center;
+}
+
+.retry-panel-icon {
+    font-size: 32px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+}
+
+.retry-panel-title {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.retry-panel-message {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.5;
+}
+
+/* ===== ERROR PAGE ===== */
+.error-page {
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 48px 24px;
+}
+
+.error-page-code {
+    font-size: 80px;
+    font-weight: 700;
+    color: var(--text-muted);
+    line-height: 1;
+    margin-bottom: 16px;
+}
+
+.error-page-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.error-page-message {
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    max-width: 400px;
+    line-height: 1.6;
+}
+
+.error-page-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* ===== TOAST ERROR (extends existing toast styles) ===== */
+.toast-error {
+    border-left: 4px solid var(--danger);
+}
+
+.toast-error .toast-icon {
+    color: var(--danger);
+}
+
+.toast-warning {
+    border-left: 4px solid var(--warning);
+}
+
+.toast-warning .toast-icon {
+    color: var(--warning);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 640px) {
+    .error-boundary-actions {
+        flex-direction: column;
+    }
+
+    .error-boundary-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .error-page-code {
+        font-size: 60px;
+    }
+
+    .error-page-title {
+        font-size: 20px;
+    }
+
+    .error-page-actions {
+        flex-direction: column;
+        width: 100%;
+        max-width: 280px;
+    }
+
+    .error-page-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .network-status {
+        left: 16px;
+        right: 16px;
+        transform: none;
+        justify-content: center;
+    }
+
+    @keyframes networkStatusSlideUp {
+        from {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+}

@@ -1,0 +1,124 @@
+@* Multi-step onboarding overlay for first-time users *@
+@inject IJSRuntime JSRuntime
+
+@if (IsVisible)
+{
+    <div class="onboarding-overlay @(IsAnimating ? "active" : "")" @onclick="Skip">
+        <div class="onboarding-card" @onclick:stopPropagation>
+            <div class="onboarding-icon">
+                <i class="bi bi-@Steps[CurrentStep].Icon"></i>
+            </div>
+            <div class="onboarding-title">@Steps[CurrentStep].Title</div>
+            <div class="onboarding-description">@Steps[CurrentStep].Description</div>
+
+            <div class="onboarding-steps">
+                @for (int i = 0; i < Steps.Length; i++)
+                {
+                    var index = i;
+                    <div class="onboarding-step @(index == CurrentStep ? "active" : "") @(index < CurrentStep ? "completed" : "")"
+                         @onclick="() => GoToStep(index)"
+                         @onclick:stopPropagation></div>
+                }
+            </div>
+
+            <div class="onboarding-actions">
+                <button class="btn btn-outline" @onclick="Skip" type="button">Skip Tour</button>
+                @if (CurrentStep < Steps.Length - 1)
+                {
+                    <button class="btn btn-primary" @onclick="Next" type="button">
+                        Next <i class="bi bi-arrow-right"></i>
+                    </button>
+                }
+                else
+                {
+                    <button class="btn btn-primary" @onclick="Complete" type="button">
+                        <i class="bi bi-check"></i> Get Started
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// Whether the onboarding overlay is visible
+    /// </summary>
+    [Parameter] public bool IsVisible { get; set; }
+
+    /// <summary>
+    /// Callback when onboarding is completed or skipped
+    /// </summary>
+    [Parameter] public EventCallback OnComplete { get; set; }
+
+    /// <summary>
+    /// Custom steps to override defaults
+    /// </summary>
+    [Parameter] public OnboardingStep[]? CustomSteps { get; set; }
+
+    private bool IsAnimating = false;
+    private int CurrentStep = 0;
+
+    private OnboardingStep[] Steps => CustomSteps ?? DefaultSteps;
+
+    private static readonly OnboardingStep[] DefaultSteps = new[]
+    {
+        new OnboardingStep("stars", "Welcome to Form Builder!", "Create professional forms with our drag-and-drop editor. Let's take a quick tour to get you started."),
+        new OnboardingStep("grid", "Drag & Drop Fields", "Choose from 15+ field types in the left panel and drag them onto your canvas to build your form."),
+        new OnboardingStep("sliders", "Configure Properties", "Click any field to customize its settings in the right panel. Set labels, validation rules, and more."),
+        new OnboardingStep("check-circle", "Preview & Publish", "Use the preview button to test your form, then export or publish when you're ready.")
+    };
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (IsVisible && !IsAnimating)
+        {
+            await Task.Delay(50);
+            IsAnimating = true;
+            StateHasChanged();
+        }
+    }
+
+    private void Next()
+    {
+        if (CurrentStep < Steps.Length - 1)
+        {
+            CurrentStep++;
+        }
+    }
+
+    private void Previous()
+    {
+        if (CurrentStep > 0)
+        {
+            CurrentStep--;
+        }
+    }
+
+    private void GoToStep(int step)
+    {
+        if (step >= 0 && step < Steps.Length)
+        {
+            CurrentStep = step;
+        }
+    }
+
+    private async Task Skip()
+    {
+        IsAnimating = false;
+        StateHasChanged();
+        await Task.Delay(300);
+        CurrentStep = 0;
+        await OnComplete.InvokeAsync();
+    }
+
+    private async Task Complete()
+    {
+        await Skip();
+    }
+
+    /// <summary>
+    /// Represents a single step in the onboarding flow
+    /// </summary>
+    public record OnboardingStep(string Icon, string Title, string Description);
+}

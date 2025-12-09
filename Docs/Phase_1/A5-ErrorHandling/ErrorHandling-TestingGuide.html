@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Handling UI - Testing Guide</title>
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: #EEF2FF;
+            --success: #10B981;
+            --success-light: #D1FAE5;
+            --danger: #EF4444;
+            --danger-light: #FEE2E2;
+            --warning: #F59E0B;
+            --warning-light: #FEF3C7;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8FAFC;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --border-color: #E2E8F0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-top: 32px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 24px;
+            margin-bottom: 12px;
+        }
+
+        .card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .checklist li:last-child {
+            border-bottom: none;
+        }
+
+        .checklist input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            cursor: pointer;
+            accent-color: var(--success);
+        }
+
+        .checklist label {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .checklist .item-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .checklist .item-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .expected-result {
+            background: var(--success-light);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #065F46;
+            margin-top: 8px;
+        }
+
+        .code-block {
+            background: #1E293B;
+            color: #E2E8F0;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Fira Code', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+
+        .progress-bar {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            height: 8px;
+            margin-top: 24px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: var(--success);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .note {
+            background: var(--warning-light);
+            border-left: 4px solid var(--warning);
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            font-size: 13px;
+            margin: 16px 0;
+        }
+
+        .component-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+
+        .component-table th,
+        .component-table td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .component-table th {
+            background: var(--bg-secondary);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .component-table td {
+            font-size: 13px;
+        }
+
+        .component-table code {
+            background: var(--bg-secondary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Error Handling UI Testing Guide</h1>
+        <p class="subtitle">Complete testing checklist for the Error Handling UI implementation</p>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <p class="progress-text"><span id="completedCount">0</span> of <span id="totalCount">0</span> tasks completed</p>
+
+        <!-- Components Created -->
+        <h2>Components Created</h2>
+        <div class="card">
+            <div class="card-title">Error Components</div>
+            <table class="component-table">
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Location</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>ErrorBoundary.razor</code></td>
+                        <td>Components/Shared/</td>
+                        <td>Catches and displays component errors</td>
+                    </tr>
+                    <tr>
+                        <td><code>Alert.razor</code></td>
+                        <td>Components/Shared/</td>
+                        <td>Dismissible alert banners</td>
+                    </tr>
+                    <tr>
+                        <td><code>ValidationSummary.razor</code></td>
+                        <td>Components/Shared/</td>
+                        <td>List of validation errors</td>
+                    </tr>
+                    <tr>
+                        <td><code>InlineError.razor</code></td>
+                        <td>Components/Shared/</td>
+                        <td>Field-level error messages</td>
+                    </tr>
+                    <tr>
+                        <td><code>NetworkStatus.razor</code></td>
+                        <td>Components/Shared/</td>
+                        <td>Connection status indicator</td>
+                    </tr>
+                    <tr>
+                        <td><code>RetryPanel.razor</code></td>
+                        <td>Components/Shared/</td>
+                        <td>Failed operation with retry</td>
+                    </tr>
+                    <tr>
+                        <td><code>ErrorPage.razor</code></td>
+                        <td>Components/Shared/</td>
+                        <td>Full-page error (404, 500)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Enums & Records Created</div>
+            <table class="component-table">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Values/Properties</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>AlertVariant</code></td>
+                        <td>Error, Warning, Info, Success</td>
+                    </tr>
+                    <tr>
+                        <td><code>NetworkConnectionStatus</code></td>
+                        <td>Connected, Disconnected, Reconnecting</td>
+                    </tr>
+                    <tr>
+                        <td><code>ValidationError</code></td>
+                        <td>FieldId, FieldLabel, Message</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Section 1: Manual Testing Steps -->
+        <h2>Section 1: Manual Testing Steps</h2>
+
+        <h3>1.1 ErrorBoundary Tests</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test1" class="test-item">
+                    <label for="test1">
+                        <div class="item-title">Wrap Component with ErrorBoundary</div>
+                        <div class="item-desc">Wrap a component that throws an exception</div>
+                        <div class="expected-result">Expected: Error UI displays instead of crash</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test2" class="test-item">
+                    <label for="test2">
+                        <div class="item-title">Test "Try Again" Button</div>
+                        <div class="item-desc">Click the "Try Again" button after an error</div>
+                        <div class="expected-result">Expected: Calls Recover(), re-renders child content</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test3" class="test-item">
+                    <label for="test3">
+                        <div class="item-title">Test Technical Details Toggle</div>
+                        <div class="item-desc">Set ShowDetails=true and click to expand</div>
+                        <div class="expected-result">Expected: Exception message and stack trace visible</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test4" class="test-item">
+                    <label for="test4">
+                        <div class="item-title">Test Custom Message</div>
+                        <div class="item-desc">Pass a CustomMessage parameter</div>
+                        <div class="expected-result">Expected: Custom message displays instead of default</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test5" class="test-item">
+                    <label for="test5">
+                        <div class="item-title">Test OnError Callback</div>
+                        <div class="item-desc">Provide an OnError handler</div>
+                        <div class="expected-result">Expected: Callback receives exception for logging</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.2 Alert Tests</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test6" class="test-item">
+                    <label for="test6">
+                        <div class="item-title">Test Error Alert Variant</div>
+                        <div class="item-desc">Render <code>&lt;Alert Variant="AlertVariant.Error" ... /&gt;</code></div>
+                        <div class="expected-result">Expected: Red background, X-circle icon</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test7" class="test-item">
+                    <label for="test7">
+                        <div class="item-title">Test Warning Alert Variant</div>
+                        <div class="item-desc">Render with Variant="AlertVariant.Warning"</div>
+                        <div class="expected-result">Expected: Yellow/orange background, warning icon</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test8" class="test-item">
+                    <label for="test8">
+                        <div class="item-title">Test Info Alert Variant</div>
+                        <div class="item-desc">Render with Variant="AlertVariant.Info"</div>
+                        <div class="expected-result">Expected: Blue/purple background, info icon</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test9" class="test-item">
+                    <label for="test9">
+                        <div class="item-title">Test Success Alert Variant</div>
+                        <div class="item-desc">Render with Variant="AlertVariant.Success"</div>
+                        <div class="expected-result">Expected: Green background, check icon</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test10" class="test-item">
+                    <label for="test10">
+                        <div class="item-title">Test Dismiss Button</div>
+                        <div class="item-desc">Click the X button on a dismissible alert</div>
+                        <div class="expected-result">Expected: Alert fades out with animation, OnDismiss fires</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test11" class="test-item">
+                    <label for="test11">
+                        <div class="item-title">Test Auto-Dismiss</div>
+                        <div class="item-desc">Set AutoDismissMs="3000"</div>
+                        <div class="expected-result">Expected: Alert auto-dismisses after 3 seconds</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test12" class="test-item">
+                    <label for="test12">
+                        <div class="item-title">Test Alert with Title</div>
+                        <div class="item-desc">Provide both Title and Message parameters</div>
+                        <div class="expected-result">Expected: Bold title above message text</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.3 ValidationSummary Tests</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test13" class="test-item">
+                    <label for="test13">
+                        <div class="item-title">Test Error Count Display</div>
+                        <div class="item-desc">Pass a list of 3 errors</div>
+                        <div class="expected-result">Expected: Header shows "(3)" error count</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test14" class="test-item">
+                    <label for="test14">
+                        <div class="item-title">Test Error List Rendering</div>
+                        <div class="item-desc">Pass errors with FieldLabel and Message</div>
+                        <div class="expected-result">Expected: Each error shows "Field X - message"</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test15" class="test-item">
+                    <label for="test15">
+                        <div class="item-title">Test Click-to-Field</div>
+                        <div class="item-desc">Click an error item with FieldId</div>
+                        <div class="expected-result">Expected: OnErrorClick callback fires with FieldId</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test16" class="test-item">
+                    <label for="test16">
+                        <div class="item-title">Test Keyboard Navigation</div>
+                        <div class="item-desc">Focus error item and press Enter</div>
+                        <div class="expected-result">Expected: Same behavior as click</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test17" class="test-item">
+                    <label for="test17">
+                        <div class="item-title">Test Empty State</div>
+                        <div class="item-desc">Pass null or empty Errors list</div>
+                        <div class="expected-result">Expected: Nothing renders</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.4 InlineError Tests</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test18" class="test-item">
+                    <label for="test18">
+                        <div class="item-title">Test Error Display</div>
+                        <div class="item-desc">Pass a Message parameter</div>
+                        <div class="expected-result">Expected: Error icon + message in red below input</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test19" class="test-item">
+                    <label for="test19">
+                        <div class="item-title">Test Empty State</div>
+                        <div class="item-desc">Pass null or empty Message</div>
+                        <div class="expected-result">Expected: Nothing renders</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test20" class="test-item">
+                    <label for="test20">
+                        <div class="item-title">Test with Input.error Class</div>
+                        <div class="item-desc">Add class="form-input error" to input field</div>
+                        <div class="expected-result">Expected: Input has red border and light red background</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.5 NetworkStatus Tests</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test21" class="test-item">
+                    <label for="test21">
+                        <div class="item-title">Test Disconnected State</div>
+                        <div class="item-desc">Set Status="NetworkConnectionStatus.Disconnected"</div>
+                        <div class="expected-result">Expected: Red bar with "You are offline" and wifi-off icon</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test22" class="test-item">
+                    <label for="test22">
+                        <div class="item-title">Test Reconnecting State</div>
+                        <div class="item-desc">Set Status="NetworkConnectionStatus.Reconnecting"</div>
+                        <div class="expected-result">Expected: Yellow bar with "Reconnecting..." and pulsing dot</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test23" class="test-item">
+                    <label for="test23">
+                        <div class="item-title">Test Connected State (After Reconnect)</div>
+                        <div class="item-desc">Transition from Disconnected to Connected</div>
+                        <div class="expected-result">Expected: Green "Back online" shows for 3s, then hides</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test24" class="test-item">
+                    <label for="test24">
+                        <div class="item-title">Test Slide-Up Animation</div>
+                        <div class="item-desc">Trigger status change</div>
+                        <div class="expected-result">Expected: Status bar slides up from bottom center</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.6 RetryPanel Tests</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test25" class="test-item">
+                    <label for="test25">
+                        <div class="item-title">Test Default Display</div>
+                        <div class="item-desc">Render RetryPanel with no parameters</div>
+                        <div class="expected-result">Expected: Cloud-slash icon, "Failed to load" title, "Try Again" button</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test26" class="test-item">
+                    <label for="test26">
+                        <div class="item-title">Test Retry Button Click</div>
+                        <div class="item-desc">Click the "Try Again" button</div>
+                        <div class="expected-result">Expected: OnRetry callback fires</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test27" class="test-item">
+                    <label for="test27">
+                        <div class="item-title">Test IsRetrying State</div>
+                        <div class="item-desc">Set IsRetrying=true</div>
+                        <div class="expected-result">Expected: Button shows spinner + "Retrying...", disabled</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test28" class="test-item">
+                    <label for="test28">
+                        <div class="item-title">Test Custom Icon/Title/Message</div>
+                        <div class="item-desc">Override Icon, Title, and Message parameters</div>
+                        <div class="expected-result">Expected: Custom content displays</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.7 ErrorPage Tests</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test29" class="test-item">
+                    <label for="test29">
+                        <div class="item-title">Test 404 Page</div>
+                        <div class="item-desc">Render with default parameters</div>
+                        <div class="expected-result">Expected: Large "404", "Page Not Found" title</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test30" class="test-item">
+                    <label for="test30">
+                        <div class="item-title">Test 500 Page</div>
+                        <div class="item-desc">Set Code="500", Title="Server Error"</div>
+                        <div class="expected-result">Expected: Large "500", custom title</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test31" class="test-item">
+                    <label for="test31">
+                        <div class="item-title">Test "Go to Dashboard" Button</div>
+                        <div class="item-desc">Click the primary button</div>
+                        <div class="expected-result">Expected: Navigates to HomeUrl or fires OnGoHome</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test32" class="test-item">
+                    <label for="test32">
+                        <div class="item-title">Test "Go Back" Button</div>
+                        <div class="item-desc">Click the secondary button</div>
+                        <div class="expected-result">Expected: Fires OnGoBack callback</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.8 Accessibility Tests</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test33" class="test-item">
+                    <label for="test33">
+                        <div class="item-title">Test ARIA role="alert"</div>
+                        <div class="item-desc">Inspect Alert and ValidationSummary elements</div>
+                        <div class="expected-result">Expected: role="alert" present on containers</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test34" class="test-item">
+                    <label for="test34">
+                        <div class="item-title">Test Screen Reader Announcement</div>
+                        <div class="item-desc">Use screen reader when alert appears</div>
+                        <div class="expected-result">Expected: Alert content is announced</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test35" class="test-item">
+                    <label for="test35">
+                        <div class="item-title">Test Dark Mode</div>
+                        <div class="item-desc">Switch to dark mode and verify all error components</div>
+                        <div class="expected-result">Expected: Colors adapt, text readable</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Section 2: Manual Implementation Tasks -->
+        <h2>Section 2: Manual Implementation Tasks</h2>
+
+        <div class="note">
+            These tasks require manual integration with your application.
+        </div>
+
+        <div class="card">
+            <div class="card-title">ErrorBoundary Integration</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="task1" class="test-item">
+                    <label for="task1">
+                        <div class="item-title">Wrap Critical Components</div>
+                        <div class="item-desc">Wrap components that may throw exceptions</div>
+                        <div class="code-block">&lt;ErrorBoundary ShowDetails="@IsDevelopment" OnError="LogError"&gt;
+    &lt;ModuleEditor Module="@module" /&gt;
+&lt;/ErrorBoundary&gt;</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task2" class="test-item">
+                    <label for="task2">
+                        <div class="item-title">Implement Error Logging Service</div>
+                        <div class="item-desc">Create a service to log errors for analysis</div>
+                        <div class="code-block">private async Task LogError(Exception ex)
+{
+    await ErrorLoggingService.LogAsync(ex);
+}</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Validation Integration</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="task3" class="test-item">
+                    <label for="task3">
+                        <div class="item-title">Collect Validation Errors</div>
+                        <div class="item-desc">Map validation results to ValidationError records</div>
+                        <div class="code-block">var errors = validationResult.Errors
+    .Select(e =&gt; new ValidationError(e.FieldId, e.FieldLabel, e.Message))
+    .ToList();
+
+&lt;ValidationSummary Errors="@errors" OnErrorClick="ScrollToField" /&gt;</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task4" class="test-item">
+                    <label for="task4">
+                        <div class="item-title">Implement ScrollToField</div>
+                        <div class="item-desc">Add JS interop to scroll/focus field on click</div>
+                        <div class="code-block">async Task ScrollToField(string? fieldId)
+{
+    if (!string.IsNullOrEmpty(fieldId))
+    {
+        await JSRuntime.InvokeVoidAsync("scrollToElement", fieldId);
+    }
+}</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Network Status Integration</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="task5" class="test-item">
+                    <label for="task5">
+                        <div class="item-title">Detect Network Status Changes</div>
+                        <div class="item-desc">Use SignalR connection state or browser events</div>
+                        <div class="code-block">// In MainLayout.razor
+&lt;NetworkStatus Status="@networkStatus" /&gt;
+
+// Update networkStatus when SignalR connects/disconnects</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Alert Usage</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="task6" class="test-item">
+                    <label for="task6">
+                        <div class="item-title">Add Alerts for Save/Delete Operations</div>
+                        <div class="item-desc">Show alerts after async operations</div>
+                        <div class="code-block">@if (saveError != null)
+{
+    &lt;Alert Variant="AlertVariant.Error"
+           Title="Failed to save"
+           Message="@saveError"
+           OnDismiss="() =&gt; saveError = null" /&gt;
+}</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Section 3: Verification Checklist -->
+        <h2>Section 3: Final Verification Checklist</h2>
+
+        <div class="card">
+            <div class="card-title">ErrorBoundary</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="verify1" class="test-item">
+                    <label for="verify1">
+                        <div class="item-title">ErrorBoundary catches component errors</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify2" class="test-item">
+                    <label for="verify2">
+                        <div class="item-title">ErrorBoundary Recover() resets state</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify3" class="test-item">
+                    <label for="verify3">
+                        <div class="item-title">Technical details collapsible works</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Alert</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="verify4" class="test-item">
+                    <label for="verify4">
+                        <div class="item-title">Alert displays all variants correctly</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify5" class="test-item">
+                    <label for="verify5">
+                        <div class="item-title">Alert dismiss animation works</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify6" class="test-item">
+                    <label for="verify6">
+                        <div class="item-title">Alert auto-dismiss works</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Validation</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="verify7" class="test-item">
+                    <label for="verify7">
+                        <div class="item-title">ValidationSummary shows error count</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify8" class="test-item">
+                    <label for="verify8">
+                        <div class="item-title">ValidationSummary click fires OnErrorClick</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify9" class="test-item">
+                    <label for="verify9">
+                        <div class="item-title">InlineError displays below input</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Network & Retry</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="verify10" class="test-item">
+                    <label for="verify10">
+                        <div class="item-title">NetworkStatus shows for offline</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify11" class="test-item">
+                    <label for="verify11">
+                        <div class="item-title">NetworkStatus auto-hides on reconnect</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify12" class="test-item">
+                    <label for="verify12">
+                        <div class="item-title">RetryPanel retry button works</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">ErrorPage & Accessibility</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="verify13" class="test-item">
+                    <label for="verify13">
+                        <div class="item-title">ErrorPage navigation works</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify14" class="test-item">
+                    <label for="verify14">
+                        <div class="item-title">Dark mode styling correct</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify15" class="test-item">
+                    <label for="verify15">
+                        <div class="item-title">Screen reader announces alerts</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify16" class="test-item">
+                    <label for="verify16">
+                        <div class="item-title">Animations are smooth</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+    <script>
+        // Progress tracking
+        const checkboxes = document.querySelectorAll('.test-item');
+        const progressFill = document.getElementById('progressFill');
+        const completedCount = document.getElementById('completedCount');
+        const totalCount = document.getElementById('totalCount');
+
+        totalCount.textContent = checkboxes.length;
+
+        function updateProgress() {
+            const completed = document.querySelectorAll('.test-item:checked').length;
+            const percentage = (completed / checkboxes.length) * 100;
+
+            progressFill.style.width = percentage + '%';
+            completedCount.textContent = completed;
+
+            // Save to localStorage
+            const state = {};
+            checkboxes.forEach((cb, i) => {
+                state[cb.id] = cb.checked;
+            });
+            localStorage.setItem('errorHandlingTestingProgress', JSON.stringify(state));
+        }
+
+        // Load saved state
+        const savedState = JSON.parse(localStorage.getItem('errorHandlingTestingProgress') || '{}');
+        checkboxes.forEach(cb => {
+            if (savedState[cb.id]) {
+                cb.checked = true;
+            }
+            cb.addEventListener('change', updateProgress);
+        });
+
+        updateProgress();
+    </script>
+</body>
+</html>

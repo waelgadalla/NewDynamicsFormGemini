@@ -1,0 +1,43 @@
+@* Full page loading overlay *@
+@using VisualEditorOpus.Models
+
+@if (IsVisible)
+{
+    <div class="page-loader @CssClass" role="status" aria-label="@Text">
+        @if (ShowIcon)
+        {
+            <div class="page-loader-icon">
+                <i class="bi bi-@Icon"></i>
+            </div>
+        }
+        <LoadingSpinner Size="SpinnerSize.Large" />
+        <div class="page-loader-text">@Text</div>
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// Whether the page loader is visible
+    /// </summary>
+    [Parameter] public bool IsVisible { get; set; }
+
+    /// <summary>
+    /// Loading text to display
+    /// </summary>
+    [Parameter] public string Text { get; set; } = "Loading...";
+
+    /// <summary>
+    /// Whether to show the icon
+    /// </summary>
+    [Parameter] public bool ShowIcon { get; set; } = true;
+
+    /// <summary>
+    /// Bootstrap icon name (without bi- prefix)
+    /// </summary>
+    [Parameter] public string Icon { get; set; } = "grid-1x2-fill";
+
+    /// <summary>
+    /// Additional CSS classes
+    /// </summary>
+    [Parameter] public string? CssClass { get; set; }
+}

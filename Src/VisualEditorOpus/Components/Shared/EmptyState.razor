@@ -1,0 +1,135 @@
+@* Reusable empty state component *@
+@using VisualEditorOpus.Models
+
+<div class="empty-state @SizeClass @CssClass" role="status" aria-label="@Title">
+    @if (!string.IsNullOrEmpty(Icon))
+    {
+        <div class="empty-state-icon @IconVariant">
+            <i class="bi bi-@Icon"></i>
+        </div>
+    }
+
+    @if (Illustration != null)
+    {
+        <div class="empty-state-illustration">
+            @Illustration
+        </div>
+    }
+
+    <div class="empty-state-title">@Title</div>
+
+    @if (!string.IsNullOrEmpty(Description))
+    {
+        <div class="empty-state-description">@Description</div>
+    }
+
+    @if (ChildContent != null || PrimaryAction.HasDelegate || SecondaryAction.HasDelegate)
+    {
+        <div class="empty-state-actions">
+            @if (PrimaryAction.HasDelegate)
+            {
+                <button class="btn btn-primary @(Size == EmptyStateSize.Small ? "btn-sm" : "")"
+                        @onclick="PrimaryAction"
+                        type="button">
+                    @if (!string.IsNullOrEmpty(PrimaryIcon))
+                    {
+                        <i class="bi bi-@PrimaryIcon"></i>
+                    }
+                    @PrimaryLabel
+                </button>
+            }
+            @if (SecondaryAction.HasDelegate)
+            {
+                <button class="btn btn-outline @(Size == EmptyStateSize.Small ? "btn-sm" : "")"
+                        @onclick="SecondaryAction"
+                        type="button">
+                    @if (!string.IsNullOrEmpty(SecondaryIcon))
+                    {
+                        <i class="bi bi-@SecondaryIcon"></i>
+                    }
+                    @SecondaryLabel
+                </button>
+            }
+            @ChildContent
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// Bootstrap icon name (without bi- prefix)
+    /// </summary>
+    [Parameter] public string? Icon { get; set; }
+
+    /// <summary>
+    /// Icon color variant: "success", "primary", "warning", or empty for default
+    /// </summary>
+    [Parameter] public string IconVariant { get; set; } = "";
+
+    /// <summary>
+    /// Custom illustration content
+    /// </summary>
+    [Parameter] public RenderFragment? Illustration { get; set; }
+
+    /// <summary>
+    /// Main title text
+    /// </summary>
+    [Parameter] public string Title { get; set; } = "No items";
+
+    /// <summary>
+    /// Description text below the title
+    /// </summary>
+    [Parameter] public string? Description { get; set; }
+
+    /// <summary>
+    /// Size variant of the empty state
+    /// </summary>
+    [Parameter] public EmptyStateSize Size { get; set; } = EmptyStateSize.Medium;
+
+    /// <summary>
+    /// Additional CSS classes
+    /// </summary>
+    [Parameter] public string? CssClass { get; set; }
+
+    /// <summary>
+    /// Primary action button label
+    /// </summary>
+    [Parameter] public string? PrimaryLabel { get; set; }
+
+    /// <summary>
+    /// Primary action button icon (without bi- prefix)
+    /// </summary>
+    [Parameter] public string? PrimaryIcon { get; set; }
+
+    /// <summary>
+    /// Primary action button click handler
+    /// </summary>
+    [Parameter] public EventCallback PrimaryAction { get; set; }
+
+    /// <summary>
+    /// Secondary action button label
+    /// </summary>
+    [Parameter] public string? SecondaryLabel { get; set; }
+
+    /// <summary>
+    /// Secondary action button icon (without bi- prefix)
+    /// </summary>
+    [Parameter] public string? SecondaryIcon { get; set; }
+
+    /// <summary>
+    /// Secondary action button click handler
+    /// </summary>
+    [Parameter] public EventCallback SecondaryAction { get; set; }
+
+    /// <summary>
+    /// Custom action content
+    /// </summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string SizeClass => Size switch
+    {
+        EmptyStateSize.Small => "empty-state-sm",
+        EmptyStateSize.Large => "empty-state-lg",
+        _ => ""
+    };
+}

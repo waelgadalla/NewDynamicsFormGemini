@@ -1,0 +1,61 @@
+@* Validation summary showing list of errors *@
+@using VisualEditorOpus.Models
+
+@if (Errors?.Any() == true)
+{
+    <div class="validation-summary" role="alert" aria-live="polite">
+        <div class="validation-summary-header">
+            <i class="bi bi-exclamation-triangle"></i>
+            <span>@HeaderText (@Errors.Count)</span>
+        </div>
+        <ul class="validation-summary-list">
+            @foreach (var error in Errors)
+            {
+                <li @onclick="() => HandleErrorClick(error.FieldId)"
+                    @onclick:stopPropagation
+                    tabindex="0"
+                    @onkeydown="e => HandleKeyDown(e, error.FieldId)">
+                    <i class="bi bi-dot"></i>
+                    @if (!string.IsNullOrEmpty(error.FieldLabel))
+                    {
+                        <span class="validation-summary-field">Field "@error.FieldLabel" - </span>
+                    }
+                    <span>@error.Message</span>
+                </li>
+            }
+        </ul>
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// List of validation errors to display
+    /// </summary>
+    [Parameter] public List<ValidationError>? Errors { get; set; }
+
+    /// <summary>
+    /// Header text (default: "Please fix the following errors")
+    /// </summary>
+    [Parameter] public string HeaderText { get; set; } = "Please fix the following errors";
+
+    /// <summary>
+    /// Callback when an error item is clicked (passes FieldId)
+    /// </summary>
+    [Parameter] public EventCallback<string?> OnErrorClick { get; set; }
+
+    private async Task HandleErrorClick(string? fieldId)
+    {
+        if (OnErrorClick.HasDelegate && !string.IsNullOrEmpty(fieldId))
+        {
+            await OnErrorClick.InvokeAsync(fieldId);
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e, string? fieldId)
+    {
+        if (e.Key == "Enter" || e.Key == " ")
+        {
+            await HandleErrorClick(fieldId);
+        }
+    }
+}

@@ -1,0 +1,19 @@
+@* Inline loading indicator with text *@
+@using VisualEditorOpus.Models
+
+<div class="inline-loader @CssClass" role="status" aria-label="@Text">
+    <LoadingSpinner Size="SpinnerSize.Small" />
+    <span>@Text</span>
+</div>
+
+@code {
+    /// <summary>
+    /// Loading text to display
+    /// </summary>
+    [Parameter] public string Text { get; set; } = "Loading...";
+
+    /// <summary>
+    /// Additional CSS classes
+    /// </summary>
+    [Parameter] public string? CssClass { get; set; }
+}

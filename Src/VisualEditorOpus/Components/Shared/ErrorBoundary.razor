@@ -1,0 +1,96 @@
+@* Error boundary component to catch and display component errors *@
+@inherits ErrorBoundaryBase
+
+@if (CurrentException != null)
+{
+    <div class="error-boundary" role="alert">
+        <div class="error-boundary-icon">
+            <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <div class="error-boundary-title">Something went wrong</div>
+        <div class="error-boundary-message">
+            @(CustomMessage ?? "We encountered an unexpected error. Please try refreshing the page.")
+        </div>
+        <div class="error-boundary-actions">
+            <button class="btn btn-primary btn-sm" @onclick="HandleRecover" type="button">
+                <i class="bi bi-arrow-clockwise"></i> Try Again
+            </button>
+            @if (ShowContactSupport)
+            {
+                <button class="btn btn-outline btn-sm" @onclick="HandleContactSupport" type="button">
+                    <i class="bi bi-chat"></i> Contact Support
+                </button>
+            }
+        </div>
+        @if (ShowDetails)
+        {
+            <details class="error-boundary-details-toggle">
+                <summary>Technical Details</summary>
+                <div class="error-boundary-details">
+                    <strong>@CurrentException.GetType().Name:</strong> @CurrentException.Message
+                    @if (!string.IsNullOrEmpty(CurrentException.StackTrace))
+                    {
+                        <br/><br/>
+                        <pre>@CurrentException.StackTrace</pre>
+                    }
+                </div>
+            </details>
+        }
+    </div>
+}
+else
+{
+    @ChildContent
+}
+
+@code {
+    /// <summary>
+    /// Custom error message to display instead of the default
+    /// </summary>
+    [Parameter] public string? CustomMessage { get; set; }
+
+    /// <summary>
+    /// Whether to show technical details (stack trace)
+    /// </summary>
+    [Parameter] public bool ShowDetails { get; set; } = false;
+
+    /// <summary>
+    /// Whether to show the Contact Support button
+    /// </summary>
+    [Parameter] public bool ShowContactSupport { get; set; } = true;
+
+    /// <summary>
+    /// Callback when Contact Support is clicked
+    /// </summary>
+    [Parameter] public EventCallback OnContactSupport { get; set; }
+
+    /// <summary>
+    /// Callback when an error is caught (for logging)
+    /// </summary>
+    [Parameter] public EventCallback<Exception> OnError { get; set; }
+
+    protected override async Task OnErrorAsync(Exception exception)
+    {
+        // Log error to console
+        Console.Error.WriteLine($"ErrorBoundary caught: {exception}");
+
+        // Invoke custom error handler if provided
+        if (OnError.HasDelegate)
+        {
+            await OnError.InvokeAsync(exception);
+        }
+    }
+
+    private void HandleRecover()
+    {
+        Recover();
+    }
+
+    private async Task HandleContactSupport()
+    {
+        if (OnContactSupport.HasDelegate)
+        {
+            await OnContactSupport.InvokeAsync();
+        }
+    }
+}

@@ -1,0 +1,40 @@
+@* Empty state for the module editor canvas *@
+@using VisualEditorOpus.Models
+
+<div class="canvas-empty">
+    <EmptyState
+        Size="EmptyStateSize.Large"
+        Title="Start Building Your Form"
+        Description="Drag fields from the left panel or click below to add your first field.">
+
+        <Illustration>
+            <div class="illustration-canvas">
+                <div class="illustration-field"></div>
+                <div class="illustration-field"></div>
+                <div class="illustration-field"></div>
+                <div class="illustration-plus"><i class="bi bi-plus"></i></div>
+            </div>
+        </Illustration>
+
+        <ChildContent>
+            <button class="btn btn-primary" @onclick="OnAddField" type="button">
+                <i class="bi bi-plus-lg"></i> Add First Field
+            </button>
+            <button class="btn btn-outline" @onclick="OnImport" type="button">
+                <i class="bi bi-cloud-arrow-down"></i> Import JSON
+            </button>
+        </ChildContent>
+    </EmptyState>
+</div>
+
+@code {
+    /// <summary>
+    /// Callback when user clicks "Add First Field"
+    /// </summary>
+    [Parameter] public EventCallback OnAddField { get; set; }
+
+    /// <summary>
+    /// Callback when user clicks "Import JSON"
+    /// </summary>
+    [Parameter] public EventCallback OnImport { get; set; }
+}

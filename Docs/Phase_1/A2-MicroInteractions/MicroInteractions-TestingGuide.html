@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Micro-interactions & Animations - Testing Guide</title>
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: #EEF2FF;
+            --success: #10B981;
+            --success-light: #D1FAE5;
+            --danger: #EF4444;
+            --danger-light: #FEE2E2;
+            --warning: #F59E0B;
+            --warning-light: #FEF3C7;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8FAFC;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --border-color: #E2E8F0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-top: 32px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 24px;
+            margin-bottom: 12px;
+        }
+
+        .card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .checklist li:last-child {
+            border-bottom: none;
+        }
+
+        .checklist input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            cursor: pointer;
+            accent-color: var(--success);
+        }
+
+        .checklist label {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .checklist .item-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .checklist .item-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-required {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+
+        .badge-optional {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .badge-auto {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .expected-result {
+            background: var(--success-light);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #065F46;
+            margin-top: 8px;
+        }
+
+        .code-block {
+            background: #1E293B;
+            color: #E2E8F0;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Fira Code', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+
+        .file-path {
+            font-family: 'Consolas', monospace;
+            background: var(--bg-secondary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .progress-bar {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            height: 8px;
+            margin-top: 24px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: var(--success);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .note {
+            background: var(--warning-light);
+            border-left: 4px solid var(--warning);
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            font-size: 13px;
+            margin: 16px 0;
+        }
+
+        .info-box {
+            background: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            font-size: 13px;
+            margin: 16px 0;
+        }
+
+        .animation-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+
+        .animation-table th,
+        .animation-table td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .animation-table th {
+            background: var(--bg-secondary);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .animation-table td {
+            font-size: 13px;
+        }
+
+        .animation-table code {
+            background: var(--bg-secondary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Micro-interactions & Animations Testing Guide</h1>
+        <p class="subtitle">Complete testing checklist for the Micro-interactions implementation</p>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <p class="progress-text"><span id="completedCount">0</span> of <span id="totalCount">0</span> tasks completed</p>
+
+        <!-- Animation Classes Reference -->
+        <h2>Animation Classes Reference</h2>
+        <div class="card">
+            <div class="card-title">Available Animation Classes</div>
+            <table class="animation-table">
+                <thead>
+                    <tr>
+                        <th>Class Name</th>
+                        <th>Animation</th>
+                        <th>Duration</th>
+                        <th>Use Case</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>.animate-fadeIn</code></td>
+                        <td>Fade in</td>
+                        <td>200ms</td>
+                        <td>General appearance</td>
+                    </tr>
+                    <tr>
+                        <td><code>.animate-fadeInUp</code></td>
+                        <td>Fade in + slide up</td>
+                        <td>300ms</td>
+                        <td>List items, cards</td>
+                    </tr>
+                    <tr>
+                        <td><code>.animate-fadeInDown</code></td>
+                        <td>Fade in + slide down</td>
+                        <td>200ms</td>
+                        <td>Dropdowns, tooltips</td>
+                    </tr>
+                    <tr>
+                        <td><code>.animate-scaleIn</code></td>
+                        <td>Scale up + fade in</td>
+                        <td>300ms</td>
+                        <td>Modals, popovers</td>
+                    </tr>
+                    <tr>
+                        <td><code>.animate-slideInRight</code></td>
+                        <td>Slide in from right</td>
+                        <td>300ms</td>
+                        <td>Toast notifications</td>
+                    </tr>
+                    <tr>
+                        <td><code>.animate-pop</code></td>
+                        <td>Pop scale effect</td>
+                        <td>300ms</td>
+                        <td>Selection confirmation</td>
+                    </tr>
+                    <tr>
+                        <td><code>.animate-spin</code></td>
+                        <td>Continuous rotation</td>
+                        <td>1000ms</td>
+                        <td>Loading spinner</td>
+                    </tr>
+                    <tr>
+                        <td><code>.btn-ripple</code></td>
+                        <td>Click ripple effect</td>
+                        <td>500ms</td>
+                        <td>Buttons</td>
+                    </tr>
+                    <tr>
+                        <td><code>.card-hover</code></td>
+                        <td>Lift on hover</td>
+                        <td>300ms</td>
+                        <td>Interactive cards</td>
+                    </tr>
+                    <tr>
+                        <td><code>.skeleton</code></td>
+                        <td>Shimmer effect</td>
+                        <td>1500ms</td>
+                        <td>Loading placeholders</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Section 1: Manual Testing Steps -->
+        <h2>Section 1: Manual Testing Steps</h2>
+
+        <h3>1.1 Basic Animation Tests</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test1" class="test-item">
+                    <label for="test1">
+                        <div class="item-title">Open Browser DevTools</div>
+                        <div class="item-desc">Press F12 and check the Console tab for any CSS errors related to animations</div>
+                        <div class="expected-result">Expected: No errors about undefined keyframes or missing properties</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test2" class="test-item">
+                    <label for="test2">
+                        <div class="item-title">Verify CSS Variables Available</div>
+                        <div class="item-desc">In DevTools, check that --ease-bounce, --ease-out, --duration-normal are defined in :root</div>
+                        <div class="expected-result">Expected: All timing variables resolve to proper values</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.2 Button Micro-interactions</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test3" class="test-item">
+                    <label for="test3">
+                        <div class="item-title">Test Button Hover Lift</div>
+                        <div class="item-desc">Hover over primary buttons - they should lift up slightly (translateY(-1px))</div>
+                        <div class="expected-result">Expected: Subtle 1px upward movement, smooth 150ms transition</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test4" class="test-item">
+                    <label for="test4">
+                        <div class="item-title">Test Button Active Press</div>
+                        <div class="item-desc">Click and hold a button - it should scale down slightly (scale(0.98))</div>
+                        <div class="expected-result">Expected: Button appears to "press in" on click</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test5" class="test-item">
+                    <label for="test5">
+                        <div class="item-title">Test Ripple Effect</div>
+                        <div class="item-desc">Click buttons with class <code>.btn-ripple</code> - a radial ripple should appear</div>
+                        <div class="expected-result">Expected: White radial gradient expands from click point</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test6" class="test-item">
+                    <label for="test6">
+                        <div class="item-title">Test Disabled Buttons</div>
+                        <div class="item-desc">Verify disabled buttons do NOT animate on hover or click</div>
+                        <div class="expected-result">Expected: No animations on disabled buttons</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.3 Card Hover Effects</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test7" class="test-item">
+                    <label for="test7">
+                        <div class="item-title">Test Card Lift Effect</div>
+                        <div class="item-desc">Hover over cards with <code>.card-hover</code> class</div>
+                        <div class="expected-result">Expected: Card lifts 4px, shadow increases to shadow-lg, uses bounce easing</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test8" class="test-item">
+                    <label for="test8">
+                        <div class="item-title">Test Card Icon Animation</div>
+                        <div class="item-desc">If card has <code>.card-icon</code>, verify it scales up and changes color on hover</div>
+                        <div class="expected-result">Expected: Icon scales to 1.1x, background becomes primary color</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.4 Input Focus Effects</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test9" class="test-item">
+                    <label for="test9">
+                        <div class="item-title">Test Focus Ring</div>
+                        <div class="item-desc">Click into form inputs with <code>.input-focus</code> class</div>
+                        <div class="expected-result">Expected: Border turns primary color, 3px focus ring appears (rgba(99, 102, 241, 0.15))</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test10" class="test-item">
+                    <label for="test10">
+                        <div class="item-title">Test Hover State</div>
+                        <div class="item-desc">Hover over input (not focused) - border should darken slightly</div>
+                        <div class="expected-result">Expected: Border color changes to --border-strong</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.5 Toggle & Checkbox Animations</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test11" class="test-item">
+                    <label for="test11">
+                        <div class="item-title">Test Toggle Switch</div>
+                        <div class="item-desc">Click toggle switches with <code>.toggle-animated</code></div>
+                        <div class="expected-result">Expected: Background color transitions smoothly, knob slides with bounce easing</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test12" class="test-item">
+                    <label for="test12">
+                        <div class="item-title">Test Checkbox Pop</div>
+                        <div class="item-desc">Check checkboxes with <code>.checkbox-animated</code> class</div>
+                        <div class="expected-result">Expected: Pop animation (scale 1 -> 1.1 -> 1) on check</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.6 Panel Expand/Collapse</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test13" class="test-item">
+                    <label for="test13">
+                        <div class="item-title">Test Panel Expansion</div>
+                        <div class="item-desc">Click to expand collapsible panels with <code>.panel-animated</code></div>
+                        <div class="expected-result">Expected: max-height transition (300ms), content fades in</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test14" class="test-item">
+                    <label for="test14">
+                        <div class="item-title">Test Chevron Rotation</div>
+                        <div class="item-desc">Verify chevron icon rotates 180 degrees with bounce easing</div>
+                        <div class="expected-result">Expected: Chevron rotates smoothly on expand/collapse</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.7 Field Selection</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test15" class="test-item">
+                    <label for="test15">
+                        <div class="item-title">Test Field Selection Animation</div>
+                        <div class="item-desc">Click on form fields with <code>.field-selectable</code> class</div>
+                        <div class="expected-result">Expected: Pop animation plays, border turns primary, background becomes primary-light</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.8 Modal Animations</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test16" class="test-item">
+                    <label for="test16">
+                        <div class="item-title">Test Modal Open Animation</div>
+                        <div class="item-desc">Open modals - they should scale in with bounce easing</div>
+                        <div class="expected-result">Expected: Scale from 0.95 to 1, fade in, bounce easing (300ms)</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test17" class="test-item">
+                    <label for="test17">
+                        <div class="item-title">Test Backdrop Animation</div>
+                        <div class="item-desc">Verify backdrop fades in smoothly (200ms)</div>
+                        <div class="expected-result">Expected: Dark overlay fades in, blur effect applies</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.9 Toast Notifications</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test18" class="test-item">
+                    <label for="test18">
+                        <div class="item-title">Test Toast Slide In</div>
+                        <div class="item-desc">Trigger toast notifications - they should slide in from the right</div>
+                        <div class="expected-result">Expected: Slides from right (20px offset), bounce easing, 300ms duration</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test19" class="test-item">
+                    <label for="test19">
+                        <div class="item-title">Test Toast Dismiss</div>
+                        <div class="item-desc">Dismiss toasts - they should slide out with reverse animation</div>
+                        <div class="expected-result">Expected: Slides back to right, fades out</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.10 Skeleton Loading</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test20" class="test-item">
+                    <label for="test20">
+                        <div class="item-title">Test Shimmer Animation</div>
+                        <div class="item-desc">View elements with <code>.skeleton</code> class</div>
+                        <div class="expected-result">Expected: Continuous shimmer effect moving left-to-right (1.5s loop)</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.11 Performance Testing</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test21" class="test-item">
+                    <label for="test21">
+                        <div class="item-title">Check 60fps Performance</div>
+                        <div class="item-desc">Open DevTools Performance tab, record while triggering animations</div>
+                        <div class="expected-result">Expected: No dropped frames, animations should be GPU-accelerated</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test22" class="test-item">
+                    <label for="test22">
+                        <div class="item-title">Check No Layout Thrashing</div>
+                        <div class="item-desc">Animations should use transform/opacity only (no width/height changes)</div>
+                        <div class="expected-result">Expected: Only composite-layer properties animated</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.12 Reduced Motion Accessibility</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test23" class="test-item">
+                    <label for="test23">
+                        <div class="item-title">Test Reduced Motion Preference</div>
+                        <div class="item-desc">Enable "Reduce motion" in OS settings (or emulate in DevTools)</div>
+                        <div class="expected-result">Expected: All animations instantly complete (0.01ms duration)</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.13 Dark Mode Testing</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test24" class="test-item">
+                    <label for="test24">
+                        <div class="item-title">Test Animations in Dark Mode</div>
+                        <div class="item-desc">Switch to dark mode and verify all animations still work correctly</div>
+                        <div class="expected-result">Expected: Skeleton shimmer uses dark theme colors, focus rings visible</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Section 2: Manual Implementation Tasks -->
+        <h2>Section 2: Manual Implementation Tasks</h2>
+
+        <div class="note">
+            These are tasks that require you to add classes to your existing components.
+        </div>
+
+        <div class="card">
+            <div class="card-title">Component Class Updates</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="task1" class="test-item">
+                    <label for="task1">
+                        <div class="item-title">Add <code>.btn-ripple</code> to Primary Buttons</div>
+                        <div class="item-desc">Update primary action buttons to include the ripple class</div>
+                        <div class="code-block">&lt;button class="btn btn-primary btn-ripple"&gt;Save&lt;/button&gt;</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task2" class="test-item">
+                    <label for="task2">
+                        <div class="item-title">Add <code>.card-hover</code> to Interactive Cards</div>
+                        <div class="item-desc">Apply to clickable cards in the UI</div>
+                        <div class="code-block">&lt;div class="card card-hover"&gt;...&lt;/div&gt;</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task3" class="test-item">
+                    <label for="task3">
+                        <div class="item-title">Add <code>.input-focus</code> to Form Inputs</div>
+                        <div class="item-desc">Apply to text inputs, textareas, and select elements</div>
+                        <div class="code-block">&lt;input class="form-input input-focus" /&gt;</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task4" class="test-item">
+                    <label for="task4">
+                        <div class="item-title">Add <code>.modal-animated</code> to Modals</div>
+                        <div class="item-desc">Apply to modal containers for entrance animation</div>
+                        <div class="code-block">&lt;div class="modal modal-animated"&gt;...&lt;/div&gt;</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task5" class="test-item">
+                    <label for="task5">
+                        <div class="item-title">Add <code>.toast-animated</code> to Toast Notifications</div>
+                        <div class="item-desc">Apply to toast elements for slide-in animation</div>
+                        <div class="code-block">&lt;div class="toast toast-animated"&gt;...&lt;/div&gt;</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task6" class="test-item">
+                    <label for="task6">
+                        <div class="item-title">Add <code>.field-selectable</code> to Canvas Fields</div>
+                        <div class="item-desc">Apply to selectable field items on the canvas</div>
+                        <div class="code-block">&lt;div class="field-item field-selectable @(IsSelected ? "selected" : "")"&gt;...&lt;/div&gt;</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task7" class="test-item">
+                    <label for="task7">
+                        <div class="item-title">Add <code>.panel-animated</code> to Collapsible Panels</div>
+                        <div class="item-desc">Apply to accordion/collapsible panel components</div>
+                        <div class="code-block">&lt;div class="panel panel-animated @(IsExpanded ? "expanded" : "")"&gt;...&lt;/div&gt;</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Skeleton Loading Implementation</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="task8" class="test-item">
+                    <label for="task8">
+                        <div class="item-title">Create Skeleton Components</div>
+                        <div class="item-desc">Use skeleton classes for loading states</div>
+                        <div class="code-block">&lt;div class="skeleton skeleton-title"&gt;&lt;/div&gt;
+&lt;div class="skeleton skeleton-text"&gt;&lt;/div&gt;
+&lt;div class="skeleton skeleton-avatar"&gt;&lt;/div&gt;</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Section 3: Verification Checklist -->
+        <h2>Section 3: Final Verification Checklist</h2>
+
+        <div class="card">
+            <div class="card-title">Keyframe Animations</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="verify1" class="test-item">
+                    <label for="verify1">
+                        <div class="item-title">fadeIn, fadeInUp, fadeInDown defined</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify2" class="test-item">
+                    <label for="verify2">
+                        <div class="item-title">scaleIn animation defined</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify3" class="test-item">
+                    <label for="verify3">
+                        <div class="item-title">slideInRight, slideInLeft defined</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify4" class="test-item">
+                    <label for="verify4">
+                        <div class="item-title">bounce, pulse, shake, pop defined</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify5" class="test-item">
+                    <label for="verify5">
+                        <div class="item-title">spin (loading) defined</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify6" class="test-item">
+                    <label for="verify6">
+                        <div class="item-title">shimmer (skeleton) defined</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Component Animations</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="verify7" class="test-item">
+                    <label for="verify7">
+                        <div class="item-title">Button hover/active animations smooth</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify8" class="test-item">
+                    <label for="verify8">
+                        <div class="item-title">Button ripple effect working</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify9" class="test-item">
+                    <label for="verify9">
+                        <div class="item-title">Card hover effects working</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify10" class="test-item">
+                    <label for="verify10">
+                        <div class="item-title">Input focus ring appears correctly</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify11" class="test-item">
+                    <label for="verify11">
+                        <div class="item-title">Toggle switch animates smoothly</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify12" class="test-item">
+                    <label for="verify12">
+                        <div class="item-title">Panel expand/collapse smooth</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify13" class="test-item">
+                    <label for="verify13">
+                        <div class="item-title">Modal entrance animations working</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify14" class="test-item">
+                    <label for="verify14">
+                        <div class="item-title">Toast slide animations working</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify15" class="test-item">
+                    <label for="verify15">
+                        <div class="item-title">Skeleton shimmer animating</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify16" class="test-item">
+                    <label for="verify16">
+                        <div class="item-title">Field selection pop effect working</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Accessibility & Performance</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="verify17" class="test-item">
+                    <label for="verify17">
+                        <div class="item-title">Reduced motion media query present</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify18" class="test-item">
+                    <label for="verify18">
+                        <div class="item-title">All animations respect reduced motion</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify19" class="test-item">
+                    <label for="verify19">
+                        <div class="item-title">No janky/stuttering animations</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify20" class="test-item">
+                    <label for="verify20">
+                        <div class="item-title">Performance is smooth (60fps)</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify21" class="test-item">
+                    <label for="verify21">
+                        <div class="item-title">Dark mode animations working correctly</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Browser Compatibility</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="verify22" class="test-item">
+                    <label for="verify22">
+                        <div class="item-title">Chrome/Edge (latest) - all animations working</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify23" class="test-item">
+                    <label for="verify23">
+                        <div class="item-title">Firefox (latest) - all animations working</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify24" class="test-item">
+                    <label for="verify24">
+                        <div class="item-title">Safari (latest) - all animations working <span class="badge badge-optional">If applicable</span></div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+    <script>
+        // Progress tracking
+        const checkboxes = document.querySelectorAll('.test-item');
+        const progressFill = document.getElementById('progressFill');
+        const completedCount = document.getElementById('completedCount');
+        const totalCount = document.getElementById('totalCount');
+
+        totalCount.textContent = checkboxes.length;
+
+        function updateProgress() {
+            const completed = document.querySelectorAll('.test-item:checked').length;
+            const percentage = (completed / checkboxes.length) * 100;
+
+            progressFill.style.width = percentage + '%';
+            completedCount.textContent = completed;
+
+            // Save to localStorage
+            const state = {};
+            checkboxes.forEach((cb, i) => {
+                state[cb.id] = cb.checked;
+            });
+            localStorage.setItem('microInteractionsTestingProgress', JSON.stringify(state));
+        }
+
+        // Load saved state
+        const savedState = JSON.parse(localStorage.getItem('microInteractionsTestingProgress') || '{}');
+        checkboxes.forEach(cb => {
+            if (savedState[cb.id]) {
+                cb.checked = true;
+            }
+            cb.addEventListener('change', updateProgress);
+        });
+
+        updateProgress();
+    </script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+@* Dismissible alert banner component *@
+@using VisualEditorOpus.Models
+
+@if (IsVisible)
+{
+    <div class="alert alert-@VariantClass @(IsDismissing ? "dismissing" : "") @CssClass"
+         role="alert"
+         aria-live="polite">
+        <div class="alert-icon">
+            <i class="bi bi-@IconName"></i>
+        </div>
+        <div class="alert-content">
+            @if (!string.IsNullOrEmpty(Title))
+            {
+                <div class="alert-title">@Title</div>
+            }
+            <div class="alert-message">@Message</div>
+            @if (ChildContent != null)
+            {
+                <div class="alert-actions">
+                    @ChildContent
+                </div>
+            }
+        </div>
+        @if (Dismissible)
+        {
+            <button class="alert-close" @onclick="Dismiss" aria-label="Dismiss alert" type="button">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        }
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// Alert style variant
+    /// </summary>
+    [Parameter] public AlertVariant Variant { get; set; } = AlertVariant.Error;
+
+    /// <summary>
+    /// Optional title text
+    /// </summary>
+    [Parameter] public string? Title { get; set; }
+
+    /// <summary>
+    /// Alert message content
+    /// </summary>
+    [Parameter] public string Message { get; set; } = "";
+
+    /// <summary>
+    /// Whether the alert can be dismissed
+    /// </summary>
+    [Parameter] public bool Dismissible { get; set; } = true;
+
+    /// <summary>
+    /// Additional CSS classes
+    /// </summary>
+    [Parameter] public string? CssClass { get; set; }
+
+    /// <summary>
+    /// Auto-dismiss after specified milliseconds (0 = no auto-dismiss)
+    /// </summary>
+    [Parameter] public int AutoDismissMs { get; set; } = 0;
+
+    /// <summary>
+    /// Callback when alert is dismissed
+    /// </summary>
+    [Parameter] public EventCallback OnDismiss { get; set; }
+
+    /// <summary>
+    /// Optional action content
+    /// </summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private bool IsVisible = true;
+    private bool IsDismissing = false;
+
+    private string VariantClass => Variant.ToString().ToLower();
+
+    private string IconName => Variant switch
+    {
+        AlertVariant.Error => "x-circle",
+        AlertVariant.Warning => "exclamation-triangle",
+        AlertVariant.Info => "info-circle",
+        AlertVariant.Success => "check-circle",
+        _ => "info-circle"
+    };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && AutoDismissMs > 0)
+        {
+            await Task.Delay(AutoDismissMs);
+            await Dismiss();
+        }
+    }
+
+    private async Task Dismiss()
+    {
+        IsDismissing = true;
+        StateHasChanged();
+        await Task.Delay(200); // Animation duration
+        IsVisible = false;
+        await OnDismiss.InvokeAsync();
+    }
+
+    /// <summary>
+    /// Show the alert again (useful for reusable alert instances)
+    /// </summary>
+    public void Show()
+    {
+        IsVisible = true;
+        IsDismissing = false;
+        StateHasChanged();
+    }
+}

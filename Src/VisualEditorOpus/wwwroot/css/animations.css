@@ -1,0 +1,560 @@
+/* ===== ANIMATIONS & TRANSITIONS ===== */
+
+/* === Base Transitions === */
+.transition-none { transition: none; }
+.transition-all { transition: all var(--duration-normal) var(--ease-in-out); }
+.transition-colors { transition: color, background-color, border-color, fill, stroke var(--duration-normal) var(--ease-in-out); }
+.transition-opacity { transition: opacity var(--duration-normal) var(--ease-in-out); }
+.transition-transform { transition: transform var(--duration-normal) var(--ease-in-out); }
+.transition-shadow { transition: box-shadow var(--duration-normal) var(--ease-in-out); }
+
+/* === Duration Modifiers === */
+.duration-fast { transition-duration: var(--duration-fast); }
+.duration-normal { transition-duration: var(--duration-normal); }
+.duration-slow { transition-duration: var(--duration-slow); }
+.duration-slower { transition-duration: var(--duration-slower); }
+
+/* === Easing Modifiers === */
+.ease-in { transition-timing-function: var(--ease-in); }
+.ease-out { transition-timing-function: var(--ease-out); }
+.ease-in-out { transition-timing-function: var(--ease-in-out); }
+.ease-bounce { transition-timing-function: var(--ease-bounce); }
+
+/* === Transform Utilities === */
+.scale-0 { transform: scale(0); }
+.scale-50 { transform: scale(0.5); }
+.scale-75 { transform: scale(0.75); }
+.scale-90 { transform: scale(0.9); }
+.scale-95 { transform: scale(0.95); }
+.scale-100 { transform: scale(1); }
+.scale-105 { transform: scale(1.05); }
+.scale-110 { transform: scale(1.1); }
+
+.rotate-0 { transform: rotate(0deg); }
+.rotate-45 { transform: rotate(45deg); }
+.rotate-90 { transform: rotate(90deg); }
+.rotate-180 { transform: rotate(180deg); }
+.-rotate-45 { transform: rotate(-45deg); }
+.-rotate-90 { transform: rotate(-90deg); }
+.-rotate-180 { transform: rotate(-180deg); }
+
+.translate-y-0 { transform: translateY(0); }
+.translate-y-1 { transform: translateY(4px); }
+.translate-y-2 { transform: translateY(8px); }
+.-translate-y-1 { transform: translateY(-4px); }
+.-translate-y-2 { transform: translateY(-8px); }
+
+/* === Keyframe Animations === */
+
+/* Fade In */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.animate-fade-in {
+    animation: fadeIn var(--duration-normal) var(--ease-out);
+}
+
+/* Fade Out */
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+.animate-fade-out {
+    animation: fadeOut var(--duration-normal) var(--ease-in);
+}
+
+/* Slide In from Top */
+@keyframes slideInFromTop {
+    from { transform: translateY(-10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+.animate-slide-in-top {
+    animation: slideInFromTop var(--duration-normal) var(--ease-out);
+}
+
+/* Slide In from Bottom */
+@keyframes slideInFromBottom {
+    from { transform: translateY(10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+.animate-slide-in-bottom {
+    animation: slideInFromBottom var(--duration-normal) var(--ease-out);
+}
+
+/* Slide In from Left */
+@keyframes slideInFromLeft {
+    from { transform: translateX(-10px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+.animate-slide-in-left {
+    animation: slideInFromLeft var(--duration-normal) var(--ease-out);
+}
+
+/* Slide In from Right */
+@keyframes slideInFromRight {
+    from { transform: translateX(10px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+.animate-slide-in-right {
+    animation: slideInFromRight var(--duration-normal) var(--ease-out);
+}
+
+/* Scale In */
+@keyframes scaleIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+.animate-scale-in {
+    animation: scaleIn var(--duration-normal) var(--ease-out);
+}
+
+/* Scale Out */
+@keyframes scaleOut {
+    from { transform: scale(1); opacity: 1; }
+    to { transform: scale(0.95); opacity: 0; }
+}
+.animate-scale-out {
+    animation: scaleOut var(--duration-fast) var(--ease-in);
+}
+
+/* Bounce */
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+.animate-bounce {
+    animation: bounce 0.5s var(--ease-bounce);
+}
+
+/* Pulse */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+.animate-pulse {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* Spin */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Shake */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+.animate-shake {
+    animation: shake 0.3s ease-in-out;
+}
+
+/* Modal/Dialog Enter */
+@keyframes modalEnter {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+.animate-modal-enter {
+    animation: modalEnter var(--duration-slow) var(--ease-out);
+}
+
+/* Modal/Dialog Exit */
+@keyframes modalExit {
+    from {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
+    }
+}
+.animate-modal-exit {
+    animation: modalExit var(--duration-normal) var(--ease-in);
+}
+
+/* Backdrop Fade */
+@keyframes backdropFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.animate-backdrop {
+    animation: backdropFade var(--duration-normal) var(--ease-out);
+}
+
+/* Toast Slide */
+@keyframes toastSlide {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+.animate-toast {
+    animation: toastSlide var(--duration-normal) var(--ease-out);
+}
+
+/* Dropdown Open */
+@keyframes dropdownOpen {
+    from {
+        opacity: 0;
+        transform: scaleY(0.95);
+        transform-origin: top;
+    }
+    to {
+        opacity: 1;
+        transform: scaleY(1);
+        transform-origin: top;
+    }
+}
+.animate-dropdown {
+    animation: dropdownOpen var(--duration-fast) var(--ease-out);
+}
+
+/* Skeleton Loading */
+@keyframes skeleton {
+    0% { background-position: -200px 0; }
+    100% { background-position: calc(200px + 100%) 0; }
+}
+.animate-skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--bg-tertiary) 0px,
+        var(--bg-secondary) 40px,
+        var(--bg-tertiary) 80px
+    );
+    background-size: 200px 100%;
+    animation: skeleton 1.5s ease-in-out infinite;
+}
+
+/* === Hover Utilities === */
+.hover\:scale-105:hover { transform: scale(1.05); }
+.hover\:scale-110:hover { transform: scale(1.1); }
+.hover\:-translate-y-1:hover { transform: translateY(-4px); }
+.hover\:-translate-y-2:hover { transform: translateY(-8px); }
+.hover\:shadow-md:hover { box-shadow: var(--shadow-md); }
+.hover\:shadow-lg:hover { box-shadow: var(--shadow-lg); }
+
+/* === Focus Utilities === */
+.focus\:ring:focus {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+}
+.focus\:outline-none:focus {
+    outline: none;
+}
+
+/* === Active Utilities === */
+.active\:scale-95:active { transform: scale(0.95); }
+.active\:scale-98:active { transform: scale(0.98); }
+
+/* ===== ADDITIONAL KEYFRAMES FROM MICRO-INTERACTIONS ===== */
+
+/* Fade In Up */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.animate-fadeInUp {
+    animation: fadeInUp 0.3s var(--ease-out);
+}
+
+/* Fade In Down */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.animate-fadeInDown {
+    animation: fadeInDown 0.2s var(--ease-out);
+}
+
+/* Pop Animation */
+@keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+.animate-pop {
+    animation: pop 0.3s var(--ease-bounce);
+}
+
+/* Pulse Scale (for selection confirmation) */
+@keyframes pulseScale {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+.animate-pulse-scale {
+    animation: pulseScale 0.4s ease;
+}
+
+/* Shimmer (Skeleton Loading - Enhanced) */
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Slide In Right (for toasts) */
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+.animate-slideInRight {
+    animation: slideInRight 0.3s var(--ease-bounce);
+}
+
+/* Slide In Left (for side panels) */
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+.animate-slideInLeft {
+    animation: slideInLeft 0.3s var(--ease-out);
+}
+
+/* ===== COMPONENT-SPECIFIC MICRO-INTERACTIONS ===== */
+
+/* === Button Micro-interactions === */
+
+/* Button Ripple Effect */
+.btn-ripple {
+    position: relative;
+    overflow: hidden;
+}
+.btn-ripple::after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.3) 10%, transparent 10.01%);
+    background-repeat: no-repeat;
+    background-position: 50%;
+    transform: scale(10, 10);
+    opacity: 0;
+    transition: transform 0.5s, opacity 0.5s;
+}
+.btn-ripple:active::after {
+    transform: scale(0, 0);
+    opacity: 1;
+    transition: 0s;
+}
+
+/* Button Hover Lift & Active Press */
+.btn-animated {
+    transition: all 0.15s var(--ease-out);
+}
+.btn-animated:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+.btn-animated:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+}
+
+/* === Card Hover Effect === */
+.card-hover {
+    transition: transform 0.3s var(--ease-bounce), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-light);
+}
+
+/* Card Icon Animation on Hover */
+.card-hover .card-icon {
+    transition: all 0.3s ease;
+}
+.card-hover:hover .card-icon {
+    transform: scale(1.1);
+    background: var(--primary);
+    color: white;
+}
+
+/* === Input Focus Effect === */
+.input-focus {
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.input-focus:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+.input-focus:hover:not(:focus) {
+    border-color: var(--border-strong);
+}
+
+/* === Toggle Switch Animation === */
+.toggle-animated {
+    transition: background-color 0.3s ease;
+}
+.toggle-animated::after {
+    transition: transform 0.3s var(--ease-bounce);
+}
+
+/* === Panel Expand/Collapse === */
+.panel-animated .panel-body {
+    transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.2s ease;
+    overflow: hidden;
+}
+.panel-animated .panel-chevron {
+    transition: transform 0.3s var(--ease-bounce);
+}
+.panel-animated.expanded .panel-chevron {
+    transform: rotate(180deg);
+}
+
+/* === Field Selection Animation === */
+.field-selectable {
+    transition: border-color 0.2s, background-color 0.2s, transform 0.2s;
+}
+.field-selectable:hover {
+    border-color: var(--border-color);
+    background-color: var(--bg-secondary);
+}
+.field-selectable.selected {
+    border-color: var(--primary);
+    background-color: var(--primary-light);
+    animation: pop 0.3s var(--ease-bounce);
+}
+
+/* === Modal Animation === */
+.modal-animated {
+    transition: transform 0.3s var(--ease-bounce), opacity 0.2s ease;
+}
+.modal-backdrop-animated {
+    transition: opacity 0.2s, visibility 0.2s;
+}
+.modal-backdrop-animated.active {
+    opacity: 1;
+    visibility: visible;
+}
+.modal-backdrop-animated.active .modal-animated {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+/* === Toast Notification Animation === */
+.toast-animated {
+    animation: slideInRight 0.3s var(--ease-bounce);
+}
+.toast-animated.hiding {
+    animation: slideInRight 0.3s var(--ease-bounce) reverse forwards;
+}
+
+/* === Skeleton Shimmer (Enhanced) === */
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--bg-tertiary) 25%,
+        var(--bg-secondary) 50%,
+        var(--bg-tertiary) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+}
+.skeleton-text {
+    height: 14px;
+    margin-bottom: 8px;
+    border-radius: var(--radius-sm);
+}
+.skeleton-title {
+    height: 20px;
+    width: 60%;
+    margin-bottom: 12px;
+    border-radius: var(--radius-sm);
+}
+.skeleton-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+}
+.skeleton-btn {
+    height: 36px;
+    width: 100px;
+    border-radius: var(--radius-md);
+}
+
+/* === Checkbox Animation === */
+.checkbox-animated {
+    transition: all 0.2s var(--ease-bounce);
+}
+.checkbox-animated.checked {
+    animation: pop 0.3s var(--ease-bounce);
+}
+.checkbox-animated.checked i {
+    animation: pop 0.3s ease;
+}
+
+/* === Icon Hover Rotation === */
+.icon-rotate-hover {
+    transition: transform 0.3s var(--ease-bounce);
+}
+.icon-rotate-hover:hover {
+    transform: rotate(90deg);
+}
+
+/* === Additional Utility Animations === */
+.animate-fadeIn {
+    animation: fadeIn 0.2s var(--ease-out);
+}
+.animate-scaleIn {
+    animation: scaleIn 0.3s var(--ease-bounce);
+}
+.animate-bounce-once {
+    animation: bounce 0.6s ease;
+}
+.animate-shake-once {
+    animation: shake 0.5s ease;
+}
+
+/* ===== REDUCED MOTION ===== */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

@@ -1,0 +1,90 @@
+@* Full-page error display (404, 500, etc.) *@
+@inject NavigationManager NavigationManager
+
+<div class="error-page @CssClass">
+    <div class="error-page-code">@Code</div>
+    <div class="error-page-title">@Title</div>
+    <div class="error-page-message">@Message</div>
+    <div class="error-page-actions">
+        <button class="btn btn-primary" @onclick="HandleGoHome" type="button">
+            <i class="bi bi-house"></i> @HomeButtonText
+        </button>
+        <button class="btn btn-ghost" @onclick="HandleGoBack" type="button">
+            <i class="bi bi-arrow-left"></i> @BackButtonText
+        </button>
+    </div>
+</div>
+
+@code {
+    /// <summary>
+    /// Error code to display (e.g., "404", "500")
+    /// </summary>
+    [Parameter] public string Code { get; set; } = "404";
+
+    /// <summary>
+    /// Error title
+    /// </summary>
+    [Parameter] public string Title { get; set; } = "Page Not Found";
+
+    /// <summary>
+    /// Error message/description
+    /// </summary>
+    [Parameter] public string Message { get; set; } = "The page you're looking for doesn't exist or has been moved.";
+
+    /// <summary>
+    /// Home button text
+    /// </summary>
+    [Parameter] public string HomeButtonText { get; set; } = "Go to Dashboard";
+
+    /// <summary>
+    /// Back button text
+    /// </summary>
+    [Parameter] public string BackButtonText { get; set; } = "Go Back";
+
+    /// <summary>
+    /// URL to navigate to on "Go Home" click
+    /// </summary>
+    [Parameter] public string HomeUrl { get; set; } = "/";
+
+    /// <summary>
+    /// Callback when "Go Home" is clicked
+    /// </summary>
+    [Parameter] public EventCallback OnGoHome { get; set; }
+
+    /// <summary>
+    /// Callback when "Go Back" is clicked
+    /// </summary>
+    [Parameter] public EventCallback OnGoBack { get; set; }
+
+    /// <summary>
+    /// Additional CSS classes
+    /// </summary>
+    [Parameter] public string? CssClass { get; set; }
+
+    private async Task HandleGoHome()
+    {
+        if (OnGoHome.HasDelegate)
+        {
+            await OnGoHome.InvokeAsync();
+        }
+        else
+        {
+            NavigationManager.NavigateTo(HomeUrl);
+        }
+    }
+
+    private async Task HandleGoBack()
+    {
+        if (OnGoBack.HasDelegate)
+        {
+            await OnGoBack.InvokeAsync();
+        }
+        else
+        {
+            // Navigate back in browser history
+            await Task.CompletedTask;
+            // Note: For actual back navigation, you may need JS interop
+            NavigationManager.NavigateTo(HomeUrl);
+        }
+    }
+}

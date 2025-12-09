@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empty States & Onboarding - Testing Guide</title>
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: #EEF2FF;
+            --success: #10B981;
+            --success-light: #D1FAE5;
+            --danger: #EF4444;
+            --danger-light: #FEE2E2;
+            --warning: #F59E0B;
+            --warning-light: #FEF3C7;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8FAFC;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --border-color: #E2E8F0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-top: 32px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 24px;
+            margin-bottom: 12px;
+        }
+
+        .card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .checklist li:last-child {
+            border-bottom: none;
+        }
+
+        .checklist input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            cursor: pointer;
+            accent-color: var(--success);
+        }
+
+        .checklist label {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .checklist .item-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .checklist .item-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-required {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+
+        .badge-optional {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .expected-result {
+            background: var(--success-light);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #065F46;
+            margin-top: 8px;
+        }
+
+        .code-block {
+            background: #1E293B;
+            color: #E2E8F0;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Fira Code', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+
+        .file-path {
+            font-family: 'Consolas', monospace;
+            background: var(--bg-secondary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .progress-bar {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            height: 8px;
+            margin-top: 24px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: var(--success);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .note {
+            background: var(--warning-light);
+            border-left: 4px solid var(--warning);
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            font-size: 13px;
+            margin: 16px 0;
+        }
+
+        .info-box {
+            background: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            font-size: 13px;
+            margin: 16px 0;
+        }
+
+        .component-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+
+        .component-table th,
+        .component-table td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .component-table th {
+            background: var(--bg-secondary);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .component-table td {
+            font-size: 13px;
+        }
+
+        .component-table code {
+            background: var(--bg-secondary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Empty States & Onboarding Testing Guide</h1>
+        <p class="subtitle">Complete testing checklist for the Empty States & Onboarding implementation</p>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <p class="progress-text"><span id="completedCount">0</span> of <span id="totalCount">0</span> tasks completed</p>
+
+        <!-- Components Created -->
+        <h2>Components Created</h2>
+        <div class="card">
+            <div class="card-title">Empty State Components</div>
+            <table class="component-table">
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Location</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>EmptyState.razor</code></td>
+                        <td>Components/Shared/</td>
+                        <td>Base reusable empty state component</td>
+                    </tr>
+                    <tr>
+                        <td><code>EmptyCanvas.razor</code></td>
+                        <td>Components/Shared/</td>
+                        <td>Empty module editor canvas</td>
+                    </tr>
+                    <tr>
+                        <td><code>EmptyWorkflow.razor</code></td>
+                        <td>Components/Shared/</td>
+                        <td>Empty workflow designer</td>
+                    </tr>
+                    <tr>
+                        <td><code>EmptyOutline.razor</code></td>
+                        <td>Components/Shared/</td>
+                        <td>Empty field outline sidebar</td>
+                    </tr>
+                    <tr>
+                        <td><code>ValidationSuccess.razor</code></td>
+                        <td>Components/Shared/</td>
+                        <td>Validation passed success state</td>
+                    </tr>
+                    <tr>
+                        <td><code>NoSearchResults.razor</code></td>
+                        <td>Components/Shared/</td>
+                        <td>No search results found</td>
+                    </tr>
+                    <tr>
+                        <td><code>EmptyCodeSet.razor</code></td>
+                        <td>Components/Shared/</td>
+                        <td>Empty code set options list</td>
+                    </tr>
+                    <tr>
+                        <td><code>EmptyDashboard.razor</code></td>
+                        <td>Components/Shared/</td>
+                        <td>Empty dashboard with quick start</td>
+                    </tr>
+                    <tr>
+                        <td><code>FirstTimeOnboarding.razor</code></td>
+                        <td>Components/Shared/</td>
+                        <td>Multi-step onboarding overlay</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Section 1: Manual Testing Steps -->
+        <h2>Section 1: Manual Testing Steps</h2>
+
+        <h3>1.1 EmptyState Base Component</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test1" class="test-item">
+                    <label for="test1">
+                        <div class="item-title">Test with Icon only</div>
+                        <div class="item-desc">Render EmptyState with just Icon and Title parameters</div>
+                        <div class="expected-result">Expected: Icon displays in circular container, title below it</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test2" class="test-item">
+                    <label for="test2">
+                        <div class="item-title">Test Icon Variants</div>
+                        <div class="item-desc">Test IconVariant with values: "success", "primary", "warning"</div>
+                        <div class="expected-result">Expected: Icon container color changes based on variant</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test3" class="test-item">
+                    <label for="test3">
+                        <div class="item-title">Test Size Variants</div>
+                        <div class="item-desc">Test Size with Small, Medium, and Large values</div>
+                        <div class="expected-result">Expected: Padding and font sizes adjust accordingly</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test4" class="test-item">
+                    <label for="test4">
+                        <div class="item-title">Test Primary Action Button</div>
+                        <div class="item-desc">Click the primary action button</div>
+                        <div class="expected-result">Expected: PrimaryAction EventCallback fires correctly</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test5" class="test-item">
+                    <label for="test5">
+                        <div class="item-title">Test Secondary Action Button</div>
+                        <div class="item-desc">Click the secondary action button</div>
+                        <div class="expected-result">Expected: SecondaryAction EventCallback fires correctly</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.2 EmptyCanvas Component</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test6" class="test-item">
+                    <label for="test6">
+                        <div class="item-title">Display EmptyCanvas in Module Editor</div>
+                        <div class="item-desc">Open a new/empty module in the editor</div>
+                        <div class="expected-result">Expected: Dashed border container with illustration and buttons</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test7" class="test-item">
+                    <label for="test7">
+                        <div class="item-title">Hover Effect on Canvas</div>
+                        <div class="item-desc">Hover over the empty canvas area</div>
+                        <div class="expected-result">Expected: Border color changes to primary on hover</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test8" class="test-item">
+                    <label for="test8">
+                        <div class="item-title">Click "Add First Field"</div>
+                        <div class="item-desc">Click the primary action button</div>
+                        <div class="expected-result">Expected: Field type selector or add field dialog opens</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test9" class="test-item">
+                    <label for="test9">
+                        <div class="item-title">Click "Import JSON"</div>
+                        <div class="item-desc">Click the secondary action button</div>
+                        <div class="expected-result">Expected: Import JSON dialog opens</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test10" class="test-item">
+                    <label for="test10">
+                        <div class="item-title">Illustration Animation</div>
+                        <div class="item-desc">Observe the illustration fields</div>
+                        <div class="expected-result">Expected: Subtle pulse animation on placeholder fields</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.3 EmptyWorkflow Component</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test11" class="test-item">
+                    <label for="test11">
+                        <div class="item-title">Display EmptyWorkflow in Workflow Designer</div>
+                        <div class="item-desc">Open an empty workflow</div>
+                        <div class="expected-result">Expected: Dotted grid background with workflow icon and button</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test12" class="test-item">
+                    <label for="test12">
+                        <div class="item-title">Click "Add Module"</div>
+                        <div class="item-desc">Click the primary action button</div>
+                        <div class="expected-result">Expected: Add module dialog or selector opens</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.4 ValidationSuccess Component</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test13" class="test-item">
+                    <label for="test13">
+                        <div class="item-title">Display when validation passes</div>
+                        <div class="item-desc">Trigger validation on a valid form</div>
+                        <div class="expected-result">Expected: Green success icon with "All Checks Passed!" message</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test14" class="test-item">
+                    <label for="test14">
+                        <div class="item-title">Gradient Background</div>
+                        <div class="item-desc">Verify the success state visual treatment</div>
+                        <div class="expected-result">Expected: Subtle green gradient background</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.5 NoSearchResults Component</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test15" class="test-item">
+                    <label for="test15">
+                        <div class="item-title">Display on empty search</div>
+                        <div class="item-desc">Search for something that doesn't exist</div>
+                        <div class="expected-result">Expected: Search icon with "No Results Found" message including search term</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test16" class="test-item">
+                    <label for="test16">
+                        <div class="item-title">Click "Clear Search"</div>
+                        <div class="item-desc">Click the secondary action button</div>
+                        <div class="expected-result">Expected: Search is cleared, results update</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.6 FirstTimeOnboarding Component</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test17" class="test-item">
+                    <label for="test17">
+                        <div class="item-title">Overlay Appearance</div>
+                        <div class="item-desc">Show the onboarding overlay</div>
+                        <div class="expected-result">Expected: Dark overlay with blur, centered card animates in</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test18" class="test-item">
+                    <label for="test18">
+                        <div class="item-title">Step Navigation - Next</div>
+                        <div class="item-desc">Click "Next" button multiple times</div>
+                        <div class="expected-result">Expected: Content updates, step indicator advances</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test19" class="test-item">
+                    <label for="test19">
+                        <div class="item-title">Step Dots Navigation</div>
+                        <div class="item-desc">Click on step indicator dots</div>
+                        <div class="expected-result">Expected: Jumps to clicked step</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test20" class="test-item">
+                    <label for="test20">
+                        <div class="item-title">Skip Tour</div>
+                        <div class="item-desc">Click "Skip Tour" button</div>
+                        <div class="expected-result">Expected: Overlay animates out, OnComplete fires</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test21" class="test-item">
+                    <label for="test21">
+                        <div class="item-title">Get Started (Last Step)</div>
+                        <div class="item-desc">Navigate to last step and click "Get Started"</div>
+                        <div class="expected-result">Expected: Overlay closes, OnComplete fires</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test22" class="test-item">
+                    <label for="test22">
+                        <div class="item-title">Click Outside to Close</div>
+                        <div class="item-desc">Click on the dark overlay area outside the card</div>
+                        <div class="expected-result">Expected: Overlay closes (same as skip)</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test23" class="test-item">
+                    <label for="test23">
+                        <div class="item-title">Press Escape to Close</div>
+                        <div class="item-desc">Press Escape key while overlay is open</div>
+                        <div class="expected-result">Expected: Overlay closes (if implemented)</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.7 Dark Mode Testing</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test24" class="test-item">
+                    <label for="test24">
+                        <div class="item-title">Empty States in Dark Mode</div>
+                        <div class="item-desc">Switch to dark mode and view all empty states</div>
+                        <div class="expected-result">Expected: Colors adapt properly, text remains readable</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test25" class="test-item">
+                    <label for="test25">
+                        <div class="item-title">Onboarding in Dark Mode</div>
+                        <div class="item-desc">View onboarding overlay in dark mode</div>
+                        <div class="expected-result">Expected: Card background and text colors adapt</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Section 2: Manual Implementation Tasks -->
+        <h2>Section 2: Manual Implementation Tasks</h2>
+
+        <div class="note">
+            These are tasks that require manual integration with your existing components.
+        </div>
+
+        <div class="card">
+            <div class="card-title">Component Integration</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="task1" class="test-item">
+                    <label for="task1">
+                        <div class="item-title">Add EmptyCanvas to Module Editor</div>
+                        <div class="item-desc">When module has no fields, show EmptyCanvas instead of empty canvas</div>
+                        <div class="code-block">@if (Fields.Count == 0)
+{
+    &lt;EmptyCanvas OnAddField="OpenFieldSelector" OnImport="OpenImportDialog" /&gt;
+}
+else
+{
+    &lt;!-- Existing canvas content --&gt;
+}</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task2" class="test-item">
+                    <label for="task2">
+                        <div class="item-title">Add EmptyWorkflow to Workflow Designer</div>
+                        <div class="item-desc">When workflow has no modules, show EmptyWorkflow</div>
+                        <div class="code-block">@if (Modules.Count == 0)
+{
+    &lt;EmptyWorkflow OnAddModule="OpenModuleSelector" /&gt;
+}</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task3" class="test-item">
+                    <label for="task3">
+                        <div class="item-title">Add EmptyOutline to Field Outline Panel</div>
+                        <div class="item-desc">When no fields in outline, show EmptyOutline</div>
+                        <div class="code-block">@if (Fields.Count == 0)
+{
+    &lt;EmptyOutline OnAddField="AddField" /&gt;
+}</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task4" class="test-item">
+                    <label for="task4">
+                        <div class="item-title">Add ValidationSuccess to Validation Panel</div>
+                        <div class="item-desc">When validation has no issues, show ValidationSuccess</div>
+                        <div class="code-block">@if (ValidationIssues.Count == 0)
+{
+    &lt;ValidationSuccess /&gt;
+}</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task5" class="test-item">
+                    <label for="task5">
+                        <div class="item-title">Add NoSearchResults to Search</div>
+                        <div class="item-desc">When search returns no results, show NoSearchResults</div>
+                        <div class="code-block">@if (!string.IsNullOrEmpty(SearchTerm) && Results.Count == 0)
+{
+    &lt;NoSearchResults SearchTerm="@SearchTerm" OnClear="ClearSearch" /&gt;
+}</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Onboarding State Management</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="task6" class="test-item">
+                    <label for="task6">
+                        <div class="item-title">Track Onboarding Completion</div>
+                        <div class="item-desc">Store onboarding completion state in localStorage or user preferences</div>
+                        <div class="code-block">// Check if first time user
+var hasCompletedOnboarding = await localStorage.GetItemAsync&lt;bool&gt;("onboardingComplete");
+ShowOnboarding = !hasCompletedOnboarding;
+
+// After completion
+await localStorage.SetItemAsync("onboardingComplete", true);</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task7" class="test-item">
+                    <label for="task7">
+                        <div class="item-title">Add Onboarding to Main Layout</div>
+                        <div class="item-desc">Include FirstTimeOnboarding in main layout or dashboard</div>
+                        <div class="code-block">&lt;FirstTimeOnboarding IsVisible="@ShowOnboarding"
+                      OnComplete="CompleteOnboarding" /&gt;</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Wire Event Handlers</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="task8" class="test-item">
+                    <label for="task8">
+                        <div class="item-title">EmptyCanvas Event Handlers</div>
+                        <div class="item-desc">Implement OnAddField and OnImport handlers</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task9" class="test-item">
+                    <label for="task9">
+                        <div class="item-title">EmptyDashboard Event Handlers</div>
+                        <div class="item-desc">Implement OnCreateBlank, OnCreateContact, OnCreateSurvey handlers</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Section 3: Verification Checklist -->
+        <h2>Section 3: Final Verification Checklist</h2>
+
+        <div class="card">
+            <div class="card-title">Component Rendering</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="verify1" class="test-item">
+                    <label for="verify1">
+                        <div class="item-title">EmptyState base component renders correctly</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify2" class="test-item">
+                    <label for="verify2">
+                        <div class="item-title">All size variants working (Small, Medium, Large)</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify3" class="test-item">
+                    <label for="verify3">
+                        <div class="item-title">All icon variants working (success, primary, warning)</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify4" class="test-item">
+                    <label for="verify4">
+                        <div class="item-title">Illustration slot renders custom content</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Specific Empty States</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="verify5" class="test-item">
+                    <label for="verify5">
+                        <div class="item-title">EmptyCanvas displays in empty module editor</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify6" class="test-item">
+                    <label for="verify6">
+                        <div class="item-title">EmptyWorkflow displays in empty workflow designer</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify7" class="test-item">
+                    <label for="verify7">
+                        <div class="item-title">EmptyOutline displays in empty outline panel</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify8" class="test-item">
+                    <label for="verify8">
+                        <div class="item-title">ValidationSuccess displays when no validation issues</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify9" class="test-item">
+                    <label for="verify9">
+                        <div class="item-title">NoSearchResults displays on empty search</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify10" class="test-item">
+                    <label for="verify10">
+                        <div class="item-title">EmptyCodeSet displays in empty code set</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify11" class="test-item">
+                    <label for="verify11">
+                        <div class="item-title">EmptyDashboard displays on empty dashboard</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Onboarding Flow</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="verify12" class="test-item">
+                    <label for="verify12">
+                        <div class="item-title">Onboarding overlay shows on first visit</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify13" class="test-item">
+                    <label for="verify13">
+                        <div class="item-title">Onboarding step navigation works</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify14" class="test-item">
+                    <label for="verify14">
+                        <div class="item-title">Onboarding skip works</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify15" class="test-item">
+                    <label for="verify15">
+                        <div class="item-title">Onboarding completion is remembered</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Styling & Accessibility</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="verify16" class="test-item">
+                    <label for="verify16">
+                        <div class="item-title">Dark mode styling correct</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify17" class="test-item">
+                    <label for="verify17">
+                        <div class="item-title">Animations smooth and subtle</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify18" class="test-item">
+                    <label for="verify18">
+                        <div class="item-title">ARIA role="status" present on empty states</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify19" class="test-item">
+                    <label for="verify19">
+                        <div class="item-title">Button type="button" present (no form submission)</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify20" class="test-item">
+                    <label for="verify20">
+                        <div class="item-title">Responsive on mobile viewports</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+    <script>
+        // Progress tracking
+        const checkboxes = document.querySelectorAll('.test-item');
+        const progressFill = document.getElementById('progressFill');
+        const completedCount = document.getElementById('completedCount');
+        const totalCount = document.getElementById('totalCount');
+
+        totalCount.textContent = checkboxes.length;
+
+        function updateProgress() {
+            const completed = document.querySelectorAll('.test-item:checked').length;
+            const percentage = (completed / checkboxes.length) * 100;
+
+            progressFill.style.width = percentage + '%';
+            completedCount.textContent = completed;
+
+            // Save to localStorage
+            const state = {};
+            checkboxes.forEach((cb, i) => {
+                state[cb.id] = cb.checked;
+            });
+            localStorage.setItem('emptyStatesTestingProgress', JSON.stringify(state));
+        }
+
+        // Load saved state
+        const savedState = JSON.parse(localStorage.getItem('emptyStatesTestingProgress') || '{}');
+        checkboxes.forEach(cb => {
+            if (savedState[cb.id]) {
+                cb.checked = true;
+            }
+            cb.addEventListener('change', updateProgress);
+        });
+
+        updateProgress();
+    </script>
+</body>
+</html>

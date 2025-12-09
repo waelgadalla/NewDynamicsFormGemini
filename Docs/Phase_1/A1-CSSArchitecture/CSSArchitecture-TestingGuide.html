@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Architecture - Testing Guide</title>
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: #EEF2FF;
+            --success: #10B981;
+            --success-light: #D1FAE5;
+            --danger: #EF4444;
+            --danger-light: #FEE2E2;
+            --warning: #F59E0B;
+            --warning-light: #FEF3C7;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8FAFC;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --border-color: #E2E8F0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-top: 32px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 24px;
+            margin-bottom: 12px;
+        }
+
+        .card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .checklist li:last-child {
+            border-bottom: none;
+        }
+
+        .checklist input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            cursor: pointer;
+            accent-color: var(--success);
+        }
+
+        .checklist label {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .checklist .item-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .checklist .item-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-required {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+
+        .badge-optional {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .badge-auto {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .step-number {
+            background: var(--primary);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .step-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .step-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .expected-result {
+            background: var(--success-light);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #065F46;
+            margin-top: 8px;
+        }
+
+        .code-block {
+            background: #1E293B;
+            color: #E2E8F0;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Fira Code', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+
+        .file-path {
+            font-family: 'Consolas', monospace;
+            background: var(--bg-secondary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .progress-bar {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            height: 8px;
+            margin-top: 24px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: var(--success);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .note {
+            background: var(--warning-light);
+            border-left: 4px solid var(--warning);
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            font-size: 13px;
+            margin: 16px 0;
+        }
+
+        .files-created {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .file-item {
+            background: var(--bg-secondary);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .file-item.new {
+            border-left: 3px solid var(--success);
+        }
+
+        .file-item.modified {
+            border-left: 3px solid var(--warning);
+        }
+
+        .file-status {
+            font-size: 10px;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .file-item.new .file-status { color: var(--success); }
+        .file-item.modified .file-status { color: var(--warning); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CSS Architecture Testing Guide</h1>
+        <p class="subtitle">Complete testing checklist for the CSS Architecture Overhaul implementation</p>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <p class="progress-text"><span id="completedCount">0</span> of <span id="totalCount">0</span> tasks completed</p>
+
+        <!-- Section 1: Files Created -->
+        <h2>Files Created / Modified</h2>
+        <div class="card">
+            <div class="card-title">CSS Architecture Files</div>
+            <div class="files-created">
+                <div class="file-item new">
+                    <div class="file-status">New</div>
+                    <span class="file-path">reset.css</span>
+                </div>
+                <div class="file-item modified">
+                    <div class="file-status">Enhanced</div>
+                    <span class="file-path">variables.css</span>
+                </div>
+                <div class="file-item new">
+                    <div class="file-status">New</div>
+                    <span class="file-path">typography.css</span>
+                </div>
+                <div class="file-item new">
+                    <div class="file-status">New</div>
+                    <span class="file-path">layouts.css</span>
+                </div>
+                <div class="file-item new">
+                    <div class="file-status">New</div>
+                    <span class="file-path">animations.css</span>
+                </div>
+                <div class="file-item new">
+                    <div class="file-status">New</div>
+                    <span class="file-path">themes/dark.css</span>
+                </div>
+                <div class="file-item modified">
+                    <div class="file-status">Updated</div>
+                    <span class="file-path">app.css</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Manual Testing Steps -->
+        <h2>Section 1: Manual Testing Steps</h2>
+
+        <h3>1.1 Basic Rendering Test</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test1" class="test-item">
+                    <label for="test1">
+                        <div class="item-title">Start the application</div>
+                        <div class="item-desc">Run <code>dotnet run</code> in the VisualEditorOpus project</div>
+                        <div class="expected-result">Expected: Application starts without CSS errors in console</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test2" class="test-item">
+                    <label for="test2">
+                        <div class="item-title">Check page loads with styles</div>
+                        <div class="item-desc">Open the browser and navigate to the application</div>
+                        <div class="expected-result">Expected: All styles load correctly, no unstyled content flashes</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test3" class="test-item">
+                    <label for="test3">
+                        <div class="item-title">Check browser console for errors</div>
+                        <div class="item-desc">Open browser DevTools (F12) and check the Console tab</div>
+                        <div class="expected-result">Expected: No CSS-related errors or 404s for CSS files</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.2 CSS Variable Testing</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test4" class="test-item">
+                    <label for="test4">
+                        <div class="item-title">Verify CSS variables are loaded</div>
+                        <div class="item-desc">In DevTools Elements panel, select :root and check Computed styles</div>
+                        <div class="expected-result">Expected: All --primary, --bg-*, --text-*, --space-* variables visible</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test5" class="test-item">
+                    <label for="test5">
+                        <div class="item-title">Check spacing scale</div>
+                        <div class="item-desc">Verify --space-1 through --space-16 exist with correct values</div>
+                        <div class="expected-result">Expected: --space-1: 4px, --space-2: 8px, etc.</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test6" class="test-item">
+                    <label for="test6">
+                        <div class="item-title">Check shadow variables</div>
+                        <div class="item-desc">Verify --shadow-xs through --shadow-2xl exist</div>
+                        <div class="expected-result">Expected: All shadow variables defined with proper box-shadow values</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.3 Dark Mode Testing</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test7" class="test-item">
+                    <label for="test7">
+                        <div class="item-title">Enable dark mode</div>
+                        <div class="item-desc">Toggle dark mode in the application (or add data-theme="dark" to HTML element)</div>
+                        <div class="expected-result">Expected: All colors switch to dark theme values</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test8" class="test-item">
+                    <label for="test8">
+                        <div class="item-title">Check background colors</div>
+                        <div class="item-desc">Verify backgrounds change: primary=#1E293B, secondary=#0F172A</div>
+                        <div class="expected-result">Expected: Dark backgrounds throughout the application</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test9" class="test-item">
+                    <label for="test9">
+                        <div class="item-title">Check text colors</div>
+                        <div class="item-desc">Verify text is readable on dark backgrounds</div>
+                        <div class="expected-result">Expected: Text color #F1F5F9, secondary #94A3B8</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test10" class="test-item">
+                    <label for="test10">
+                        <div class="item-title">Check border colors</div>
+                        <div class="item-desc">Verify borders are visible but subtle in dark mode</div>
+                        <div class="expected-result">Expected: Borders visible with appropriate contrast</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.4 Component Testing</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test11" class="test-item">
+                    <label for="test11">
+                        <div class="item-title">Test buttons</div>
+                        <div class="item-desc">Click through all button variants (.btn-primary, .btn-ghost, etc.)</div>
+                        <div class="expected-result">Expected: Proper colors, hover states, and transitions</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test12" class="test-item">
+                    <label for="test12">
+                        <div class="item-title">Test form inputs</div>
+                        <div class="item-desc">Focus on form inputs, type text, check validation states</div>
+                        <div class="expected-result">Expected: Focus ring appears, proper border color changes</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test13" class="test-item">
+                    <label for="test13">
+                        <div class="item-title">Test modals</div>
+                        <div class="item-desc">Open and close modals throughout the application</div>
+                        <div class="expected-result">Expected: Smooth animations, proper backdrop blur</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test14" class="test-item">
+                    <label for="test14">
+                        <div class="item-title">Test toast notifications</div>
+                        <div class="item-desc">Trigger success, error, and warning toasts</div>
+                        <div class="expected-result">Expected: Slide-in animation, correct colors</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test15" class="test-item">
+                    <label for="test15">
+                        <div class="item-title">Test cards</div>
+                        <div class="item-desc">Verify cards have proper shadows and borders</div>
+                        <div class="expected-result">Expected: Subtle shadow, rounded corners, proper padding</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.5 Animation Testing</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test16" class="test-item">
+                    <label for="test16">
+                        <div class="item-title">Test hover transitions</div>
+                        <div class="item-desc">Hover over interactive elements (buttons, links, cards)</div>
+                        <div class="expected-result">Expected: Smooth 150-200ms transitions, no jank</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test17" class="test-item">
+                    <label for="test17">
+                        <div class="item-title">Test reduced motion</div>
+                        <div class="item-desc">Enable "Reduce motion" in OS accessibility settings</div>
+                        <div class="expected-result">Expected: All animations disabled or minimal</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <h3>1.6 Typography Testing</h3>
+        <div class="card">
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="test18" class="test-item">
+                    <label for="test18">
+                        <div class="item-title">Check font loading</div>
+                        <div class="item-desc">Verify DM Sans loads for body text, JetBrains Mono for code</div>
+                        <div class="expected-result">Expected: Custom fonts applied without FOUT</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="test19" class="test-item">
+                    <label for="test19">
+                        <div class="item-title">Check heading hierarchy</div>
+                        <div class="item-desc">Verify h1-h6 have distinct sizes and weights</div>
+                        <div class="expected-result">Expected: Clear visual hierarchy from h1 (24px) to h6 (14px)</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Section 2: Manual Implementation Tasks -->
+        <h2>Section 2: Manual Implementation Tasks</h2>
+
+        <div class="note">
+            These are tasks that may require manual intervention if not already configured.
+        </div>
+
+        <div class="card">
+            <div class="card-title">Configuration Tasks</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="task1" class="test-item">
+                    <label for="task1">
+                        <div class="item-title">Verify CSS imports in _Host.cshtml or _Layout.cshtml</div>
+                        <div class="item-desc">Ensure the main app.css is imported: <code>&lt;link href="css/app.css" rel="stylesheet" /&gt;</code></div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task2" class="test-item">
+                    <label for="task2">
+                        <div class="item-title">Check static file serving</div>
+                        <div class="item-desc">Verify wwwroot/css folder is being served by checking Network tab in DevTools</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task3" class="test-item">
+                    <label for="task3">
+                        <div class="item-title">Theme toggle implementation</div>
+                        <div class="item-desc">If not existing, implement a theme toggle that sets <code>data-theme="dark"</code> on the html element</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Optional Enhancements</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="task4" class="test-item">
+                    <label for="task4">
+                        <div class="item-title">CSS minification <span class="badge badge-optional">Optional</span></div>
+                        <div class="item-desc">Consider bundling and minifying CSS for production builds</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task5" class="test-item">
+                    <label for="task5">
+                        <div class="item-title">Add CSS bundling <span class="badge badge-optional">Optional</span></div>
+                        <div class="item-desc">Replace @import with bundled CSS file for better performance</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Section 3: Verification Checklist -->
+        <h2>Section 3: Final Verification Checklist</h2>
+
+        <div class="card">
+            <div class="card-title">File Verification</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="verify1" class="test-item">
+                    <label for="verify1">
+                        <div class="item-title">All files created successfully</div>
+                        <div class="item-desc">reset.css, variables.css, typography.css, layouts.css, animations.css, themes/dark.css</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify2" class="test-item">
+                    <label for="verify2">
+                        <div class="item-title">app.css imports are correct</div>
+                        <div class="item-desc">All @import statements present and in correct order</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify3" class="test-item">
+                    <label for="verify3">
+                        <div class="item-title">No duplicate CSS rules</div>
+                        <div class="item-desc">Check that extracted styles don't conflict with original files</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Functionality Verification</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="verify4" class="test-item">
+                    <label for="verify4">
+                        <div class="item-title">All CSS variables working</div>
+                        <div class="item-desc">Variables resolve correctly in browser DevTools</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify5" class="test-item">
+                    <label for="verify5">
+                        <div class="item-title">Theme switching functional</div>
+                        <div class="item-desc">Dark/light mode toggles correctly change all colors</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify6" class="test-item">
+                    <label for="verify6">
+                        <div class="item-title">No console errors</div>
+                        <div class="item-desc">Browser console is clean of CSS-related errors</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify7" class="test-item">
+                    <label for="verify7">
+                        <div class="item-title">All components render correctly</div>
+                        <div class="item-desc">Buttons, forms, modals, cards, navigation all styled properly</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify8" class="test-item">
+                    <label for="verify8">
+                        <div class="item-title">Responsive design working</div>
+                        <div class="item-desc">Test at different viewport sizes (mobile, tablet, desktop)</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify9" class="test-item">
+                    <label for="verify9">
+                        <div class="item-title">Performance acceptable</div>
+                        <div class="item-desc">No noticeable delay in style application, smooth transitions</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Accessibility Verification</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="verify10" class="test-item">
+                    <label for="verify10">
+                        <div class="item-title">Color contrast meets WCAG AA</div>
+                        <div class="item-desc">Text has at least 4.5:1 contrast ratio with background</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify11" class="test-item">
+                    <label for="verify11">
+                        <div class="item-title">Focus states visible</div>
+                        <div class="item-desc">Interactive elements have clear focus indicators</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify12" class="test-item">
+                    <label for="verify12">
+                        <div class="item-title">Reduced motion respected</div>
+                        <div class="item-desc">Animations disabled when prefers-reduced-motion is set</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Browser Testing</div>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="verify13" class="test-item">
+                    <label for="verify13">
+                        <div class="item-title">Chrome/Edge (latest)</div>
+                        <div class="item-desc">All features working correctly</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify14" class="test-item">
+                    <label for="verify14">
+                        <div class="item-title">Firefox (latest)</div>
+                        <div class="item-desc">All features working correctly</div>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="verify15" class="test-item">
+                    <label for="verify15">
+                        <div class="item-title">Safari (latest) <span class="badge badge-optional">If applicable</span></div>
+                        <div class="item-desc">All features working correctly</div>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+    <script>
+        // Progress tracking
+        const checkboxes = document.querySelectorAll('.test-item');
+        const progressFill = document.getElementById('progressFill');
+        const completedCount = document.getElementById('completedCount');
+        const totalCount = document.getElementById('totalCount');
+
+        totalCount.textContent = checkboxes.length;
+
+        function updateProgress() {
+            const completed = document.querySelectorAll('.test-item:checked').length;
+            const percentage = (completed / checkboxes.length) * 100;
+
+            progressFill.style.width = percentage + '%';
+            completedCount.textContent = completed;
+
+            // Save to localStorage
+            const state = {};
+            checkboxes.forEach((cb, i) => {
+                state[cb.id] = cb.checked;
+            });
+            localStorage.setItem('cssArchTestingProgress', JSON.stringify(state));
+        }
+
+        // Load saved state
+        const savedState = JSON.parse(localStorage.getItem('cssArchTestingProgress') || '{}');
+        checkboxes.forEach(cb => {
+            if (savedState[cb.id]) {
+                cb.checked = true;
+            }
+            cb.addEventListener('change', updateProgress);
+        });
+
+        updateProgress();
+    </script>
+</body>
+</html>

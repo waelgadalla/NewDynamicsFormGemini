@@ -1,0 +1,16 @@
+@* Inline field-level error message *@
+
+@if (!string.IsNullOrEmpty(Message))
+{
+    <div class="form-error" role="alert" aria-live="polite">
+        <i class="bi bi-exclamation-circle"></i>
+        <span>@Message</span>
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// Error message to display
+    /// </summary>
+    [Parameter] public string? Message { get; set; }
+}

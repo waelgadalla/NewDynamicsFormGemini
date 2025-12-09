@@ -1,0 +1,18 @@
+@* Empty state for the field outline panel in the sidebar *@
+@using VisualEditorOpus.Models
+
+<EmptyState
+    Icon="list-nested"
+    Size="EmptyStateSize.Small"
+    Title="No Fields Yet"
+    Description="Add fields to your form to see them listed here."
+    PrimaryLabel="Add Field"
+    PrimaryIcon="plus"
+    PrimaryAction="OnAddField" />
+
+@code {
+    /// <summary>
+    /// Callback when user clicks "Add Field"
+    /// </summary>
+    [Parameter] public EventCallback OnAddField { get; set; }
+}

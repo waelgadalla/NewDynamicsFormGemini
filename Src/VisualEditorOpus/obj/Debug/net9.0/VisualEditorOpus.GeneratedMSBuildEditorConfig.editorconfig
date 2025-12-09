@@ -204,6 +204,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xSb3V0ZXMucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/Alert.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcQWxlcnQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/Badge.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcQmFkZ2UucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
@@ -216,8 +220,80 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcQnV0dG9uLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/ButtonLoading.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcQnV0dG9uTG9hZGluZy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/EmptyCanvas.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcRW1wdHlDYW52YXMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/EmptyCodeSet.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcRW1wdHlDb2RlU2V0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/EmptyDashboard.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcRW1wdHlEYXNoYm9hcmQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/EmptyOutline.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcRW1wdHlPdXRsaW5lLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/EmptyState.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcRW1wdHlTdGF0ZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/EmptyWorkflow.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcRW1wdHlXb3JrZmxvdy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/ErrorBoundary.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcRXJyb3JCb3VuZGFyeS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/ErrorPage.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcRXJyb3JQYWdlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/FirstTimeOnboarding.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcRmlyc3RUaW1lT25ib2FyZGluZy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/IconButton.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcSWNvbkJ1dHRvbi5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/InlineError.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcSW5saW5lRXJyb3IucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/InlineLoader.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcSW5saW5lTG9hZGVyLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/LoadingSpinner.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcTG9hZGluZ1NwaW5uZXIucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/NetworkStatus.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcTmV0d29ya1N0YXR1cy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/NoSearchResults.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcTm9TZWFyY2hSZXN1bHRzLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/PageLoader.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcUGFnZUxvYWRlci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/ProgressBar.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcUHJvZ3Jlc3NCYXIucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/RetryPanel.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcUmV0cnlQYW5lbC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/SearchBox.razor]
@@ -226,6 +302,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/SelectInput.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcU2VsZWN0SW5wdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/SkeletonLoader.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcU2tlbGV0b25Mb2FkZXIucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/TextInput.razor]
@@ -238,6 +318,14 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/ToastContainer.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcVG9hc3RDb250YWluZXIucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/ValidationSuccess.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcVmFsaWRhdGlvblN1Y2Nlc3MucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/ValidationSummary.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcVmFsaWRhdGlvblN1bW1hcnkucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Workflow/WorkflowCanvas.razor]

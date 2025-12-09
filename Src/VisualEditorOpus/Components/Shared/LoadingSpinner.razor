@@ -1,0 +1,41 @@
+@* Animated loading spinner component *@
+@using VisualEditorOpus.Models
+
+<div class="spinner @SizeClass @ColorClass @CssClass" role="status" aria-label="@AriaLabel">
+    <span class="visually-hidden">@AriaLabel</span>
+</div>
+
+@code {
+    /// <summary>
+    /// Size of the spinner
+    /// </summary>
+    [Parameter] public SpinnerSize Size { get; set; } = SpinnerSize.Medium;
+
+    /// <summary>
+    /// Color of the spinner
+    /// </summary>
+    [Parameter] public SpinnerColor Color { get; set; } = SpinnerColor.Primary;
+
+    /// <summary>
+    /// Additional CSS classes
+    /// </summary>
+    [Parameter] public string? CssClass { get; set; }
+
+    /// <summary>
+    /// Accessible label for screen readers
+    /// </summary>
+    [Parameter] public string AriaLabel { get; set; } = "Loading...";
+
+    private string SizeClass => Size switch
+    {
+        SpinnerSize.Small => "spinner-sm",
+        SpinnerSize.Large => "spinner-lg",
+        _ => ""
+    };
+
+    private string ColorClass => Color switch
+    {
+        SpinnerColor.White => "spinner-white",
+        _ => ""
+    };
+}

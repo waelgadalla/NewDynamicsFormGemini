@@ -1,0 +1,44 @@
+@* Empty state for dashboard when no forms exist *@
+@using VisualEditorOpus.Models
+
+<EmptyState
+    Icon="grid-1x2"
+    IconVariant="primary"
+    Size="EmptyStateSize.Large"
+    Title="Welcome to Form Builder"
+    Description="You don't have any forms yet. Get started by creating your first form or explore templates.">
+
+    <ChildContent>
+        <div class="quick-start">
+            <div class="quick-start-card" @onclick="OnCreateBlank">
+                <i class="bi bi-file-earmark-plus"></i>
+                <span>Blank Form</span>
+            </div>
+            <div class="quick-start-card" @onclick="OnCreateContact">
+                <i class="bi bi-person-badge"></i>
+                <span>Contact Form</span>
+            </div>
+            <div class="quick-start-card" @onclick="OnCreateSurvey">
+                <i class="bi bi-clipboard-check"></i>
+                <span>Survey</span>
+            </div>
+        </div>
+    </ChildContent>
+</EmptyState>
+
+@code {
+    /// <summary>
+    /// Callback when user clicks "Blank Form"
+    /// </summary>
+    [Parameter] public EventCallback OnCreateBlank { get; set; }
+
+    /// <summary>
+    /// Callback when user clicks "Contact Form"
+    /// </summary>
+    [Parameter] public EventCallback OnCreateContact { get; set; }
+
+    /// <summary>
+    /// Callback when user clicks "Survey"
+    /// </summary>
+    [Parameter] public EventCallback OnCreateSurvey { get; set; }
+}

@@ -1,0 +1,72 @@
+@* Network connection status indicator *@
+@using VisualEditorOpus.Models
+
+@if (ShouldShow)
+{
+    <div class="network-status @StatusClass" role="status" aria-live="polite">
+        <i class="bi bi-@IconName"></i>
+        <span>@StatusText</span>
+        @if (Status == NetworkConnectionStatus.Reconnecting)
+        {
+            <div class="status-dot pulse"></div>
+        }
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// Current network connection status
+    /// </summary>
+    [Parameter] public NetworkConnectionStatus Status { get; set; } = NetworkConnectionStatus.Connected;
+
+    /// <summary>
+    /// Duration to show "Back online" message in milliseconds
+    /// </summary>
+    [Parameter] public int ReconnectShowDurationMs { get; set; } = 3000;
+
+    private bool ShowReconnected = false;
+    private NetworkConnectionStatus _previousStatus = NetworkConnectionStatus.Connected;
+
+    private bool ShouldShow => Status != NetworkConnectionStatus.Connected || ShowReconnected;
+
+    private string StatusClass => Status switch
+    {
+        NetworkConnectionStatus.Disconnected => "offline",
+        NetworkConnectionStatus.Reconnecting => "reconnecting",
+        NetworkConnectionStatus.Connected => "online",
+        _ => ""
+    };
+
+    private string IconName => Status switch
+    {
+        NetworkConnectionStatus.Disconnected => "wifi-off",
+        NetworkConnectionStatus.Reconnecting => "arrow-repeat",
+        NetworkConnectionStatus.Connected => "wifi",
+        _ => "wifi"
+    };
+
+    private string StatusText => Status switch
+    {
+        NetworkConnectionStatus.Disconnected => "You are offline",
+        NetworkConnectionStatus.Reconnecting => "Reconnecting...",
+        NetworkConnectionStatus.Connected => "Back online",
+        _ => ""
+    };
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // If transitioning to Connected from another state, show "Back online" briefly
+        if (Status == NetworkConnectionStatus.Connected && _previousStatus != NetworkConnectionStatus.Connected)
+        {
+            ShowReconnected = true;
+            StateHasChanged();
+
+            await Task.Delay(ReconnectShowDurationMs);
+
+            ShowReconnected = false;
+            StateHasChanged();
+        }
+
+        _previousStatus = Status;
+    }
+}

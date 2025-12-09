@@ -1,0 +1,20 @@
+@* Empty state for the workflow designer *@
+@using VisualEditorOpus.Models
+
+<div class="workflow-empty">
+    <EmptyState
+        Icon="diagram-3"
+        IconVariant="primary"
+        Title="Create Your Workflow"
+        Description="Add modules to build a multi-step workflow. Drag to arrange the order."
+        PrimaryLabel="Add Module"
+        PrimaryIcon="plus"
+        PrimaryAction="OnAddModule" />
+</div>
+
+@code {
+    /// <summary>
+    /// Callback when user clicks "Add Module"
+    /// </summary>
+    [Parameter] public EventCallback OnAddModule { get; set; }
+}

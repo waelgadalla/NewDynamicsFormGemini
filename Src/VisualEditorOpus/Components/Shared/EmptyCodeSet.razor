@@ -1,0 +1,26 @@
+@* Empty state for code set with no options *@
+@using VisualEditorOpus.Models
+
+<EmptyState
+    Icon="list-ul"
+    Title="No Options Yet"
+    Description="Add options to this code set or import from CSV."
+    Size="EmptyStateSize.Small"
+    PrimaryLabel="Add Option"
+    PrimaryIcon="plus"
+    PrimaryAction="OnAddOption"
+    SecondaryLabel="Import CSV"
+    SecondaryIcon="upload"
+    SecondaryAction="OnImport" />
+
+@code {
+    /// <summary>
+    /// Callback when user clicks "Add Option"
+    /// </summary>
+    [Parameter] public EventCallback OnAddOption { get; set; }
+
+    /// <summary>
+    /// Callback when user clicks "Import CSV"
+    /// </summary>
+    [Parameter] public EventCallback OnImport { get; set; }
+}

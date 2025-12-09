@@ -1,0 +1,97 @@
+@* Skeleton placeholder loader component *@
+@using VisualEditorOpus.Models
+
+@switch (Variant)
+{
+    case SkeletonVariant.Text:
+        <div class="skeleton skeleton-text @CssClass" style="@WidthStyle"></div>
+        break;
+
+    case SkeletonVariant.Title:
+        <div class="skeleton skeleton-title @CssClass" style="@WidthStyle"></div>
+        break;
+
+    case SkeletonVariant.Avatar:
+        <div class="skeleton skeleton-avatar @(Size == SkeletonSize.Small ? "skeleton-avatar-sm" : "") @CssClass"></div>
+        break;
+
+    case SkeletonVariant.Button:
+        <div class="skeleton skeleton-btn @CssClass" style="@WidthStyle"></div>
+        break;
+
+    case SkeletonVariant.Icon:
+        <div class="skeleton skeleton-icon @CssClass"></div>
+        break;
+
+    case SkeletonVariant.Card:
+        <div class="skeleton-card @CssClass">
+            <div class="skeleton-card-header">
+                <div class="skeleton skeleton-icon"></div>
+                <div style="flex: 1;">
+                    <div class="skeleton skeleton-title"></div>
+                    <div class="skeleton skeleton-text-sm" style="width: 40%;"></div>
+                </div>
+            </div>
+            <div class="skeleton-card-body">
+                <div class="skeleton skeleton-text"></div>
+                <div class="skeleton skeleton-text"></div>
+                <div class="skeleton skeleton-text" style="width: 70%;"></div>
+            </div>
+        </div>
+        break;
+
+    case SkeletonVariant.Field:
+        <div class="skeleton-field @CssClass">
+            <div class="skeleton skeleton-field-label"></div>
+            <div class="skeleton skeleton-field-input"></div>
+        </div>
+        break;
+
+    case SkeletonVariant.ListItem:
+        <div class="skeleton-list-item @CssClass">
+            <div class="skeleton skeleton-avatar-sm"></div>
+            <div style="flex: 1;">
+                <div class="skeleton skeleton-text" style="width: 60%; margin-bottom: 4px;"></div>
+                <div class="skeleton skeleton-text-sm" style="width: 40%;"></div>
+            </div>
+        </div>
+        break;
+
+    case SkeletonVariant.TableRow:
+        <div class="skeleton-table-row @CssClass">
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-text"></div>
+        </div>
+        break;
+}
+
+@code {
+    /// <summary>
+    /// Type of skeleton to render
+    /// </summary>
+    [Parameter] public SkeletonVariant Variant { get; set; } = SkeletonVariant.Text;
+
+    /// <summary>
+    /// Size variant for certain skeleton types
+    /// </summary>
+    [Parameter] public SkeletonSize Size { get; set; } = SkeletonSize.Medium;
+
+    /// <summary>
+    /// Custom width (e.g., "80%", "200px")
+    /// </summary>
+    [Parameter] public string? Width { get; set; }
+
+    /// <summary>
+    /// Additional CSS classes
+    /// </summary>
+    [Parameter] public string? CssClass { get; set; }
+
+    /// <summary>
+    /// Number of items to render (for repeating skeletons)
+    /// </summary>
+    [Parameter] public int Count { get; set; } = 1;
+
+    private string? WidthStyle => !string.IsNullOrEmpty(Width) ? $"width: {Width}" : null;
+}

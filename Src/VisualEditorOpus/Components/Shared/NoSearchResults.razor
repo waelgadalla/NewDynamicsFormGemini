@@ -1,0 +1,23 @@
+@* Empty state when search returns no results *@
+@using VisualEditorOpus.Models
+
+<EmptyState
+    Icon="search"
+    Size="EmptyStateSize.Small"
+    Title="No Results Found"
+    Description="@($"We couldn't find any items matching \"{SearchTerm}\". Try a different search term.")"
+    SecondaryLabel="Clear Search"
+    SecondaryIcon="x"
+    SecondaryAction="OnClear" />
+
+@code {
+    /// <summary>
+    /// The search term that returned no results
+    /// </summary>
+    [Parameter] public string SearchTerm { get; set; } = "";
+
+    /// <summary>
+    /// Callback when user clicks "Clear Search"
+    /// </summary>
+    [Parameter] public EventCallback OnClear { get; set; }
+}

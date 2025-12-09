@@ -1,0 +1,72 @@
+@* Panel for failed operations with retry button *@
+@using VisualEditorOpus.Models
+
+<div class="retry-panel @CssClass">
+    <div class="retry-panel-icon">
+        <i class="bi bi-@Icon"></i>
+    </div>
+    <div class="retry-panel-title">@Title</div>
+    <div class="retry-panel-message">@Message</div>
+    <button class="btn btn-primary btn-sm" @onclick="HandleRetry" disabled="@IsRetrying" type="button">
+        @if (IsRetrying)
+        {
+            <LoadingSpinner Size="SpinnerSize.Small" Color="SpinnerColor.White" />
+            <span>@RetryingText</span>
+        }
+        else
+        {
+            <i class="bi bi-arrow-clockwise"></i>
+            <span>@RetryText</span>
+        }
+    </button>
+</div>
+
+@code {
+    /// <summary>
+    /// Bootstrap icon name (without bi- prefix)
+    /// </summary>
+    [Parameter] public string Icon { get; set; } = "cloud-slash";
+
+    /// <summary>
+    /// Panel title
+    /// </summary>
+    [Parameter] public string Title { get; set; } = "Failed to load";
+
+    /// <summary>
+    /// Panel message
+    /// </summary>
+    [Parameter] public string Message { get; set; } = "Something went wrong. Please try again.";
+
+    /// <summary>
+    /// Retry button text
+    /// </summary>
+    [Parameter] public string RetryText { get; set; } = "Try Again";
+
+    /// <summary>
+    /// Text shown while retrying
+    /// </summary>
+    [Parameter] public string RetryingText { get; set; } = "Retrying...";
+
+    /// <summary>
+    /// Callback when retry button is clicked
+    /// </summary>
+    [Parameter] public EventCallback OnRetry { get; set; }
+
+    /// <summary>
+    /// Whether a retry is in progress
+    /// </summary>
+    [Parameter] public bool IsRetrying { get; set; }
+
+    /// <summary>
+    /// Additional CSS classes
+    /// </summary>
+    [Parameter] public string? CssClass { get; set; }
+
+    private async Task HandleRetry()
+    {
+        if (!IsRetrying && OnRetry.HasDelegate)
+        {
+            await OnRetry.InvokeAsync();
+        }
+    }
+}

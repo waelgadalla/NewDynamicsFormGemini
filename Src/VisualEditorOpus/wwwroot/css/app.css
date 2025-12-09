@@ -1,15 +1,21 @@
+/* ===== CSS IMPORTS ===== */
+@import url('reset.css');
 @import url('variables.css');
+@import url('typography.css');
+@import url('layouts.css');
+@import url('animations.css');
+@import url('empty-states.css');
+@import url('loading.css');
+@import url('errors.css');
+@import url('themes/dark.css');
+
+/* Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
-/* ===== RESET & BASE ===== */
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
+/* ===== BASE STYLES ===== */
 html, body {
     height: 100%;
-    font-family: var(--font-sans);
     background: var(--bg-secondary);
-    color: var(--text-primary);
-    font-size: 14px;
     overflow: hidden;
     transition: background-color var(--transition-normal), color var(--transition-normal);
 }
@@ -371,28 +377,11 @@ html, body {
     align-items: center;
     gap: 10px;
     min-width: 280px;
-    animation: slideIn 0.2s ease;
+    animation: toastSlide 0.2s ease;
 }
 .toast-success { background: var(--success); color: white; border-color: var(--success); }
 .toast-error { background: var(--danger); color: white; border-color: var(--danger); }
 .toast-warning { background: var(--warning); color: white; border-color: var(--warning); }
 
-@keyframes slideIn {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-}
-
-/* ===== UTILITIES ===== */
-.hidden { display: none !important; }
-.text-muted { color: var(--text-muted); }
-.text-sm { font-size: 12px; }
-.text-xs { font-size: 11px; }
-.mt-1 { margin-top: 4px; }
-.mt-2 { margin-top: 8px; }
-.mt-3 { margin-top: 16px; }
-.mb-1 { margin-bottom: 4px; }
-.mb-2 { margin-bottom: 8px; }
-.mb-3 { margin-bottom: 16px; }
-.gap-1 { gap: 4px; }
-.gap-2 { gap: 8px; }
-.gap-3 { gap: 16px; }
+/* Import Components */
+@import url('components.css');
