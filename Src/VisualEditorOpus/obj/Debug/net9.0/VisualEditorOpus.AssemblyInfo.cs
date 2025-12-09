@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VisualEditorOpus")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6a8434c1b30578fcad332105e8b5aadced742414")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dd128340766907076eb0240926d05b08b4fad039")]
 [assembly: System.Reflection.AssemblyProductAttribute("VisualEditorOpus")]
 [assembly: System.Reflection.AssemblyTitleAttribute("VisualEditorOpus")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

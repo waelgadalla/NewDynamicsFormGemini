@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRD: GovFormKit Mapping Engine</title>
+    <style>
+        body { font-family: 'Segoe UI', system-ui, sans-serif; line-height: 1.6; color: #333; max-width: 900px; margin: 0 auto; padding: 20px; }
+        h1 { border-bottom: 3px solid #2563eb; padding-bottom: 10px; color: #1e3a8a; }
+        h2 { margin-top: 30px; color: #1f2937; border-left: 5px solid #2563eb; padding-left: 10px; }
+        h3 { color: #4b5563; margin-top: 25px; }
+        .req-tag { display: inline-block; background: #e5e7eb; padding: 2px 8px; border-radius: 4px; font-family: monospace; font-weight: bold; font-size: 0.9em; color: #374151; margin-right: 10px; }
+        .req-critical { border-left: 4px solid #dc2626; background: #fef2f2; padding: 10px; margin: 10px 0; }
+        .req-box { border: 1px solid #e5e7eb; padding: 15px; border-radius: 6px; margin-bottom: 15px; background: #f9fafb; }
+        .tech-note { background: #fffbeb; border: 1px solid #f59e0b; padding: 10px; border-radius: 4px; font-size: 0.95em; }
+        code { background: #1f2937; color: #e2e8f0; padding: 2px 5px; border-radius: 3px; font-family: 'Consolas', monospace; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #d1d5db; padding: 8px; text-align: left; }
+        th { background: #f3f4f6; }
+    </style>
+</head>
+<body>
+
+    <h1>Technical Requirements Document: Core Mapping Engine</h1>
+    <p><strong>Component:</strong> <code>GovFormKit.Engine</code><br>
+    <strong>Target Framework:</strong> .NET Standard 2.0 / .NET 8<br>
+    <strong>Core Dependency:</strong> PDFSharp (Forked/Customized) or AcroForm-compatible engine.</p>
+
+    <h2>1. Executive Summary</h2>
+    <p>The Mapping Engine is the "brain" that accepts a C# object (Source) and a PDF file (Target). It uses <strong>Reflection</strong> to read the object's properties and matches them to PDF Form Fields based on naming conventions or explicit Attributes.</p>
+    <div class="tech-note">
+        <strong>Strategic Note:</strong> This engine handles both <em>Private Forms</em> (User defined) and <em>Government Forms</em> (Library defined). The only difference is that Government Form classes are pre-compiled and shipped by us.
+    </div>
+
+    <h2>2. Gap Analysis: PDFSharp Limitations</h2>
+    <p>Standard PDFSharp has gaps that the Mapping Engine must bridge.</p>
+    <table>
+        <tr>
+            <th>Feature</th>
+            <th>PDFSharp Native Capability</th>
+            <th>Mapping Engine Requirement (The Gap)</th>
+        </tr>
+        <tr>
+            <td><strong>Field Naming</strong></td>
+            <td>Requires exact string match (e.g., <code>topmostSubform[0].Page1[0].f1_01[0]</code>).</td>
+            <td>Must map friendly C# names (<code>EmployeeName</code>) to complex PDF names via attributes.</td>
+        </tr>
+        <tr>
+            <td><strong>Checkboxes</strong></td>
+            <td>Requires knowing the specific "Export Value" (e.g., <code>/Yes</code>, <code>/On</code>, <code>/1</code>) to check a box.</td>
+            <td>Must automatically scan the PDF's <code>/AP</code> (Appearance) dictionary to find the correct "On" value for <code>bool true</code>.</td>
+        </tr>
+        <tr>
+            <td><strong>Data Types</strong></td>
+            <td>Only accepts <code>string</code>.</td>
+            <td>Must convert <code>DateTime</code>, <code>decimal</code>, and <code>int</code> to formatted strings (e.g., "MM/dd/yyyy").</td>
+        </tr>
+        <tr>
+            <td><strong>Flattening</strong></td>
+            <td><code>Flatten()</code> is notoriously buggy; fields often disappear or remain editable.</td>
+            <td>Must implement a "Hard Flatten" feature: Draw text over the field coordinates and delete the widget.</td>
+        </tr>
+    </table>
+
+    <h2>3. Functional Requirements</h2>
+
+    <h3>3.1 Core Mapping Logic</h3>
+    
+    <div class="req-box">
+        <span class="req-tag">R-01</span> <strong>Attribute-Based Mapping</strong>
+        <p>The engine must inspect C# properties for the <code>[PdfField]</code> attribute. If present, it uses that value to find the PDF field.</p>
+        <code>[PdfField("f1_09(0)")] public string LastName { get; set; }</code>
+    </div>
+
+    <div class="req-box">
+        <span class="req-tag">R-02</span> <strong>Heuristic (Name) Mapping</strong>
+        <p>If no attribute is present, the engine must attempt to find a field by normalizing names (Case-insensitive, ignoring underscores). This is crucial for the <strong>Private Form</strong> use case where users want "Magic Mapping."</p>
+        <p><em>Example:</em> Property <code>PhoneNumber</code> matches PDF field <code>phone_number</code> or <code>Phone Number</code>.</p>
+    </div>
+
+    <div class="req-box">
+        <span class="req-tag">R-03</span> <strong>Formatting Control</strong>
+        <p>The engine must support a <code>[PdfFormat]</code> attribute to control <code>ToString()</code> conversion.</p>
+        <ul>
+            <li>Currency: <code>[PdfFormat("C2")] decimal Wages;</code> -> "$50,000.00"</li>
+            <li>Date: <code>[PdfFormat("MM-dd-yyyy")] DateTime BirthDate;</code> -> "12-31-1990"</li>
+            <li>Boolean: <code>[PdfBoolean("Yes", "Off")] bool IsCitizen;</code> -> "Yes" (if true)</li>
+        </ul>
+    </div>
+
+    <h3>3.2 Advanced PDF Handling</h3>
+
+    <div class="req-critical">
+        <span class="req-tag">R-04</span> <strong>Checkbox Export Value Auto-Discovery</strong>
+        <p>For boolean properties, the engine <strong>must not</strong> assume the value is "Yes". It must open the PDF Field's <code>/AP/N</code> dictionary to discover the valid state names (e.g., <code>/On</code>, <code>/Checked</code>, <code>/1</code>).<br>
+        <em>Failure to do this will result in unchecked boxes even when the code says true.</em></p>
+    </div>
+
+    <div class="req-box">
+        <span class="req-tag">R-05</span> <strong>Visual Flattening</strong>
+        <p>The engine must support a <code>Flatten = true</code> option. It should:</p>
+        <ol>
+            <li>Read the field's value, font, size, and rectangle coordinates.</li>
+            <li>Draw a standard string (using XGraphics) at that location.</li>
+            <li>Remove the interactive AcroForm widget.</li>
+        </ol>
+        <p><em>This ensures the PDF is viewable in simple viewers (browser, mobile) that don't support forms well.</em></p>
+    </div>
+
+    <h2>4. The "Inspector" (Private Form Generator)</h2>
+    <p>This is a separate tool/method used to generate the C# class for the user.</p>
+
+    <div class="req-box">
+        <span class="req-tag">R-06</span> <strong>Class Generation</strong>
+        <p>The engine must have a mode <code>GenerateClass(string pdfPath)</code> that:</p>
+        <ol>
+            <li>Iterates every field in <code>AcroForm.Fields</code>.</li>
+            <li>Sanitizes the field name (e.g., <code>topmostSubform[0].Page1[0].f1_01[0]</code> becomes <code>Field_f1_01</code>).</li>
+            <li>Detects the type (Checkbox -> <code>bool</code>, Text -> <code>string</code>).</li>
+            <li>Outputs a C# class string with the correct <code>[PdfField]</code> attributes pre-filled.</li>
+        </ol>
+    </div>
+
+    <h2>5. Security & Performance</h2>
+
+    <div class="req-box">
+        <span class="req-tag">R-07</span> <strong>Reflection Caching</strong>
+        <p>Reflection is slow. The engine must cache the PropertyInfo/Attribute mapping for a given Type. Do not reflect on the <code>W2_2024</code> class every time you fill a form; do it once per application lifetime.</p>
+    </div>
+
+    <div class="req-box">
+        <span class="req-tag">R-08</span> <strong>Read-Only Protection</strong>
+        <p>The engine must be able to set the PDF "NeedAppearances" flag to false and optionally set the document security to prevent modification after filling.</p>
+    </div>
+
+</body>
+</html>
