@@ -213,9 +213,11 @@ public partial class WorkflowRulesModal : ComponentBase
         showConditionBuilder = true;
     }
 
-    private void HandleConditionSaved(Condition condition)
+    private void HandleConditionSaved(List<ConditionalRule> rules)
     {
-        currentCondition = condition;
+        //wael not working
+        
+        //currentCondition = condition;
         showConditionBuilder = false;
     }
 

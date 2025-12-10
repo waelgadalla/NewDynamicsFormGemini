@@ -201,6 +201,7 @@
     <ConditionBuilderModal @bind-IsOpen="showConditionBuilder"
                            ExistingCondition="currentCondition"
                            AvailableFields="GetAllWorkflowFields()"
-                           OnSave="HandleConditionSaved"
+                           //OnSave="HandleConditionSaved"
+                           OnSave="(List<ConditionalRule> rules) => HandleConditionSaved(rules)"
                            OnCancel="@(() => showConditionBuilder = false)" />
 }
