@@ -1,0 +1,115 @@
+@namespace VisualEditorOpus.Components.CodeSet
+@inject IJSRuntime JSRuntime
+
+<div class="ie-drop-zone @(_isDragOver ? "dragover" : "") @(HasFile ? "has-file" : "")"
+     @ondragover="HandleDragOver"
+     @ondragover:preventDefault
+     @ondragleave="HandleDragLeave"
+     @ondrop="HandleDrop"
+     @ondrop:preventDefault
+     @onclick="TriggerFileInput">
+
+    <InputFile @ref="_fileInput"
+               OnChange="HandleFileSelected"
+               accept="@AcceptedFormats"
+               style="display: none;" />
+
+    @if (!HasFile)
+    {
+        <div class="ie-drop-zone-icon">
+            <i class="bi bi-cloud-upload"></i>
+        </div>
+        <div class="ie-drop-zone-title">Drag & drop your file here</div>
+        <div class="ie-drop-zone-subtitle">or click to browse</div>
+        <div class="ie-drop-zone-formats">
+            <span class="ie-format-badge"><i class="bi bi-filetype-json"></i> JSON</span>
+            <span class="ie-format-badge"><i class="bi bi-filetype-csv"></i> CSV</span>
+        </div>
+    }
+    else
+    {
+        <div class="ie-file-info">
+            <div class="ie-file-icon">
+                <i class="bi bi-file-earmark-check"></i>
+            </div>
+            <div class="ie-file-details">
+                <div class="ie-file-name">@FileName</div>
+                <div class="ie-file-size">@FormatFileSize(FileSize)</div>
+            </div>
+            <button class="ie-file-remove" @onclick="RemoveFile" @onclick:stopPropagation>
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string AcceptedFormats { get; set; } = ".json,.csv";
+    [Parameter] public EventCallback<IBrowserFile> OnFileSelected { get; set; }
+    [Parameter] public EventCallback OnFileRemoved { get; set; }
+
+    private InputFile? _fileInput;
+    private bool _isDragOver = false;
+
+    public bool HasFile { get; private set; }
+    public string FileName { get; private set; } = "";
+    public long FileSize { get; private set; }
+
+    private void HandleDragOver(DragEventArgs e)
+    {
+        _isDragOver = true;
+    }
+
+    private void HandleDragLeave(DragEventArgs e)
+    {
+        _isDragOver = false;
+    }
+
+    private async Task HandleDrop(DragEventArgs e)
+    {
+        _isDragOver = false;
+        // Note: Blazor doesn't support direct file access from drag events
+        // User must click to browse instead
+    }
+
+    private async Task TriggerFileInput()
+    {
+        if (!HasFile)
+        {
+            await JSRuntime.InvokeVoidAsync("clickFileInput");
+        }
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        if (e.FileCount > 0)
+        {
+            var file = e.File;
+            FileName = file.Name;
+            FileSize = file.Size;
+            HasFile = true;
+            await OnFileSelected.InvokeAsync(file);
+        }
+    }
+
+    private async Task RemoveFile()
+    {
+        HasFile = false;
+        FileName = "";
+        FileSize = 0;
+        await OnFileRemoved.InvokeAsync();
+    }
+
+    private static string FormatFileSize(long bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB" };
+        int order = 0;
+        double size = bytes;
+        while (size >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            size /= 1024;
+        }
+        return $"{size:0.##} {sizes[order]}";
+    }
+}

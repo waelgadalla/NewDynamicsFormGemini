@@ -1,0 +1,108 @@
+@namespace VisualEditorOpus.Components.CodeSet
+
+<div class="ie-field-mapper">
+    <div class="ie-mapper-header">
+        <i class="bi bi-diagram-3"></i>
+        <span>Field Mapping</span>
+        @if (Mapping.AutoDetect)
+        {
+            <span class="ie-auto-badge">Auto-detected</span>
+        }
+    </div>
+
+    <div class="ie-mapper-grid">
+        <div class="ie-mapper-row">
+            <label class="ie-mapper-label">
+                Code <span class="ie-required">*</span>
+            </label>
+            <select class="ie-mapper-select"
+                    value="@Mapping.CodeColumn"
+                    @onchange="e => UpdateMapping(m => m with { CodeColumn = e.Value?.ToString() })">
+                <option value="">-- Select Column --</option>
+                @foreach (var col in Columns)
+                {
+                    <option value="@col">@col</option>
+                }
+            </select>
+        </div>
+
+        <div class="ie-mapper-row">
+            <label class="ie-mapper-label">
+                Display Name <span class="ie-required">*</span>
+            </label>
+            <select class="ie-mapper-select"
+                    value="@Mapping.DisplayNameColumn"
+                    @onchange="e => UpdateMapping(m => m with { DisplayNameColumn = e.Value?.ToString() })">
+                <option value="">-- Select Column --</option>
+                @foreach (var col in Columns)
+                {
+                    <option value="@col">@col</option>
+                }
+            </select>
+        </div>
+
+        <div class="ie-mapper-row">
+            <label class="ie-mapper-label">Description</label>
+            <select class="ie-mapper-select"
+                    value="@Mapping.DescriptionColumn"
+                    @onchange="e => UpdateMapping(m => m with { DescriptionColumn = e.Value?.ToString() })">
+                <option value="">-- None --</option>
+                @foreach (var col in Columns)
+                {
+                    <option value="@col">@col</option>
+                }
+            </select>
+        </div>
+
+        <div class="ie-mapper-row">
+            <label class="ie-mapper-label">Order</label>
+            <select class="ie-mapper-select"
+                    value="@Mapping.OrderColumn"
+                    @onchange="e => UpdateMapping(m => m with { OrderColumn = e.Value?.ToString() })">
+                <option value="">-- None --</option>
+                @foreach (var col in Columns)
+                {
+                    <option value="@col">@col</option>
+                }
+            </select>
+        </div>
+
+        <div class="ie-mapper-row">
+            <label class="ie-mapper-label">Status</label>
+            <select class="ie-mapper-select"
+                    value="@Mapping.StatusColumn"
+                    @onchange="e => UpdateMapping(m => m with { StatusColumn = e.Value?.ToString() })">
+                <option value="">-- None --</option>
+                @foreach (var col in Columns)
+                {
+                    <option value="@col">@col</option>
+                }
+            </select>
+        </div>
+
+        <div class="ie-mapper-row">
+            <label class="ie-mapper-label">Parent Code</label>
+            <select class="ie-mapper-select"
+                    value="@Mapping.ParentCodeColumn"
+                    @onchange="e => UpdateMapping(m => m with { ParentCodeColumn = e.Value?.ToString() })">
+                <option value="">-- None --</option>
+                @foreach (var col in Columns)
+                {
+                    <option value="@col">@col</option>
+                }
+            </select>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public CodeSetFieldMapping Mapping { get; set; } = new();
+    [Parameter] public EventCallback<CodeSetFieldMapping> MappingChanged { get; set; }
+    [Parameter] public List<string> Columns { get; set; } = new();
+
+    private async Task UpdateMapping(Func<CodeSetFieldMapping, CodeSetFieldMapping> update)
+    {
+        var newMapping = update(Mapping) with { AutoDetect = false };
+        await MappingChanged.InvokeAsync(newMapping);
+    }
+}

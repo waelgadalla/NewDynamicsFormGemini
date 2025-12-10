@@ -1,0 +1,187 @@
+@namespace VisualEditorOpus.Components.CodeSet
+@inject IImportExportService ImportExportService
+
+<div class="ie-export-panel">
+    @if (CodeSet != null)
+    {
+        <div class="ie-export-info">
+            <div class="ie-export-codeset">
+                <i class="bi bi-collection"></i>
+                <div class="ie-export-codeset-details">
+                    <div class="ie-export-codeset-name">@CodeSet.NameEn</div>
+                    <div class="ie-export-codeset-stats">@CodeSet.Items.Count items</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ie-export-formats">
+            <div class="ie-format-card @(_selectedFormat == CodeSetExportFormat.Json ? "selected" : "")"
+                 @onclick="() => SelectFormat(CodeSetExportFormat.Json)">
+                <div class="ie-format-card-icon">
+                    <i class="bi bi-filetype-json"></i>
+                </div>
+                <div class="ie-format-card-title">JSON</div>
+                <div class="ie-format-card-desc">Best for API integration</div>
+            </div>
+            <div class="ie-format-card @(_selectedFormat == CodeSetExportFormat.Csv ? "selected" : "")"
+                 @onclick="() => SelectFormat(CodeSetExportFormat.Csv)">
+                <div class="ie-format-card-icon">
+                    <i class="bi bi-filetype-csv"></i>
+                </div>
+                <div class="ie-format-card-title">CSV</div>
+                <div class="ie-format-card-desc">Spreadsheet compatible</div>
+            </div>
+            <div class="ie-format-card @(_selectedFormat == CodeSetExportFormat.Xml ? "selected" : "")"
+                 @onclick="() => SelectFormat(CodeSetExportFormat.Xml)">
+                <div class="ie-format-card-icon">
+                    <i class="bi bi-code-slash"></i>
+                </div>
+                <div class="ie-format-card-title">XML</div>
+                <div class="ie-format-card-desc">Legacy system support</div>
+            </div>
+        </div>
+
+        <div class="ie-export-settings">
+            <div class="ie-settings-title">Export Options</div>
+
+            <div class="ie-setting-row">
+                <span class="ie-setting-label">Include metadata</span>
+                <label class="ie-toggle-switch">
+                    <input type="checkbox" @bind="_includeMetadata" />
+                    <span class="ie-toggle-slider"></span>
+                </label>
+            </div>
+
+            <div class="ie-setting-row">
+                <span class="ie-setting-label">Include inactive items</span>
+                <label class="ie-toggle-switch">
+                    <input type="checkbox" @bind="_includeInactive" />
+                    <span class="ie-toggle-slider"></span>
+                </label>
+            </div>
+
+            <div class="ie-setting-row">
+                <span class="ie-setting-label">Include deprecated items</span>
+                <label class="ie-toggle-switch">
+                    <input type="checkbox" @bind="_includeDeprecated" />
+                    <span class="ie-toggle-slider"></span>
+                </label>
+            </div>
+
+            @if (_selectedFormat == CodeSetExportFormat.Json)
+            {
+                <div class="ie-setting-row">
+                    <span class="ie-setting-label">Pretty print (formatted)</span>
+                    <label class="ie-toggle-switch">
+                        <input type="checkbox" @bind="_prettyPrint" />
+                        <span class="ie-toggle-slider"></span>
+                    </label>
+                </div>
+            }
+
+            @if (_selectedFormat == CodeSetExportFormat.Csv)
+            {
+                <div class="ie-setting-row">
+                    <span class="ie-setting-label">Include header row</span>
+                    <label class="ie-toggle-switch">
+                        <input type="checkbox" @bind="_includeHeader" />
+                        <span class="ie-toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="ie-setting-row">
+                    <span class="ie-setting-label">Delimiter</span>
+                    <select class="ie-setting-select" @bind="_csvDelimiter">
+                        <option value=",">Comma (,)</option>
+                        <option value=";">Semicolon (;)</option>
+                        <option value="	">Tab</option>
+                    </select>
+                </div>
+            }
+        </div>
+
+        @if (_isExporting)
+        {
+            <div class="ie-export-progress">
+                <i class="bi bi-arrow-repeat ie-spin"></i>
+                Preparing export...
+            </div>
+        }
+    }
+    else
+    {
+        <div class="ie-export-empty">
+            <i class="bi bi-exclamation-circle"></i>
+            <p>No CodeSet selected for export</p>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public ManagedCodeSet? CodeSet { get; set; }
+    [Parameter] public EventCallback<(byte[] Data, string FileName)> OnExportComplete { get; set; }
+
+    private CodeSetExportFormat _selectedFormat = CodeSetExportFormat.Json;
+    private bool _includeMetadata = true;
+    private bool _includeInactive = false;
+    private bool _includeDeprecated = false;
+    private bool _prettyPrint = true;
+    private bool _includeHeader = true;
+    private string _csvDelimiter = ",";
+    private bool _isExporting = false;
+
+    private void SelectFormat(CodeSetExportFormat format)
+    {
+        _selectedFormat = format;
+    }
+
+    public async Task StartExportAsync()
+    {
+        if (CodeSet == null) return;
+
+        _isExporting = true;
+        StateHasChanged();
+
+        try
+        {
+            var options = new CodeSetExportOptions
+            {
+                Format = _selectedFormat,
+                IncludeMetadata = _includeMetadata,
+                IncludeInactive = _includeInactive,
+                IncludeDeprecated = _includeDeprecated,
+                PrettyPrint = _prettyPrint,
+                IncludeHeader = _includeHeader,
+                CsvDelimiter = _csvDelimiter.Length > 0 ? _csvDelimiter[0] : ','
+            };
+
+            var data = await ImportExportService.ExportAsync(CodeSet.Id, options);
+            var fileName = GetFileName();
+
+            await OnExportComplete.InvokeAsync((data, fileName));
+        }
+        finally
+        {
+            _isExporting = false;
+            StateHasChanged();
+        }
+    }
+
+    private string GetFileName()
+    {
+        if (CodeSet == null) return "export";
+
+        var baseName = CodeSet.NameEn.Replace(" ", "_");
+        var date = DateTime.Now.ToString("yyyyMMdd");
+        var extension = _selectedFormat switch
+        {
+            CodeSetExportFormat.Json => ".json",
+            CodeSetExportFormat.Csv => ".csv",
+            CodeSetExportFormat.Xml => ".xml",
+            CodeSetExportFormat.Excel => ".xlsx",
+            _ => ".txt"
+        };
+
+        return $"{baseName}_{date}{extension}";
+    }
+}

@@ -8,6 +8,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// Add memory cache for CodeSet caching
+builder.Services.AddMemoryCache();
+
+// Add HttpClient for CodeSet loader
+builder.Services.AddHttpClient<ICodeSetLoader, CodeSetLoader>();
+
 // Register DynamicForms Core services
 builder.Services.AddScoped<IFormHierarchyService, FormHierarchyService>();
 builder.Services.AddScoped<ICodeSetProvider, InMemoryCodeSetProvider>();
@@ -19,6 +25,12 @@ builder.Services.AddScoped<IUndoRedoService, UndoRedoService>();
 builder.Services.AddScoped<ISchemaValidationService, SchemaValidationService>();
 builder.Services.AddScoped<IEditorStateService, EditorStateService>();
 builder.Services.AddScoped<IJsonImportExportService, JsonImportExportService>();
+
+// Register CodeSet management services
+builder.Services.AddScoped<ICodeSetCache, CodeSetCache>();
+builder.Services.AddScoped<ICodeSetService, CodeSetService>();
+builder.Services.AddSingleton<ITabStateService, TabStateService>();
+builder.Services.AddScoped<IImportExportService, ImportExportService>();
 
 var app = builder.Build();
 

@@ -1,0 +1,246 @@
+@namespace VisualEditorOpus.Components.CodeSet
+
+<div class="data-editor">
+    <div class="editor-toolbar">
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text"
+                   placeholder="Search..."
+                   value="@SearchTerm"
+                   @oninput="HandleSearch" />
+        </div>
+        <div class="toolbar-actions">
+            <button class="btn-icon" @onclick="OnImport" title="Import">
+                <i class="bi bi-upload"></i>
+            </button>
+            <button class="btn-icon" @onclick="OnExport" title="Export">
+                <i class="bi bi-download"></i>
+            </button>
+            <button class="btn-icon danger"
+                    @onclick="DeleteSelected"
+                    disabled="@(!SelectedItems.Any())"
+                    title="Delete Selected">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="data-grid">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 40px;">
+                        <input type="checkbox"
+                               checked="@_selectAll"
+                               @onchange="ToggleSelectAll" />
+                    </th>
+                    <th class="sortable @(SortColumn == "Code" ? "sorted" : "")"
+                        @onclick="SortByCode" style="width: 100px;">
+                        Code
+                        @if (SortColumn == "Code")
+                        {
+                            <i class="bi bi-caret-@(SortAscending ? "up" : "down")-fill sort-icon"></i>
+                        }
+                    </th>
+                    <th class="sortable @(SortColumn == "DisplayName" ? "sorted" : "")"
+                        @onclick="SortByDisplayName">
+                        Display Name
+                        @if (SortColumn == "DisplayName")
+                        {
+                            <i class="bi bi-caret-@(SortAscending ? "up" : "down")-fill sort-icon"></i>
+                        }
+                    </th>
+                    <th>Description</th>
+                    <th class="sortable @(SortColumn == "Order" ? "sorted" : "")"
+                        @onclick="SortByOrder" style="width: 80px;">
+                        Order
+                        @if (SortColumn == "Order")
+                        {
+                            <i class="bi bi-caret-@(SortAscending ? "up" : "down")-fill sort-icon"></i>
+                        }
+                    </th>
+                    <th style="width: 60px;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Items)
+                {
+                    <tr class="@(SelectedItems.Contains(item.Id) ? "selected" : "")">
+                        <td>
+                            <input type="checkbox"
+                                   checked="@SelectedItems.Contains(item.Id)"
+                                   @onchange="e => ToggleSelect(item.Id, e)" />
+                        </td>
+                        <td>
+                            <input type="text"
+                                   class="inline-input code-input"
+                                   value="@item.Code"
+                                   @onchange="e => UpdateCode(item, e.Value?.ToString())" />
+                        </td>
+                        <td>
+                            <input type="text"
+                                   class="inline-input"
+                                   value="@item.DisplayNameEn"
+                                   @onchange="e => UpdateDisplayName(item, e.Value?.ToString())" />
+                        </td>
+                        <td>
+                            <input type="text"
+                                   class="inline-input"
+                                   value="@item.Description"
+                                   @onchange="e => UpdateDescription(item, e.Value?.ToString())" />
+                        </td>
+                        <td>
+                            <input type="number"
+                                   class="inline-input order-input"
+                                   value="@item.Order"
+                                   @onchange="e => UpdateOrder(item, e.Value?.ToString())" />
+                        </td>
+                        <td>
+                            <div class="row-actions">
+                                <button class="row-action" @onclick="() => EditItem(item)" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="row-action danger" @onclick="() => DeleteItem(item)" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <button class="add-row" @onclick="OnItemAdd">
+            <i class="bi bi-plus-lg"></i>
+            Add New Item
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public List<ManagedCodeSetItem> Items { get; set; } = new();
+    [Parameter] public string SearchTerm { get; set; } = "";
+    [Parameter] public string SortColumn { get; set; } = "Order";
+    [Parameter] public bool SortAscending { get; set; } = true;
+    [Parameter] public EventCallback OnItemAdd { get; set; }
+    [Parameter] public EventCallback<ManagedCodeSetItem> OnItemUpdate { get; set; }
+    [Parameter] public EventCallback<ManagedCodeSetItem> OnItemDelete { get; set; }
+    [Parameter] public EventCallback<string> OnSearch { get; set; }
+    [Parameter] public EventCallback<(string Column, bool Ascending)> OnSort { get; set; }
+    [Parameter] public EventCallback OnImport { get; set; }
+    [Parameter] public EventCallback OnExport { get; set; }
+
+    private HashSet<string> SelectedItems { get; set; } = new();
+    private bool _selectAll = false;
+    private ManagedCodeSetItem? _draggingItem;
+
+    private async Task HandleSearch(ChangeEventArgs e)
+    {
+        await OnSearch.InvokeAsync(e.Value?.ToString() ?? "");
+    }
+
+    private async Task Sort(string column)
+    {
+        var ascending = SortColumn == column ? !SortAscending : true;
+        await OnSort.InvokeAsync((column, ascending));
+    }
+
+    private Task SortByCode() => Sort("Code");
+    private Task SortByDisplayName() => Sort("DisplayName");
+    private Task SortByOrder() => Sort("Order");
+
+    private void ToggleSelectAll(ChangeEventArgs e)
+    {
+        _selectAll = e.Value as bool? ?? false;
+        if (_selectAll)
+        {
+            SelectedItems = Items.Select(i => i.Id).ToHashSet();
+        }
+        else
+        {
+            SelectedItems.Clear();
+        }
+    }
+
+    private void ToggleSelect(string itemId, ChangeEventArgs e)
+    {
+        var selected = e.Value as bool? ?? false;
+        if (selected)
+        {
+            SelectedItems.Add(itemId);
+        }
+        else
+        {
+            SelectedItems.Remove(itemId);
+        }
+        _selectAll = SelectedItems.Count == Items.Count;
+    }
+
+    private async Task UpdateCode(ManagedCodeSetItem item, string? value)
+    {
+        if (value != null && value != item.Code)
+        {
+            var updated = item with { Code = value };
+            await OnItemUpdate.InvokeAsync(updated);
+        }
+    }
+
+    private async Task UpdateDisplayName(ManagedCodeSetItem item, string? value)
+    {
+        if (value != null && value != item.DisplayNameEn)
+        {
+            var updated = item with { DisplayNameEn = value };
+            await OnItemUpdate.InvokeAsync(updated);
+        }
+    }
+
+    private async Task UpdateDescription(ManagedCodeSetItem item, string? value)
+    {
+        var updated = item with { Description = value };
+        await OnItemUpdate.InvokeAsync(updated);
+    }
+
+    private async Task UpdateOrder(ManagedCodeSetItem item, string? value)
+    {
+        if (int.TryParse(value, out var order) && order != item.Order)
+        {
+            var updated = item with { Order = order };
+            await OnItemUpdate.InvokeAsync(updated);
+        }
+    }
+
+    private void EditItem(ManagedCodeSetItem item)
+    {
+        // Could open a modal for full editing
+        // For now, inline editing is available
+    }
+
+    private async Task DeleteItem(ManagedCodeSetItem item)
+    {
+        await OnItemDelete.InvokeAsync(item);
+        SelectedItems.Remove(item.Id);
+    }
+
+    private async Task DeleteSelected()
+    {
+        foreach (var id in SelectedItems.ToList())
+        {
+            var item = Items.FirstOrDefault(i => i.Id == id);
+            if (item != null)
+            {
+                await OnItemDelete.InvokeAsync(item);
+            }
+        }
+        SelectedItems.Clear();
+        _selectAll = false;
+    }
+
+    private void StartDrag(ManagedCodeSetItem item)
+    {
+        _draggingItem = item;
+    }
+
+    private void EndDrag()
+    {
+        _draggingItem = null;
+    }
+}

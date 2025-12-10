@@ -491,7 +491,7 @@ public class JsonImportExportService : IJsonImportExportService
             {
                 Message = $"Invalid JSON: {ex.Message}",
                 Line = (int?)ex.LineNumber,
-                Column = (int?)ex.BytePositionInLine,
+                Column = ex.BytePositionInLine?.ToString(),
                 Severity = ImportValidationSeverity.Error
             });
         }

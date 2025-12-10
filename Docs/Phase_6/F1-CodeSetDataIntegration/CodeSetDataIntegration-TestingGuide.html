@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F.1 CodeSetDataIntegration - Testing Guide</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #eef2ff;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .progress-bar {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-title {
+            font-weight: 600;
+        }
+
+        .progress-count {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .progress-track {
+            height: 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--success);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: var(--bg-secondary);
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-icon {
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+
+        .section-icon.tests { background: var(--primary-light); color: var(--primary); }
+        .section-icon.manual { background: var(--warning-light); color: var(--warning); }
+        .section-icon.verify { background: var(--success-light); color: var(--success); }
+
+        .section-count {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .section-content {
+            padding: 1rem 1.25rem;
+        }
+
+        .test-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .test-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .test-group-title {
+            font-weight: 600;
+            font-size: 0.9375rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--bg-secondary);
+        }
+
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+
+        .checklist-item input[type="checkbox"] {
+            margin-top: 0.25rem;
+            width: 1rem;
+            height: 1rem;
+            cursor: pointer;
+            accent-color: var(--success);
+        }
+
+        .checklist-item label {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .checklist-item.checked label {
+            color: var(--text-secondary);
+            text-decoration: line-through;
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.25rem;
+            height: 1.25rem;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 50%;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8125rem;
+            overflow-x: auto;
+            margin: 0.75rem 0;
+        }
+
+        .note {
+            background: var(--primary-light);
+            border-left: 3px solid var(--primary);
+            padding: 0.75rem 1rem;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.875rem;
+            margin: 0.75rem 0;
+        }
+
+        .warning {
+            background: var(--warning-light);
+            border-left: 3px solid var(--warning);
+            padding: 0.75rem 1rem;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.875rem;
+            margin: 0.75rem 0;
+        }
+
+        .file-list {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8125rem;
+        }
+
+        .file-item {
+            padding: 0.25rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .file-icon {
+            color: var(--primary);
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>F.1 CodeSetDataIntegration - Testing Guide</h1>
+        <p class="subtitle">Manual testing steps and verification checklist for the CodeSet management system</p>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-header">
+                <span class="progress-title">Testing Progress</span>
+                <span class="progress-count"><span id="completed">0</span> / <span id="total">0</span> completed</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Section 1: Manual Testing Steps -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">
+                    <span class="section-icon tests">1</span>
+                    Manual Testing Steps
+                </div>
+                <span class="section-count test-count">0 / 44 steps</span>
+            </div>
+            <div class="section-content">
+                <!-- CodeSet List Testing -->
+                <div class="test-group">
+                    <div class="test-group-title">CodeSet List Panel</div>
+                    <ul class="checklist">
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t1" class="test-item">
+                            <label for="t1"><span class="step-number">1</span>Navigate to /codesets page and verify the 3-panel layout loads</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t2" class="test-item">
+                            <label for="t2"><span class="step-number">2</span>Verify the left panel shows list of sample CodeSets (Countries, US States, etc.)</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t3" class="test-item">
+                            <label for="t3"><span class="step-number">3</span>Click on different CodeSets and verify selection highlighting</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t4" class="test-item">
+                            <label for="t4"><span class="step-number">4</span>Verify icons change based on category (globe for Geography, building for Organization)</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t5" class="test-item">
+                            <label for="t5"><span class="step-number">5</span>Check that status indicators show (green=ok, yellow=modified, red=error)</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t6" class="test-item">
+                            <label for="t6"><span class="step-number">6</span>Click "Add CodeSet" button and verify new CodeSet is created</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t7" class="test-item">
+                            <label for="t7"><span class="step-number">7</span>Click Refresh button and verify toast notification appears</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Data Grid Testing -->
+                <div class="test-group">
+                    <div class="test-group-title">Data Grid Panel</div>
+                    <ul class="checklist">
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t8" class="test-item">
+                            <label for="t8"><span class="step-number">8</span>Select "Countries" CodeSet and verify grid shows country items</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t9" class="test-item">
+                            <label for="t9"><span class="step-number">9</span>Type in search box and verify items filter in real-time</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t10" class="test-item">
+                            <label for="t10"><span class="step-number">10</span>Click "Code" column header and verify sorting (ascending)</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t11" class="test-item">
+                            <label for="t11"><span class="step-number">11</span>Click "Code" column header again and verify sorting (descending)</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t12" class="test-item">
+                            <label for="t12"><span class="step-number">12</span>Click "Display Name" column header and verify sorting works</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t13" class="test-item">
+                            <label for="t13"><span class="step-number">13</span>Click checkbox in row and verify row highlights as selected</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t14" class="test-item">
+                            <label for="t14"><span class="step-number">14</span>Click header checkbox and verify all rows select</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t15" class="test-item">
+                            <label for="t15"><span class="step-number">15</span>Click header checkbox again and verify all rows deselect</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Inline Editing Testing -->
+                <div class="test-group">
+                    <div class="test-group-title">Inline Editing</div>
+                    <ul class="checklist">
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t16" class="test-item">
+                            <label for="t16"><span class="step-number">16</span>Click on Code cell and verify input becomes editable</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t17" class="test-item">
+                            <label for="t17"><span class="step-number">17</span>Change Code value and blur - verify change is saved</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t18" class="test-item">
+                            <label for="t18"><span class="step-number">18</span>Click on Display Name cell and verify input becomes editable</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t19" class="test-item">
+                            <label for="t19"><span class="step-number">19</span>Change Display Name value and blur - verify change is saved</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t20" class="test-item">
+                            <label for="t20"><span class="step-number">20</span>Click Add Row button and verify new row appears</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t21" class="test-item">
+                            <label for="t21"><span class="step-number">21</span>Select rows and click Delete - verify rows are removed</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Properties Panel Testing -->
+                <div class="test-group">
+                    <div class="test-group-title">Properties Panel</div>
+                    <ul class="checklist">
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t22" class="test-item">
+                            <label for="t22"><span class="step-number">22</span>Verify CodeSet Name (EN) field displays and is editable</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t23" class="test-item">
+                            <label for="t23"><span class="step-number">23</span>Verify CodeSet Name (FR) field displays and is editable</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t24" class="test-item">
+                            <label for="t24"><span class="step-number">24</span>Change Code field and verify it updates</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t25" class="test-item">
+                            <label for="t25"><span class="step-number">25</span>Change Category dropdown and verify it updates</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t26" class="test-item">
+                            <label for="t26"><span class="step-number">26</span>Verify Field Bindings section shows bound fields for Countries</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t27" class="test-item">
+                            <label for="t27"><span class="step-number">27</span>Click X button on binding and verify it is removed</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Data Source Testing -->
+                <div class="test-group">
+                    <div class="test-group-title">Data Source Configuration</div>
+                    <ul class="checklist">
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t28" class="test-item">
+                            <label for="t28"><span class="step-number">28</span>Verify Source Type dropdown shows Static, API, File options</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t29" class="test-item">
+                            <label for="t29"><span class="step-number">29</span>Select "API Endpoint" and verify API fields appear</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t30" class="test-item">
+                            <label for="t30"><span class="step-number">30</span>Verify API Endpoint, HTTP Method, Response Path fields show</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t31" class="test-item">
+                            <label for="t31"><span class="step-number">31</span>Select "File" and verify File Path field appears</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t32" class="test-item">
+                            <label for="t32"><span class="step-number">32</span>Select Periodic refresh mode and verify interval field appears</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t33" class="test-item">
+                            <label for="t33"><span class="step-number">33</span>Toggle Enable Caching and verify cache duration field shows/hides</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Export Testing -->
+                <div class="test-group">
+                    <div class="test-group-title">Export Functionality</div>
+                    <ul class="checklist">
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t34" class="test-item">
+                            <label for="t34"><span class="step-number">34</span>Click JSON export button in grid toolbar</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t35" class="test-item">
+                            <label for="t35"><span class="step-number">35</span>Verify toast notification shows "JSON export ready"</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t36" class="test-item">
+                            <label for="t36"><span class="step-number">36</span>Click CSV export button in grid toolbar</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t37" class="test-item">
+                            <label for="t37"><span class="step-number">37</span>Verify toast notification shows "CSV export ready"</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Delete and Metadata Testing -->
+                <div class="test-group">
+                    <div class="test-group-title">Delete and Metadata</div>
+                    <ul class="checklist">
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t38" class="test-item">
+                            <label for="t38"><span class="step-number">38</span>Verify Metadata section shows ID, Created date, Items count</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t39" class="test-item">
+                            <label for="t39"><span class="step-number">39</span>Click Delete CodeSet button (trash icon in header)</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t40" class="test-item">
+                            <label for="t40"><span class="step-number">40</span>Verify CodeSet is removed from list and next one is selected</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Empty State Testing -->
+                <div class="test-group">
+                    <div class="test-group-title">Empty States</div>
+                    <ul class="checklist">
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t41" class="test-item">
+                            <label for="t41"><span class="step-number">41</span>Delete all CodeSets and verify empty state shows in center panel</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t42" class="test-item">
+                            <label for="t42"><span class="step-number">42</span>Click "Create CodeSet" in empty state and verify new CodeSet created</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t43" class="test-item">
+                            <label for="t43"><span class="step-number">43</span>Search for non-existent term and verify "No items found" message</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t44" class="test-item">
+                            <label for="t44"><span class="step-number">44</span>Clear search and verify items reappear</label>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Manual Implementation Tasks -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">
+                    <span class="section-icon manual">2</span>
+                    Implementation Files Created
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="note">
+                    The following files have been created as part of the CodeSetDataIntegration implementation.
+                </div>
+
+                <div class="test-group">
+                    <div class="test-group-title">Model Files</div>
+                    <div class="file-list">
+                        <div class="file-item"><span class="file-icon">📄</span> Models/CodeSetModels.cs - CodeSetSource, CodeSetBinding, ManagedCodeSet, ManagedCodeSetItem, enums</div>
+                    </div>
+                </div>
+
+                <div class="test-group">
+                    <div class="test-group-title">Service Files</div>
+                    <div class="file-list">
+                        <div class="file-item"><span class="file-icon">📄</span> Services/ICodeSetService.cs - Service interface with 17 methods</div>
+                        <div class="file-item"><span class="file-icon">📄</span> Services/CodeSetService.cs - Full implementation (~400 lines)</div>
+                        <div class="file-item"><span class="file-icon">📄</span> Services/ICodeSetCache.cs - Cache interface</div>
+                        <div class="file-item"><span class="file-icon">📄</span> Services/CodeSetCache.cs - IMemoryCache-based implementation</div>
+                        <div class="file-item"><span class="file-icon">📄</span> Services/ICodeSetLoader.cs - Loader interface</div>
+                        <div class="file-item"><span class="file-icon">📄</span> Services/CodeSetLoader.cs - API/File loading implementation</div>
+                    </div>
+                </div>
+
+                <div class="test-group">
+                    <div class="test-group-title">Component Files</div>
+                    <div class="file-list">
+                        <div class="file-item"><span class="file-icon">📄</span> Components/Pages/CodeSetManager.razor - Updated 3-panel layout</div>
+                        <div class="file-item"><span class="file-icon">📄</span> Components/CodeSet/CodeSetList.razor - Left panel list</div>
+                        <div class="file-item"><span class="file-icon">📄</span> Components/CodeSet/CodeSetGrid.razor - Center panel grid</div>
+                        <div class="file-item"><span class="file-icon">📄</span> Components/CodeSet/CodeSetPropertiesPanel.razor - Right panel properties</div>
+                    </div>
+                </div>
+
+                <div class="test-group">
+                    <div class="test-group-title">Style Files</div>
+                    <div class="file-list">
+                        <div class="file-item"><span class="file-icon">📄</span> wwwroot/css/codeset-manager.css - 350+ lines of styles</div>
+                    </div>
+                </div>
+
+                <div class="test-group">
+                    <div class="test-group-title">Modified Files</div>
+                    <div class="file-list">
+                        <div class="file-item"><span class="file-icon">✏️</span> Program.cs - Added service registrations</div>
+                        <div class="file-item"><span class="file-icon">✏️</span> wwwroot/css/app.css - Added CSS import</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Verification Checklist -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">
+                    <span class="section-icon verify">3</span>
+                    Verification Checklist
+                </div>
+                <span class="section-count verify-count">0 / 30 items</span>
+            </div>
+            <div class="section-content">
+                <div class="test-group">
+                    <div class="test-group-title">Layout & Structure</div>
+                    <ul class="checklist">
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v1" class="verify-item">
+                            <label for="v1">Three-panel layout displays correctly (280px | flex | 320px)</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v2" class="verify-item">
+                            <label for="v2">All panels have proper headers with icons</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v3" class="verify-item">
+                            <label for="v3">Panels are scrollable when content overflows</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v4" class="verify-item">
+                            <label for="v4">Header shows title and navigation buttons</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="test-group">
+                    <div class="test-group-title">CodeSet List Functionality</div>
+                    <ul class="checklist">
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v5" class="verify-item">
+                            <label for="v5">CodeSet list displays all items</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v6" class="verify-item">
+                            <label for="v6">Selection highlighting works correctly</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v7" class="verify-item">
+                            <label for="v7">Add CodeSet creates new entry</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v8" class="verify-item">
+                            <label for="v8">Status indicators show appropriate colors</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="test-group">
+                    <div class="test-group-title">Data Grid Functionality</div>
+                    <ul class="checklist">
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v9" class="verify-item">
+                            <label for="v9">Data grid displays items correctly</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v10" class="verify-item">
+                            <label for="v10">Inline editing updates items</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v11" class="verify-item">
+                            <label for="v11">Search filters items correctly</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v12" class="verify-item">
+                            <label for="v12">Column sorting works (asc/desc)</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v13" class="verify-item">
+                            <label for="v13">Row selection (single and all) works</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v14" class="verify-item">
+                            <label for="v14">Add item creates new row</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v15" class="verify-item">
+                            <label for="v15">Delete removes selected rows</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v16" class="verify-item">
+                            <label for="v16">Status badges display correct styles</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="test-group">
+                    <div class="test-group-title">Properties Panel Functionality</div>
+                    <ul class="checklist">
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v17" class="verify-item">
+                            <label for="v17">All form fields are editable</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v18" class="verify-item">
+                            <label for="v18">Changes save and persist</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v19" class="verify-item">
+                            <label for="v19">Field bindings section shows bound fields</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v20" class="verify-item">
+                            <label for="v20">Remove binding works correctly</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v21" class="verify-item">
+                            <label for="v21">Data source type switching shows correct fields</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v22" class="verify-item">
+                            <label for="v22">Metadata section displays correct information</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="test-group">
+                    <div class="test-group-title">Service Functionality</div>
+                    <ul class="checklist">
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v23" class="verify-item">
+                            <label for="v23">CodeSetService initializes with sample data</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v24" class="verify-item">
+                            <label for="v24">CRUD operations work correctly</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v25" class="verify-item">
+                            <label for="v25">Caching prevents repeated data fetches</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v26" class="verify-item">
+                            <label for="v26">Search/filter returns correct results</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="test-group">
+                    <div class="test-group-title">UI/UX</div>
+                    <ul class="checklist">
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v27" class="verify-item">
+                            <label for="v27">Empty states display appropriate messages</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v28" class="verify-item">
+                            <label for="v28">Toast notifications appear for actions</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v29" class="verify-item">
+                            <label for="v29">Export buttons trigger notifications</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v30" class="verify-item">
+                            <label for="v30">Delete CodeSet removes from list correctly</label>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+            <button class="btn btn-secondary" onclick="resetAll()">Reset All</button>
+            <button class="btn btn-primary" onclick="saveProgress()">Save Progress</button>
+        </div>
+    </div>
+
+    <script>
+        // Initialize
+        function init() {
+            loadProgress();
+            updateCounts();
+            attachListeners();
+        }
+
+        function attachListeners() {
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    this.closest('.checklist-item').classList.toggle('checked', this.checked);
+                    updateCounts();
+                    saveProgress();
+                });
+            });
+        }
+
+        function updateCounts() {
+            const testItems = document.querySelectorAll('.test-item');
+            const verifyItems = document.querySelectorAll('.verify-item');
+
+            const testChecked = document.querySelectorAll('.test-item:checked').length;
+            const verifyChecked = document.querySelectorAll('.verify-item:checked').length;
+
+            const total = testItems.length + verifyItems.length;
+            const completed = testChecked + verifyChecked;
+
+            document.getElementById('completed').textContent = completed;
+            document.getElementById('total').textContent = total;
+            document.getElementById('progressFill').style.width = (completed / total * 100) + '%';
+
+            document.querySelector('.test-count').textContent = `${testChecked} / ${testItems.length} steps`;
+            document.querySelector('.verify-count').textContent = `${verifyChecked} / ${verifyItems.length} items`;
+        }
+
+        function saveProgress() {
+            const state = {};
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                state[cb.id] = cb.checked;
+            });
+            localStorage.setItem('codesetIntegrationTestProgress', JSON.stringify(state));
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem('codesetIntegrationTestProgress');
+            if (saved) {
+                const state = JSON.parse(saved);
+                Object.keys(state).forEach(id => {
+                    const cb = document.getElementById(id);
+                    if (cb) {
+                        cb.checked = state[id];
+                        cb.closest('.checklist-item').classList.toggle('checked', state[id]);
+                    }
+                });
+            }
+        }
+
+        function resetAll() {
+            if (confirm('Are you sure you want to reset all progress?')) {
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                    cb.checked = false;
+                    cb.closest('.checklist-item').classList.remove('checked');
+                });
+                localStorage.removeItem('codesetIntegrationTestProgress');
+                updateCounts();
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>

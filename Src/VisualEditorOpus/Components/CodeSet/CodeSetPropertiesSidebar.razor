@@ -1,0 +1,235 @@
+@namespace VisualEditorOpus.Components.CodeSet
+
+<div class="properties-panel">
+    <!-- CodeSet Info Card -->
+    <div class="property-card">
+        <div class="property-card-header">
+            <i class="bi bi-info-circle"></i>
+            <h4>CodeSet Info</h4>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Name (EN)</label>
+            <input type="text" class="form-input"
+                   value="@CodeSet.NameEn"
+                   @onchange="HandleNameEnChange" />
+        </div>
+        <div class="form-group">
+            <label class="form-label">Name (FR)</label>
+            <input type="text" class="form-input"
+                   value="@CodeSet.NameFr"
+                   @onchange="HandleNameFrChange" />
+        </div>
+        <div class="form-group">
+            <label class="form-label">Description</label>
+            <input type="text" class="form-input"
+                   value="@CodeSet.DescriptionEn"
+                   @onchange="HandleDescriptionChange" />
+        </div>
+        <div class="form-group">
+            <label class="form-label">Category</label>
+            <select class="form-input form-select"
+                    value="@CodeSet.Category"
+                    @onchange="HandleCategoryChange">
+                <option value="geography">Geography</option>
+                <option value="organization">Organization</option>
+                <option value="system">System</option>
+                <option value="custom">Custom</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Statistics Card -->
+    <div class="property-card">
+        <div class="property-card-header">
+            <i class="bi bi-bar-chart"></i>
+            <h4>Statistics</h4>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value">@CodeSet.Items.Count</div>
+                <div class="stat-label">Total Items</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">@CodeSet.Items.Count(i => i.Status == CodeSetItemStatus.Active)</div>
+                <div class="stat-label">Active</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">@CodeSet.Items.Count(i => i.Status == CodeSetItemStatus.Inactive)</div>
+                <div class="stat-label">Inactive</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">@CodeSet.Items.Count(i => i.Status == CodeSetItemStatus.Deprecated)</div>
+                <div class="stat-label">Deprecated</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Field Mapping Card -->
+    <div class="property-card">
+        <div class="property-card-header">
+            <i class="bi bi-gear"></i>
+            <h4>Field Mapping</h4>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Code Field</label>
+            <input type="text" class="form-input"
+                   value="@CodeSet.CodeField"
+                   @onchange="HandleCodeFieldChange" />
+        </div>
+        <div class="form-group">
+            <label class="form-label">Display Field</label>
+            <input type="text" class="form-input"
+                   value="@CodeSet.DisplayField"
+                   @onchange="HandleDisplayFieldChange" />
+        </div>
+        <div class="form-group">
+            <label class="form-label">Description Field</label>
+            <input type="text" class="form-input"
+                   value="@CodeSet.DescriptionField"
+                   @onchange="HandleDescriptionFieldChange" />
+        </div>
+    </div>
+
+    <!-- Field Bindings Card -->
+    <div class="property-card">
+        <div class="property-card-header">
+            <i class="bi bi-link-45deg"></i>
+            <h4>Field Bindings</h4>
+        </div>
+        @if (CodeSet.Bindings.Any())
+        {
+            <div class="binding-list">
+                @foreach (var binding in CodeSet.Bindings)
+                {
+                    <div class="binding-item">
+                        <div class="binding-icon">
+                            <i class="bi @GetBindingIcon(binding.FieldType)"></i>
+                        </div>
+                        <div class="binding-info">
+                            <div class="binding-name">@binding.FieldName</div>
+                            <div class="binding-path">@binding.FieldPath</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-bindings">
+                <i class="bi bi-link-45deg"></i>
+                <p>No fields are using this CodeSet</p>
+            </div>
+        }
+    </div>
+
+    <!-- Data Source Card -->
+    @if (CodeSet.Source != null)
+    {
+        <div class="property-card">
+            <div class="property-card-header">
+                <i class="bi bi-database"></i>
+                <h4>Data Source</h4>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Source Type</label>
+                <div class="source-type-badge @GetSourceTypeClass(CodeSet.Source.Type)">
+                    <i class="bi @GetSourceTypeIcon(CodeSet.Source.Type)"></i>
+                    @CodeSet.Source.Type.ToString()
+                </div>
+            </div>
+            @if (CodeSet.Source.Type == CodeSetSourceType.Api && !string.IsNullOrEmpty(CodeSet.Source.ApiEndpoint))
+            {
+                <div class="form-group">
+                    <label class="form-label">API Endpoint</label>
+                    <div class="api-endpoint">@CodeSet.Source.ApiEndpoint</div>
+                </div>
+            }
+            @if (CodeSet.Source.Type == CodeSetSourceType.File && !string.IsNullOrEmpty(CodeSet.Source.FilePath))
+            {
+                <div class="form-group">
+                    <label class="form-label">File Path</label>
+                    <div class="file-path">@CodeSet.Source.FilePath</div>
+                </div>
+            }
+            @if (CodeSet.LastRefreshed.HasValue)
+            {
+                <div class="form-group">
+                    <label class="form-label">Last Refreshed</label>
+                    <div class="last-refreshed">@CodeSet.LastRefreshed.Value.ToString("g")</div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public ManagedCodeSet CodeSet { get; set; } = default!;
+    [Parameter] public EventCallback<ManagedCodeSet> OnCodeSetUpdate { get; set; }
+
+    private async Task HandleNameEnChange(ChangeEventArgs e)
+    {
+        var updated = CodeSet with { NameEn = e.Value?.ToString() ?? CodeSet.NameEn };
+        await OnCodeSetUpdate.InvokeAsync(updated);
+    }
+
+    private async Task HandleNameFrChange(ChangeEventArgs e)
+    {
+        var updated = CodeSet with { NameFr = e.Value?.ToString() ?? CodeSet.NameFr };
+        await OnCodeSetUpdate.InvokeAsync(updated);
+    }
+
+    private async Task HandleDescriptionChange(ChangeEventArgs e)
+    {
+        var updated = CodeSet with { DescriptionEn = e.Value?.ToString() };
+        await OnCodeSetUpdate.InvokeAsync(updated);
+    }
+
+    private async Task HandleCategoryChange(ChangeEventArgs e)
+    {
+        var updated = CodeSet with { Category = e.Value?.ToString() ?? CodeSet.Category };
+        await OnCodeSetUpdate.InvokeAsync(updated);
+    }
+
+    private async Task HandleCodeFieldChange(ChangeEventArgs e)
+    {
+        var updated = CodeSet with { CodeField = e.Value?.ToString() ?? "code" };
+        await OnCodeSetUpdate.InvokeAsync(updated);
+    }
+
+    private async Task HandleDisplayFieldChange(ChangeEventArgs e)
+    {
+        var updated = CodeSet with { DisplayField = e.Value?.ToString() ?? "displayNameEn" };
+        await OnCodeSetUpdate.InvokeAsync(updated);
+    }
+
+    private async Task HandleDescriptionFieldChange(ChangeEventArgs e)
+    {
+        var updated = CodeSet with { DescriptionField = e.Value?.ToString() };
+        await OnCodeSetUpdate.InvokeAsync(updated);
+    }
+
+    private static string GetBindingIcon(BoundFieldType fieldType) => fieldType switch
+    {
+        BoundFieldType.Dropdown => "bi-ui-checks",
+        BoundFieldType.RadioGroup => "bi-ui-radios",
+        BoundFieldType.CheckboxGroup => "bi-check2-square",
+        BoundFieldType.Autocomplete => "bi-search",
+        _ => "bi-input-cursor-text"
+    };
+
+    private static string GetSourceTypeClass(CodeSetSourceType sourceType) => sourceType switch
+    {
+        CodeSetSourceType.Static => "source-static",
+        CodeSetSourceType.Api => "source-api",
+        CodeSetSourceType.File => "source-file",
+        _ => ""
+    };
+
+    private static string GetSourceTypeIcon(CodeSetSourceType sourceType) => sourceType switch
+    {
+        CodeSetSourceType.Static => "bi-database",
+        CodeSetSourceType.Api => "bi-cloud",
+        CodeSetSourceType.File => "bi-file-earmark-text",
+        _ => "bi-question"
+    };
+}

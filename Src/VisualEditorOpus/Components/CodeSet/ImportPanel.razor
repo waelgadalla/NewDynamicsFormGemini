@@ -1,0 +1,288 @@
+@namespace VisualEditorOpus.Components.CodeSet
+@inject IImportExportService ImportExportService
+
+<div class="ie-import-panel">
+    @if (_importState == ImportState.SelectFile)
+    {
+        <FileDropZone @ref="_dropZone"
+                      OnFileSelected="HandleFileSelected"
+                      OnFileRemoved="HandleFileRemoved" />
+
+        @if (_parsedData != null)
+        {
+            <FilePreview Data="_parsedData" Mapping="_mapping" />
+
+            <FieldMapper Columns="_parsedData.Columns"
+                         Mapping="_mapping"
+                         MappingChanged="HandleMappingChanged" />
+
+            <div class="ie-import-options">
+                <div class="ie-option-group">
+                    <label class="ie-option-label">Import Mode</label>
+                    <select class="ie-option-select" @bind="_importMode">
+                        <option value="@CodeSetImportMode.CreateNew">Create new CodeSet</option>
+                        <option value="@CodeSetImportMode.MergeWith">Merge with existing CodeSet</option>
+                        <option value="@CodeSetImportMode.Replace">Replace existing CodeSet</option>
+                    </select>
+                </div>
+
+                @if (_importMode == CodeSetImportMode.CreateNew)
+                {
+                    <div class="ie-option-group">
+                        <label class="ie-option-label">CodeSet Name</label>
+                        <input type="text" class="ie-option-input"
+                               placeholder="Enter name for new CodeSet"
+                               @bind="_newCodeSetName" />
+                    </div>
+                }
+                else
+                {
+                    <div class="ie-option-group">
+                        <label class="ie-option-label">Target CodeSet</label>
+                        <select class="ie-option-select" @bind="_targetCodeSetId">
+                            <option value="">-- Select CodeSet --</option>
+                            @foreach (var cs in CodeSets)
+                            {
+                                <option value="@cs.Id">@cs.NameEn</option>
+                            }
+                        </select>
+                    </div>
+                }
+
+                <div class="ie-option-group">
+                    <label class="ie-option-label">Duplicate Handling</label>
+                    <select class="ie-option-select" @bind="_duplicateHandling">
+                        <option value="@CodeSetDuplicateHandling.Skip">Skip duplicates</option>
+                        <option value="@CodeSetDuplicateHandling.Update">Update existing</option>
+                        <option value="@CodeSetDuplicateHandling.Error">Fail on duplicates</option>
+                    </select>
+                </div>
+
+                <div class="ie-option-checkboxes">
+                    <label class="ie-option-checkbox">
+                        <input type="checkbox" @bind="_validateBeforeImport" />
+                        Validate before import
+                    </label>
+                    <label class="ie-option-checkbox">
+                        <input type="checkbox" @bind="_trimWhitespace" />
+                        Trim whitespace
+                    </label>
+                    <label class="ie-option-checkbox">
+                        <input type="checkbox" @bind="_skipEmptyRows" />
+                        Skip empty rows
+                    </label>
+                </div>
+            </div>
+        }
+    }
+    else if (_importState == ImportState.Importing)
+    {
+        <div class="ie-import-progress">
+            <div class="ie-progress-icon">
+                <i class="bi bi-arrow-repeat ie-spin"></i>
+            </div>
+            <div class="ie-progress-bar">
+                <div class="ie-progress-fill" style="width: @(_progress.Percentage)%"></div>
+            </div>
+            <div class="ie-progress-text">
+                <span>@_progress.Status</span>
+                <span>@((int)_progress.Percentage)%</span>
+            </div>
+        </div>
+    }
+    else if (_importState == ImportState.Complete)
+    {
+        <div class="ie-import-result @(_result?.Success == true ? "success" : "error")">
+            <div class="ie-result-icon">
+                <i class="bi bi-@(_result?.Success == true ? "check-circle-fill" : "x-circle-fill")"></i>
+            </div>
+            <div class="ie-result-message">
+                @if (_result?.Success == true)
+                {
+                    <strong>Import Successful!</strong>
+                    <p>@_result.ImportedCount items imported to "@_result.CodeSetName"</p>
+                }
+                else
+                {
+                    <strong>Import Failed</strong>
+                    <p>@_result?.Errors.FirstOrDefault()?.Message</p>
+                }
+            </div>
+
+            @if (_result != null)
+            {
+                <div class="ie-result-stats">
+                    <div class="ie-stat">
+                        <span class="ie-stat-value">@_result.TotalRows</span>
+                        <span class="ie-stat-label">Total Rows</span>
+                    </div>
+                    <div class="ie-stat success">
+                        <span class="ie-stat-value">@_result.ImportedCount</span>
+                        <span class="ie-stat-label">Imported</span>
+                    </div>
+                    <div class="ie-stat warning">
+                        <span class="ie-stat-value">@_result.SkippedCount</span>
+                        <span class="ie-stat-label">Skipped</span>
+                    </div>
+                    <div class="ie-stat error">
+                        <span class="ie-stat-value">@_result.ErrorCount</span>
+                        <span class="ie-stat-label">Errors</span>
+                    </div>
+                </div>
+
+                @if (_result.Warnings.Any())
+                {
+                    <div class="ie-result-warnings">
+                        <div class="ie-warnings-header">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Warnings (@_result.Warnings.Count)
+                        </div>
+                        <ul class="ie-warnings-list">
+                            @foreach (var warning in _result.Warnings.Take(5))
+                            {
+                                <li>Row @warning.RowNumber: @warning.Message</li>
+                            }
+                            @if (_result.Warnings.Count > 5)
+                            {
+                                <li>... and @(_result.Warnings.Count - 5) more</li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                @if (_result.Errors.Any())
+                {
+                    <div class="ie-result-errors">
+                        <div class="ie-errors-header">
+                            <i class="bi bi-x-circle"></i>
+                            Errors (@_result.Errors.Count)
+                        </div>
+                        <ul class="ie-errors-list">
+                            @foreach (var error in _result.Errors.Take(5))
+                            {
+                                <li>@(error.RowNumber > 0 ? $"Row {error.RowNumber}: " : "")@error.Message</li>
+                            }
+                            @if (_result.Errors.Count > 5)
+                            {
+                                <li>... and @(_result.Errors.Count - 5) more</li>
+                            }
+                        </ul>
+                    </div>
+                }
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public List<ManagedCodeSet> CodeSets { get; set; } = new();
+    [Parameter] public EventCallback<CodeSetImportResult> OnImportComplete { get; set; }
+
+    private FileDropZone? _dropZone;
+    private CodeSetParsedFileData? _parsedData;
+    private CodeSetFieldMapping _mapping = new();
+    private IBrowserFile? _selectedFile;
+
+    // Import options
+    private CodeSetImportMode _importMode = CodeSetImportMode.CreateNew;
+    private string _newCodeSetName = "";
+    private int? _targetCodeSetId;
+    private CodeSetDuplicateHandling _duplicateHandling = CodeSetDuplicateHandling.Skip;
+    private bool _validateBeforeImport = true;
+    private bool _trimWhitespace = true;
+    private bool _skipEmptyRows = true;
+
+    // Import state
+    private ImportState _importState = ImportState.SelectFile;
+    private CodeSetImportProgress _progress = new();
+    private CodeSetImportResult? _result;
+
+    public bool HasFile => _parsedData != null;
+
+    private async Task HandleFileSelected(IBrowserFile file)
+    {
+        _selectedFile = file;
+
+        try
+        {
+            using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // 10MB limit
+            using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
+
+            _parsedData = await ImportExportService.ParseFileAsync(memoryStream, file.Name);
+            _mapping = _parsedData.DetectedMapping;
+
+            // Auto-set CodeSet name from file name
+            _newCodeSetName = Path.GetFileNameWithoutExtension(file.Name)
+                .Replace("_", " ")
+                .Replace("-", " ");
+        }
+        catch (Exception ex)
+        {
+            _parsedData = null;
+            _result = new CodeSetImportResult
+            {
+                Success = false,
+                Errors = new List<CodeSetImportError>
+                {
+                    new CodeSetImportError { Message = $"Failed to parse file: {ex.Message}" }
+                }
+            };
+            _importState = ImportState.Complete;
+        }
+    }
+
+    private void HandleFileRemoved()
+    {
+        _parsedData = null;
+        _selectedFile = null;
+        _mapping = new();
+        _result = null;
+        _importState = ImportState.SelectFile;
+    }
+
+    private void HandleMappingChanged(CodeSetFieldMapping mapping)
+    {
+        _mapping = mapping;
+    }
+
+    public async Task StartImportAsync()
+    {
+        if (_parsedData == null) return;
+
+        _importState = ImportState.Importing;
+        _progress = new CodeSetImportProgress { Total = _parsedData.TotalRows, Status = "Starting import..." };
+        StateHasChanged();
+
+        var options = new CodeSetImportOptions
+        {
+            Mode = _importMode,
+            NewCodeSetName = _newCodeSetName,
+            TargetCodeSetId = _targetCodeSetId,
+            Mapping = _mapping,
+            DuplicateHandling = _duplicateHandling,
+            ValidateBeforeImport = _validateBeforeImport,
+            TrimWhitespace = _trimWhitespace,
+            SkipEmptyRows = _skipEmptyRows
+        };
+
+        var progress = new Progress<CodeSetImportProgress>(p =>
+        {
+            _progress = p;
+            InvokeAsync(StateHasChanged);
+        });
+
+        _result = await ImportExportService.ImportAsync(_parsedData, options, progress);
+        _importState = ImportState.Complete;
+
+        await OnImportComplete.InvokeAsync(_result);
+    }
+
+    private enum ImportState
+    {
+        SelectFile,
+        Importing,
+        Complete
+    }
+}

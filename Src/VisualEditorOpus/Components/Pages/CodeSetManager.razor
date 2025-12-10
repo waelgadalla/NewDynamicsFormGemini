@@ -1,174 +1,289 @@
 @page "/codesets"
 @layout MainLayout
+@using VisualEditorOpus.Models
+@using VisualEditorOpus.Services
+@inject ICodeSetService CodeSetService
+@inject IToastService ToastService
+@inject NavigationManager Navigation
 
 <PageTitle>CodeSet Manager - DynamicForms Editor</PageTitle>
 
-<div class="codeset-manager">
-    <div class="app-header">
+<div class="codeset-manager-v2">
+    <div class="manager-header">
         <div class="header-left">
             <button class="btn btn-ghost btn-icon-sm" @onclick="GoBack" title="Back to Dashboard">
                 <i class="bi bi-arrow-left"></i>
             </button>
             <div class="header-title">
-                <i class="bi bi-code-square"></i> CodeSet Manager
+                <i class="bi bi-collection"></i> CodeSet Manager
             </div>
         </div>
         <div class="header-actions">
-            <SearchBox Placeholder="Search codeSets..." OnSearch="HandleSearch" />
-            <Button Variant="primary" Icon="bi-plus-lg" Text="New CodeSet" OnClick="CreateNewCodeSet" />
+            <button class="btn btn-secondary" @onclick="ToggleTheme" title="Toggle Theme">
+                <i class="bi bi-moon"></i>
+            </button>
         </div>
     </div>
 
-    <div class="codeset-body">
-        <div class="codeset-list-container">
-            <div class="codeset-list-header">
-                <span>@FilteredCodeSets.Count CodeSets</span>
-                <select class="prop-input" style="width: auto;" @onchange="HandleSortChange">
-                    <option value="name">Sort by Name</option>
-                    <option value="modified">Sort by Modified</option>
-                    <option value="count">Sort by Option Count</option>
-                </select>
-            </div>
-            <div class="codeset-list">
-                @foreach (var codeSet in FilteredCodeSets)
-                {
-                    <CodeSetCard CodeSet="@codeSet"
-                                 IsSelected="@(SelectedCodeSetId == codeSet.Id)"
-                                 OnSelect="SelectCodeSet"
-                                 OnDelete="DeleteCodeSet" />
-                }
-
-                @if (!FilteredCodeSets.Any())
-                {
-                    <div class="codeset-empty">
-                        <i class="bi bi-code-square"></i>
-                        <p>No CodeSets found</p>
-                        <Button Variant="primary" Text="Create First CodeSet" OnClick="CreateNewCodeSet" />
-                    </div>
-                }
-            </div>
+    <div class="manager-layout">
+        <!-- CodeSet List Panel -->
+        <div class="codeset-list-panel">
+            <CodeSetList CodeSets="@CodeSets"
+                         SelectedCodeSet="@SelectedCodeSet"
+                         OnSelect="SelectCodeSet"
+                         OnAdd="AddCodeSet"
+                         OnRefresh="RefreshAll" />
         </div>
 
-        <div class="codeset-editor-container">
-            @if (SelectedCodeSet is not null)
+        <!-- Data Grid Panel -->
+        <div class="codeset-data-panel">
+            @if (SelectedCodeSet != null)
             {
-                <CodeSetEditor CodeSet="@SelectedCodeSet"
-                               OnSave="SaveCodeSet"
-                               OnCancel="ClearSelection" />
+                <CodeSetGrid CodeSet="@SelectedCodeSet"
+                             Items="@Items"
+                             OnItemAdd="AddItem"
+                             OnItemUpdate="UpdateItem"
+                             OnItemDelete="DeleteItem"
+                             OnSearch="SearchItems"
+                             OnSort="SortItems"
+                             OnExport="ExportCodeSet" />
             }
             else
             {
-                <div class="codeset-editor-empty">
-                    <i class="bi bi-arrow-left-circle"></i>
-                    <p>Select a CodeSet to edit or create a new one</p>
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="bi bi-collection"></i>
+                    </div>
+                    <h3 class="empty-title">No CodeSet Selected</h3>
+                    <p class="empty-description">
+                        Select a CodeSet from the list or create a new one
+                    </p>
+                    <button class="btn btn-primary" @onclick="AddCodeSet">
+                        <i class="bi bi-plus-lg"></i>
+                        Create CodeSet
+                    </button>
                 </div>
+            }
+        </div>
+
+        <!-- Properties Panel -->
+        <div class="codeset-properties-panel">
+            @if (SelectedCodeSet != null)
+            {
+                <CodeSetPropertiesPanel CodeSet="@SelectedCodeSet"
+                                        OnCodeSetChanged="UpdateCodeSet"
+                                        OnBindingRemove="RemoveBinding"
+                                        OnDelete="DeleteCodeSet" />
             }
         </div>
     </div>
 </div>
 
 @code {
-    [Inject] private NavigationManager Navigation { get; set; } = default!;
-    [Inject] private IToastService ToastService { get; set; } = default!;
-    [Inject] private ICodeSetProvider CodeSetProvider { get; set; } = default!;
-
-    private List<CodeSetInfo> CodeSets { get; set; } = new();
-    private List<CodeSetInfo> FilteredCodeSets => FilterCodeSets();
-    private string? SelectedCodeSetId { get; set; }
-    private CodeSetInfo? SelectedCodeSet => CodeSets.FirstOrDefault(c => c.Id == SelectedCodeSetId);
-    private string SearchQuery { get; set; } = "";
-    private string SortBy { get; set; } = "name";
+    private List<ManagedCodeSet> CodeSets { get; set; } = new();
+    private ManagedCodeSet? SelectedCodeSet { get; set; }
+    private List<ManagedCodeSetItem> Items { get; set; } = new();
+    private string _searchTerm = "";
+    private string _sortColumn = "Code";
+    private bool _sortAscending = true;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadCodeSets();
-    }
-
-    private async Task LoadCodeSets()
-    {
-        // Load from provider - for now use mock data
-        CodeSets = new List<CodeSetInfo>
+        CodeSets = await CodeSetService.GetAllCodeSetsAsync();
+        if (CodeSets.Any())
         {
-            new CodeSetInfo("countries", "Countries", "ISO country codes", 195, DateTime.Now.AddDays(-5)),
-            new CodeSetInfo("provinces", "Canadian Provinces", "Province and territory codes", 13, DateTime.Now.AddDays(-10)),
-            new CodeSetInfo("states", "US States", "US state codes", 50, DateTime.Now.AddDays(-15)),
-            new CodeSetInfo("departments", "Departments", "Organization departments", 12, DateTime.Now.AddDays(-2)),
-            new CodeSetInfo("job-titles", "Job Titles", "Common job titles", 45, DateTime.Now.AddDays(-8)),
-        };
-    }
-
-    private List<CodeSetInfo> FilterCodeSets()
-    {
-        var filtered = CodeSets.AsEnumerable();
-
-        if (!string.IsNullOrWhiteSpace(SearchQuery))
-        {
-            filtered = filtered.Where(c =>
-                c.Name.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ||
-                c.Description.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase));
+            await SelectCodeSet(CodeSets.First());
         }
+    }
 
-        filtered = SortBy switch
+    private async Task SelectCodeSet(ManagedCodeSet codeSet)
+    {
+        SelectedCodeSet = codeSet;
+        Items = await CodeSetService.GetItemsAsync(codeSet.Id);
+        _searchTerm = "";
+        StateHasChanged();
+    }
+
+    private async Task AddCodeSet()
+    {
+        var newCodeSet = new ManagedCodeSet
         {
-            "modified" => filtered.OrderByDescending(c => c.Modified),
-            "count" => filtered.OrderByDescending(c => c.OptionCount),
-            _ => filtered.OrderBy(c => c.Name)
+            Id = 0,
+            Code = $"NEW_CODESET_{DateTime.Now.Ticks}",
+            NameEn = "New CodeSet",
+            NameFr = "Nouveau CodeSet",
+            DescriptionEn = "",
+            Category = "Custom"
         };
-
-        return filtered.ToList();
+        var created = await CodeSetService.CreateCodeSetAsync(newCodeSet);
+        CodeSets.Add(created);
+        await SelectCodeSet(created);
+        ToastService.ShowSuccess("CodeSet created");
     }
 
-    private void HandleSearch(string query)
+    private async Task UpdateCodeSet(ManagedCodeSet codeSet)
     {
-        SearchQuery = query;
-        StateHasChanged();
-    }
-
-    private void HandleSortChange(ChangeEventArgs e)
-    {
-        SortBy = e.Value?.ToString() ?? "name";
-        StateHasChanged();
-    }
-
-    private void SelectCodeSet(string id)
-    {
-        SelectedCodeSetId = id;
-    }
-
-    private void ClearSelection()
-    {
-        SelectedCodeSetId = null;
-    }
-
-    private void CreateNewCodeSet()
-    {
-        var newId = $"codeset-{DateTime.Now.Ticks}";
-        var newCodeSet = new CodeSetInfo(newId, "New CodeSet", "", 0, DateTime.Now);
-        CodeSets.Insert(0, newCodeSet);
-        SelectedCodeSetId = newId;
-        StateHasChanged();
-    }
-
-    private void SaveCodeSet(CodeSetInfo codeSet)
-    {
-        var index = CodeSets.FindIndex(c => c.Id == codeSet.Id);
+        var updated = await CodeSetService.UpdateCodeSetAsync(codeSet);
+        var index = CodeSets.FindIndex(cs => cs.Id == updated.Id);
         if (index >= 0)
         {
-            CodeSets[index] = codeSet with { Modified = DateTime.Now };
+            CodeSets[index] = updated;
         }
-        ToastService.ShowSuccess("CodeSet saved successfully");
+        SelectedCodeSet = updated;
+        ToastService.ShowSuccess("CodeSet updated");
         StateHasChanged();
     }
 
-    private void DeleteCodeSet(string id)
+    private async Task DeleteCodeSet(ManagedCodeSet codeSet)
     {
-        CodeSets.RemoveAll(c => c.Id == id);
-        if (SelectedCodeSetId == id)
+        await CodeSetService.DeleteCodeSetAsync(codeSet.Id);
+        CodeSets.RemoveAll(cs => cs.Id == codeSet.Id);
+
+        if (SelectedCodeSet?.Id == codeSet.Id)
         {
-            SelectedCodeSetId = null;
+            SelectedCodeSet = CodeSets.FirstOrDefault();
+            if (SelectedCodeSet != null)
+            {
+                Items = await CodeSetService.GetItemsAsync(SelectedCodeSet.Id);
+            }
+            else
+            {
+                Items = new();
+            }
         }
+
         ToastService.ShowSuccess("CodeSet deleted");
         StateHasChanged();
+    }
+
+    private async Task RefreshAll()
+    {
+        await CodeSetService.RefreshAllAsync();
+        CodeSets = await CodeSetService.GetAllCodeSetsAsync();
+        if (SelectedCodeSet != null)
+        {
+            var refreshed = CodeSets.FirstOrDefault(cs => cs.Id == SelectedCodeSet.Id);
+            if (refreshed != null)
+            {
+                await SelectCodeSet(refreshed);
+            }
+        }
+        ToastService.ShowSuccess("All CodeSets refreshed");
+    }
+
+    private async Task AddItem()
+    {
+        if (SelectedCodeSet == null) return;
+
+        var newItem = new ManagedCodeSetItem
+        {
+            Code = "",
+            DisplayNameEn = "New Item",
+            DisplayNameFr = "Nouvel élément",
+            Order = Items.Count + 1
+        };
+        var added = await CodeSetService.AddItemAsync(SelectedCodeSet.Id, newItem);
+        Items.Add(added);
+        StateHasChanged();
+    }
+
+    private async Task UpdateItem(ManagedCodeSetItem item)
+    {
+        if (SelectedCodeSet == null) return;
+        await CodeSetService.UpdateItemAsync(SelectedCodeSet.Id, item);
+        var index = Items.FindIndex(i => i.Id == item.Id);
+        if (index >= 0)
+        {
+            Items[index] = item;
+        }
+        StateHasChanged();
+    }
+
+    private async Task DeleteItem(ManagedCodeSetItem item)
+    {
+        if (SelectedCodeSet == null) return;
+        await CodeSetService.DeleteItemAsync(SelectedCodeSet.Id, item.Id);
+        Items.Remove(item);
+        StateHasChanged();
+    }
+
+    private async Task SearchItems(string searchTerm)
+    {
+        if (SelectedCodeSet == null) return;
+        _searchTerm = searchTerm;
+
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            Items = await CodeSetService.GetItemsAsync(SelectedCodeSet.Id);
+        }
+        else
+        {
+            Items = await CodeSetService.GetFilteredItemsAsync(
+                SelectedCodeSet.Id,
+                searchTerm: searchTerm);
+        }
+        StateHasChanged();
+    }
+
+    private void SortItems((string Column, bool Ascending) sortArgs)
+    {
+        _sortColumn = sortArgs.Column;
+        _sortAscending = sortArgs.Ascending;
+
+        Items = sortArgs.Column switch
+        {
+            "Code" => sortArgs.Ascending
+                ? Items.OrderBy(i => i.Code).ToList()
+                : Items.OrderByDescending(i => i.Code).ToList(),
+            "DisplayNameEn" => sortArgs.Ascending
+                ? Items.OrderBy(i => i.DisplayNameEn).ToList()
+                : Items.OrderByDescending(i => i.DisplayNameEn).ToList(),
+            "Status" => sortArgs.Ascending
+                ? Items.OrderBy(i => i.Status).ToList()
+                : Items.OrderByDescending(i => i.Status).ToList(),
+            "Order" => sortArgs.Ascending
+                ? Items.OrderBy(i => i.Order).ToList()
+                : Items.OrderByDescending(i => i.Order).ToList(),
+            _ => Items
+        };
+        StateHasChanged();
+    }
+
+    private async Task ExportCodeSet(string format)
+    {
+        if (SelectedCodeSet == null) return;
+
+        if (format == "json")
+        {
+            var json = await CodeSetService.ExportToJsonAsync(SelectedCodeSet.Id);
+            // In real app, trigger download via JS
+            ToastService.ShowSuccess("JSON export ready");
+        }
+        else if (format == "csv")
+        {
+            var csv = await CodeSetService.ExportToCsvAsync(SelectedCodeSet.Id);
+            // In real app, trigger download via JS
+            ToastService.ShowSuccess("CSV export ready");
+        }
+    }
+
+    private async Task RemoveBinding(CodeSetBinding binding)
+    {
+        if (SelectedCodeSet == null) return;
+        await CodeSetService.UnbindFieldAsync(SelectedCodeSet.Id, binding.FieldId);
+        var updated = await CodeSetService.GetCodeSetByIdAsync(SelectedCodeSet.Id);
+        if (updated != null)
+        {
+            SelectedCodeSet = updated;
+            var index = CodeSets.FindIndex(cs => cs.Id == updated.Id);
+            if (index >= 0) CodeSets[index] = updated;
+        }
+        StateHasChanged();
+    }
+
+    private void ToggleTheme()
+    {
+        // Theme toggle is handled by ThemeService in real app
     }
 
     private void GoBack() => Navigation.NavigateTo("/");

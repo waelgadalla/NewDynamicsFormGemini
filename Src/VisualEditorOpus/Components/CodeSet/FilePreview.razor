@@ -1,0 +1,89 @@
+@namespace VisualEditorOpus.Components.CodeSet
+
+<div class="ie-file-preview">
+    <div class="ie-preview-header">
+        <div class="ie-preview-title">
+            <i class="bi bi-table"></i>
+            Data Preview
+        </div>
+        <div class="ie-preview-stats">
+            @Data.TotalRows rows, @Data.Columns.Count columns
+        </div>
+    </div>
+
+    <div class="ie-preview-table-wrapper">
+        <table class="ie-preview-table">
+            <thead>
+                <tr>
+                    @foreach (var column in Data.Columns.Take(6))
+                    {
+                        <th>
+                            @column
+                            @if (GetMappedField(column) is string mapped)
+                            {
+                                <span class="ie-mapped-badge">@mapped</span>
+                            }
+                        </th>
+                    }
+                    @if (Data.Columns.Count > 6)
+                    {
+                        <th class="ie-more-columns">+@(Data.Columns.Count - 6) more</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in Data.Rows.Take(PreviewRowCount))
+                {
+                    <tr>
+                        @foreach (var column in Data.Columns.Take(6))
+                        {
+                            <td>@GetCellValue(row, column)</td>
+                        }
+                        @if (Data.Columns.Count > 6)
+                        {
+                            <td class="ie-more-columns">...</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (Data.TotalRows > PreviewRowCount)
+    {
+        <div class="ie-preview-more">
+            + @(Data.TotalRows - PreviewRowCount) more rows
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public CodeSetParsedFileData Data { get; set; } = default!;
+    [Parameter] public CodeSetFieldMapping? Mapping { get; set; }
+    [Parameter] public int PreviewRowCount { get; set; } = 5;
+
+    private string? GetMappedField(string column)
+    {
+        if (Mapping == null) return null;
+
+        if (Mapping.CodeColumn == column) return "Code";
+        if (Mapping.DisplayNameColumn == column) return "Name";
+        if (Mapping.DisplayNameFrColumn == column) return "Name (FR)";
+        if (Mapping.DescriptionColumn == column) return "Desc";
+        if (Mapping.OrderColumn == column) return "Order";
+        if (Mapping.StatusColumn == column) return "Status";
+        if (Mapping.ParentCodeColumn == column) return "Parent";
+
+        return null;
+    }
+
+    private static string GetCellValue(Dictionary<string, object?> row, string column)
+    {
+        if (row.TryGetValue(column, out var value) && value != null)
+        {
+            var str = value.ToString() ?? "";
+            return str.Length > 50 ? str[..47] + "..." : str;
+        }
+        return "";
+    }
+}

@@ -1,0 +1,340 @@
+@using VisualEditorOpus.Models
+
+<div class="properties-panel">
+    <div class="panel-header">
+        <div class="panel-title">
+            <i class="bi bi-sliders"></i>
+            CodeSet Properties
+        </div>
+        <button class="btn-icon danger" @onclick="HandleDelete" title="Delete CodeSet">
+            <i class="bi bi-trash"></i>
+        </button>
+    </div>
+    <div class="panel-content">
+        <!-- Basic Properties Section -->
+        <div class="property-section">
+            <div class="section-content">
+                <div class="form-group">
+                    <label class="form-label">CodeSet Name (EN)</label>
+                    <input type="text" class="form-input"
+                           value="@EditedCodeSet.NameEn"
+                           @onchange="e => UpdateProperty(cs => cs with { NameEn = e.Value?.ToString() ?? cs.NameEn })" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">CodeSet Name (FR)</label>
+                    <input type="text" class="form-input"
+                           value="@EditedCodeSet.NameFr"
+                           @onchange="e => UpdateProperty(cs => cs with { NameFr = e.Value?.ToString() })" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Code</label>
+                    <input type="text" class="form-input"
+                           value="@EditedCodeSet.Code"
+                           @onchange="e => UpdateProperty(cs => cs with { Code = e.Value?.ToString() ?? cs.Code })" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select class="form-input"
+                            value="@EditedCodeSet.Category"
+                            @onchange="e => UpdateProperty(cs => cs with { Category = e.Value?.ToString() })">
+                        <option value="">-- Select --</option>
+                        <option value="Geography">Geography</option>
+                        <option value="Organization">Organization</option>
+                        <option value="System">System</option>
+                        <option value="Custom">Custom</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Code Field</label>
+                    <input type="text" class="form-input"
+                           value="@EditedCodeSet.CodeField"
+                           placeholder="e.g., code, id"
+                           @onchange="HandleCodeFieldChange" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Display Field</label>
+                    <input type="text" class="form-input"
+                           value="@EditedCodeSet.DisplayField"
+                           placeholder="e.g., name, label"
+                           @onchange="HandleDisplayFieldChange" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description Field</label>
+                    <input type="text" class="form-input"
+                           value="@EditedCodeSet.DescriptionField"
+                           placeholder="Optional"
+                           @onchange="e => UpdateProperty(cs => cs with { DescriptionField = e.Value?.ToString() })" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Field Bindings Section -->
+        <div class="property-section">
+            <div class="section-header">
+                <div class="section-title">
+                    <i class="bi bi-link-45deg"></i>
+                    Field Bindings
+                </div>
+            </div>
+            <div class="section-content">
+                @if (CodeSet.Bindings.Any())
+                {
+                    <div class="connection-indicator">
+                        <i class="bi bi-broadcast"></i>
+                        <span>@CodeSet.Bindings.Count field(s) bound to this CodeSet</span>
+                    </div>
+
+                    @foreach (var binding in CodeSet.Bindings)
+                    {
+                        <div class="binding-row">
+                            <div class="binding-icon">
+                                <i class="bi @GetBindingIcon(binding.FieldType)"></i>
+                            </div>
+                            <div class="binding-info">
+                                <div class="binding-field">@binding.FieldName</div>
+                                <div class="binding-path">@binding.FieldPath</div>
+                            </div>
+                            <button class="btn-remove" @onclick="() => OnBindingRemove.InvokeAsync(binding)" title="Remove binding">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="no-bindings">
+                        <i class="bi bi-link-45deg"></i>
+                        <span>No fields bound to this CodeSet</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Data Source Section -->
+        <div class="property-section">
+            <div class="section-header">
+                <div class="section-title">
+                    <i class="bi bi-cloud"></i>
+                    Data Source
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="form-group">
+                    <label class="form-label">Source Type</label>
+                    <select class="form-input"
+                            value="@EditedCodeSet.Source.Type"
+                            @onchange="HandleSourceTypeChange">
+                        <option value="@CodeSetSourceType.Static">Static (Local)</option>
+                        <option value="@CodeSetSourceType.Api">API Endpoint</option>
+                        <option value="@CodeSetSourceType.File">File (JSON/CSV)</option>
+                    </select>
+                </div>
+
+                @if (EditedCodeSet.Source.Type == CodeSetSourceType.Api)
+                {
+                    <div class="form-group">
+                        <label class="form-label">API Endpoint</label>
+                        <input type="text" class="form-input"
+                               value="@EditedCodeSet.Source.ApiEndpoint"
+                               placeholder="https://api.example.com/data"
+                               @onchange="e => UpdateSource(s => s with { ApiEndpoint = e.Value?.ToString() })" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">HTTP Method</label>
+                        <select class="form-input"
+                                value="@EditedCodeSet.Source.HttpMethod"
+                                @onchange="HandleHttpMethodChange">
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Response Path</label>
+                        <input type="text" class="form-input"
+                               value="@EditedCodeSet.Source.ResponsePath"
+                               placeholder="e.g., data.items"
+                               @onchange="e => UpdateSource(s => s with { ResponsePath = e.Value?.ToString() })" />
+                    </div>
+                }
+
+                @if (EditedCodeSet.Source.Type == CodeSetSourceType.File)
+                {
+                    <div class="form-group">
+                        <label class="form-label">File Path</label>
+                        <input type="text" class="form-input"
+                               value="@EditedCodeSet.Source.FilePath"
+                               placeholder="path/to/file.json"
+                               @onchange="e => UpdateSource(s => s with { FilePath = e.Value?.ToString() })" />
+                    </div>
+                }
+
+                <div class="form-group">
+                    <label class="form-label">Refresh Mode</label>
+                    <select class="form-input"
+                            value="@EditedCodeSet.Source.RefreshMode"
+                            @onchange="HandleRefreshModeChange">
+                        <option value="@RefreshMode.OnDemand">On Demand</option>
+                        <option value="@RefreshMode.OnLoad">On Load</option>
+                        <option value="@RefreshMode.Periodic">Periodic</option>
+                    </select>
+                </div>
+
+                @if (EditedCodeSet.Source.RefreshMode == RefreshMode.Periodic)
+                {
+                    <div class="form-group">
+                        <label class="form-label">Refresh Interval (seconds)</label>
+                        <input type="number" class="form-input"
+                               value="@EditedCodeSet.Source.RefreshIntervalSeconds"
+                               min="60"
+                               @onchange="e => UpdateSource(s => s with { RefreshIntervalSeconds = int.TryParse(e.Value?.ToString(), out var val) ? val : 300 })" />
+                    </div>
+                }
+
+                <div class="form-group checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox"
+                               checked="@EditedCodeSet.Source.EnableCaching"
+                               @onchange="e => UpdateSource(s => s with { EnableCaching = (bool)e.Value! })" />
+                        <span>Enable Caching</span>
+                    </label>
+                </div>
+
+                @if (EditedCodeSet.Source.EnableCaching)
+                {
+                    <div class="form-group">
+                        <label class="form-label">Cache Duration (seconds)</label>
+                        <input type="number" class="form-input"
+                               value="@EditedCodeSet.Source.CacheDurationSeconds"
+                               min="60"
+                               @onchange="e => UpdateSource(s => s with { CacheDurationSeconds = int.TryParse(e.Value?.ToString(), out var val) ? val : 3600 })" />
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Metadata Section -->
+        <div class="property-section">
+            <div class="section-header">
+                <div class="section-title">
+                    <i class="bi bi-info-circle"></i>
+                    Metadata
+                </div>
+            </div>
+            <div class="section-content metadata-content">
+                <div class="metadata-row">
+                    <span class="metadata-label">ID:</span>
+                    <span class="metadata-value">@CodeSet.Id</span>
+                </div>
+                <div class="metadata-row">
+                    <span class="metadata-label">Created:</span>
+                    <span class="metadata-value">@CodeSet.DateCreated.ToString("g")</span>
+                </div>
+                @if (CodeSet.DateUpdated.HasValue)
+                {
+                    <div class="metadata-row">
+                        <span class="metadata-label">Updated:</span>
+                        <span class="metadata-value">@CodeSet.DateUpdated.Value.ToString("g")</span>
+                    </div>
+                }
+                @if (CodeSet.LastRefreshed.HasValue)
+                {
+                    <div class="metadata-row">
+                        <span class="metadata-label">Last Refreshed:</span>
+                        <span class="metadata-value">@CodeSet.LastRefreshed.Value.ToString("g")</span>
+                    </div>
+                }
+                <div class="metadata-row">
+                    <span class="metadata-label">Items:</span>
+                    <span class="metadata-value">@CodeSet.Items.Count</span>
+                </div>
+                <div class="metadata-row">
+                    <span class="metadata-label">Version:</span>
+                    <span class="metadata-value">@CodeSet.Version</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public ManagedCodeSet CodeSet { get; set; } = default!;
+    [Parameter] public EventCallback<ManagedCodeSet> OnCodeSetChanged { get; set; }
+    [Parameter] public EventCallback<CodeSetBinding> OnBindingRemove { get; set; }
+    [Parameter] public EventCallback<ManagedCodeSet> OnDelete { get; set; }
+
+    private ManagedCodeSet EditedCodeSet => CodeSet;
+
+    private async Task UpdateProperty(Func<ManagedCodeSet, ManagedCodeSet> update)
+    {
+        var updated = update(CodeSet);
+        await OnCodeSetChanged.InvokeAsync(updated);
+    }
+
+    private async Task UpdateSource(Func<CodeSetSource, CodeSetSource> update)
+    {
+        var updatedSource = update(CodeSet.Source);
+        var updated = CodeSet with { Source = updatedSource };
+        await OnCodeSetChanged.InvokeAsync(updated);
+    }
+
+    private async Task HandleSourceTypeChange(ChangeEventArgs e)
+    {
+        if (Enum.TryParse<CodeSetSourceType>(e.Value?.ToString(), out var sourceType))
+        {
+            var updatedSource = CodeSet.Source with { Type = sourceType };
+            var updated = CodeSet with { Source = updatedSource };
+            await OnCodeSetChanged.InvokeAsync(updated);
+        }
+    }
+
+    private async Task HandleRefreshModeChange(ChangeEventArgs e)
+    {
+        if (Enum.TryParse<RefreshMode>(e.Value?.ToString(), out var refreshMode))
+        {
+            var updatedSource = CodeSet.Source with { RefreshMode = refreshMode };
+            var updated = CodeSet with { Source = updatedSource };
+            await OnCodeSetChanged.InvokeAsync(updated);
+        }
+    }
+
+    private async Task HandleCodeFieldChange(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString() ?? "code";
+        var updated = CodeSet with { CodeField = value };
+        await OnCodeSetChanged.InvokeAsync(updated);
+    }
+
+    private async Task HandleDisplayFieldChange(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString() ?? "displayName";
+        var updated = CodeSet with { DisplayField = value };
+        await OnCodeSetChanged.InvokeAsync(updated);
+    }
+
+    private async Task HandleHttpMethodChange(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString() ?? "GET";
+        var updatedSource = CodeSet.Source with { HttpMethod = value };
+        var updated = CodeSet with { Source = updatedSource };
+        await OnCodeSetChanged.InvokeAsync(updated);
+    }
+
+    private async Task HandleDelete()
+    {
+        await OnDelete.InvokeAsync(CodeSet);
+    }
+
+    private string GetBindingIcon(BoundFieldType fieldType)
+    {
+        return fieldType switch
+        {
+            BoundFieldType.Dropdown => "bi-chevron-down",
+            BoundFieldType.RadioGroup => "bi-ui-radios",
+            BoundFieldType.CheckboxGroup => "bi-ui-checks",
+            BoundFieldType.Autocomplete => "bi-search",
+            BoundFieldType.ListBox => "bi-list-ul",
+            BoundFieldType.Combobox => "bi-input-cursor-text",
+            _ => "bi-input-cursor-text"
+        };
+    }
+}

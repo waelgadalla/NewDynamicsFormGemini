@@ -1,0 +1,360 @@
+@namespace VisualEditorOpus.Components.CodeSet
+@inject ITabStateService TabStateService
+@inject ICodeSetService CodeSetService
+@implements IDisposable
+
+<div class="codeset-tabs-container">
+    <CodeSetTabBar Tabs="TabStateService.OpenTabs.ToList()"
+                   ActiveTabId="@TabStateService.ActiveTab?.Id"
+                   OnTabSelect="HandleTabSelect"
+                   OnTabClose="HandleTabClose"
+                   OnTabAdd="HandleTabAdd"
+                   OnTabReorder="HandleTabReorder"
+                   OnTabContextMenu="HandleTabContextMenu" />
+
+    <div class="tab-content">
+        @if (TabStateService.ActiveTab != null && ActiveCodeSet != null)
+        {
+            <CodeSetTabPanel TabState="TabStateService.ActiveTab"
+                             CodeSet="ActiveCodeSet"
+                             Items="ActiveItems"
+                             OnItemAdd="HandleItemAdd"
+                             OnItemUpdate="HandleItemUpdate"
+                             OnItemDelete="HandleItemDelete"
+                             OnSearch="HandleSearch"
+                             OnSort="HandleSort"
+                             OnCodeSetUpdate="HandleCodeSetUpdate"
+                             OnImport="HandleImport"
+                             OnExport="HandleExport" />
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="bi bi-collection"></i>
+                </div>
+                <h3>No CodeSet Open</h3>
+                <p>Open a CodeSet from the sidebar or create a new one</p>
+                <button class="btn btn-primary" @onclick="HandleTabAdd">
+                    <i class="bi bi-plus-lg"></i>
+                    Create CodeSet
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+@if (_showContextMenu)
+{
+    <div class="context-menu" style="top: @(_contextMenuY)px; left: @(_contextMenuX)px;">
+        <button class="context-menu-item" @onclick="CloseTab">
+            <i class="bi bi-x"></i> Close
+        </button>
+        <button class="context-menu-item" @onclick="CloseOtherTabs">
+            <i class="bi bi-x-lg"></i> Close Others
+        </button>
+        <button class="context-menu-item" @onclick="CloseAllTabs">
+            <i class="bi bi-x-circle"></i> Close All
+        </button>
+        <div class="context-menu-divider"></div>
+        @if (_contextMenuTab?.IsPinned == true)
+        {
+            <button class="context-menu-item" @onclick="UnpinTab">
+                <i class="bi bi-pin-angle"></i> Unpin
+            </button>
+        }
+        else
+        {
+            <button class="context-menu-item" @onclick="PinTab">
+                <i class="bi bi-pin"></i> Pin
+            </button>
+        }
+    </div>
+    <div class="context-menu-backdrop" @onclick="CloseContextMenu"></div>
+}
+
+@code {
+    private ManagedCodeSet? ActiveCodeSet { get; set; }
+    private List<ManagedCodeSetItem> ActiveItems { get; set; } = new();
+
+    private bool _showContextMenu = false;
+    private double _contextMenuX = 0;
+    private double _contextMenuY = 0;
+    private TabState? _contextMenuTab;
+
+    protected override void OnInitialized()
+    {
+        TabStateService.TabActivated += OnTabActivated;
+        TabStateService.TabUpdated += OnTabUpdated;
+        TabStateService.TabClosed += OnTabClosed;
+    }
+
+    private async void OnTabActivated(object? sender, TabState tab)
+    {
+        await LoadActiveCodeSet(tab.CodeSetId);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void OnTabUpdated(object? sender, TabState tab)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void OnTabClosed(object? sender, string tabId)
+    {
+        if (TabStateService.ActiveTab == null)
+        {
+            ActiveCodeSet = null;
+            ActiveItems.Clear();
+        }
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task LoadActiveCodeSet(int codeSetId)
+    {
+        ActiveCodeSet = await CodeSetService.GetCodeSetByIdAsync(codeSetId);
+        if (ActiveCodeSet != null)
+        {
+            ActiveItems = await CodeSetService.GetItemsAsync(codeSetId);
+
+            // Apply search/sort from tab state
+            if (TabStateService.ActiveTab != null)
+            {
+                var tab = TabStateService.ActiveTab;
+                if (!string.IsNullOrEmpty(tab.SearchTerm))
+                {
+                    ActiveItems = ActiveItems
+                        .Where(i => i.Code.Contains(tab.SearchTerm, StringComparison.OrdinalIgnoreCase) ||
+                                    i.DisplayNameEn.Contains(tab.SearchTerm, StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+                }
+
+                ActiveItems = ApplySort(ActiveItems, tab.SortColumn, tab.SortAscending);
+            }
+        }
+    }
+
+    private List<ManagedCodeSetItem> ApplySort(List<ManagedCodeSetItem> items, string column, bool ascending)
+    {
+        return column switch
+        {
+            "Code" => ascending
+                ? items.OrderBy(i => i.Code).ToList()
+                : items.OrderByDescending(i => i.Code).ToList(),
+            "DisplayName" => ascending
+                ? items.OrderBy(i => i.DisplayNameEn).ToList()
+                : items.OrderByDescending(i => i.DisplayNameEn).ToList(),
+            "Order" => ascending
+                ? items.OrderBy(i => i.Order).ToList()
+                : items.OrderByDescending(i => i.Order).ToList(),
+            _ => items
+        };
+    }
+
+    private void HandleTabSelect(string tabId)
+    {
+        TabStateService.ActivateTab(tabId);
+    }
+
+    private void HandleTabClose(string tabId)
+    {
+        var tab = TabStateService.OpenTabs.FirstOrDefault(t => t.Id == tabId);
+        if (tab?.IsDirty == true)
+        {
+            // TODO: Show confirmation dialog
+        }
+        TabStateService.CloseTab(tabId);
+    }
+
+    private async Task HandleTabAdd()
+    {
+        var newCodeSet = new ManagedCodeSet
+        {
+            Id = 0, // Will be assigned by service
+            Code = $"codeset_{DateTime.UtcNow.Ticks}",
+            NameEn = "New CodeSet",
+            NameFr = "Nouveau CodeSet",
+            DescriptionEn = "",
+            Category = "custom",
+            CodeField = "code",
+            DisplayField = "displayNameEn"
+        };
+        var created = await CodeSetService.CreateCodeSetAsync(newCodeSet);
+        TabStateService.OpenTab(created);
+    }
+
+    private void HandleTabReorder(List<string> tabIds)
+    {
+        TabStateService.ReorderTabs(tabIds);
+    }
+
+    private void HandleTabContextMenu((TabState Tab, double X, double Y) args)
+    {
+        _contextMenuTab = args.Tab;
+        _contextMenuX = args.X;
+        _contextMenuY = args.Y;
+        _showContextMenu = true;
+    }
+
+    private void CloseContextMenu()
+    {
+        _showContextMenu = false;
+        _contextMenuTab = null;
+    }
+
+    private void CloseTab()
+    {
+        if (_contextMenuTab != null)
+            TabStateService.CloseTab(_contextMenuTab.Id);
+        CloseContextMenu();
+    }
+
+    private void CloseOtherTabs()
+    {
+        if (_contextMenuTab != null)
+            TabStateService.CloseOtherTabs(_contextMenuTab.Id);
+        CloseContextMenu();
+    }
+
+    private void CloseAllTabs()
+    {
+        TabStateService.CloseAllTabs();
+        CloseContextMenu();
+    }
+
+    private void PinTab()
+    {
+        if (_contextMenuTab != null)
+            TabStateService.PinTab(_contextMenuTab.Id);
+        CloseContextMenu();
+    }
+
+    private void UnpinTab()
+    {
+        if (_contextMenuTab != null)
+            TabStateService.UnpinTab(_contextMenuTab.Id);
+        CloseContextMenu();
+    }
+
+    // Editor event handlers
+    private async Task HandleItemAdd()
+    {
+        if (ActiveCodeSet == null) return;
+
+        var newItem = new ManagedCodeSetItem
+        {
+            Code = "",
+            DisplayNameEn = "New Item",
+            DisplayNameFr = "Nouvel article",
+            Order = ActiveItems.Count,
+            Status = CodeSetItemStatus.Active,
+            IsVisible = true
+        };
+        var added = await CodeSetService.AddItemAsync(ActiveCodeSet.Id, newItem);
+        ActiveItems.Add(added);
+        MarkDirty();
+    }
+
+    private async Task HandleItemUpdate(ManagedCodeSetItem item)
+    {
+        if (ActiveCodeSet == null) return;
+        await CodeSetService.UpdateItemAsync(ActiveCodeSet.Id, item);
+
+        // Update local list
+        var index = ActiveItems.FindIndex(i => i.Id == item.Id);
+        if (index >= 0)
+        {
+            ActiveItems[index] = item;
+        }
+        MarkDirty();
+    }
+
+    private async Task HandleItemDelete(ManagedCodeSetItem item)
+    {
+        if (ActiveCodeSet == null) return;
+        await CodeSetService.DeleteItemAsync(ActiveCodeSet.Id, item.Id);
+        ActiveItems.RemoveAll(i => i.Id == item.Id);
+        MarkDirty();
+    }
+
+    private async Task HandleSearch(string searchTerm)
+    {
+        if (ActiveCodeSet == null || TabStateService.ActiveTab == null) return;
+
+        var updated = TabStateService.ActiveTab with { SearchTerm = searchTerm };
+        TabStateService.UpdateTab(updated);
+
+        // Reload with filter
+        ActiveItems = await CodeSetService.GetItemsAsync(ActiveCodeSet.Id);
+
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            ActiveItems = ActiveItems
+                .Where(i => i.Code.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                            i.DisplayNameEn.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                            (i.Description?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false))
+                .ToList();
+        }
+
+        ActiveItems = ApplySort(ActiveItems, updated.SortColumn, updated.SortAscending);
+    }
+
+    private void HandleSort((string Column, bool Ascending) sort)
+    {
+        if (TabStateService.ActiveTab == null) return;
+
+        var updated = TabStateService.ActiveTab with
+        {
+            SortColumn = sort.Column,
+            SortAscending = sort.Ascending
+        };
+        TabStateService.UpdateTab(updated);
+
+        ActiveItems = ApplySort(ActiveItems, sort.Column, sort.Ascending);
+    }
+
+    private async Task HandleCodeSetUpdate(ManagedCodeSet codeSet)
+    {
+        await CodeSetService.UpdateCodeSetAsync(codeSet);
+        ActiveCodeSet = codeSet;
+
+        // Update tab name if changed
+        if (TabStateService.ActiveTab != null && TabStateService.ActiveTab.CodeSetName != codeSet.NameEn)
+        {
+            var updated = TabStateService.ActiveTab with
+            {
+                CodeSetName = codeSet.NameEn,
+                ItemCount = codeSet.Items.Count
+            };
+            TabStateService.UpdateTab(updated);
+        }
+
+        MarkDirty();
+    }
+
+    private async Task HandleImport()
+    {
+        // TODO: Show import dialog
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleExport()
+    {
+        if (ActiveCodeSet == null) return;
+        var json = await CodeSetService.ExportToJsonAsync(ActiveCodeSet.Id);
+        // TODO: Download file
+    }
+
+    private void MarkDirty()
+    {
+        if (TabStateService.ActiveTab == null) return;
+        TabStateService.MarkDirty(TabStateService.ActiveTab.Id);
+    }
+
+    public void Dispose()
+    {
+        TabStateService.TabActivated -= OnTabActivated;
+        TabStateService.TabUpdated -= OnTabUpdated;
+        TabStateService.TabClosed -= OnTabClosed;
+    }
+}

@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F.3 CodeSetImportExport - Testing Guide</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #eef2ff;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .progress-bar {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-title {
+            font-weight: 600;
+        }
+
+        .progress-count {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .progress-track {
+            height: 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--success);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: var(--bg-secondary);
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-icon {
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+
+        .section-icon.tests { background: var(--primary-light); color: var(--primary); }
+        .section-icon.manual { background: var(--warning-light); color: var(--warning); }
+        .section-icon.verify { background: var(--success-light); color: var(--success); }
+
+        .section-count {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .section-content {
+            padding: 1rem 1.25rem;
+        }
+
+        .test-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .test-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .test-group-title {
+            font-weight: 600;
+            font-size: 0.9375rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--bg-secondary);
+        }
+
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+
+        .checklist-item input[type="checkbox"] {
+            margin-top: 0.25rem;
+            width: 1rem;
+            height: 1rem;
+            cursor: pointer;
+            accent-color: var(--success);
+        }
+
+        .checklist-item label {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .checklist-item.checked label {
+            color: var(--text-secondary);
+            text-decoration: line-through;
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.25rem;
+            height: 1.25rem;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 50%;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8125rem;
+            overflow-x: auto;
+            margin: 0.75rem 0;
+        }
+
+        .note {
+            background: var(--primary-light);
+            border-left: 3px solid var(--primary);
+            padding: 0.75rem 1rem;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.875rem;
+            margin: 0.75rem 0;
+        }
+
+        .warning {
+            background: var(--warning-light);
+            border-left: 3px solid var(--warning);
+            padding: 0.75rem 1rem;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.875rem;
+            margin: 0.75rem 0;
+        }
+
+        .file-list {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8125rem;
+        }
+
+        .file-item {
+            padding: 0.25rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .file-icon {
+            color: var(--primary);
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>F.3 CodeSetImportExport - Testing Guide</h1>
+        <p class="subtitle">Manual testing steps and verification checklist for the CodeSet Import/Export functionality</p>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-header">
+                <span class="progress-title">Testing Progress</span>
+                <span class="progress-count"><span id="completed">0</span> / <span id="total">0</span> completed</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Section 1: Manual Testing Steps -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">
+                    <span class="section-icon tests">1</span>
+                    Manual Testing Steps
+                </div>
+                <span class="section-count test-count">0 / 40 steps</span>
+            </div>
+            <div class="section-content">
+                <!-- Import Modal Testing -->
+                <div class="test-group">
+                    <div class="test-group-title">Import Modal - File Drop Zone</div>
+                    <ul class="checklist">
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t1" class="test-item">
+                            <label for="t1"><span class="step-number">1</span>Navigate to /codesets page and click "Import" button in toolbar</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t2" class="test-item">
+                            <label for="t2"><span class="step-number">2</span>Verify Import/Export modal opens with Import tab active</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t3" class="test-item">
+                            <label for="t3"><span class="step-number">3</span>Verify file drop zone displays with cloud upload icon</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t4" class="test-item">
+                            <label for="t4"><span class="step-number">4</span>Drag a JSON file onto drop zone - verify highlight animation</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t5" class="test-item">
+                            <label for="t5"><span class="step-number">5</span>Drop the file - verify file info displays (name, size, type)</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t6" class="test-item">
+                            <label for="t6"><span class="step-number">6</span>Click "Browse files" link and select a CSV file</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t7" class="test-item">
+                            <label for="t7"><span class="step-number">7</span>Verify file preview table appears showing first 5 rows</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- File Preview Testing -->
+                <div class="test-group">
+                    <div class="test-group-title">Import Modal - File Preview</div>
+                    <ul class="checklist">
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t8" class="test-item">
+                            <label for="t8"><span class="step-number">8</span>Verify preview shows column headers</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t9" class="test-item">
+                            <label for="t9"><span class="step-number">9</span>Verify preview shows row count (e.g., "25 rows, 4 columns")</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t10" class="test-item">
+                            <label for="t10"><span class="step-number">10</span>Verify mapped columns show badge indicators (e.g., "Code", "Name")</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t11" class="test-item">
+                            <label for="t11"><span class="step-number">11</span>Verify "+X more" indicator for tables with many columns</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Field Mapping Testing -->
+                <div class="test-group">
+                    <div class="test-group-title">Import Modal - Field Mapping</div>
+                    <ul class="checklist">
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t12" class="test-item">
+                            <label for="t12"><span class="step-number">12</span>Verify Field Mapping section appears below preview</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t13" class="test-item">
+                            <label for="t13"><span class="step-number">13</span>Verify "Auto-detected" badge appears when columns are auto-mapped</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t14" class="test-item">
+                            <label for="t14"><span class="step-number">14</span>Change Code column mapping dropdown - verify preview badges update</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t15" class="test-item">
+                            <label for="t15"><span class="step-number">15</span>Change Display Name column mapping - verify update</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t16" class="test-item">
+                            <label for="t16"><span class="step-number">16</span>Verify required fields (Code, Display Name) have asterisk markers</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t17" class="test-item">
+                            <label for="t17"><span class="step-number">17</span>Set optional fields (Description, Order, Status, Parent Code)</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Import Options Testing -->
+                <div class="test-group">
+                    <div class="test-group-title">Import Modal - Import Options</div>
+                    <ul class="checklist">
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t18" class="test-item">
+                            <label for="t18"><span class="step-number">18</span>Verify Import Mode dropdown has 3 options: Create new, Merge with, Replace</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t19" class="test-item">
+                            <label for="t19"><span class="step-number">19</span>Select "Create new CodeSet" - verify Name input appears</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t20" class="test-item">
+                            <label for="t20"><span class="step-number">20</span>Select "Merge with existing" - verify CodeSet dropdown appears</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t21" class="test-item">
+                            <label for="t21"><span class="step-number">21</span>Verify Duplicate Handling dropdown has Skip, Update, Error options</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t22" class="test-item">
+                            <label for="t22"><span class="step-number">22</span>Verify checkboxes: Validate before import, Trim whitespace, Skip empty rows</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Import Execution Testing -->
+                <div class="test-group">
+                    <div class="test-group-title">Import Modal - Import Execution</div>
+                    <ul class="checklist">
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t23" class="test-item">
+                            <label for="t23"><span class="step-number">23</span>Click Import button - verify progress bar appears</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t24" class="test-item">
+                            <label for="t24"><span class="step-number">24</span>Verify progress percentage updates during import</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t25" class="test-item">
+                            <label for="t25"><span class="step-number">25</span>Verify success result shows: Imported count, Skipped count, Error count</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t26" class="test-item">
+                            <label for="t26"><span class="step-number">26</span>Verify warnings panel shows any duplicate code warnings</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t27" class="test-item">
+                            <label for="t27"><span class="step-number">27</span>Verify new CodeSet appears in list after successful import</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Export Panel Testing -->
+                <div class="test-group">
+                    <div class="test-group-title">Export Panel Testing</div>
+                    <ul class="checklist">
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t28" class="test-item">
+                            <label for="t28"><span class="step-number">28</span>Click Export tab in modal</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t29" class="test-item">
+                            <label for="t29"><span class="step-number">29</span>Verify selected CodeSet info displays (name, item count)</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t30" class="test-item">
+                            <label for="t30"><span class="step-number">30</span>Verify format cards: JSON, CSV, XML with icons and descriptions</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t31" class="test-item">
+                            <label for="t31"><span class="step-number">31</span>Click JSON format card - verify selection highlight</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t32" class="test-item">
+                            <label for="t32"><span class="step-number">32</span>Verify export options toggles: Include metadata, Inactive items, Deprecated</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t33" class="test-item">
+                            <label for="t33"><span class="step-number">33</span>For JSON: Verify Pretty print toggle appears</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t34" class="test-item">
+                            <label for="t34"><span class="step-number">34</span>Click CSV format - verify Include header and Delimiter options appear</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Export Execution Testing -->
+                <div class="test-group">
+                    <div class="test-group-title">Export Execution Testing</div>
+                    <ul class="checklist">
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t35" class="test-item">
+                            <label for="t35"><span class="step-number">35</span>Click Export button - verify loading spinner shows</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t36" class="test-item">
+                            <label for="t36"><span class="step-number">36</span>Verify file download initiates with correct filename</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t37" class="test-item">
+                            <label for="t37"><span class="step-number">37</span>Export as JSON - verify downloaded file is valid JSON</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t38" class="test-item">
+                            <label for="t38"><span class="step-number">38</span>Export as CSV - verify downloaded file opens in spreadsheet</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t39" class="test-item">
+                            <label for="t39"><span class="step-number">39</span>Export as XML - verify downloaded file is valid XML</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="t40" class="test-item">
+                            <label for="t40"><span class="step-number">40</span>Close modal and verify main page is unchanged</label>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Implementation Files Created -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">
+                    <span class="section-icon manual">2</span>
+                    Implementation Files Created
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="note">
+                    The following files have been created as part of the CodeSetImportExport implementation.
+                </div>
+
+                <div class="test-group">
+                    <div class="test-group-title">Model Files</div>
+                    <div class="file-list">
+                        <div class="file-item"><span class="file-icon">+</span> Models/CodeSetImportExportModels.cs - Import/Export options, results, field mapping</div>
+                    </div>
+                </div>
+
+                <div class="test-group">
+                    <div class="test-group-title">Service Files</div>
+                    <div class="file-list">
+                        <div class="file-item"><span class="file-icon">+</span> Services/IImportExportService.cs - Service interface for import/export</div>
+                        <div class="file-item"><span class="file-icon">+</span> Services/ImportExportService.cs - Full implementation with JSON/CSV parsing, export</div>
+                    </div>
+                </div>
+
+                <div class="test-group">
+                    <div class="test-group-title">Component Files</div>
+                    <div class="file-list">
+                        <div class="file-item"><span class="file-icon">+</span> Components/CodeSet/ImportExportModal.razor - Main modal with tab switching</div>
+                        <div class="file-item"><span class="file-icon">+</span> Components/CodeSet/ImportPanel.razor - Import workflow panel</div>
+                        <div class="file-item"><span class="file-icon">+</span> Components/CodeSet/ExportPanel.razor - Export format selection and options</div>
+                        <div class="file-item"><span class="file-icon">+</span> Components/CodeSet/FileDropZone.razor - Drag & drop file upload</div>
+                        <div class="file-item"><span class="file-icon">+</span> Components/CodeSet/FilePreview.razor - Data preview table</div>
+                        <div class="file-item"><span class="file-icon">+</span> Components/CodeSet/FieldMapper.razor - Column to field mapping</div>
+                    </div>
+                </div>
+
+                <div class="test-group">
+                    <div class="test-group-title">Style Files</div>
+                    <div class="file-list">
+                        <div class="file-item"><span class="file-icon">+</span> wwwroot/css/codeset-importexport.css - All modal and panel styles</div>
+                    </div>
+                </div>
+
+                <div class="test-group">
+                    <div class="test-group-title">JavaScript Files</div>
+                    <div class="file-list">
+                        <div class="file-item"><span class="file-icon">+</span> wwwroot/js/importexport.js - File download interop</div>
+                    </div>
+                </div>
+
+                <div class="test-group">
+                    <div class="test-group-title">Modified Files</div>
+                    <div class="file-list">
+                        <div class="file-item"><span class="file-icon">~</span> Program.cs - Added IImportExportService registration</div>
+                        <div class="file-item"><span class="file-icon">~</span> wwwroot/css/app.css - Added CSS import</div>
+                        <div class="file-item"><span class="file-icon">~</span> Models/JsonImportExportModels.cs - Added missing types for form import/export</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Verification Checklist -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">
+                    <span class="section-icon verify">3</span>
+                    Verification Checklist
+                </div>
+                <span class="section-count verify-count">0 / 25 items</span>
+            </div>
+            <div class="section-content">
+                <div class="test-group">
+                    <div class="test-group-title">Modal UI</div>
+                    <ul class="checklist">
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v1" class="verify-item">
+                            <label for="v1">Modal opens centered with backdrop overlay</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v2" class="verify-item">
+                            <label for="v2">Tab switching between Import and Export works</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v3" class="verify-item">
+                            <label for="v3">Close button (X) dismisses modal</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v4" class="verify-item">
+                            <label for="v4">Clicking backdrop dismisses modal</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="test-group">
+                    <div class="test-group-title">File Drop Zone</div>
+                    <ul class="checklist">
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v5" class="verify-item">
+                            <label for="v5">Drag highlight animation works</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v6" class="verify-item">
+                            <label for="v6">File browse dialog opens on click</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v7" class="verify-item">
+                            <label for="v7">File info displays after selection</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v8" class="verify-item">
+                            <label for="v8">Remove file button clears selection</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="test-group">
+                    <div class="test-group-title">Import Functionality</div>
+                    <ul class="checklist">
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v9" class="verify-item">
+                            <label for="v9">JSON files parse correctly</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v10" class="verify-item">
+                            <label for="v10">CSV files parse correctly</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v11" class="verify-item">
+                            <label for="v11">Field auto-detection works for common column names</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v12" class="verify-item">
+                            <label for="v12">Manual field mapping updates preview</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v13" class="verify-item">
+                            <label for="v13">Import progress shows real-time percentage</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v14" class="verify-item">
+                            <label for="v14">Import result shows statistics</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v15" class="verify-item">
+                            <label for="v15">Duplicate handling works correctly</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="test-group">
+                    <div class="test-group-title">Export Functionality</div>
+                    <ul class="checklist">
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v16" class="verify-item">
+                            <label for="v16">Format selection cards highlight on click</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v17" class="verify-item">
+                            <label for="v17">JSON export produces valid JSON file</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v18" class="verify-item">
+                            <label for="v18">CSV export produces valid CSV file</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v19" class="verify-item">
+                            <label for="v19">XML export produces valid XML file</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v20" class="verify-item">
+                            <label for="v20">Include metadata option works</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v21" class="verify-item">
+                            <label for="v21">Filter options work (inactive, deprecated)</label>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="test-group">
+                    <div class="test-group-title">Service Integration</div>
+                    <ul class="checklist">
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v22" class="verify-item">
+                            <label for="v22">IImportExportService is registered in DI</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v23" class="verify-item">
+                            <label for="v23">ImportExportService correctly uses CodeSetService</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v24" class="verify-item">
+                            <label for="v24">Imported data persists in CodeSetService</label>
+                        </li>
+                        <li class="checklist-item">
+                            <input type="checkbox" id="v25" class="verify-item">
+                            <label for="v25">Export retrieves data correctly from CodeSetService</label>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+            <button class="btn btn-secondary" onclick="resetAll()">Reset All</button>
+            <button class="btn btn-primary" onclick="saveProgress()">Save Progress</button>
+        </div>
+    </div>
+
+    <script>
+        // Initialize
+        function init() {
+            loadProgress();
+            updateCounts();
+            attachListeners();
+        }
+
+        function attachListeners() {
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    this.closest('.checklist-item').classList.toggle('checked', this.checked);
+                    updateCounts();
+                    saveProgress();
+                });
+            });
+        }
+
+        function updateCounts() {
+            const testItems = document.querySelectorAll('.test-item');
+            const verifyItems = document.querySelectorAll('.verify-item');
+
+            const testChecked = document.querySelectorAll('.test-item:checked').length;
+            const verifyChecked = document.querySelectorAll('.verify-item:checked').length;
+
+            const total = testItems.length + verifyItems.length;
+            const completed = testChecked + verifyChecked;
+
+            document.getElementById('completed').textContent = completed;
+            document.getElementById('total').textContent = total;
+            document.getElementById('progressFill').style.width = (completed / total * 100) + '%';
+
+            document.querySelector('.test-count').textContent = `${testChecked} / ${testItems.length} steps`;
+            document.querySelector('.verify-count').textContent = `${verifyChecked} / ${verifyItems.length} items`;
+        }
+
+        function saveProgress() {
+            const state = {};
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                state[cb.id] = cb.checked;
+            });
+            localStorage.setItem('codesetImportExportTestProgress', JSON.stringify(state));
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem('codesetImportExportTestProgress');
+            if (saved) {
+                const state = JSON.parse(saved);
+                Object.keys(state).forEach(id => {
+                    const cb = document.getElementById(id);
+                    if (cb) {
+                        cb.checked = state[id];
+                        cb.closest('.checklist-item').classList.toggle('checked', state[id]);
+                    }
+                });
+            }
+        }
+
+        function resetAll() {
+            if (confirm('Are you sure you want to reset all progress?')) {
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                    cb.checked = false;
+                    cb.closest('.checklist-item').classList.remove('checked');
+                });
+                localStorage.removeItem('codesetImportExportTestProgress');
+                updateCounts();
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>

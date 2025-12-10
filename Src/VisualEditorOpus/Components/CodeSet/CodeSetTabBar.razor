@@ -1,0 +1,85 @@
+@namespace VisualEditorOpus.Components.CodeSet
+
+<div class="tab-bar" @ondragover="HandleDragOver" @ondrop="HandleDrop">
+    @foreach (var tab in GetOrderedTabs())
+    {
+        <button class="tab-item @(tab.IsActive ? "active" : "") @(tab.IsDirty ? "dirty" : "") @(tab.IsPinned ? "pinned" : "")"
+                @onclick="() => OnTabSelect.InvokeAsync(tab.Id)"
+                @oncontextmenu="e => HandleContextMenu(e, tab)"
+                @oncontextmenu:preventDefault
+                draggable="@(!tab.IsPinned)"
+                @ondragstart="() => HandleDragStart(tab)"
+                @ondragend="HandleDragEnd">
+            @if (tab.IsPinned)
+            {
+                <i class="bi bi-pin-fill pin-icon"></i>
+            }
+            <i class="bi @tab.Icon tab-icon"></i>
+            <span class="tab-name">@tab.CodeSetName</span>
+            <span class="tab-badge">@tab.ItemCount</span>
+            @if (!tab.IsPinned)
+            {
+                <button class="tab-close"
+                        @onclick="() => OnTabClose.InvokeAsync(tab.Id)"
+                        @onclick:stopPropagation>
+                    <i class="bi bi-x"></i>
+                </button>
+            }
+            @if (tab.IsDirty)
+            {
+                <span class="dirty-indicator"></span>
+            }
+        </button>
+    }
+    <button class="tab-add" @onclick="OnTabAdd" title="Add CodeSet">
+        <i class="bi bi-plus"></i>
+    </button>
+</div>
+
+@code {
+    [Parameter] public List<TabState> Tabs { get; set; } = new();
+    [Parameter] public string? ActiveTabId { get; set; }
+    [Parameter] public EventCallback<string> OnTabSelect { get; set; }
+    [Parameter] public EventCallback<string> OnTabClose { get; set; }
+    [Parameter] public EventCallback OnTabAdd { get; set; }
+    [Parameter] public EventCallback<List<string>> OnTabReorder { get; set; }
+    [Parameter] public EventCallback<(TabState Tab, double X, double Y)> OnTabContextMenu { get; set; }
+
+    private TabState? _draggingTab;
+
+    private IEnumerable<TabState> GetOrderedTabs()
+    {
+        // Pinned tabs first, then by order
+        return Tabs.OrderByDescending(t => t.IsPinned).ThenBy(t => t.Order);
+    }
+
+    private void HandleDragStart(TabState tab)
+    {
+        if (tab.IsPinned) return;
+        _draggingTab = tab;
+    }
+
+    private void HandleDragEnd()
+    {
+        _draggingTab = null;
+    }
+
+    private void HandleDragOver(DragEventArgs e)
+    {
+        e.DataTransfer.DropEffect = "move";
+    }
+
+    private async Task HandleDrop(DragEventArgs e)
+    {
+        if (_draggingTab == null) return;
+
+        // Simple reorder - just emit current order
+        var tabIds = Tabs.Select(t => t.Id).ToList();
+        await OnTabReorder.InvokeAsync(tabIds);
+    }
+
+    private void HandleContextMenu(MouseEventArgs e, TabState tab)
+    {
+        OnTabContextMenu.InvokeAsync((tab, e.ClientX, e.ClientY));
+    }
+}

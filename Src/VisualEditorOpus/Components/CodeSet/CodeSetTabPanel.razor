@@ -1,0 +1,35 @@
+@namespace VisualEditorOpus.Components.CodeSet
+
+<div class="tab-panel active">
+    <div class="codeset-editor">
+        <CodeSetDataEditor Items="Items"
+                           SearchTerm="@TabState.SearchTerm"
+                           SortColumn="@TabState.SortColumn"
+                           SortAscending="@TabState.SortAscending"
+                           OnItemAdd="OnItemAdd"
+                           OnItemUpdate="OnItemUpdate"
+                           OnItemDelete="OnItemDelete"
+                           OnSearch="OnSearch"
+                           OnSort="OnSort"
+                           OnImport="OnImport"
+                           OnExport="OnExport" />
+
+        <CodeSetPropertiesSidebar CodeSet="CodeSet"
+                                  OnCodeSetUpdate="OnCodeSetUpdate" />
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public TabState TabState { get; set; } = default!;
+    [Parameter, EditorRequired] public ManagedCodeSet CodeSet { get; set; } = default!;
+    [Parameter] public List<ManagedCodeSetItem> Items { get; set; } = new();
+
+    [Parameter] public EventCallback OnItemAdd { get; set; }
+    [Parameter] public EventCallback<ManagedCodeSetItem> OnItemUpdate { get; set; }
+    [Parameter] public EventCallback<ManagedCodeSetItem> OnItemDelete { get; set; }
+    [Parameter] public EventCallback<string> OnSearch { get; set; }
+    [Parameter] public EventCallback<(string Column, bool Ascending)> OnSort { get; set; }
+    [Parameter] public EventCallback<ManagedCodeSet> OnCodeSetUpdate { get; set; }
+    [Parameter] public EventCallback OnImport { get; set; }
+    [Parameter] public EventCallback OnExport { get; set; }
+}

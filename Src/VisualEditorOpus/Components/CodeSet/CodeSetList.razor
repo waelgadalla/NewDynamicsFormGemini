@@ -1,0 +1,69 @@
+@using VisualEditorOpus.Models
+
+<div class="codeset-panel">
+    <div class="panel-header">
+        <div class="panel-title">
+            <i class="bi bi-collection"></i>
+            CodeSets
+        </div>
+        <button class="btn-icon" @onclick="OnRefresh" title="Refresh All">
+            <i class="bi bi-arrow-clockwise"></i>
+        </button>
+    </div>
+    <div class="panel-content">
+        <div class="codeset-list">
+            @foreach (var codeSet in CodeSets)
+            {
+                <div class="codeset-item @(SelectedCodeSet?.Id == codeSet.Id ? "active" : "")"
+                     @onclick="() => HandleSelect(codeSet)">
+                    <div class="codeset-icon">
+                        <i class="bi @GetIcon(codeSet)"></i>
+                    </div>
+                    <div class="codeset-info">
+                        <div class="codeset-name">@codeSet.NameEn</div>
+                        <div class="codeset-count">@codeSet.Items.Count items</div>
+                    </div>
+                    <div class="codeset-status @GetStatusClass(codeSet)"></div>
+                </div>
+            }
+
+            <button class="add-codeset-btn" @onclick="OnAdd">
+                <i class="bi bi-plus-lg"></i>
+                Add CodeSet
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public List<ManagedCodeSet> CodeSets { get; set; } = new();
+    [Parameter] public ManagedCodeSet? SelectedCodeSet { get; set; }
+    [Parameter] public EventCallback<ManagedCodeSet> OnSelect { get; set; }
+    [Parameter] public EventCallback OnAdd { get; set; }
+    [Parameter] public EventCallback OnRefresh { get; set; }
+
+    private async Task HandleSelect(ManagedCodeSet codeSet)
+    {
+        await OnSelect.InvokeAsync(codeSet);
+    }
+
+    private string GetIcon(ManagedCodeSet codeSet)
+    {
+        return codeSet.Category?.ToLowerInvariant() switch
+        {
+            "geography" => "bi-globe",
+            "organization" => "bi-building",
+            "system" => "bi-flag",
+            _ => "bi-code-square"
+        };
+    }
+
+    private string GetStatusClass(ManagedCodeSet codeSet)
+    {
+        if (codeSet.Source.Type == CodeSetSourceType.Api && !codeSet.LastRefreshed.HasValue)
+            return "error";
+        if (codeSet.IsDirty)
+            return "modified";
+        return "";
+    }
+}

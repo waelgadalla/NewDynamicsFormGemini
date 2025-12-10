@@ -1,0 +1,155 @@
+@namespace VisualEditorOpus.Components.CodeSet
+@using VisualEditorOpus.Models
+@inject IImportExportService ImportExportService
+@inject IJSRuntime JSRuntime
+
+@if (IsOpen)
+{
+    <div class="ie-modal-backdrop" @onclick="HandleBackdropClick">
+        <div class="ie-modal" @onclick:stopPropagation>
+            <div class="ie-modal-header">
+                <div class="ie-modal-title">
+                    <i class="bi bi-@(Mode == CodeSetImportExportMode.Import ? "upload" : "download")"></i>
+                    @(Mode == CodeSetImportExportMode.Import ? "Import" : "Export") CodeSet
+                </div>
+                <button class="ie-btn-close" @onclick="Close">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <div class="ie-modal-body">
+                <div class="ie-tabs">
+                    <button class="ie-tab @(Mode == CodeSetImportExportMode.Import ? "active" : "")"
+                            @onclick="() => SetMode(CodeSetImportExportMode.Import)">
+                        <i class="bi bi-upload"></i>
+                        Import
+                    </button>
+                    <button class="ie-tab @(Mode == CodeSetImportExportMode.Export ? "active" : "")"
+                            @onclick="() => SetMode(CodeSetImportExportMode.Export)">
+                        <i class="bi bi-download"></i>
+                        Export
+                    </button>
+                </div>
+
+                @if (Mode == CodeSetImportExportMode.Import)
+                {
+                    <ImportPanel @ref="_importPanel"
+                                 CodeSets="CodeSets"
+                                 OnImportComplete="HandleImportComplete" />
+                }
+                else
+                {
+                    <ExportPanel CodeSet="CodeSet"
+                                 OnExportComplete="HandleExportComplete" />
+                }
+            </div>
+
+            <div class="ie-modal-footer">
+                <button class="ie-btn ie-btn-secondary" @onclick="Close">Cancel</button>
+                @if (Mode == CodeSetImportExportMode.Import)
+                {
+                    <button class="ie-btn ie-btn-primary"
+                            disabled="@(!CanImport)"
+                            @onclick="StartImport">
+                        <i class="bi bi-upload"></i>
+                        Import
+                    </button>
+                }
+                else
+                {
+                    <button class="ie-btn ie-btn-success" @onclick="StartExport">
+                        <i class="bi bi-download"></i>
+                        Download
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public ManagedCodeSet? CodeSet { get; set; }
+    [Parameter] public List<ManagedCodeSet> CodeSets { get; set; } = new();
+    [Parameter] public CodeSetImportExportMode Mode { get; set; } = CodeSetImportExportMode.Import;
+    [Parameter] public EventCallback<CodeSetImportExportMode> ModeChanged { get; set; }
+    [Parameter] public EventCallback<CodeSetImportResult> OnImportComplete { get; set; }
+
+    private ImportPanel? _importPanel;
+    private ExportPanel? _exportPanel;
+    private bool CanImport => _importPanel?.HasFile == true;
+
+    private void HandleBackdropClick() => Close();
+
+    private async Task Close()
+    {
+        IsOpen = false;
+        await IsOpenChanged.InvokeAsync(false);
+    }
+
+    private async Task SetMode(CodeSetImportExportMode mode)
+    {
+        Mode = mode;
+        await ModeChanged.InvokeAsync(mode);
+    }
+
+    private async Task HandleImportComplete(CodeSetImportResult result)
+    {
+        await OnImportComplete.InvokeAsync(result);
+        if (result.Success)
+        {
+            await Close();
+        }
+    }
+
+    private async Task HandleExportComplete((byte[] Data, string FileName) export)
+    {
+        await DownloadFile(export.Data, export.FileName);
+    }
+
+    private async Task StartImport()
+    {
+        if (_importPanel != null)
+        {
+            await _importPanel.StartImportAsync();
+        }
+    }
+
+    private async Task StartExport()
+    {
+        if (CodeSet == null) return;
+
+        // Default export options
+        var options = new CodeSetExportOptions
+        {
+            Format = CodeSetExportFormat.Json,
+            IncludeMetadata = true,
+            PrettyPrint = true
+        };
+
+        var data = await ImportExportService.ExportAsync(CodeSet.Id, options);
+        var fileName = $"{CodeSet.NameEn.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd}.json";
+
+        await DownloadFile(data, fileName);
+    }
+
+    private async Task DownloadFile(byte[] data, string fileName)
+    {
+        var base64 = Convert.ToBase64String(data);
+        await JSRuntime.InvokeVoidAsync("downloadFileFromBase64", fileName, base64, GetMimeType(fileName));
+    }
+
+    private static string GetMimeType(string fileName)
+    {
+        var ext = Path.GetExtension(fileName).ToLowerInvariant();
+        return ext switch
+        {
+            ".json" => "application/json",
+            ".csv" => "text/csv",
+            ".xml" => "application/xml",
+            ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            _ => "application/octet-stream"
+        };
+    }
+}

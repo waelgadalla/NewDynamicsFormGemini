@@ -1,0 +1,213 @@
+@using VisualEditorOpus.Models
+
+<div class="data-grid-container">
+    <div class="grid-toolbar">
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text"
+                   placeholder="Search codes..."
+                   value="@_searchTerm"
+                   @oninput="HandleSearch" />
+        </div>
+        <div class="toolbar-actions">
+            <button class="btn-icon" @onclick="OnItemAdd" title="Add Row">
+                <i class="bi bi-plus-lg"></i>
+            </button>
+            <button class="btn-icon"
+                    @onclick="DeleteSelected"
+                    disabled="@(!SelectedItems.Any())"
+                    title="Delete Selected">
+                <i class="bi bi-trash"></i>
+            </button>
+            <div class="toolbar-divider"></div>
+            <button class="btn-icon" @onclick='() => OnExport.InvokeAsync("json")' title="Export JSON">
+                <i class="bi bi-filetype-json"></i>
+            </button>
+            <button class="btn-icon" @onclick='() => OnExport.InvokeAsync("csv")' title="Export CSV">
+                <i class="bi bi-filetype-csv"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="data-table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="width: 40px;">
+                        <input type="checkbox"
+                               class="row-checkbox"
+                               checked="@_selectAll"
+                               @onchange="ToggleSelectAll" />
+                    </th>
+                    <th class="sortable @(_sortColumn == "Code" ? "sorted" : "")"
+                        @onclick='() => Sort("Code")'>
+                        Code
+                        <i class="bi bi-caret-@(_sortAscending ? "up" : "down")-fill sort-icon"></i>
+                    </th>
+                    <th class="sortable @(_sortColumn == "DisplayNameEn" ? "sorted" : "")"
+                        @onclick='() => Sort("DisplayNameEn")'>
+                        Display Name
+                        <i class="bi bi-caret-@(_sortAscending ? "up" : "down")-fill sort-icon"></i>
+                    </th>
+                    <th>Description</th>
+                    <th class="sortable @(_sortColumn == "Status" ? "sorted" : "")"
+                        @onclick='() => Sort("Status")'>
+                        Status
+                        <i class="bi bi-caret-@(_sortAscending ? "up" : "down")-fill sort-icon"></i>
+                    </th>
+                    <th style="width: 80px;">Order</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Items)
+                {
+                    <tr class="@(SelectedItems.Contains(item) ? "selected" : "")">
+                        <td>
+                            <input type="checkbox"
+                                   class="row-checkbox"
+                                   checked="@SelectedItems.Contains(item)"
+                                   @onchange="e => ToggleSelect(item, (bool)e.Value!)" />
+                        </td>
+                        <td class="code-cell">
+                            <input type="text"
+                                   class="inline-edit"
+                                   value="@item.Code"
+                                   @onchange="e => UpdateCode(item, e.Value?.ToString())" />
+                        </td>
+                        <td>
+                            <input type="text"
+                                   class="inline-edit"
+                                   value="@item.DisplayNameEn"
+                                   @onchange="e => UpdateDisplayName(item, e.Value?.ToString())" />
+                        </td>
+                        <td class="description-cell">
+                            <span title="@item.Description">@(TruncateText(item.Description, 40))</span>
+                        </td>
+                        <td>
+                            <span class="status-badge @item.Status.ToString().ToLowerInvariant()">
+                                @item.Status
+                            </span>
+                        </td>
+                        <td>@item.Order</td>
+                    </tr>
+                }
+                @if (!Items.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="empty-row">
+                            <div class="empty-row-content">
+                                <i class="bi bi-inbox"></i>
+                                <span>No items found</span>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="grid-footer">
+        <span class="page-info">@Items.Count items</span>
+        @if (SelectedItems.Any())
+        {
+            <span class="selection-info">@SelectedItems.Count selected</span>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public ManagedCodeSet CodeSet { get; set; } = default!;
+    [Parameter] public List<ManagedCodeSetItem> Items { get; set; } = new();
+    [Parameter] public EventCallback OnItemAdd { get; set; }
+    [Parameter] public EventCallback<ManagedCodeSetItem> OnItemUpdate { get; set; }
+    [Parameter] public EventCallback<ManagedCodeSetItem> OnItemDelete { get; set; }
+    [Parameter] public EventCallback<string> OnSearch { get; set; }
+    [Parameter] public EventCallback<(string, bool)> OnSort { get; set; }
+    [Parameter] public EventCallback<string> OnExport { get; set; }
+
+    private HashSet<ManagedCodeSetItem> SelectedItems { get; set; } = new();
+    private bool _selectAll = false;
+    private string _searchTerm = "";
+    private string _sortColumn = "Code";
+    private bool _sortAscending = true;
+
+    protected override void OnParametersSet()
+    {
+        // Clear selection when CodeSet changes
+        SelectedItems.Clear();
+        _selectAll = false;
+    }
+
+    private async Task HandleSearch(ChangeEventArgs e)
+    {
+        _searchTerm = e.Value?.ToString() ?? "";
+        await OnSearch.InvokeAsync(_searchTerm);
+    }
+
+    private void Sort(string column)
+    {
+        if (_sortColumn == column)
+        {
+            _sortAscending = !_sortAscending;
+        }
+        else
+        {
+            _sortColumn = column;
+            _sortAscending = true;
+        }
+        OnSort.InvokeAsync((column, _sortAscending));
+    }
+
+    private void ToggleSelectAll(ChangeEventArgs e)
+    {
+        _selectAll = (bool)e.Value!;
+        if (_selectAll)
+            SelectedItems = new HashSet<ManagedCodeSetItem>(Items);
+        else
+            SelectedItems.Clear();
+    }
+
+    private void ToggleSelect(ManagedCodeSetItem item, bool selected)
+    {
+        if (selected)
+            SelectedItems.Add(item);
+        else
+            SelectedItems.Remove(item);
+        _selectAll = SelectedItems.Count == Items.Count && Items.Count > 0;
+    }
+
+    private async Task DeleteSelected()
+    {
+        foreach (var item in SelectedItems.ToList())
+        {
+            await OnItemDelete.InvokeAsync(item);
+        }
+        SelectedItems.Clear();
+        _selectAll = false;
+    }
+
+    private async Task UpdateCode(ManagedCodeSetItem item, string? newCode)
+    {
+        if (newCode != null && newCode != item.Code)
+        {
+            var updated = item with { Code = newCode };
+            await OnItemUpdate.InvokeAsync(updated);
+        }
+    }
+
+    private async Task UpdateDisplayName(ManagedCodeSetItem item, string? newName)
+    {
+        if (newName != null && newName != item.DisplayNameEn)
+        {
+            var updated = item with { DisplayNameEn = newName };
+            await OnItemUpdate.InvokeAsync(updated);
+        }
+    }
+
+    private string TruncateText(string? text, int maxLength)
+    {
+        if (string.IsNullOrEmpty(text)) return "";
+        if (text.Length <= maxLength) return text;
+        return text.Substring(0, maxLength) + "...";
+    }
+}
