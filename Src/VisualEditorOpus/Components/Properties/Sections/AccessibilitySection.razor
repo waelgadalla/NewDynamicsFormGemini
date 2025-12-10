@@ -1,0 +1,384 @@
+@* Accessibility section - WCAG-compliant ARIA attributes *@
+@implements IDisposable
+@using DynamicForms.Core.V4.Schemas
+
+<PropertySection Title="Accessibility" Icon="bi-universal-access">
+    @if (Field is not null)
+    {
+        @* Accessibility Score *@
+        <div class="a11y-score @ScoreClass">
+            <div class="a11y-score-circle">
+                <span>@ScoreGrade</span>
+            </div>
+            <div class="a11y-score-content">
+                <div class="a11y-score-title">@ScoreTitle</div>
+                <div class="a11y-score-desc">@ScoreDescription</div>
+            </div>
+        </div>
+
+        @* ARIA Label with Language Tabs *@
+        <div class="form-group">
+            <label class="form-label">
+                <i class="bi bi-tag"></i>
+                ARIA Label
+            </label>
+            <div class="language-tabs">
+                <button class="language-tab @(activeLanguage == "en" ? "active" : "")"
+                        @onclick="() => activeLanguage = &quot;en&quot;"
+                        type="button">
+                    EN
+                </button>
+                <button class="language-tab @(activeLanguage == "fr" ? "active" : "")"
+                        @onclick="() => activeLanguage = &quot;fr&quot;"
+                        type="button">
+                    FR
+                </button>
+            </div>
+            @if (activeLanguage == "en")
+            {
+                <input type="text"
+                       class="form-input"
+                       value="@Config.AriaLabelEn"
+                       @oninput="e => UpdateAriaLabel(e.Value?.ToString(), &quot;en&quot;)"
+                       placeholder="Accessible label for screen readers" />
+            }
+            else
+            {
+                <input type="text"
+                       class="form-input"
+                       value="@Config.AriaLabelFr"
+                       @oninput="e => UpdateAriaLabel(e.Value?.ToString(), &quot;fr&quot;)"
+                       placeholder="Etiquette accessible pour les lecteurs d'ecran" />
+            }
+            <div class="help-text">
+                <i class="bi bi-info-circle"></i>
+                <span>Screen readers announce this instead of the visible label</span>
+            </div>
+        </div>
+
+        @* ARIA Described By *@
+        <div class="form-group">
+            <label class="form-label">
+                <i class="bi bi-link-45deg"></i>
+                Described By (Field Reference)
+            </label>
+            <div class="field-reference-select">
+                <input type="text"
+                       class="field-reference-input"
+                       value="@Config.AriaDescribedBy"
+                       @oninput="e => UpdateAriaDescribedBy(e.Value?.ToString())"
+                       placeholder="Reference another field's ID" />
+                <button class="field-reference-btn" @onclick="OpenFieldSelector" type="button">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+            <div class="help-text">
+                <i class="bi bi-info-circle"></i>
+                <span>Link to a field that provides additional description</span>
+            </div>
+        </div>
+
+        @* ARIA Role *@
+        <div class="form-group">
+            <label class="form-label">
+                <i class="bi bi-diagram-2"></i>
+                ARIA Role
+            </label>
+            <select class="form-select"
+                    value="@Config.AriaRole"
+                    @onchange="e => UpdateAriaRole(e.Value?.ToString())">
+                <option value="">Default (based on field type)</option>
+                @foreach (var role in AvailableRoles)
+                {
+                    <option value="@role.Value" selected="@(Config.AriaRole == role.Value)">
+                        @role.Label
+                    </option>
+                }
+            </select>
+        </div>
+
+        @* Live Region Toggle *@
+        <div class="form-group">
+            <label class="form-label">
+                <i class="bi bi-broadcast"></i>
+                Live Region
+            </label>
+            <div class="toggle-row">
+                <div class="toggle-label">
+                    <div class="toggle-icon">
+                        <i class="bi bi-megaphone"></i>
+                    </div>
+                    <div>
+                        <div class="toggle-text">Announce Changes</div>
+                        <div class="toggle-desc">Screen readers announce when value changes</div>
+                    </div>
+                </div>
+                <div class="toggle-switch @(Config.AriaLive ? "active" : "")"
+                     @onclick="ToggleAriaLive"></div>
+            </div>
+        </div>
+
+        @* ARIA Preview *@
+        <div class="aria-preview">
+            <div class="aria-preview-title">
+                <i class="bi bi-code-slash"></i>
+                Generated Attributes
+            </div>
+            <div class="aria-preview-code">@((MarkupString)GeneratedAttributesHtml)</div>
+        </div>
+
+        @* Quick Actions *@
+        <div class="quick-actions">
+            <button class="quick-action-btn" @onclick="AutoGenerate" type="button">
+                <i class="bi bi-magic"></i>
+                Auto-Generate
+            </button>
+            <button class="quick-action-btn" @onclick="CopyToFrench" type="button">
+                <i class="bi bi-translate"></i>
+                Copy to French
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <p>Select a field to configure accessibility</p>
+        </div>
+    }
+</PropertySection>
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private FormFieldSchema? Field => EditorState.SelectedField;
+    private IEnumerable<FormFieldSchema> AllFields => EditorState.CurrentModule?.Fields ?? Array.Empty<FormFieldSchema>();
+
+    private string activeLanguage = "en";
+
+    private AccessibilityConfig Config => Field?.Accessibility ?? new AccessibilityConfig();
+
+    // Accessibility Score
+    private int Score => CalculateScore();
+    private string ScoreGrade => Score >= 80 ? "A+" : (Score >= 60 ? "B" : "C");
+    private string ScoreClass => Score >= 80 ? "excellent" : (Score >= 60 ? "good" : "needs-work");
+    private string ScoreTitle => Score >= 80 ? "Excellent Accessibility" : (Score >= 60 ? "Good Accessibility" : "Needs Improvement");
+    private string ScoreDescription => Score >= 80
+        ? "All required ARIA attributes configured"
+        : (Score >= 60 ? "Most accessibility requirements met" : "Missing required accessibility attributes");
+
+    // Available ARIA Roles
+    private static readonly AriaRoleOption[] AvailableRoles = new[]
+    {
+        new AriaRoleOption("textbox", "textbox - Text input"),
+        new AriaRoleOption("searchbox", "searchbox - Search input"),
+        new AriaRoleOption("spinbutton", "spinbutton - Number input"),
+        new AriaRoleOption("combobox", "combobox - Autocomplete"),
+        new AriaRoleOption("listbox", "listbox - Select list"),
+        new AriaRoleOption("menu", "menu - Menu"),
+        new AriaRoleOption("radiogroup", "radiogroup - Radio options"),
+        new AriaRoleOption("checkbox", "checkbox - Checkbox"),
+        new AriaRoleOption("switch", "switch - Toggle"),
+        new AriaRoleOption("slider", "slider - Range slider")
+    };
+
+    protected override void OnInitialized()
+    {
+        EditorState.OnFieldSelected += OnFieldSelected;
+        EditorState.OnModuleChanged += OnModuleChanged;
+    }
+
+    private void OnFieldSelected(string? fieldId)
+    {
+        activeLanguage = "en";
+        StateHasChanged();
+    }
+
+    private void OnModuleChanged()
+    {
+        StateHasChanged();
+    }
+
+    private int CalculateScore()
+    {
+        int score = 0;
+
+        // English label: 25 points
+        if (!string.IsNullOrWhiteSpace(Config.AriaLabelEn)) score += 25;
+
+        // French label: 25 points
+        if (!string.IsNullOrWhiteSpace(Config.AriaLabelFr)) score += 25;
+
+        // Described by: 20 points
+        if (!string.IsNullOrWhiteSpace(Config.AriaDescribedBy)) score += 20;
+
+        // Role defined: 15 points
+        if (!string.IsNullOrWhiteSpace(Config.AriaRole)) score += 15;
+
+        // Live region considered: 15 points
+        if (Config.AriaLive || FieldDoesNotNeedLive()) score += 15;
+
+        return score;
+    }
+
+    private bool FieldDoesNotNeedLive()
+    {
+        if (Field == null) return true;
+        // Static fields don't need live regions
+        var staticTypes = new[] { "Hidden", "Section", "File", "FileUpload", "Image", "Signature" };
+        return staticTypes.Contains(Field.FieldType);
+    }
+
+    private string GeneratedAttributesHtml
+    {
+        get
+        {
+            var lines = new List<string> { "&lt;input" };
+
+            if (!string.IsNullOrWhiteSpace(Config.AriaLabelEn))
+                lines.Add($"  <span class=\"attr-name\">aria-label</span>=<span class=\"attr-value\">\"{EscapeHtml(Config.AriaLabelEn)}\"</span>");
+
+            if (!string.IsNullOrWhiteSpace(Config.AriaDescribedBy))
+                lines.Add($"  <span class=\"attr-name\">aria-describedby</span>=<span class=\"attr-value\">\"{EscapeHtml(Config.AriaDescribedBy)}\"</span>");
+
+            if (!string.IsNullOrWhiteSpace(Config.AriaRole))
+                lines.Add($"  <span class=\"attr-name\">role</span>=<span class=\"attr-value\">\"{EscapeHtml(Config.AriaRole)}\"</span>");
+
+            if (Config.AriaLive)
+                lines.Add($"  <span class=\"attr-name\">aria-live</span>=<span class=\"attr-value\">\"polite\"</span>");
+
+            lines.Add("/&gt;");
+            return string.Join("\n", lines);
+        }
+    }
+
+    private static string EscapeHtml(string text)
+    {
+        return text.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;");
+    }
+
+    private void UpdateAriaLabel(string? value, string language)
+    {
+        if (Field == null) return;
+
+        var newConfig = language == "en"
+            ? Config with { AriaLabelEn = value }
+            : Config with { AriaLabelFr = value };
+
+        UpdateConfig(newConfig);
+    }
+
+    private void UpdateAriaDescribedBy(string? value)
+    {
+        if (Field == null) return;
+
+        var newConfig = Config with { AriaDescribedBy = value };
+        UpdateConfig(newConfig);
+    }
+
+    private void UpdateAriaRole(string? value)
+    {
+        if (Field == null) return;
+
+        var newConfig = Config with { AriaRole = string.IsNullOrEmpty(value) ? null : value };
+        UpdateConfig(newConfig);
+    }
+
+    private void ToggleAriaLive()
+    {
+        if (Field == null) return;
+
+        var newConfig = Config with { AriaLive = !Config.AriaLive };
+        UpdateConfig(newConfig);
+    }
+
+    private void UpdateConfig(AccessibilityConfig newConfig)
+    {
+        if (Field == null) return;
+
+        var updated = Field with { Accessibility = newConfig };
+        EditorState.UpdateField(updated);
+    }
+
+    private void AutoGenerate()
+    {
+        if (Field == null) return;
+
+        // Generate sensible defaults based on field properties
+        var labelEn = GenerateDefaultLabel(Field, "en");
+        var labelFr = GenerateDefaultLabel(Field, "fr");
+        var role = GetDefaultRole(Field.FieldType);
+
+        var newConfig = new AccessibilityConfig
+        {
+            AriaLabelEn = string.IsNullOrWhiteSpace(Config.AriaLabelEn) ? labelEn : Config.AriaLabelEn,
+            AriaLabelFr = string.IsNullOrWhiteSpace(Config.AriaLabelFr) ? labelFr : Config.AriaLabelFr,
+            AriaDescribedBy = Config.AriaDescribedBy,
+            AriaRole = string.IsNullOrWhiteSpace(Config.AriaRole) ? role : Config.AriaRole,
+            AriaLive = Config.AriaLive
+        };
+
+        UpdateConfig(newConfig);
+    }
+
+    private void CopyToFrench()
+    {
+        if (Field == null) return;
+
+        // Simple copy - in production, use translation service
+        if (!string.IsNullOrWhiteSpace(Config.AriaLabelEn))
+        {
+            var newConfig = Config with { AriaLabelFr = Config.AriaLabelEn };
+            UpdateConfig(newConfig);
+            activeLanguage = "fr";
+        }
+    }
+
+    private void OpenFieldSelector()
+    {
+        // TODO: Open field selector modal
+    }
+
+    private static string GenerateDefaultLabel(FormFieldSchema field, string language)
+    {
+        var label = language == "en" ? field.LabelEn : field.LabelFr;
+        if (string.IsNullOrWhiteSpace(label)) label = field.LabelEn ?? field.Id;
+
+        // Add context based on field type
+        return field.FieldType switch
+        {
+            "Email" => language == "en" ? $"Enter your {label}" : $"Entrez votre {label}",
+            "Phone" or "Telephone" => language == "en" ? $"Enter your {label}" : $"Entrez votre {label}",
+            "Date" or "DatePicker" => language == "en" ? $"Select {label}" : $"Selectionnez {label}",
+            "DropDown" or "Select" => language == "en" ? $"Choose {label}" : $"Choisissez {label}",
+            "Checkbox" => language == "en" ? $"Check if {label}" : $"Cochez si {label}",
+            "File" or "FileUpload" => language == "en" ? $"Upload {label}" : $"Telecharger {label}",
+            _ => language == "en" ? $"Enter {label}" : $"Entrez {label}"
+        };
+    }
+
+    private static string? GetDefaultRole(string fieldType) => fieldType switch
+    {
+        "TextBox" or "Text" => "textbox",
+        "Email" => "textbox",
+        "Phone" or "Telephone" => "textbox",
+        "Number" => "spinbutton",
+        "DropDown" or "Select" => "listbox",
+        "MultiSelect" => "listbox",
+        "Radio" => "radiogroup",
+        "Checkbox" => "checkbox",
+        "Toggle" => "switch",
+        "TextArea" => "textbox",
+        "Date" or "DatePicker" => "textbox",
+        "Time" => "textbox",
+        "Search" => "searchbox",
+        _ => null
+    };
+
+    public void Dispose()
+    {
+        EditorState.OnFieldSelected -= OnFieldSelected;
+        EditorState.OnModuleChanged -= OnModuleChanged;
+    }
+
+    private record AriaRoleOption(string Value, string Label);
+}

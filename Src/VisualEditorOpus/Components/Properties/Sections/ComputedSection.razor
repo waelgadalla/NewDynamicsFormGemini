@@ -1,0 +1,423 @@
+@* Computed section - Formula-based calculated fields *@
+@implements IDisposable
+@using System.Text.RegularExpressions
+@using DynamicForms.Core.V4.Schemas
+@using VisualEditorOpus.Components.Editor.Modals
+
+<PropertySection Title="Computed Value" Icon="bi-calculator">
+    @if (Field is not null)
+    {
+        @* Status Badge *@
+        <div class="computed-status @StatusClass">
+            <i class="bi bi-@StatusIcon"></i>
+            <div class="computed-status-content">
+                <div class="computed-status-title">@StatusTitle</div>
+                <div class="computed-status-desc">@StatusDescription</div>
+            </div>
+        </div>
+
+        @if (HasFormula)
+        {
+            @* Formula Display *@
+            <div class="formula-display @(HasError ? "has-error" : "")">
+                <div class="formula-code">
+                    @((MarkupString)HighlightedFormula)
+                </div>
+
+                @if (DependentFields.Any())
+                {
+                    <div class="dependent-fields">
+                        <div class="dependent-fields-label">Dependent Fields</div>
+                        <div class="dependent-field-tags">
+                            @foreach (var field in DependentFields)
+                            {
+                                <span class="dependent-field-tag @(field.Exists ? "linked" : "missing")">
+                                    <i class="bi bi-@(field.Exists ? "link-45deg" : "exclamation-circle")"></i>
+                                    @field.Label
+                                </span>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @* Error Display *@
+            @if (HasError)
+            {
+                <div class="formula-error">
+                    <i class="bi bi-@ErrorIcon"></i>
+                    <div class="formula-error-content">
+                        <div class="formula-error-title">@ErrorTitle</div>
+                        <div class="formula-error-message">@ErrorMessage</div>
+                    </div>
+                </div>
+            }
+
+            @* Live Preview *@
+            @if (!HasError && PreviewValue != null)
+            {
+                <div class="formula-preview">
+                    <div class="preview-label">
+                        <i class="bi bi-eye"></i>
+                        Live Preview
+                    </div>
+                    <div class="preview-value">@PreviewValue</div>
+                    @if (PreviewCalculation != null)
+                    {
+                        <div class="preview-calculation">@PreviewCalculation</div>
+                    }
+                </div>
+            }
+
+            @* Action Buttons *@
+            <div class="formula-actions">
+                <button class="action-btn primary" @onclick="OpenFormulaEditor" type="button">
+                    <i class="bi bi-pencil"></i>
+                    @(HasError ? "Fix Formula" : "Edit Formula")
+                </button>
+                <button class="action-btn danger" @onclick="RemoveFormula" type="button">
+                    <i class="bi bi-trash"></i>
+                    Remove
+                </button>
+            </div>
+        }
+        else
+        {
+            @* Add Formula Button *@
+            <button class="edit-formula-btn" @onclick="OpenFormulaEditor" type="button">
+                <i class="bi bi-plus-lg"></i>
+                Add Formula
+            </button>
+
+            @* Quick Templates *@
+            <div class="formula-examples">
+                <div class="examples-title">
+                    <i class="bi bi-lightbulb"></i>
+                    Quick Templates
+                </div>
+                @foreach (var template in FormulaTemplates)
+                {
+                    <div class="example-item" @onclick="() => ApplyTemplate(template)">
+                        <div class="example-icon">
+                            <i class="bi bi-@template.Icon"></i>
+                        </div>
+                        <div class="example-content">
+                            <div class="example-name">@template.Name</div>
+                            <div class="example-formula">@template.Formula</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    }
+    else
+    {
+        <div class="empty-state">
+            <p>Select a field to configure computed value</p>
+        </div>
+    }
+</PropertySection>
+
+@* Formula Editor Modal *@
+<FormulaEditorModal @bind-IsOpen="showFormulaEditor"
+                    ExistingFormula="@Field?.ComputedValue"
+                    CurrentModule="@CurrentModule"
+                    OnSave="SaveFormula"
+                    OnCancel="@(() => showFormulaEditor = false)" />
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private FormFieldSchema? Field => EditorState.SelectedField;
+    private FormModuleSchema? CurrentModule => EditorState.CurrentModule;
+    private IEnumerable<FormFieldSchema> AllFields => CurrentModule?.Fields ?? Array.Empty<FormFieldSchema>();
+
+    private bool showFormulaEditor;
+    private string? templateToApply;
+
+    private bool HasFormula => Field?.ComputedValue != null && !string.IsNullOrEmpty(Field.ComputedValue.Expression);
+    private bool HasError => ValidationError != null;
+    private FormulaValidationResult? ValidationError { get; set; }
+
+    // Dependent fields analysis
+    private IEnumerable<DependentFieldInfo> DependentFields { get; set; } = [];
+
+    // Preview
+    private string? PreviewValue { get; set; }
+    private string? PreviewCalculation { get; set; }
+
+    // Status properties
+    private string StatusClass => HasError ? "has-error" : (HasFormula ? "has-formula" : "no-formula");
+    private string StatusIcon => HasError ? "exclamation-circle-fill" : (HasFormula ? "check-circle-fill" : "calculator");
+    private string StatusTitle => HasError ? "Formula Error" : (HasFormula ? "Formula Active" : "No Formula Defined");
+    private string StatusDescription => HasError
+        ? "There's a problem with your formula"
+        : (HasFormula
+            ? $"Value computed from {DependentFields.Count()} dependent field{(DependentFields.Count() != 1 ? "s" : "")}"
+            : "Add a formula to compute this field's value automatically");
+
+    // Error display
+    private string ErrorIcon => ValidationError?.ErrorType switch
+    {
+        FormulaErrorType.CircularReference => "arrow-repeat",
+        FormulaErrorType.MissingField => "exclamation-triangle-fill",
+        FormulaErrorType.SyntaxError => "code-slash",
+        _ => "exclamation-triangle-fill"
+    };
+    private string ErrorTitle => ValidationError?.ErrorType switch
+    {
+        FormulaErrorType.CircularReference => "Circular Reference Detected",
+        FormulaErrorType.MissingField => "Reference Error",
+        FormulaErrorType.SyntaxError => "Syntax Error",
+        _ => "Validation Error"
+    };
+    private string? ErrorMessage => ValidationError?.Message;
+
+    // Syntax highlighted formula
+    private string HighlightedFormula => HighlightFormula(Field?.ComputedValue?.Expression ?? "");
+
+    // Formula templates
+    private static readonly FormulaTemplate[] FormulaTemplates = new[]
+    {
+        new FormulaTemplate("plus-slash-minus", "Sum Fields", "[field1] + [field2]"),
+        new FormulaTemplate("percent", "Percentage", "[field1] * 0.1"),
+        new FormulaTemplate("type", "Concatenate", "CONCAT([first], \" \", [last])"),
+        new FormulaTemplate("question-circle", "Conditional", "IF([condition], [value1], [value2])")
+    };
+
+    protected override void OnInitialized()
+    {
+        EditorState.OnFieldSelected += OnFieldSelected;
+        EditorState.OnModuleChanged += OnModuleChanged;
+        RefreshData();
+    }
+
+    private void OnFieldSelected(string? fieldId)
+    {
+        RefreshData();
+        StateHasChanged();
+    }
+
+    private void OnModuleChanged()
+    {
+        RefreshData();
+        StateHasChanged();
+    }
+
+    private void RefreshData()
+    {
+        if (HasFormula)
+        {
+            ValidateFormula();
+            BuildDependentFields();
+            CalculatePreview();
+        }
+        else
+        {
+            ValidationError = null;
+            DependentFields = [];
+            PreviewValue = null;
+            PreviewCalculation = null;
+        }
+    }
+
+    private void ValidateFormula()
+    {
+        if (Field?.ComputedValue == null) return;
+
+        var expression = Field.ComputedValue.Expression;
+
+        // Check for circular references
+        if (HasCircularReference(Field.Id, Field.ComputedValue.DependentFieldIds))
+        {
+            ValidationError = new FormulaValidationResult(
+                FormulaErrorType.CircularReference,
+                "This formula references itself through a dependency chain");
+            return;
+        }
+
+        // Check for missing field references
+        var missingFields = FindMissingFields(expression);
+        if (missingFields.Any())
+        {
+            ValidationError = new FormulaValidationResult(
+                FormulaErrorType.MissingField,
+                $"Field \"{missingFields.First()}\" does not exist in this module");
+            return;
+        }
+
+        // Basic syntax validation
+        if (!IsValidSyntax(expression))
+        {
+            ValidationError = new FormulaValidationResult(
+                FormulaErrorType.SyntaxError,
+                "Invalid formula syntax - unbalanced brackets");
+            return;
+        }
+
+        ValidationError = null;
+    }
+
+    private void BuildDependentFields()
+    {
+        if (Field?.ComputedValue == null) return;
+
+        var dependentIds = Field.ComputedValue.DependentFieldIds ?? Array.Empty<string>();
+        DependentFields = dependentIds.Select(id =>
+        {
+            var field = AllFields.FirstOrDefault(f => f.Id == id);
+            return new DependentFieldInfo
+            {
+                Id = id,
+                Label = field?.LabelEn ?? id,
+                Exists = field != null
+            };
+        }).ToList();
+    }
+
+    private void CalculatePreview()
+    {
+        // In a real implementation, this would evaluate the formula
+        // with sample/current values from dependent fields
+        if (!HasError && HasFormula && DependentFields.Any())
+        {
+            // Placeholder values for demonstration
+            PreviewValue = "$425.00";
+            PreviewCalculation = "5 x $100.00 x (1 - 0.15) = $425.00";
+        }
+        else
+        {
+            PreviewValue = null;
+            PreviewCalculation = null;
+        }
+    }
+
+    private bool HasCircularReference(string fieldId, string[]? dependentIds)
+    {
+        if (dependentIds == null || dependentIds.Length == 0) return false;
+
+        var visited = new HashSet<string> { fieldId };
+        var queue = new Queue<string>(dependentIds);
+
+        while (queue.Count > 0)
+        {
+            var current = queue.Dequeue();
+            if (visited.Contains(current)) return true;
+            visited.Add(current);
+
+            var field = AllFields.FirstOrDefault(f => f.Id == current);
+            var deps = field?.ComputedValue?.DependentFieldIds ?? Array.Empty<string>();
+            foreach (var dep in deps)
+            {
+                queue.Enqueue(dep);
+            }
+        }
+
+        return false;
+    }
+
+    private IEnumerable<string> FindMissingFields(string expression)
+    {
+        // Extract field references like [FieldName]
+        var fieldPattern = new Regex(@"\[([^\]]+)\]");
+        var matches = fieldPattern.Matches(expression);
+
+        return matches
+            .Select(m => m.Groups[1].Value)
+            .Where(name => !AllFields.Any(f =>
+                f.LabelEn?.Equals(name, StringComparison.OrdinalIgnoreCase) == true ||
+                f.Id.Equals(name, StringComparison.OrdinalIgnoreCase)));
+    }
+
+    private bool IsValidSyntax(string expression)
+    {
+        // Check for balanced brackets
+        var openBrackets = expression.Count(c => c == '[');
+        var closeBrackets = expression.Count(c => c == ']');
+        if (openBrackets != closeBrackets) return false;
+
+        // Check for balanced parentheses
+        var openParens = expression.Count(c => c == '(');
+        var closeParens = expression.Count(c => c == ')');
+        return openParens == closeParens;
+    }
+
+    private string HighlightFormula(string expression)
+    {
+        if (string.IsNullOrEmpty(expression)) return "";
+
+        // Highlight field references [FieldName]
+        expression = Regex.Replace(expression, @"\[([^\]]+)\]",
+            m => $"[<span class=\"field-ref\">{m.Groups[1].Value}</span>]");
+
+        // Highlight operators
+        expression = Regex.Replace(expression, @"(\+|\-|\*|\/|\%|\^)",
+            m => $"<span class=\"operator\">{m.Value}</span>");
+
+        // Highlight numbers
+        expression = Regex.Replace(expression, @"\b(\d+\.?\d*)\b",
+            m => $"<span class=\"number\">{m.Value}</span>");
+
+        // Highlight keywords/functions
+        var functions = new[] { "SUM", "AVG", "IF", "CONCAT", "MIN", "MAX", "ROUND", "ABS", "FLOOR", "CEIL" };
+        foreach (var func in functions)
+        {
+            expression = Regex.Replace(expression, $@"\b({func})\b",
+                m => $"<span class=\"keyword\">{m.Value}</span>",
+                RegexOptions.IgnoreCase);
+        }
+
+        return expression;
+    }
+
+    private void OpenFormulaEditor()
+    {
+        showFormulaEditor = true;
+    }
+
+    private async Task SaveFormula(ComputedFormula formula)
+    {
+        if (Field is null) return;
+
+        var updated = Field with { ComputedValue = formula };
+        EditorState.UpdateField(updated);
+        showFormulaEditor = false;
+        RefreshData();
+    }
+
+    private void RemoveFormula()
+    {
+        if (Field is null) return;
+
+        var updated = Field with { ComputedValue = null };
+        EditorState.UpdateField(updated);
+        RefreshData();
+    }
+
+    private void ApplyTemplate(FormulaTemplate template)
+    {
+        // For now, open the formula editor - the template could be pre-filled
+        // In a more advanced implementation, we could pass the template to the modal
+        showFormulaEditor = true;
+    }
+
+    public void Dispose()
+    {
+        EditorState.OnFieldSelected -= OnFieldSelected;
+        EditorState.OnModuleChanged -= OnModuleChanged;
+    }
+
+    // Helper types
+    private record DependentFieldInfo
+    {
+        public string Id { get; init; } = "";
+        public string Label { get; init; } = "";
+        public bool Exists { get; init; }
+    }
+
+    private record FormulaTemplate(string Icon, string Name, string Formula);
+
+    private record FormulaValidationResult(FormulaErrorType ErrorType, string Message);
+
+    private enum FormulaErrorType { SyntaxError, MissingField, CircularReference }
+}

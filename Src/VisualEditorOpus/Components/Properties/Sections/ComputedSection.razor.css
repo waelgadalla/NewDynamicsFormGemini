@@ -1,0 +1,387 @@
+/* ===== COMPUTED SECTION ===== */
+
+/* Status Badge */
+.computed-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    margin-bottom: 16px;
+}
+
+.computed-status.no-formula {
+    background: var(--bg-tertiary);
+}
+
+.computed-status.has-formula {
+    background: var(--primary-light);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.computed-status.has-error {
+    background: var(--danger-light);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.computed-status i {
+    font-size: 18px;
+}
+
+.computed-status.no-formula i {
+    color: var(--text-muted);
+}
+
+.computed-status.has-formula i {
+    color: var(--primary);
+}
+
+.computed-status.has-error i {
+    color: var(--danger);
+}
+
+.computed-status-content {
+    flex: 1;
+}
+
+.computed-status-title {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.computed-status.no-formula .computed-status-title {
+    color: var(--text-secondary);
+}
+
+.computed-status.has-formula .computed-status-title {
+    color: var(--primary);
+}
+
+.computed-status.has-error .computed-status-title {
+    color: var(--danger);
+}
+
+.computed-status-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* Formula Display */
+.formula-display {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    margin-bottom: 16px;
+}
+
+.formula-display.has-error {
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.formula-code {
+    font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+    font-size: 13px;
+    color: var(--text-primary);
+    background: var(--bg-tertiary);
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.formula-code .keyword {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.formula-code .field-ref {
+    color: var(--success);
+}
+
+.formula-code .operator {
+    color: var(--warning);
+}
+
+.formula-code .number {
+    color: #F472B6;
+}
+
+.formula-code .string {
+    color: #34D399;
+}
+
+/* Dependent Fields */
+.dependent-fields {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+}
+
+.dependent-fields-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.dependent-field-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.dependent-field-tag {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    background: var(--bg-tertiary);
+    border-radius: 12px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.dependent-field-tag i {
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
+.dependent-field-tag.linked {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.dependent-field-tag.linked i {
+    color: var(--primary);
+}
+
+.dependent-field-tag.missing {
+    background: var(--danger-light);
+    color: var(--danger);
+}
+
+.dependent-field-tag.missing i {
+    color: var(--danger);
+}
+
+/* Formula Error */
+.formula-error {
+    display: flex;
+    gap: 10px;
+    padding: 12px;
+    background: var(--danger-light);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: var(--radius-md);
+    margin-bottom: 12px;
+}
+
+.formula-error i {
+    color: var(--danger);
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.formula-error-content {
+    flex: 1;
+}
+
+.formula-error-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--danger);
+}
+
+.formula-error-message {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* Formula Preview */
+.formula-preview {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    margin-bottom: 16px;
+}
+
+.preview-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.preview-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.preview-calculation {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* Add Formula Button */
+.edit-formula-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px;
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.edit-formula-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-light);
+}
+
+.edit-formula-btn i {
+    font-size: 16px;
+}
+
+/* Formula Examples */
+.formula-examples {
+    margin-top: 16px;
+    padding: 14px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+}
+
+.examples-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.example-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.example-item:last-child {
+    margin-bottom: 0;
+}
+
+.example-item:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.example-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.example-item:hover .example-icon {
+    background: var(--primary);
+    color: white;
+}
+
+.example-content {
+    flex: 1;
+}
+
+.example-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.example-formula {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: monospace;
+}
+
+/* Action Buttons */
+.formula-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.action-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-light);
+}
+
+.action-btn.primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.action-btn.primary:hover {
+    background: var(--primary-hover);
+}
+
+.action-btn.danger:hover {
+    border-color: var(--danger);
+    color: var(--danger);
+    background: var(--danger-light);
+}
+
+/* Empty State */
+.empty-state {
+    padding: 24px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+}
