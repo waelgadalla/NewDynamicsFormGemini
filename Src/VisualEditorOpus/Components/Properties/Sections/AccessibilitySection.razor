@@ -24,12 +24,12 @@
             </label>
             <div class="language-tabs">
                 <button class="language-tab @(activeLanguage == "en" ? "active" : "")"
-                        @onclick="() => activeLanguage = &quot;en&quot;"
+                        @onclick='() => activeLanguage = "en"'
                         type="button">
                     EN
                 </button>
                 <button class="language-tab @(activeLanguage == "fr" ? "active" : "")"
-                        @onclick="() => activeLanguage = &quot;fr&quot;"
+                        @onclick='() => activeLanguage = "fr"'
                         type="button">
                     FR
                 </button>
@@ -39,7 +39,7 @@
                 <input type="text"
                        class="form-input"
                        value="@Config.AriaLabelEn"
-                       @oninput="e => UpdateAriaLabel(e.Value?.ToString(), &quot;en&quot;)"
+                       @oninput='e => UpdateAriaLabel(e.Value?.ToString(), "en")'
                        placeholder="Accessible label for screen readers" />
             }
             else
@@ -47,7 +47,7 @@
                 <input type="text"
                        class="form-input"
                        value="@Config.AriaLabelFr"
-                       @oninput="e => UpdateAriaLabel(e.Value?.ToString(), &quot;fr&quot;)"
+                       @oninput='e => UpdateAriaLabel(e.Value?.ToString(), "fr")'
                        placeholder="Etiquette accessible pour les lecteurs d'ecran" />
             }
             <div class="help-text">
@@ -166,19 +166,19 @@
         ? "All required ARIA attributes configured"
         : (Score >= 60 ? "Most accessibility requirements met" : "Missing required accessibility attributes");
 
-    // Available ARIA Roles
-    private static readonly AriaRoleOption[] AvailableRoles = new[]
+    // Available ARIA Roles - using tuple array instead of nested type
+    private static readonly (string Value, string Label)[] AvailableRoles = new[]
     {
-        new AriaRoleOption("textbox", "textbox - Text input"),
-        new AriaRoleOption("searchbox", "searchbox - Search input"),
-        new AriaRoleOption("spinbutton", "spinbutton - Number input"),
-        new AriaRoleOption("combobox", "combobox - Autocomplete"),
-        new AriaRoleOption("listbox", "listbox - Select list"),
-        new AriaRoleOption("menu", "menu - Menu"),
-        new AriaRoleOption("radiogroup", "radiogroup - Radio options"),
-        new AriaRoleOption("checkbox", "checkbox - Checkbox"),
-        new AriaRoleOption("switch", "switch - Toggle"),
-        new AriaRoleOption("slider", "slider - Range slider")
+        ("textbox", "textbox - Text input"),
+        ("searchbox", "searchbox - Search input"),
+        ("spinbutton", "spinbutton - Number input"),
+        ("combobox", "combobox - Autocomplete"),
+        ("listbox", "listbox - Select list"),
+        ("menu", "menu - Menu"),
+        ("radiogroup", "radiogroup - Radio options"),
+        ("checkbox", "checkbox - Checkbox"),
+        ("switch", "switch - Toggle"),
+        ("slider", "slider - Range slider")
     };
 
     protected override void OnInitialized()
@@ -379,6 +379,4 @@
         EditorState.OnFieldSelected -= OnFieldSelected;
         EditorState.OnModuleChanged -= OnModuleChanged;
     }
-
-    private record AriaRoleOption(string Value, string Label);
 }

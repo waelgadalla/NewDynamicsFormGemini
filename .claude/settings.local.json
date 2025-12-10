@@ -7,7 +7,11 @@
       "Bash(mkdir -p:*)",
       "Bash(dir \"C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormGemini\\Src\\VisualEditorOpus\\Components\\Editor\")",
       "Bash(dir:*)",
-      "Bash(dotnet build:*)"
+      "Bash(dotnet build:*)",
+      "Bash(findstr:*)",
+      "Bash(Get-Content \"C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormGemini\\Src\\VisualEditorOpus\\Components\\Properties\\Sections\\AccessibilitySection.razor\")",
+      "Bash(Select-String -Pattern \"^\\s*\\}\" -AllMatches)",
+      "Bash(Select-Object -Last 15)"
     ],
     "deny": [],
     "ask": []

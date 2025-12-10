@@ -86,7 +86,7 @@
                 <input type="checkbox"
                        checked="@(ValueString == "true")"
                        @onchange="e => OnValueChange.InvokeAsync(((bool)(e.Value ?? false)).ToString().ToLower())" />
-                <span>@GetLabel(Field.CheckboxTextEn, Field.CheckboxTextFr)</span>
+                <span>@GetLabel(Field.LabelEn, Field.LabelFr)</span>
             </label>
             break;
 

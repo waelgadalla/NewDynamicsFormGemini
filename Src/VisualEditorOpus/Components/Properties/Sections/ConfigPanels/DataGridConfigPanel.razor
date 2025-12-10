@@ -45,13 +45,13 @@
         </label>
         <div class="config-options-row">
             <label class="config-option @(Config.EditorMode == "Modal" ? "selected" : "")"
-                   @onclick="() => SetEditorMode(\"Modal\")">
+                   @onclick='() => SetEditorMode("Modal")'>
                 <i class="bi bi-window"></i>
                 <span>Modal</span>
                 <small>Edit in popup</small>
             </label>
             <label class="config-option @(Config.EditorMode == "Inline" ? "selected" : "")"
-                   @onclick="() => SetEditorMode(\"Inline\")">
+                   @onclick='() => SetEditorMode("Inline")'>
                 <i class="bi bi-pencil-square"></i>
                 <span>Inline</span>
                 <small>Edit in row</small>
