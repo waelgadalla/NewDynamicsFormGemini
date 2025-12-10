@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E.2 Connection Drawing - Testing Guide</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: rgba(99, 102, 241, 0.1);
+            --success: #10B981;
+            --success-light: rgba(16, 185, 129, 0.1);
+            --warning: #F59E0B;
+            --warning-light: rgba(245, 158, 11, 0.1);
+            --error: #EF4444;
+            --error-light: rgba(239, 68, 68, 0.1);
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --bg-tertiary: #F3F4F6;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --border-color: #E5E7EB;
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        [data-theme="dark"] {
+            --primary: #818CF8;
+            --primary-light: rgba(129, 140, 248, 0.15);
+            --bg-primary: #1F2937;
+            --bg-secondary: #111827;
+            --bg-tertiary: #374151;
+            --text-primary: #F9FAFB;
+            --text-secondary: #D1D5DB;
+            --text-muted: #9CA3AF;
+            --border-color: #374151;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .page-title span {
+            color: var(--primary);
+        }
+
+        .theme-toggle {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--primary);
+        }
+
+        .subsection {
+            margin-bottom: 24px;
+        }
+
+        .subsection-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            transition: background 0.2s;
+        }
+
+        .checklist-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            accent-color: var(--success);
+            cursor: pointer;
+        }
+
+        .checklist-item.checked {
+            background: var(--success-light);
+        }
+
+        .checklist-item.checked .item-text {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .item-content {
+            flex: 1;
+        }
+
+        .item-text {
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .item-details {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .file-list {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-top: 12px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .file-item i {
+            color: var(--primary);
+        }
+
+        .file-status {
+            margin-left: auto;
+            padding: 2px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-created {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .status-modified {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--success);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .path-type-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 600;
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .summary-card {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            text-align: center;
+        }
+
+        .summary-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .summary-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .integration-note {
+            background: var(--warning-light);
+            border-left: 4px solid var(--warning);
+            padding: 12px 16px;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            margin: 16px 0;
+        }
+
+        .integration-note-title {
+            font-weight: 600;
+            color: var(--warning);
+            margin-bottom: 4px;
+        }
+
+        .integration-note-text {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin-top: 12px;
+        }
+
+        .code-comment { color: #6a9955; }
+        .code-keyword { color: #569cd6; }
+        .code-string { color: #ce9178; }
+        .code-type { color: #4ec9b0; }
+
+        .path-preview {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .path-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .path-card-title {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        .path-card svg {
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-header">
+        <h1 class="page-title">E.2 <span>Connection Drawing</span> - Testing Guide</h1>
+        <button class="theme-toggle" onclick="toggleTheme()">
+            <i class="bi bi-moon"></i>
+            Toggle Theme
+        </button>
+    </div>
+
+    <!-- Progress Summary -->
+    <div class="section">
+        <h2 class="section-title">
+            <i class="bi bi-bar-chart-fill"></i>
+            Testing Progress
+        </h2>
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="summary-value" id="completedCount">0</div>
+                <div class="summary-label">Completed</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-value" id="totalCount">0</div>
+                <div class="summary-label">Total Tests</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-value" id="percentComplete">0%</div>
+                <div class="summary-label">Progress</div>
+            </div>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+        </div>
+        <div class="progress-text">
+            <span>Testing Progress</span>
+            <span id="progressPercent">0%</span>
+        </div>
+    </div>
+
+    <!-- Path Types Preview -->
+    <div class="section">
+        <h2 class="section-title">
+            <i class="bi bi-bezier2"></i>
+            Connection Path Types
+        </h2>
+        <div class="path-preview">
+            <div class="path-card">
+                <div class="path-card-title">Bezier</div>
+                <svg width="100" height="60">
+                    <defs>
+                        <marker id="arrowBezier" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L8,3 z" fill="#6B7280"/>
+                        </marker>
+                    </defs>
+                    <path d="M10,10 C10,35 90,25 90,50" stroke="#6B7280" stroke-width="2" fill="none" marker-end="url(#arrowBezier)"/>
+                </svg>
+            </div>
+            <div class="path-card">
+                <div class="path-card-title">Step</div>
+                <svg width="100" height="60">
+                    <defs>
+                        <marker id="arrowStep" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L8,3 z" fill="#6B7280"/>
+                        </marker>
+                    </defs>
+                    <path d="M10,10 L10,30 L90,30 L90,50" stroke="#6B7280" stroke-width="2" fill="none" marker-end="url(#arrowStep)"/>
+                </svg>
+            </div>
+            <div class="path-card">
+                <div class="path-card-title">Smooth Step</div>
+                <svg width="100" height="60">
+                    <defs>
+                        <marker id="arrowSmooth" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L8,3 z" fill="#6B7280"/>
+                        </marker>
+                    </defs>
+                    <path d="M10,10 L10,22 Q10,30 18,30 L82,30 Q90,30 90,38 L90,50" stroke="#6B7280" stroke-width="2" fill="none" marker-end="url(#arrowSmooth)"/>
+                </svg>
+            </div>
+            <div class="path-card">
+                <div class="path-card-title">Straight</div>
+                <svg width="100" height="60">
+                    <defs>
+                        <marker id="arrowStraight" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L8,3 z" fill="#6B7280"/>
+                        </marker>
+                    </defs>
+                    <path d="M10,10 L90,50" stroke="#6B7280" stroke-width="2" fill="none" marker-end="url(#arrowStraight)"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 1: Manual Testing Steps -->
+    <div class="section">
+        <h2 class="section-title">
+            <i class="bi bi-list-check"></i>
+            Section 1: Manual Testing Steps
+        </h2>
+
+        <!-- Path Type Testing -->
+        <div class="subsection">
+            <h3 class="subsection-title">Path Type Rendering</h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Bezier curves render with smooth S-curve</div>
+                        <div class="item-details">Control points at 50% distance create smooth curves</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Step paths render with 90-degree angles</div>
+                        <div class="item-details">Horizontal segment at midpoint between nodes</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Smooth Step paths render with rounded corners</div>
+                        <div class="item-details">10px radius on corners, uses quadratic bezier</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Straight lines render directly between handles</div>
+                        <div class="item-details">Simple line from source to target</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Arrow Markers Testing -->
+        <div class="subsection">
+            <h3 class="subsection-title">Arrow Markers</h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Arrow heads point toward target node</div>
+                        <div class="item-details">marker-end attribute with orient="auto"</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Default arrows are gray (#6B7280)</div>
+                        <div class="item-details">Uses arrow-default marker</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Success arrows are green (#10B981)</div>
+                        <div class="item-details">For Yes branch connections</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Warning arrows are orange (#F59E0B)</div>
+                        <div class="item-details">For No branch connections</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Active arrows are indigo (#6366F1)</div>
+                        <div class="item-details">For selected/hovered connections</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Selection and Hover Testing -->
+        <div class="subsection">
+            <h3 class="subsection-title">Selection and Hover States</h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Clicking connection selects it</div>
+                        <div class="item-details">OnSelected event fires with connection ID</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Selected connection has thicker stroke (3px)</div>
+                        <div class="item-details">Stroke changes to indigo active color</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Hover highlights connection path</div>
+                        <div class="item-details">Same styling as selected state</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Cursor changes to pointer on connection</div>
+                        <div class="item-details">pointer-events: stroke enables click detection</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Delete Button Testing -->
+        <div class="subsection">
+            <h3 class="subsection-title">Delete Button</h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Delete button appears on selection</div>
+                        <div class="item-details">Red circular button with X icon</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Delete button appears on hover</div>
+                        <div class="item-details">Same positioning as selection</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Delete button positioned at path midpoint</div>
+                        <div class="item-details">Calculated from source and target positions</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Clicking delete removes connection</div>
+                        <div class="item-details">OnDeleted event fires with connection ID</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Delete button scales on hover (1.1x)</div>
+                        <div class="item-details">Visual feedback for interaction</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Drawing Preview Testing -->
+        <div class="subsection">
+            <h3 class="subsection-title">Drawing Preview</h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Drawing shows animated dashed line</div>
+                        <div class="item-details">stroke-dasharray: 5 with animation</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Preview line follows mouse position</div>
+                        <div class="item-details">UpdateDrawing() called on mousemove</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Preview uses active arrow marker</div>
+                        <div class="item-details">Indigo arrow at end of drawing line</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Preview disappears on cancel</div>
+                        <div class="item-details">CancelDrawing() resets state</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Branch Labels Testing -->
+        <div class="subsection">
+            <h3 class="subsection-title">Branch Labels</h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Labels display for connections with Label property</div>
+                        <div class="item-details">Only shows when Label is not empty</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Labels positioned at 25% of path</div>
+                        <div class="item-details">Closer to source node</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Yes labels show green text</div>
+                        <div class="item-details">BranchType.Yes styling</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">No labels show orange text</div>
+                        <div class="item-details">BranchType.No styling</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Labels have white background with border</div>
+                        <div class="item-details">rect element behind text</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Connection Creation Testing -->
+        <div class="subsection">
+            <h3 class="subsection-title">Connection Creation</h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">StartDrawing initializes drawing state</div>
+                        <div class="item-details">Sets IsDrawing, source node, and handle</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">FinishDrawing creates new connection</div>
+                        <div class="item-details">OnConnectionCreated event fires</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Cannot connect node to itself</div>
+                        <div class="item-details">sourceNodeId != targetNodeId check</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Connection includes handle positions</div>
+                        <div class="item-details">SourceHandle and TargetHandle properties</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Section 2: Implementation Files -->
+    <div class="section">
+        <h2 class="section-title">
+            <i class="bi bi-folder-fill"></i>
+            Section 2: Implementation Files Created
+        </h2>
+
+        <div class="subsection">
+            <h3 class="subsection-title">Model Files</h3>
+            <div class="file-list">
+                <div class="file-item">
+                    <i class="bi bi-file-earmark-code"></i>
+                    <span>Models/WorkflowNodeModels.cs</span>
+                    <span class="file-status status-modified">Modified</span>
+                </div>
+            </div>
+            <p style="margin-top: 12px; color: var(--text-secondary); font-size: 13px;">
+                Added: ConnectionType enum, BranchType enum, NodePosition record, BranchType property to WorkflowConnection
+            </p>
+        </div>
+
+        <div class="subsection">
+            <h3 class="subsection-title">Component Files</h3>
+            <div class="file-list">
+                <div class="file-item">
+                    <i class="bi bi-file-earmark-code"></i>
+                    <span>Components/Workflow/ConnectionLayer.razor</span>
+                    <span class="file-status status-created">Created</span>
+                </div>
+                <div class="file-item">
+                    <i class="bi bi-file-earmark-code"></i>
+                    <span>Components/Workflow/ConnectionPath.razor</span>
+                    <span class="file-status status-created">Created</span>
+                </div>
+                <div class="file-item">
+                    <i class="bi bi-file-earmark-code"></i>
+                    <span>Components/Workflow/ConnectionLabel.razor</span>
+                    <span class="file-status status-created">Created</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="subsection">
+            <h3 class="subsection-title">CSS Files</h3>
+            <div class="file-list">
+                <div class="file-item">
+                    <i class="bi bi-file-earmark-code"></i>
+                    <span>wwwroot/css/workflow-connections.css</span>
+                    <span class="file-status status-created">Created</span>
+                </div>
+                <div class="file-item">
+                    <i class="bi bi-file-earmark-code"></i>
+                    <span>wwwroot/css/app.css</span>
+                    <span class="file-status status-modified">Modified</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="subsection">
+            <h3 class="subsection-title">JavaScript Files</h3>
+            <div class="file-list">
+                <div class="file-item">
+                    <i class="bi bi-file-earmark-code"></i>
+                    <span>wwwroot/js/workflow-connections.js</span>
+                    <span class="file-status status-created">Created</span>
+                </div>
+            </div>
+            <p style="margin-top: 12px; color: var(--text-secondary); font-size: 13px;">
+                Contains: getPathLength, getPointAtLength, animatePath, getPathMidpoint, getMousePosition, isPointNearPath
+            </p>
+        </div>
+
+        <div class="integration-note">
+            <div class="integration-note-title">Integration Note</div>
+            <div class="integration-note-text">
+                The ConnectionLayer component should be rendered inside the workflow canvas, positioned absolutely at top:0, left:0.
+                Pass NodePositions dictionary from parent to enable connection path calculation.
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 3: Verification Checklist -->
+    <div class="section">
+        <h2 class="section-title">
+            <i class="bi bi-check2-square"></i>
+            Section 3: Verification Checklist
+        </h2>
+
+        <div class="subsection">
+            <h3 class="subsection-title">Build Verification</h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Project builds with 0 errors</div>
+                        <div class="item-details">Run: dotnet build Src/VisualEditorOpus</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">All components resolve correctly</div>
+                        <div class="item-details">No missing namespace or reference errors</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">CSS file loads without errors</div>
+                        <div class="item-details">Check browser dev tools for 404s</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">JS file loads without errors</div>
+                        <div class="item-details">Check browser console for errors</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="subsection">
+            <h3 class="subsection-title">Visual Verification</h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Bezier curves render correctly</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Step paths render correctly</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Smooth step paths render correctly</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Straight lines render correctly</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Arrow heads point to target</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Yes branch shows green color</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">No branch shows orange color</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="subsection">
+            <h3 class="subsection-title">Interaction Verification</h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Clicking selects connection</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Delete button appears on selection</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Delete removes connection</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Hover highlights path</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Drawing shows animated dashed line</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Labels display at correct position</div>
+                    </div>
+                </li>
+        </div>
+
+        <div class="subsection">
+            <h3 class="subsection-title">Theme Verification</h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Light mode displays correctly</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Dark mode displays correctly</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Usage Example -->
+    <div class="section">
+        <h2 class="section-title">
+            <i class="bi bi-code-slash"></i>
+            Usage Example
+        </h2>
+        <p style="color: var(--text-secondary); margin-bottom: 16px;">
+            Example of how to use the ConnectionLayer component in a parent WorkflowCanvas:
+        </p>
+        <div class="code-block">
+<span class="code-comment">@* In WorkflowCanvas.razor *@</span>
+<span class="code-keyword">@using</span> VisualEditorOpus.Components.Workflow
+
+&lt;<span class="code-type">div</span> class=<span class="code-string">"workflow-canvas"</span>&gt;
+    &lt;<span class="code-type">ConnectionLayer</span>
+        Connections=<span class="code-string">"@_connections"</span>
+        NodePositions=<span class="code-string">"@_nodePositions"</span>
+        PathType=<span class="code-string">"@ConnectionType.Bezier"</span>
+        SelectedConnectionId=<span class="code-string">"@_selectedConnectionId"</span>
+        OnConnectionSelected=<span class="code-string">"HandleConnectionSelected"</span>
+        OnConnectionCreated=<span class="code-string">"HandleConnectionCreated"</span>
+        OnConnectionDeleted=<span class="code-string">"HandleConnectionDeleted"</span>
+        @ref=<span class="code-string">"_connectionLayer"</span> /&gt;
+
+    <span class="code-comment">@* Nodes rendered here *@</span>
+&lt;/<span class="code-type">div</span>&gt;
+
+<span class="code-keyword">@code</span> {
+    <span class="code-keyword">private</span> ConnectionLayer? _connectionLayer;
+    <span class="code-keyword">private</span> List&lt;WorkflowConnection&gt; _connections = <span class="code-keyword">new</span>();
+    <span class="code-keyword">private</span> Dictionary&lt;<span class="code-type">string</span>, NodePosition&gt; _nodePositions = <span class="code-keyword">new</span>();
+
+    <span class="code-comment">// Call from node handle mousedown</span>
+    <span class="code-keyword">private void</span> StartConnectionDrawing(<span class="code-type">string</span> nodeId, HandlePosition handle)
+    {
+        <span class="code-keyword">var</span> pos = GetHandleScreenPosition(nodeId, handle);
+        _connectionLayer?.StartDrawing(nodeId, handle, pos);
+    }
+}
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            body.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+        }
+
+        function updateProgress(checkbox) {
+            const item = checkbox.closest('.checklist-item');
+            if (checkbox.checked) {
+                item.classList.add('checked');
+            } else {
+                item.classList.remove('checked');
+            }
+            calculateProgress();
+        }
+
+        function calculateProgress() {
+            const checkboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+            const total = checkboxes.length;
+            let completed = 0;
+
+            checkboxes.forEach(cb => {
+                if (cb.checked) completed++;
+            });
+
+            const percent = Math.round((completed / total) * 100);
+
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('percentComplete').textContent = percent + '%';
+            document.getElementById('progressBar').style.width = percent + '%';
+            document.getElementById('progressPercent').textContent = percent + '%';
+
+            // Save progress to localStorage
+            const state = [];
+            checkboxes.forEach((cb, i) => state.push(cb.checked));
+            localStorage.setItem('connections-testing-progress', JSON.stringify(state));
+        }
+
+        // Load saved progress on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('connections-testing-progress');
+            if (saved) {
+                const state = JSON.parse(saved);
+                const checkboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+                checkboxes.forEach((cb, i) => {
+                    if (state[i]) {
+                        cb.checked = true;
+                        cb.closest('.checklist-item').classList.add('checked');
+                    }
+                });
+            }
+            calculateProgress();
+        });
+    </script>
+</body>
+</html>

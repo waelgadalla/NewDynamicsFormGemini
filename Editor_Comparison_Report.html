@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor Comparison: DynamicForms.Editor vs VisualEditorOpus</title>
+    <style>
+        :root {
+            --primary: #0d6efd;
+            --success: #198754;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --border: #dee2e6;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #f5f5f5;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        h1 { margin: 0; color: var(--dark); }
+        .subtitle { color: #666; margin-top: 0.5rem; }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            padding: 2rem;
+        }
+
+        .card-header {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .opus-header { color: var(--primary); }
+        .editor-header { color: var(--success); }
+
+        h3 { margin-top: 1.5rem; font-size: 1.1rem; }
+        ul { padding-left: 1.2rem; }
+        li { margin-bottom: 0.5rem; }
+
+        .badge {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            color: white;
+            font-weight: normal;
+        }
+        .badge.pro { background-color: var(--success); }
+        .badge.con { background-color: var(--danger); }
+
+        .winner-section {
+            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            margin-top: 2rem;
+        }
+
+        .winner-section h2 { margin-top: 0; }
+        .winner-section li { border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 0.5rem; }
+        .winner-section li:last-child { border-bottom: none; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background-color: var(--light); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Editor Comparison Report</h1>
+        <p class="subtitle">DynamicForms.Editor vs. VisualEditorOpus</p>
+    </header>
+
+    <div class="comparison-grid">
+        <!-- VisualEditorOpus Analysis -->
+        <div class="card">
+            <div class="card-header opus-header">
+                VisualEditorOpus
+                <span class="badge" style="background:var(--primary)">Newer Architecture</span>
+            </div>
+            
+            <h3><span class="badge pro">Pros</span> Strengths</h3>
+            <ul>
+                <li><strong>Modern Architecture:</strong> Clean separation of concerns with a dedicated <code>Components/Editor/Canvas</code> structure.</li>
+                <li><strong>Component Granularity:</strong> High granularity in rendering (e.g., <code>CanvasTextInput</code>, <code>CanvasCheckbox</code>) makes maintenance easier.</li>
+                <li><strong>Clean State Management:</strong> <code>EditorStateService</code> uses C# 12 features and immutable records effectively.</li>
+                <li><strong>UI/UX Focus:</strong> Includes placeholder components for diverse states (Empty, Loading, Error), indicating a focus on user experience.</li>
+            </ul>
+
+            <h3><span class="badge con">Cons</span> Weaknesses</h3>
+            <ul>
+                <li><strong>Incomplete Logic:</strong> Critical logic gaps (e.g., missing "Insert At" logic in state service).</li>
+                <li><strong>Refactoring Artifacts:</strong> Duplicate components (<code>OptionsSection</code> vs <code>EnhancedOptionsSection</code>) suggest work in progress.</li>
+                <li><strong>Empty Folders:</strong> <code>Components/Properties/Editors</code> is empty, meaning advanced property editing is missing.</li>
+            </ul>
+        </div>
+
+        <!-- DynamicForms.Editor Analysis -->
+        <div class="card">
+            <div class="card-header editor-header">
+                DynamicForms.Editor
+                <span class="badge" style="background:var(--success)">Feature Rich</span>
+            </div>
+
+            <h3><span class="badge pro">Pros</span> Strengths</h3>
+            <ul>
+                <li><strong>More Complete Service Layer:</strong> <code>EditorStateService</code> has implemented more logic, including Clipboard (Copy/Paste), JSON Export, and basic Workflow layout persistence.</li>
+                <li><strong>Keyboard Support:</strong> Includes <code>JSInvokable</code> methods for keyboard shortcuts (Save, Undo, Delete), which are missing in Opus.</li>
+                <li><strong>Workflow Graph Support:</strong> Contains a <code>WorkflowGraphService</code> and logic for node positioning/connections, which seems more advanced than Opus.</li>
+                <li><strong>Clipboard Integration:</strong> Full implementation of system clipboard integration for JSON copying.</li>
+            </ul>
+
+            <h3><span class="badge con">Cons</span> Weaknesses</h3>
+            <ul>
+                <li><strong>Blazor Structure:</strong> Uses standard <code>AddServerSideBlazor</code> but relies slightly more on older patterns compared to Opus's strict component isolation.</li>
+                <li><strong>Less Granular Canvas:</strong> <code>CanvasField.razor</code> structure is less segmented than Opus's explicit component tree, potentially making complex field rendering harder to manage long-term.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Feature Matrix -->
+    <div class="card">
+        <h2>Feature Comparison Matrix</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>VisualEditorOpus</th>
+                    <th>DynamicForms.Editor</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>State Architecture</strong></td>
+                    <td>Immutable (Good)</td>
+                    <td>Immutable (Good) + JS Interop</td>
+                </tr>
+                <tr>
+                    <td><strong>Canvas Rendering</strong></td>
+                    <td>Highly Granular Components</td>
+                    <td>Standard Components</td>
+                </tr>
+                <tr>
+                    <td><strong>Workflow Designer</strong></td>
+                    <td>Basic / Placeholder</td>
+                    <td><strong>Advanced (Graph + Persistence)</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>Clipboard / Shortcuts</strong></td>
+                    <td>Basic</td>
+                    <td><strong>Advanced (System Clipboard + Hotkeys)</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>Property Editors</strong></td>
+                    <td>Incomplete / Conflicted</td>
+                    <td>Standard</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Recommendation -->
+    <div class="winner-section">
+        <h2>🏆 Recommendation: Continue with <code>DynamicForms.Editor</code></h2>
+        <p>While <strong>VisualEditorOpus</strong> has a slightly cleaner component directory structure, <strong>DynamicForms.Editor</strong> is functionally far ahead and contains critical features that would take significant time to port.</p>
+        
+        <h3>Why DynamicForms.Editor?</h3>
+        <ul>
+            <li><strong>Feature Completeness:</strong> It already implements Workflow persistence, Graph logic, and Keyboard shortcuts, which are complex "Phase 4" requirements.</li>
+            <li><strong>Service Maturity:</strong> The <code>EditorStateService</code> handles complex scenarios like duplicate detection, circular reference checks on move, and system clipboard integration.</li>
+            <li><strong>Lower Technical Debt:</strong> Opus has incomplete refactoring (duplicate sections) and empty directories that require cleanup before development can proceed.</li>
+        </ul>
+
+        <h3>Next Steps Strategy</h3>
+        <p>To get the "Best of Both Worlds":</p>
+        <ol>
+            <li>Adopt <strong>DynamicForms.Editor</strong> as the primary codebase.</li>
+            <li><strong>Port the Canvas Granularity:</strong> Refactor <code>DynamicForms.Editor</code>'s <code>CanvasField.razor</code> to use the granular approach found in Opus (creating separate <code>CanvasTextInput</code>, <code>CanvasCheckbox</code> components) to improve maintainability.</li>
+            <li><strong>Align HTML Output:</strong> Update these new granular components to match the Core MVC TagHelper HTML structure (as discussed previously).</li>
+        </ol>
+    </div>
+
+</body>
+</html>

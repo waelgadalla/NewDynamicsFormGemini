@@ -1,0 +1,180 @@
+@namespace VisualEditorOpus.Components.Workflow
+@inject IJSRuntime JS
+
+<svg class="connections-layer" @ref="svgRef">
+    <defs>
+        @* Arrow markers for different states *@
+        <marker id="arrow-default" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" class="arrow-default"/>
+        </marker>
+        <marker id="arrow-success" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" class="arrow-success"/>
+        </marker>
+        <marker id="arrow-warning" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" class="arrow-warning"/>
+        </marker>
+        <marker id="arrow-error" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" class="arrow-error"/>
+        </marker>
+        <marker id="arrow-active" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" class="arrow-active"/>
+        </marker>
+    </defs>
+
+    <CascadingValue Value="NodePositions">
+        @* Existing connections *@
+        <g class="connection-paths">
+            @foreach (var connection in Connections)
+            {
+                <ConnectionPath
+                    Connection="@connection"
+                    PathType="@PathType"
+                    IsSelected="@(SelectedConnectionId == connection.Id)"
+                    OnSelected="HandleConnectionSelected"
+                    OnDeleted="HandleConnectionDeleted" />
+            }
+        </g>
+
+        @* Connection labels *@
+        <g class="connection-labels">
+            @foreach (var connection in Connections.Where(c => !string.IsNullOrEmpty(c.Label)))
+            {
+                <ConnectionLabel
+                    Connection="@connection"
+                    PathType="@PathType" />
+            }
+        </g>
+    </CascadingValue>
+
+    @* Drawing preview *@
+    @if (IsDrawing)
+    {
+        <path class="connection-path connection-drawing"
+              d="@DrawingPath"
+              marker-end="url(#arrow-active)" />
+    }
+</svg>
+
+@code {
+    [Parameter] public List<WorkflowConnection> Connections { get; set; } = new();
+    [Parameter] public Dictionary<string, NodePosition> NodePositions { get; set; } = new();
+    [Parameter] public ConnectionType PathType { get; set; } = ConnectionType.Bezier;
+    [Parameter] public string? SelectedConnectionId { get; set; }
+
+    [Parameter] public EventCallback<string> OnConnectionSelected { get; set; }
+    [Parameter] public EventCallback<WorkflowConnection> OnConnectionCreated { get; set; }
+    [Parameter] public EventCallback<string> OnConnectionDeleted { get; set; }
+
+    private ElementReference svgRef;
+    private bool IsDrawing { get; set; }
+    private WfPoint? DrawingStart { get; set; }
+    private WfPoint? DrawingEnd { get; set; }
+    private string? DrawingSourceNodeId { get; set; }
+    private HandlePosition? DrawingSourceHandle { get; set; }
+
+    private string DrawingPath => IsDrawing && DrawingStart != null && DrawingEnd != null
+        ? GeneratePath(DrawingStart, DrawingEnd)
+        : "";
+
+    public void StartDrawing(string nodeId, HandlePosition handle, WfPoint position)
+    {
+        IsDrawing = true;
+        DrawingSourceNodeId = nodeId;
+        DrawingSourceHandle = handle;
+        DrawingStart = position;
+        DrawingEnd = position;
+        StateHasChanged();
+    }
+
+    public void UpdateDrawing(WfPoint position)
+    {
+        if (IsDrawing)
+        {
+            DrawingEnd = position;
+            StateHasChanged();
+        }
+    }
+
+    public async Task FinishDrawing(string? targetNodeId, HandlePosition? targetHandle, WfPoint position)
+    {
+        if (IsDrawing && DrawingSourceNodeId != null && targetNodeId != null &&
+            DrawingSourceNodeId != targetNodeId)
+        {
+            var connection = new WorkflowConnection
+            {
+                Id = Guid.NewGuid().ToString(),
+                SourceNodeId = DrawingSourceNodeId,
+                SourceHandle = DrawingSourceHandle!.Value,
+                TargetNodeId = targetNodeId,
+                TargetHandle = targetHandle!.Value
+            };
+
+            await OnConnectionCreated.InvokeAsync(connection);
+        }
+
+        CancelDrawing();
+    }
+
+    public void CancelDrawing()
+    {
+        IsDrawing = false;
+        DrawingStart = null;
+        DrawingEnd = null;
+        DrawingSourceNodeId = null;
+        DrawingSourceHandle = null;
+        StateHasChanged();
+    }
+
+    private async Task HandleConnectionSelected(string connectionId)
+    {
+        await OnConnectionSelected.InvokeAsync(connectionId);
+    }
+
+    private async Task HandleConnectionDeleted(string connectionId)
+    {
+        await OnConnectionDeleted.InvokeAsync(connectionId);
+    }
+
+    private string GeneratePath(WfPoint start, WfPoint end)
+    {
+        return PathType switch
+        {
+            ConnectionType.Bezier => GenerateBezierPath(start, end),
+            ConnectionType.Step => GenerateStepPath(start, end),
+            ConnectionType.SmoothStep => GenerateSmoothStepPath(start, end),
+            ConnectionType.Straight => GenerateStraightPath(start, end),
+            _ => GenerateBezierPath(start, end)
+        };
+    }
+
+    private string GenerateBezierPath(WfPoint start, WfPoint end)
+    {
+        var controlPointOffset = Math.Abs(end.Y - start.Y) / 2;
+        return $"M {start.X:F1},{start.Y:F1} C {start.X:F1},{start.Y + controlPointOffset:F1} {end.X:F1},{end.Y - controlPointOffset:F1} {end.X:F1},{end.Y:F1}";
+    }
+
+    private string GenerateStepPath(WfPoint start, WfPoint end)
+    {
+        var midY = (start.Y + end.Y) / 2;
+        return $"M {start.X:F1},{start.Y:F1} L {start.X:F1},{midY:F1} L {end.X:F1},{midY:F1} L {end.X:F1},{end.Y:F1}";
+    }
+
+    private string GenerateSmoothStepPath(WfPoint start, WfPoint end)
+    {
+        var midY = (start.Y + end.Y) / 2;
+        var radius = Math.Min(10, Math.Abs(end.X - start.X) / 4);
+        var dir = end.X > start.X ? 1 : -1;
+
+        return $"M {start.X:F1},{start.Y:F1} " +
+               $"L {start.X:F1},{midY - radius:F1} " +
+               $"Q {start.X:F1},{midY:F1} {start.X + dir * radius:F1},{midY:F1} " +
+               $"L {end.X - dir * radius:F1},{midY:F1} " +
+               $"Q {end.X:F1},{midY:F1} {end.X:F1},{midY + radius:F1} " +
+               $"L {end.X:F1},{end.Y:F1}";
+    }
+
+    private string GenerateStraightPath(WfPoint start, WfPoint end)
+    {
+        return $"M {start.X:F1},{start.Y:F1} L {end.X:F1},{end.Y:F1}";
+    }
+}

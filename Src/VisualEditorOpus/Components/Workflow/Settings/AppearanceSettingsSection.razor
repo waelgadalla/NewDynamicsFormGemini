@@ -1,0 +1,129 @@
+@namespace VisualEditorOpus.Components.Workflow.Settings
+
+<div class="settings-fields">
+    <div class="form-group">
+        <label class="form-label">Primary Color</label>
+        <div class="color-group">
+            <input type="color"
+                   class="color-swatch"
+                   value="@Settings.PrimaryColor"
+                   @onchange="OnColorChange" />
+            <input type="text"
+                   class="form-input color-input"
+                   value="@Settings.PrimaryColor"
+                   @oninput="e => UpdateColor(e.Value?.ToString())" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Layout Mode</label>
+        <select class="form-select"
+                value="@Settings.LayoutMode"
+                @onchange="OnLayoutModeChange">
+            @foreach (var mode in Enum.GetValues<LayoutMode>())
+            {
+                <option value="@mode">@FormatLayoutMode(mode)</option>
+            }
+        </select>
+    </div>
+
+    <div class="toggle-group">
+        <span class="toggle-label">Show Step Numbers</span>
+        <label class="toggle-switch">
+            <input type="checkbox"
+                   checked="@Settings.ShowStepNumbers"
+                   @onchange="e => Update(s => s with { ShowStepNumbers = (bool)e.Value! })" />
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+
+    <div class="toggle-group">
+        <span class="toggle-label">Animate Transitions</span>
+        <label class="toggle-switch">
+            <input type="checkbox"
+                   checked="@Settings.AnimateTransitions"
+                   @onchange="e => Update(s => s with { AnimateTransitions = (bool)e.Value! })" />
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+
+    <div class="toggle-group">
+        <span class="toggle-label">Hide Header</span>
+        <label class="toggle-switch">
+            <input type="checkbox"
+                   checked="@Settings.HideHeader"
+                   @onchange="e => Update(s => s with { HideHeader = (bool)e.Value! })" />
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+
+    <div class="toggle-group">
+        <span class="toggle-label">Compact Mode</span>
+        <label class="toggle-switch">
+            <input type="checkbox"
+                   checked="@Settings.CompactMode"
+                   @onchange="e => Update(s => s with { CompactMode = (bool)e.Value! })" />
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Custom CSS Class</label>
+        <input type="text"
+               class="form-input"
+               value="@Settings.CustomCssClass"
+               @oninput="e => Update(s => s with { CustomCssClass = e.Value?.ToString() })"
+               placeholder="my-custom-class" />
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Logo URL</label>
+        <input type="text"
+               class="form-input"
+               value="@Settings.LogoUrl"
+               @oninput="e => Update(s => s with { LogoUrl = e.Value?.ToString() })"
+               placeholder="https://example.com/logo.png" />
+    </div>
+</div>
+
+@code {
+    [Parameter] public AppearanceSettings Settings { get; set; } = new();
+    [Parameter] public EventCallback<AppearanceSettings> OnSettingsChanged { get; set; }
+
+    private void Update(Func<AppearanceSettings, AppearanceSettings> updater)
+    {
+        OnSettingsChanged.InvokeAsync(updater(Settings));
+    }
+
+    private void OnColorChange(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString();
+        Update(s => s with { PrimaryColor = value ?? "#6366f1" });
+    }
+
+    private void OnLayoutModeChange(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString();
+        if (!string.IsNullOrEmpty(value) && Enum.TryParse<LayoutMode>(value, out var mode))
+        {
+            Update(s => s with { LayoutMode = mode });
+        }
+    }
+
+    private void UpdateColor(string? value)
+    {
+        if (!string.IsNullOrEmpty(value) && System.Text.RegularExpressions.Regex.IsMatch(value, @"^#[0-9A-Fa-f]{6}$"))
+        {
+            Update(s => s with { PrimaryColor = value });
+        }
+    }
+
+    private string FormatLayoutMode(LayoutMode mode) => mode switch
+    {
+        LayoutMode.Wizard => "Wizard (Step by Step)",
+        LayoutMode.Accordion => "Accordion",
+        LayoutMode.Tabs => "Tabs",
+        LayoutMode.SinglePage => "Single Page",
+        _ => mode.ToString()
+    };
+}

@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E.1 Workflow Node Types - Testing Guide</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: rgba(99, 102, 241, 0.1);
+            --success: #10B981;
+            --success-light: rgba(16, 185, 129, 0.1);
+            --warning: #F59E0B;
+            --warning-light: rgba(245, 158, 11, 0.1);
+            --error: #EF4444;
+            --error-light: rgba(239, 68, 68, 0.1);
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --bg-tertiary: #F3F4F6;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --border-color: #E5E7EB;
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        [data-theme="dark"] {
+            --primary: #818CF8;
+            --primary-light: rgba(129, 140, 248, 0.15);
+            --bg-primary: #1F2937;
+            --bg-secondary: #111827;
+            --bg-tertiary: #374151;
+            --text-primary: #F9FAFB;
+            --text-secondary: #D1D5DB;
+            --text-muted: #9CA3AF;
+            --border-color: #374151;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .page-title span {
+            color: var(--primary);
+        }
+
+        .theme-toggle {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--primary);
+        }
+
+        .subsection {
+            margin-bottom: 24px;
+        }
+
+        .subsection-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            transition: background 0.2s;
+        }
+
+        .checklist-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            accent-color: var(--success);
+            cursor: pointer;
+        }
+
+        .checklist-item.checked {
+            background: var(--success-light);
+        }
+
+        .checklist-item.checked .item-text {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .item-content {
+            flex: 1;
+        }
+
+        .item-text {
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .item-details {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .file-list {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-top: 12px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .file-item i {
+            color: var(--primary);
+        }
+
+        .file-status {
+            margin-left: auto;
+            padding: 2px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-created {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .status-modified {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--success);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .node-type-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-start { background: rgba(16, 185, 129, 0.1); color: #10B981; }
+        .badge-end { background: rgba(107, 114, 128, 0.1); color: #6B7280; }
+        .badge-step { background: rgba(99, 102, 241, 0.1); color: #6366F1; }
+        .badge-decision { background: rgba(245, 158, 11, 0.1); color: #F59E0B; }
+        .badge-action { background: rgba(139, 92, 246, 0.1); color: #8B5CF6; }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .summary-card {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            text-align: center;
+        }
+
+        .summary-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .summary-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .integration-note {
+            background: var(--warning-light);
+            border-left: 4px solid var(--warning);
+            padding: 12px 16px;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            margin: 16px 0;
+        }
+
+        .integration-note-title {
+            font-weight: 600;
+            color: var(--warning);
+            margin-bottom: 4px;
+        }
+
+        .integration-note-text {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin-top: 12px;
+        }
+
+        .code-comment { color: #6a9955; }
+        .code-keyword { color: #569cd6; }
+        .code-string { color: #ce9178; }
+        .code-type { color: #4ec9b0; }
+    </style>
+</head>
+<body>
+    <div class="page-header">
+        <h1 class="page-title">E.1 <span>Workflow Node Types</span> - Testing Guide</h1>
+        <button class="theme-toggle" onclick="toggleTheme()">
+            <i class="bi bi-moon"></i>
+            Toggle Theme
+        </button>
+    </div>
+
+    <!-- Progress Summary -->
+    <div class="section">
+        <h2 class="section-title">
+            <i class="bi bi-bar-chart-fill"></i>
+            Testing Progress
+        </h2>
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="summary-value" id="completedCount">0</div>
+                <div class="summary-label">Completed</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-value" id="totalCount">0</div>
+                <div class="summary-label">Total Tests</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-value" id="percentComplete">0%</div>
+                <div class="summary-label">Progress</div>
+            </div>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+        </div>
+        <div class="progress-text">
+            <span>Testing Progress</span>
+            <span id="progressPercent">0%</span>
+        </div>
+    </div>
+
+    <!-- Section 1: Manual Testing Steps -->
+    <div class="section">
+        <h2 class="section-title">
+            <i class="bi bi-list-check"></i>
+            Section 1: Manual Testing Steps
+        </h2>
+
+        <!-- Start Node Testing -->
+        <div class="subsection">
+            <h3 class="subsection-title">
+                <span class="node-type-badge badge-start"><i class="bi bi-play-fill"></i> Start Node</span>
+            </h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Start node displays with green border (#10B981)</div>
+                        <div class="item-details">Verify border color matches the design spec</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Header background is light green (rgba(16, 185, 129, 0.1))</div>
+                        <div class="item-details">Check header section has correct tinted background</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Play icon (bi-play-fill) displays in icon container</div>
+                        <div class="item-details">Icon should be white on green background</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Only bottom handle is visible (no top handle)</div>
+                        <div class="item-details">Start nodes connect outward only</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Trigger type displays correctly in footer (e.g., "Trigger: On Submit")</div>
+                        <div class="item-details">Test all trigger types: OnSubmit, OnSave, OnLoad, Manual, Scheduled</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- End Node Testing -->
+        <div class="subsection">
+            <h3 class="subsection-title">
+                <span class="node-type-badge badge-end"><i class="bi bi-stop-fill"></i> End Node</span>
+            </h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">End node displays with gray border (#6B7280)</div>
+                        <div class="item-details">Verify border color matches the design spec</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Header background is light gray</div>
+                        <div class="item-details">Check header section has correct tinted background</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Stop icon (bi-stop-fill) displays correctly</div>
+                        <div class="item-details">Icon should be white on gray background</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Only top handle is visible (no bottom handle)</div>
+                        <div class="item-details">End nodes receive connections only</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Completion action displays in footer (e.g., "Action: Submit")</div>
+                        <div class="item-details">Test all actions: Submit, Save, Redirect, ShowMessage, CallApi</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Step Node Testing -->
+        <div class="subsection">
+            <h3 class="subsection-title">
+                <span class="node-type-badge badge-step"><i class="bi bi-ui-checks"></i> Step Node</span>
+            </h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Step node displays with indigo border (#6366F1)</div>
+                        <div class="item-details">Verify primary color is used for step nodes</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Top and bottom handles are visible</div>
+                        <div class="item-details">Steps can connect in both directions</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Field count displays correctly (e.g., "8 fields")</div>
+                        <div class="item-details">Should show Module.Fields.Length value</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Required indicator shows when IsRequired=true</div>
+                        <div class="item-details">Should display "Required" text in red</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Skip condition indicator shows when SkipCondition is set</div>
+                        <div class="item-details">Yellow badge with "Has skip condition" text</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Decision Node Testing -->
+        <div class="subsection">
+            <h3 class="subsection-title">
+                <span class="node-type-badge badge-decision"><i class="bi bi-signpost-split"></i> Decision Node</span>
+            </h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Decision node displays with orange border (#F59E0B)</div>
+                        <div class="item-details">Verify warning color is used for decisions</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">All 4 handles visible (top, bottom, left, right)</div>
+                        <div class="item-details">Decision nodes support multi-directional branching</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Condition summary displays (e.g., "If fieldId = value")</div>
+                        <div class="item-details">Should parse first condition from ConditionGroupModel</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Yes/No branch badges display correctly</div>
+                        <div class="item-details">Yes in green, No in red with icons</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Custom branch labels work (YesBranchLabel, NoBranchLabel)</div>
+                        <div class="item-details">Should override default "Yes"/"No" text</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Action Node Testing -->
+        <div class="subsection">
+            <h3 class="subsection-title">
+                <span class="node-type-badge badge-action"><i class="bi bi-lightning-fill"></i> Action Node</span>
+            </h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Action node displays with purple border (#8B5CF6)</div>
+                        <div class="item-details">Verify purple color is used for actions</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Correct icon shows per action type</div>
+                        <div class="item-details">SendEmail=envelope, CallApi=globe, SetFieldValue=pencil, etc.</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Action description displays correctly</div>
+                        <div class="item-details">E.g., "Send email to admin@example.com"</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Email recipients show for SendEmail actions</div>
+                        <div class="item-details">Should display recipient list with envelope icon</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Action type label shows in footer (e.g., "Email Action")</div>
+                        <div class="item-details">Test all action types</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Common Node Behavior -->
+        <div class="subsection">
+            <h3 class="subsection-title">Common Node Behavior</h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Node selection highlights with colored ring</div>
+                        <div class="item-details">Selected state uses node's color for highlight</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Menu button appears on node hover</div>
+                        <div class="item-details">Three-dots vertical icon should show</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Handles scale 1.3x on hover</div>
+                        <div class="item-details">Connection handles should grow on mouseover</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Handles show crosshair cursor</div>
+                        <div class="item-details">Indicates connection mode</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Node shows move cursor</div>
+                        <div class="item-details">cursor: move on node body</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">OnSelected event fires on click</div>
+                        <div class="item-details">Parent should receive node ID</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Dark mode styles apply correctly</div>
+                        <div class="item-details">Background and border colors adapt to theme</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Section 2: Implementation Files -->
+    <div class="section">
+        <h2 class="section-title">
+            <i class="bi bi-folder-fill"></i>
+            Section 2: Implementation Files Created
+        </h2>
+
+        <div class="subsection">
+            <h3 class="subsection-title">Model Files</h3>
+            <div class="file-list">
+                <div class="file-item">
+                    <i class="bi bi-file-earmark-code"></i>
+                    <span>Models/WorkflowNodeModels.cs</span>
+                    <span class="file-status status-created">Created</span>
+                </div>
+            </div>
+            <p style="margin-top: 12px; color: var(--text-secondary); font-size: 13px;">
+                Contains: WfPoint, WorkflowNodeData, WorkflowConnection records and enums
+                (HandlePosition, TriggerType, CompletionAction, ActionType, WorkflowNodeType)
+            </p>
+        </div>
+
+        <div class="subsection">
+            <h3 class="subsection-title">Component Files</h3>
+            <div class="file-list">
+                <div class="file-item">
+                    <i class="bi bi-file-earmark-code"></i>
+                    <span>Components/Workflow/Nodes/WfNodeBase.razor</span>
+                    <span class="file-status status-created">Created</span>
+                </div>
+                <div class="file-item">
+                    <i class="bi bi-file-earmark-code"></i>
+                    <span>Components/Workflow/Nodes/WfNodeStart.razor</span>
+                    <span class="file-status status-created">Created</span>
+                </div>
+                <div class="file-item">
+                    <i class="bi bi-file-earmark-code"></i>
+                    <span>Components/Workflow/Nodes/WfNodeEnd.razor</span>
+                    <span class="file-status status-created">Created</span>
+                </div>
+                <div class="file-item">
+                    <i class="bi bi-file-earmark-code"></i>
+                    <span>Components/Workflow/Nodes/WfNodeStep.razor</span>
+                    <span class="file-status status-created">Created</span>
+                </div>
+                <div class="file-item">
+                    <i class="bi bi-file-earmark-code"></i>
+                    <span>Components/Workflow/Nodes/WfNodeDecision.razor</span>
+                    <span class="file-status status-created">Created</span>
+                </div>
+                <div class="file-item">
+                    <i class="bi bi-file-earmark-code"></i>
+                    <span>Components/Workflow/Nodes/WfNodeAction.razor</span>
+                    <span class="file-status status-created">Created</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="subsection">
+            <h3 class="subsection-title">CSS Files</h3>
+            <div class="file-list">
+                <div class="file-item">
+                    <i class="bi bi-file-earmark-code"></i>
+                    <span>wwwroot/css/workflow-nodes.css</span>
+                    <span class="file-status status-created">Created</span>
+                </div>
+                <div class="file-item">
+                    <i class="bi bi-file-earmark-code"></i>
+                    <span>wwwroot/css/app.css</span>
+                    <span class="file-status status-modified">Modified</span>
+                </div>
+            </div>
+            <p style="margin-top: 12px; color: var(--text-secondary); font-size: 13px;">
+                Added @import url('workflow-nodes.css') to app.css imports
+            </p>
+        </div>
+
+        <div class="integration-note">
+            <div class="integration-note-title">Integration Note</div>
+            <div class="integration-note-text">
+                These components are designed to be used within a parent WorkflowCanvas component.
+                The parent is responsible for handling drag events and managing node positions.
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 3: Verification Checklist -->
+    <div class="section">
+        <h2 class="section-title">
+            <i class="bi bi-check2-square"></i>
+            Section 3: Verification Checklist
+        </h2>
+
+        <div class="subsection">
+            <h3 class="subsection-title">Build Verification</h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Project builds with 0 errors</div>
+                        <div class="item-details">Run: dotnet build Src/VisualEditorOpus</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">All new components resolve correctly</div>
+                        <div class="item-details">No missing namespace or reference errors</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">CSS file loads without errors</div>
+                        <div class="item-details">Check browser dev tools for 404s</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="subsection">
+            <h3 class="subsection-title">Visual Verification</h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Start node: Green styling, bottom handle only</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">End node: Gray styling, top handle only</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Step node: Indigo styling, top + bottom handles</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Decision node: Orange styling, all 4 handles</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Action node: Purple styling, top + bottom handles</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="subsection">
+            <h3 class="subsection-title">Interaction Verification</h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Clicking node triggers OnSelected event</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Selected state shows colored ring highlight</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Menu button visible on hover</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Handles scale on hover</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">OnConnectionStart fires when handle clicked</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="subsection">
+            <h3 class="subsection-title">Theme Verification</h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Light mode displays correctly</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Dark mode displays correctly</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Usage Example -->
+    <div class="section">
+        <h2 class="section-title">
+            <i class="bi bi-code-slash"></i>
+            Usage Example
+        </h2>
+        <p style="color: var(--text-secondary); margin-bottom: 16px;">
+            Example of how to use the new node components in a parent canvas:
+        </p>
+        <div class="code-block">
+<span class="code-comment">@* In WorkflowCanvas.razor *@</span>
+<span class="code-keyword">@using</span> VisualEditorOpus.Components.Workflow.Nodes
+
+<span class="code-keyword">@foreach</span> (var node <span class="code-keyword">in</span> Nodes)
+{
+    <span class="code-keyword">@switch</span> (node.Type)
+    {
+        <span class="code-keyword">case</span> WorkflowNodeType.Start:
+            &lt;<span class="code-type">WfNodeStart</span>
+                Id=<span class="code-string">"@node.Id"</span>
+                Node=<span class="code-string">"@node"</span>
+                Position=<span class="code-string">"@node.Position"</span>
+                IsSelected=<span class="code-string">"@(SelectedNodeId == node.Id)"</span>
+                OnSelected=<span class="code-string">"HandleNodeSelected"</span>
+                OnConnectionStart=<span class="code-string">"HandleConnectionStart"</span> /&gt;
+            <span class="code-keyword">break</span>;
+
+        <span class="code-keyword">case</span> WorkflowNodeType.End:
+            &lt;<span class="code-type">WfNodeEnd</span>
+                Id=<span class="code-string">"@node.Id"</span>
+                Node=<span class="code-string">"@node"</span>
+                Position=<span class="code-string">"@node.Position"</span>
+                IsSelected=<span class="code-string">"@(SelectedNodeId == node.Id)"</span>
+                OnSelected=<span class="code-string">"HandleNodeSelected"</span>
+                OnConnectionStart=<span class="code-string">"HandleConnectionStart"</span> /&gt;
+            <span class="code-keyword">break</span>;
+
+        <span class="code-comment">// ... other node types</span>
+    }
+}
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            body.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+        }
+
+        function updateProgress(checkbox) {
+            const item = checkbox.closest('.checklist-item');
+            if (checkbox.checked) {
+                item.classList.add('checked');
+            } else {
+                item.classList.remove('checked');
+            }
+            calculateProgress();
+        }
+
+        function calculateProgress() {
+            const checkboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+            const total = checkboxes.length;
+            let completed = 0;
+
+            checkboxes.forEach(cb => {
+                if (cb.checked) completed++;
+            });
+
+            const percent = Math.round((completed / total) * 100);
+
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('percentComplete').textContent = percent + '%';
+            document.getElementById('progressBar').style.width = percent + '%';
+            document.getElementById('progressPercent').textContent = percent + '%';
+
+            // Save progress to localStorage
+            const state = [];
+            checkboxes.forEach((cb, i) => state.push(cb.checked));
+            localStorage.setItem('wfnodes-testing-progress', JSON.stringify(state));
+        }
+
+        // Load saved progress on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('wfnodes-testing-progress');
+            if (saved) {
+                const state = JSON.parse(saved);
+                const checkboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+                checkboxes.forEach((cb, i) => {
+                    if (state[i]) {
+                        cb.checked = true;
+                        cb.closest('.checklist-item').classList.add('checked');
+                    }
+                });
+            }
+            calculateProgress();
+        });
+    </script>
+</body>
+</html>

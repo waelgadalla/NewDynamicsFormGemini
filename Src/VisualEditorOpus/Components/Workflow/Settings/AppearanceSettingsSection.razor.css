@@ -1,0 +1,35 @@
+.settings-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.color-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.color-swatch {
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid var(--border-color, #e5e7eb);
+    border-radius: 6px;
+    cursor: pointer;
+    padding: 0;
+}
+
+.color-swatch::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+.color-swatch::-webkit-color-swatch {
+    border: none;
+    border-radius: 4px;
+}
+
+.color-input {
+    flex: 1;
+    font-family: 'SF Mono', Monaco, Consolas, monospace;
+    font-size: 0.8125rem;
+}

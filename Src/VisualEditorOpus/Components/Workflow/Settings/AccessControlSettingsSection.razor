@@ -1,0 +1,109 @@
+@namespace VisualEditorOpus.Components.Workflow.Settings
+
+<div class="settings-fields">
+    <div class="toggle-group">
+        <span class="toggle-label">Require Authentication</span>
+        <label class="toggle-switch">
+            <input type="checkbox"
+                   checked="@Settings.RequireAuthentication"
+                   @onchange="e => Update(s => s with { RequireAuthentication = (bool)e.Value! })" />
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+
+    <div class="toggle-group">
+        <span class="toggle-label">Allow Anonymous</span>
+        <label class="toggle-switch">
+            <input type="checkbox"
+                   checked="@Settings.AllowAnonymous"
+                   @onchange="e => Update(s => s with { AllowAnonymous = (bool)e.Value! })" />
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+
+    @if (Settings.RequireAuthentication)
+    {
+        <div class="form-group">
+            <label class="form-label">Allowed Roles</label>
+            <div class="roles-container">
+                @foreach (var role in AvailableRoles)
+                {
+                    <label class="role-checkbox">
+                        <input type="checkbox"
+                               checked="@Settings.AllowedRoles.Contains(role)"
+                               @onchange="e => ToggleRole(role, (bool)e.Value!)" />
+                        <span class="role-label">@role</span>
+                    </label>
+                }
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Max Submissions Per User</label>
+            <div class="number-input">
+                <button type="button" @onclick="() => AdjustMaxSubmissions(-1)">
+                    <i class="bi bi-dash"></i>
+                </button>
+                <input type="number"
+                       class="form-input"
+                       value="@(Settings.MaxSubmissionsPerUser ?? 0)"
+                       @onchange="e => UpdateMaxSubmissions(e.Value?.ToString())" />
+                <button type="button" @onclick="() => AdjustMaxSubmissions(1)">
+                    <i class="bi bi-plus"></i>
+                </button>
+            </div>
+            <span class="help-text">0 = unlimited</span>
+        </div>
+    }
+
+    <div class="toggle-group">
+        <span class="toggle-label">Require CAPTCHA</span>
+        <label class="toggle-switch">
+            <input type="checkbox"
+                   checked="@Settings.RequireCaptcha"
+                   @onchange="e => Update(s => s with { RequireCaptcha = (bool)e.Value! })" />
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+</div>
+
+@code {
+    [Parameter] public AccessControlSettings Settings { get; set; } = new();
+    [Parameter] public EventCallback<AccessControlSettings> OnSettingsChanged { get; set; }
+
+    private List<string> AvailableRoles { get; set; } = new() { "Admin", "Editor", "Viewer", "Guest" };
+
+    private void Update(Func<AccessControlSettings, AccessControlSettings> updater)
+    {
+        OnSettingsChanged.InvokeAsync(updater(Settings));
+    }
+
+    private void ToggleRole(string role, bool isChecked)
+    {
+        var roles = new List<string>(Settings.AllowedRoles);
+        if (isChecked && !roles.Contains(role))
+        {
+            roles.Add(role);
+        }
+        else if (!isChecked && roles.Contains(role))
+        {
+            roles.Remove(role);
+        }
+        Update(s => s with { AllowedRoles = roles });
+    }
+
+    private void UpdateMaxSubmissions(string? value)
+    {
+        if (int.TryParse(value, out var max))
+        {
+            Update(s => s with { MaxSubmissionsPerUser = max == 0 ? null : max });
+        }
+    }
+
+    private void AdjustMaxSubmissions(int delta)
+    {
+        var current = Settings.MaxSubmissionsPerUser ?? 0;
+        var newValue = Math.Max(0, current + delta);
+        Update(s => s with { MaxSubmissionsPerUser = newValue == 0 ? null : newValue });
+    }
+}

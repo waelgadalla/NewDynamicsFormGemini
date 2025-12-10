@@ -1,0 +1,97 @@
+@namespace VisualEditorOpus.Components.Workflow
+@inject IJSRuntime JS
+
+<div class="minimap @(IsCollapsed ? "collapsed" : "")">
+    <div class="minimap-header">
+        <span>Minimap</span>
+        <button class="minimap-toggle" @onclick="ToggleCollapse">
+            <i class="bi bi-chevron-@(IsCollapsed ? "up" : "down")"></i>
+        </button>
+    </div>
+
+    @if (!IsCollapsed)
+    {
+        <div class="minimap-content" @ref="minimapRef"
+             @onclick="HandleMinimapClick">
+            @* Mini representations of nodes *@
+            @foreach (var node in Nodes)
+            {
+                <div class="minimap-node @node.Type.ToString().ToLower()"
+                     style="left: @(node.Position.X * Scale)px;
+                            top: @(node.Position.Y * Scale)px;
+                            width: @(NodeWidth * Scale)px;
+                            height: @(NodeHeight * Scale)px;">
+                </div>
+            }
+
+            @* Viewport indicator *@
+            <div class="minimap-viewport"
+                 style="left: @(ViewportLeft)px;
+                        top: @(ViewportTop)px;
+                        width: @(ViewportWidth)px;
+                        height: @(ViewportHeight)px;"
+                 @onmousedown="StartViewportDrag"
+                 @onmousedown:stopPropagation>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public List<WorkflowNodeData> Nodes { get; set; } = new();
+    [Parameter] public double CanvasWidth { get; set; } = 2000;
+    [Parameter] public double CanvasHeight { get; set; } = 1500;
+    [Parameter] public double ViewportX { get; set; }
+    [Parameter] public double ViewportY { get; set; }
+    [Parameter] public double ViewportW { get; set; }
+    [Parameter] public double ViewportH { get; set; }
+    [Parameter] public double Zoom { get; set; } = 1;
+    [Parameter] public EventCallback<(double X, double Y)> OnNavigate { get; set; }
+
+    private ElementReference minimapRef;
+    private bool IsCollapsed { get; set; } = false;
+    private bool IsDragging { get; set; } = false;
+
+    private const double MinimapWidth = 200;
+    private const double MinimapHeight = 122; // Content height (150 - 28 header)
+    private const double NodeWidth = 160;
+    private const double NodeHeight = 80;
+
+    private double Scale => Math.Min(MinimapWidth / CanvasWidth, MinimapHeight / CanvasHeight);
+
+    private double ViewportLeft => Math.Max(0, (-ViewportX / Zoom) * Scale);
+    private double ViewportTop => Math.Max(0, (-ViewportY / Zoom) * Scale);
+    private double ViewportWidth => Math.Min(MinimapWidth - ViewportLeft, (ViewportW / Zoom) * Scale);
+    private double ViewportHeight => Math.Min(MinimapHeight - ViewportTop, (ViewportH / Zoom) * Scale);
+
+    private void ToggleCollapse()
+    {
+        IsCollapsed = !IsCollapsed;
+    }
+
+    private async Task HandleMinimapClick(MouseEventArgs e)
+    {
+        try
+        {
+            var rect = await JS.InvokeAsync<BoundingClientRect>("getBoundingClientRect", minimapRef);
+            var clickX = (e.ClientX - rect.Left) / Scale;
+            var clickY = (e.ClientY - rect.Top) / Scale;
+
+            var newX = -clickX * Zoom + ViewportW / 2;
+            var newY = -clickY * Zoom + ViewportH / 2;
+
+            await OnNavigate.InvokeAsync((newX, newY));
+        }
+        catch
+        {
+            // Handle JS interop errors gracefully
+        }
+    }
+
+    private void StartViewportDrag(MouseEventArgs e)
+    {
+        IsDragging = true;
+    }
+
+    public record BoundingClientRect(double Left, double Top, double Width, double Height);
+}

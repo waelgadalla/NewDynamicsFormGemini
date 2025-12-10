@@ -1,0 +1,73 @@
+@namespace VisualEditorOpus.Components.Workflow.Settings
+
+<div class="settings-fields">
+    <div class="form-group">
+        <label class="form-label">Workflow Name</label>
+        <input type="text"
+               class="form-input"
+               value="@Settings.Name"
+               @oninput="e => UpdateName(e.Value?.ToString())"
+               placeholder="Enter workflow name" />
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-textarea"
+                  @oninput="e => UpdateDescription(e.Value?.ToString())"
+                  placeholder="Describe this workflow...">@Settings.Description</textarea>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Version</label>
+        <div class="version-group">
+            <input type="text"
+                   class="form-input"
+                   value="@Settings.Version"
+                   @oninput="e => UpdateVersion(e.Value?.ToString())" />
+            <span class="status-badge @GetStatusClass()">
+                <i class="bi @GetStatusIcon()"></i>
+                @Settings.Status
+            </span>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public WorkflowPanelSettings Settings { get; set; } = new();
+    [Parameter] public EventCallback<WorkflowPanelSettings> OnSettingsChanged { get; set; }
+
+    private void UpdateName(string? value)
+    {
+        if (value != null)
+            OnSettingsChanged.InvokeAsync(Settings with { Name = value });
+    }
+
+    private void UpdateDescription(string? value)
+    {
+        OnSettingsChanged.InvokeAsync(Settings with { Description = value ?? "" });
+    }
+
+    private void UpdateVersion(string? value)
+    {
+        if (value != null)
+            OnSettingsChanged.InvokeAsync(Settings with { Version = value });
+    }
+
+    private string GetStatusClass() => Settings.Status switch
+    {
+        WorkflowStatus.Draft => "draft",
+        WorkflowStatus.Published => "published",
+        WorkflowStatus.Archived => "archived",
+        WorkflowStatus.Disabled => "disabled",
+        _ => ""
+    };
+
+    private string GetStatusIcon() => Settings.Status switch
+    {
+        WorkflowStatus.Draft => "bi-pencil",
+        WorkflowStatus.Published => "bi-check-circle",
+        WorkflowStatus.Archived => "bi-archive",
+        WorkflowStatus.Disabled => "bi-x-circle",
+        _ => "bi-circle"
+    };
+}

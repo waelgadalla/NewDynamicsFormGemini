@@ -1,0 +1,98 @@
+@namespace VisualEditorOpus.Components.Workflow.Nodes
+
+<div class="wf-node @NodeTypeClass @(IsSelected ? "selected" : "")"
+     style="left: @(Position.X)px; top: @(Position.Y)px;"
+     @onclick="HandleClick"
+     @onclick:stopPropagation
+     @onmousedown="HandleMouseDown">
+
+    <div class="wf-node-header">
+        <div class="wf-node-icon">
+            <i class="bi bi-@IconName"></i>
+        </div>
+        <span class="wf-node-title">@Title</span>
+        <button class="wf-node-menu" @onclick="ShowMenu" @onclick:stopPropagation>
+            <i class="bi bi-three-dots-vertical"></i>
+        </button>
+    </div>
+
+    <div class="wf-node-body">
+        @ChildContent
+    </div>
+
+    @if (ShowFooter)
+    {
+        <div class="wf-node-footer">
+            @FooterContent
+        </div>
+    }
+
+    @* Connection Handles *@
+    @if (HasTopHandle)
+    {
+        <div class="wf-handle top"
+             @onmousedown="e => StartConnection(e, HandlePosition.Top)"
+             @onmousedown:stopPropagation></div>
+    }
+    @if (HasBottomHandle)
+    {
+        <div class="wf-handle bottom"
+             @onmousedown="e => StartConnection(e, HandlePosition.Bottom)"
+             @onmousedown:stopPropagation></div>
+    }
+    @if (HasLeftHandle)
+    {
+        <div class="wf-handle left"
+             @onmousedown="e => StartConnection(e, HandlePosition.Left)"
+             @onmousedown:stopPropagation></div>
+    }
+    @if (HasRightHandle)
+    {
+        <div class="wf-handle right"
+             @onmousedown="e => StartConnection(e, HandlePosition.Right)"
+             @onmousedown:stopPropagation></div>
+    }
+</div>
+
+@code {
+    [Parameter] public string Id { get; set; } = "";
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string IconName { get; set; } = "circle";
+    [Parameter] public WfPoint Position { get; set; } = WfPoint.Zero;
+    [Parameter] public bool IsSelected { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? FooterContent { get; set; }
+    [Parameter] public bool ShowFooter { get; set; } = true;
+
+    [Parameter] public bool HasTopHandle { get; set; } = true;
+    [Parameter] public bool HasBottomHandle { get; set; } = true;
+    [Parameter] public bool HasLeftHandle { get; set; } = false;
+    [Parameter] public bool HasRightHandle { get; set; } = false;
+
+    [Parameter] public string NodeTypeClass { get; set; } = "wf-node-base";
+
+    [Parameter] public EventCallback<string> OnSelected { get; set; }
+    [Parameter] public EventCallback<(string NodeId, WfPoint Position)> OnPositionChanged { get; set; }
+    [Parameter] public EventCallback<(string NodeId, HandlePosition Handle)> OnConnectionStart { get; set; }
+    [Parameter] public EventCallback OnMenuRequested { get; set; }
+
+    private async Task HandleClick()
+    {
+        await OnSelected.InvokeAsync(Id);
+    }
+
+    private void HandleMouseDown(MouseEventArgs e)
+    {
+        // Initiate drag - handled by parent canvas
+    }
+
+    private async Task StartConnection(MouseEventArgs e, HandlePosition handle)
+    {
+        await OnConnectionStart.InvokeAsync((Id, handle));
+    }
+
+    private async Task ShowMenu()
+    {
+        await OnMenuRequested.InvokeAsync();
+    }
+}

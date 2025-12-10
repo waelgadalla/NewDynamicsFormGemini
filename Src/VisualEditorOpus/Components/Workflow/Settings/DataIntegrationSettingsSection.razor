@@ -1,0 +1,82 @@
+@namespace VisualEditorOpus.Components.Workflow.Settings
+
+<div class="settings-fields">
+    <div class="form-group">
+        <label class="form-label">Submit Endpoint</label>
+        <div class="api-endpoint">
+            <select class="form-select method-select"
+                    value="@Settings.SubmitMethod"
+                    @onchange="OnSubmitMethodChange">
+                @foreach (var method in Enum.GetValues<HttpMethodType>())
+                {
+                    <option value="@method">@method.ToString().ToUpper()</option>
+                }
+            </select>
+            <input type="text"
+                   class="form-input api-url"
+                   value="@Settings.SubmitEndpoint"
+                   @oninput="e => Update(s => s with { SubmitEndpoint = e.Value?.ToString() })"
+                   placeholder="/api/workflows/submit" />
+        </div>
+        <span class="help-text">Data will be submitted as JSON when workflow completes</span>
+    </div>
+
+    <div class="toggle-group">
+        <span class="toggle-label">Include Metadata</span>
+        <label class="toggle-switch">
+            <input type="checkbox"
+                   checked="@Settings.IncludeMetadata"
+                   @onchange="e => Update(s => s with { IncludeMetadata = (bool)e.Value! })" />
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+
+    <div class="toggle-group">
+        <span class="toggle-label">Enable Webhooks</span>
+        <label class="toggle-switch">
+            <input type="checkbox"
+                   checked="@Settings.EnableWebhooks"
+                   @onchange="e => Update(s => s with { EnableWebhooks = (bool)e.Value! })" />
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Data Source Endpoint</label>
+        <input type="text"
+               class="form-input"
+               value="@Settings.DataSourceEndpoint"
+               @oninput="e => Update(s => s with { DataSourceEndpoint = e.Value?.ToString() })"
+               placeholder="/api/data/prefill" />
+        <span class="help-text">Load pre-filled data from this endpoint</span>
+    </div>
+
+    <div class="toggle-group">
+        <span class="toggle-label">Enable Real-Time Sync</span>
+        <label class="toggle-switch">
+            <input type="checkbox"
+                   checked="@Settings.EnableRealTimeSync"
+                   @onchange="e => Update(s => s with { EnableRealTimeSync = (bool)e.Value! })" />
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+</div>
+
+@code {
+    [Parameter] public DataIntegrationSettings Settings { get; set; } = new();
+    [Parameter] public EventCallback<DataIntegrationSettings> OnSettingsChanged { get; set; }
+
+    private void Update(Func<DataIntegrationSettings, DataIntegrationSettings> updater)
+    {
+        OnSettingsChanged.InvokeAsync(updater(Settings));
+    }
+
+    private void OnSubmitMethodChange(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString();
+        if (!string.IsNullOrEmpty(value) && Enum.TryParse<HttpMethodType>(value, out var method))
+        {
+            Update(s => s with { SubmitMethod = method });
+        }
+    }
+}

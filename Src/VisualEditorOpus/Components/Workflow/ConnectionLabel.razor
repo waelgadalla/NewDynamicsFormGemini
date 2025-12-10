@@ -1,0 +1,66 @@
+@namespace VisualEditorOpus.Components.Workflow
+
+@if (!string.IsNullOrEmpty(Connection.Label))
+{
+    <g class="connection-label-group">
+        <rect class="connection-label-bg"
+              x="@(LabelPosition.X - 15)"
+              y="@(LabelPosition.Y - 8)"
+              width="30"
+              height="16"
+              rx="4" />
+        <text class="connection-label @GetLabelClass()"
+              x="@LabelPosition.X"
+              y="@(LabelPosition.Y + 4)"
+              text-anchor="middle">
+            @Connection.Label
+        </text>
+    </g>
+}
+
+@code {
+    [Parameter] public WorkflowConnection Connection { get; set; } = default!;
+    [Parameter] public ConnectionType PathType { get; set; }
+
+    [CascadingParameter] public Dictionary<string, NodePosition>? NodePositions { get; set; }
+
+    private WfPoint LabelPosition
+    {
+        get
+        {
+            var sourcePos = GetHandlePosition(Connection.SourceNodeId, Connection.SourceHandle);
+            var targetPos = GetHandlePosition(Connection.TargetNodeId, Connection.TargetHandle);
+
+            if (sourcePos == null || targetPos == null) return new WfPoint(0, 0);
+
+            // Position label at 25% of the path (closer to source)
+            return new WfPoint(
+                sourcePos.X + (targetPos.X - sourcePos.X) * 0.25,
+                sourcePos.Y + (targetPos.Y - sourcePos.Y) * 0.25
+            );
+        }
+    }
+
+    private WfPoint? GetHandlePosition(string nodeId, HandlePosition handle)
+    {
+        if (NodePositions == null || !NodePositions.TryGetValue(nodeId, out var nodePos))
+            return null;
+
+        return handle switch
+        {
+            HandlePosition.Top => new WfPoint(nodePos.X + nodePos.Width / 2, nodePos.Y),
+            HandlePosition.Bottom => new WfPoint(nodePos.X + nodePos.Width / 2, nodePos.Y + nodePos.Height),
+            HandlePosition.Left => new WfPoint(nodePos.X, nodePos.Y + nodePos.Height / 2),
+            HandlePosition.Right => new WfPoint(nodePos.X + nodePos.Width, nodePos.Y + nodePos.Height / 2),
+            _ => new WfPoint(nodePos.X + nodePos.Width / 2, nodePos.Y + nodePos.Height / 2)
+        };
+    }
+
+    private string GetLabelClass() => Connection.BranchType switch
+    {
+        BranchType.Yes => "label-success",
+        BranchType.No => "label-warning",
+        BranchType.Error => "label-error",
+        _ => "label-default"
+    };
+}

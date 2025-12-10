@@ -1,0 +1,186 @@
+/* ===================================================================
+   Workflow Connections - CSS Styles
+   E.2 ConnectionDrawing Implementation
+   =================================================================== */
+
+/* ===== CSS Variables for Connection Colors ===== */
+:root {
+    --connection-default: #6B7280;
+    --connection-success: #10B981;
+    --connection-warning: #F59E0B;
+    --connection-error: #EF4444;
+    --connection-active: #6366F1;
+}
+
+/* ===== CONNECTION LAYER ===== */
+.connections-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+    z-index: 0;
+}
+
+/* ===== CONNECTION PATH ===== */
+.connection-path {
+    fill: none;
+    stroke: var(--connection-default);
+    stroke-width: 2;
+    pointer-events: stroke;
+    cursor: pointer;
+    transition: stroke 0.2s, stroke-width 0.2s;
+}
+
+.connection-path:hover,
+.connection-path.hovered {
+    stroke: var(--connection-active);
+    stroke-width: 3;
+}
+
+.connection-path.selected {
+    stroke: var(--connection-active);
+    stroke-width: 3;
+}
+
+.connection-path.default {
+    stroke: var(--connection-default);
+}
+
+.connection-path.success {
+    stroke: var(--connection-success);
+}
+
+.connection-path.warning {
+    stroke: var(--connection-warning);
+}
+
+.connection-path.error {
+    stroke: var(--connection-error);
+}
+
+.connection-path.success:hover,
+.connection-path.success.hovered,
+.connection-path.success.selected {
+    stroke: var(--connection-active);
+}
+
+.connection-path.warning:hover,
+.connection-path.warning.hovered,
+.connection-path.warning.selected {
+    stroke: var(--connection-active);
+}
+
+.connection-path.error:hover,
+.connection-path.error.hovered,
+.connection-path.error.selected {
+    stroke: var(--connection-active);
+}
+
+/* ===== ARROW MARKERS ===== */
+.arrow-default {
+    fill: var(--connection-default);
+}
+
+.arrow-success {
+    fill: var(--connection-success);
+}
+
+.arrow-warning {
+    fill: var(--connection-warning);
+}
+
+.arrow-error {
+    fill: var(--connection-error);
+}
+
+.arrow-active {
+    fill: var(--connection-active);
+}
+
+/* ===== DRAWING ANIMATION ===== */
+.connection-drawing {
+    stroke: var(--connection-active);
+    stroke-dasharray: 5;
+    animation: connection-dash 0.5s linear infinite;
+}
+
+@keyframes connection-dash {
+    to {
+        stroke-dashoffset: -10;
+    }
+}
+
+/* ===== CONNECTION LABELS ===== */
+.connection-label-bg {
+    fill: var(--bg-primary, #ffffff);
+    stroke: var(--border-color, #e5e7eb);
+    stroke-width: 1;
+}
+
+.connection-label {
+    font-size: 10px;
+    font-weight: 600;
+    fill: var(--text-secondary, #6b7280);
+    pointer-events: none;
+    user-select: none;
+}
+
+.connection-label.label-default {
+    fill: var(--text-secondary, #6b7280);
+}
+
+.connection-label.label-success {
+    fill: var(--success, #10b981);
+}
+
+.connection-label.label-warning {
+    fill: var(--warning, #f59e0b);
+}
+
+.connection-label.label-error {
+    fill: var(--error, #ef4444);
+}
+
+/* ===== DELETE BUTTON ===== */
+.connection-delete-btn {
+    width: 24px;
+    height: 24px;
+    background: var(--error, #ef4444);
+    border: 2px solid var(--bg-primary, #ffffff);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: transform 0.15s;
+    padding: 0;
+}
+
+.connection-delete-btn:hover {
+    transform: scale(1.1);
+}
+
+.connection-delete-btn i {
+    line-height: 1;
+}
+
+/* ===== CONNECTION GROUP ===== */
+.connection-group {
+    pointer-events: auto;
+}
+
+/* ===== DARK MODE SUPPORT ===== */
+[data-theme="dark"] .connection-label-bg {
+    fill: var(--bg-primary, #1f2937);
+    stroke: var(--border-color, #374151);
+}
+
+[data-theme="dark"] .connection-delete-btn {
+    border-color: var(--bg-primary, #1f2937);
+}

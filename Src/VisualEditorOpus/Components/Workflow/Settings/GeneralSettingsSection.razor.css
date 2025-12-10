@@ -1,0 +1,47 @@
+.settings-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.version-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.version-group .form-input {
+    flex: 1;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.status-badge.draft {
+    background: var(--info-light, #dbeafe);
+    color: var(--info, #3b82f6);
+}
+
+.status-badge.published {
+    background: var(--success-light, #d1fae5);
+    color: var(--success, #10b981);
+}
+
+.status-badge.archived {
+    background: var(--bg-tertiary, #f3f4f6);
+    color: var(--text-secondary, #6b7280);
+}
+
+.status-badge.disabled {
+    background: var(--danger-light, #fee2e2);
+    color: var(--danger, #ef4444);
+}

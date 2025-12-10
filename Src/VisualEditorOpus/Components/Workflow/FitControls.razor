@@ -1,0 +1,39 @@
+@namespace VisualEditorOpus.Components.Workflow
+
+<div class="fit-controls">
+    <button class="fit-btn" @onclick="HandleFitView" title="Fit all nodes in view">
+        <i class="bi bi-arrows-fullscreen"></i>
+        Fit View
+    </button>
+
+    <button class="fit-btn" @onclick="HandleCenterView" title="Center the canvas">
+        <i class="bi bi-fullscreen"></i>
+        Center
+    </button>
+
+    <button class="fit-btn" @onclick="HandleResetView" title="Reset zoom and pan">
+        <i class="bi bi-arrow-counterclockwise"></i>
+        Reset
+    </button>
+</div>
+
+@code {
+    [Parameter] public EventCallback OnFitView { get; set; }
+    [Parameter] public EventCallback OnCenterView { get; set; }
+    [Parameter] public EventCallback OnResetView { get; set; }
+
+    private async Task HandleFitView()
+    {
+        await OnFitView.InvokeAsync();
+    }
+
+    private async Task HandleCenterView()
+    {
+        await OnCenterView.InvokeAsync();
+    }
+
+    private async Task HandleResetView()
+    {
+        await OnResetView.InvokeAsync();
+    }
+}

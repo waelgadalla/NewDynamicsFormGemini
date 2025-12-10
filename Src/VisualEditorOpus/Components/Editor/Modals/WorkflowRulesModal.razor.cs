@@ -7,6 +7,7 @@ namespace VisualEditorOpus.Components.Editor.Modals;
 /// <summary>
 /// Code-behind for the WorkflowRulesModal component.
 /// Manages workflow-level conditional rules for step navigation and workflow completion.
+/// Provides a tabbed interface for different rule types.
 /// </summary>
 public partial class WorkflowRulesModal : ComponentBase
 {
@@ -52,6 +53,9 @@ public partial class WorkflowRulesModal : ComponentBase
     [Parameter]
     public EventCallback OnCancel { get; set; }
 
+    // Tab state
+    private RuleTab activeTab = RuleTab.Skip;
+
     // State
     private List<WorkflowRuleViewModel> rules = new();
     private bool isAddingRule;
@@ -62,6 +66,7 @@ public partial class WorkflowRulesModal : ComponentBase
     private string selectedAction = "skipStep";
     private string ruleDescription = "";
     private int? targetStepNumber;
+    private string? targetFieldId;
     private Condition? currentCondition;
     private int rulePriority = 100;
 
@@ -71,15 +76,17 @@ public partial class WorkflowRulesModal : ComponentBase
     // Action type definitions
     private static readonly List<ActionTypeInfo> ActionTypes = new()
     {
-        new("skipStep", "Skip Step", "Skip a specific step/module", "bi-skip-forward", "skip"),
-        new("goToStep", "Go To Step", "Navigate to a specific step", "bi-arrow-right-circle", "goto"),
-        new("completeWorkflow", "Complete", "Complete the workflow", "bi-check-circle", "complete")
+        new("skipStep", "Skip Step", "Skip a specific step/module", "bi-skip-forward-fill", "skip"),
+        new("goToStep", "Go To Step", "Navigate to a specific step", "bi-arrow-return-left", "goto"),
+        new("completeWorkflow", "Complete", "Complete the workflow", "bi-check-circle-fill", "complete"),
+        new("validate", "Validate", "Custom field validation", "bi-shield-check", "validate")
     };
 
     private bool IsRuleValid =>
         !string.IsNullOrWhiteSpace(ruleDescription) &&
         currentCondition != null &&
-        (selectedAction == "completeWorkflow" || targetStepNumber.HasValue);
+        (selectedAction == "completeWorkflow" ||
+         selectedAction == "validate" ? !string.IsNullOrEmpty(targetFieldId) : targetStepNumber.HasValue);
 
     /// <inheritdoc />
     protected override void OnParametersSet()
@@ -101,6 +108,7 @@ public partial class WorkflowRulesModal : ComponentBase
                 Action = r.Action,
                 Description = r.Description ?? "",
                 TargetStepNumber = r.TargetStepNumber,
+                TargetFieldId = r.TargetFieldId,
                 Condition = r.Condition,
                 Priority = r.Priority,
                 IsActive = r.IsActive
@@ -111,16 +119,129 @@ public partial class WorkflowRulesModal : ComponentBase
     }
 
     private static bool IsWorkflowRule(string action) =>
-        action is "skipStep" or "goToStep" or "completeWorkflow";
+        action is "skipStep" or "goToStep" or "completeWorkflow" or "validate";
+
+    private void SetActiveTab(RuleTab tab)
+    {
+        activeTab = tab;
+        ResetForm();
+
+        // Set default action based on tab
+        selectedAction = tab switch
+        {
+            RuleTab.Skip => "skipStep",
+            RuleTab.GoTo => "goToStep",
+            RuleTab.Completion => "completeWorkflow",
+            RuleTab.Validation => "validate",
+            _ => "skipStep"
+        };
+    }
+
+    private int GetRuleCountByType(string action)
+    {
+        return rules.Count(r => r.Action == action);
+    }
+
+    private List<WorkflowRuleViewModel> GetFilteredRules()
+    {
+        var actionType = activeTab switch
+        {
+            RuleTab.Skip => "skipStep",
+            RuleTab.GoTo => "goToStep",
+            RuleTab.Completion => "completeWorkflow",
+            RuleTab.Validation => "validate",
+            _ => ""
+        };
+
+        return rules
+            .Where(r => r.Action == actionType)
+            .OrderBy(r => r.Priority)
+            .ToList();
+    }
+
+    private List<ActionTypeInfo> GetAvailableActions()
+    {
+        return activeTab switch
+        {
+            RuleTab.Skip => ActionTypes.Where(a => a.Id == "skipStep").ToList(),
+            RuleTab.GoTo => ActionTypes.Where(a => a.Id == "goToStep").ToList(),
+            RuleTab.Completion => ActionTypes.Where(a => a.Id == "completeWorkflow").ToList(),
+            RuleTab.Validation => ActionTypes.Where(a => a.Id == "validate").ToList(),
+            _ => ActionTypes.ToList()
+        };
+    }
+
+    private string GetTabTitle() => activeTab switch
+    {
+        RuleTab.Skip => "Skip Rule",
+        RuleTab.GoTo => "Go To Rule",
+        RuleTab.Completion => "Completion Rule",
+        RuleTab.Validation => "Validation Rule",
+        _ => "Rule"
+    };
+
+    private string GetEmptyStateIcon() => activeTab switch
+    {
+        RuleTab.Skip => "bi-skip-forward",
+        RuleTab.GoTo => "bi-arrow-return-right",
+        RuleTab.Completion => "bi-check-circle",
+        RuleTab.Validation => "bi-shield-check",
+        _ => "bi-inbox"
+    };
+
+    private string GetEmptyStateDescription() => activeTab switch
+    {
+        RuleTab.Skip => "Skip rules allow steps to be skipped based on conditions.",
+        RuleTab.GoTo => "Go To rules redirect the workflow to different steps.",
+        RuleTab.Completion => "Completion rules control what happens when the workflow ends.",
+        RuleTab.Validation => "Validation rules perform custom field validation.",
+        _ => "No rules defined."
+    };
+
+    private string GetActionLabel(string action) => action switch
+    {
+        "skipStep" => "Then Skip",
+        "goToStep" => "Then Go To",
+        "completeWorkflow" => "Then Complete",
+        "validate" => "Validate Field",
+        _ => "Then"
+    };
+
+    private string GetActionValue(WorkflowRuleViewModel rule) => rule.Action switch
+    {
+        "skipStep" when rule.TargetStepNumber.HasValue => GetStepName(rule.TargetStepNumber.Value),
+        "goToStep" when rule.TargetStepNumber.HasValue => GetStepName(rule.TargetStepNumber.Value),
+        "completeWorkflow" => "Workflow completion",
+        "validate" when !string.IsNullOrEmpty(rule.TargetFieldId) => rule.TargetFieldId,
+        _ => "Unknown"
+    };
+
+    private string GetStepName(int stepNumber)
+    {
+        if (WorkflowModules.Count >= stepNumber && stepNumber > 0)
+        {
+            var module = WorkflowModules[stepNumber - 1];
+            return $"Step {stepNumber}: {module.TitleEn ?? "Untitled"}";
+        }
+        return $"Step {stepNumber}";
+    }
 
     private void ResetForm()
     {
         isAddingRule = false;
         isEditingRule = false;
         editingRuleId = null;
-        selectedAction = "skipStep";
+        selectedAction = activeTab switch
+        {
+            RuleTab.Skip => "skipStep",
+            RuleTab.GoTo => "goToStep",
+            RuleTab.Completion => "completeWorkflow",
+            RuleTab.Validation => "validate",
+            _ => "skipStep"
+        };
         ruleDescription = "";
         targetStepNumber = null;
+        targetFieldId = null;
         currentCondition = null;
         rulePriority = 100;
     }
@@ -141,6 +262,7 @@ public partial class WorkflowRulesModal : ComponentBase
         selectedAction = rule.Action;
         ruleDescription = rule.Description;
         targetStepNumber = rule.TargetStepNumber;
+        targetFieldId = rule.TargetFieldId;
         currentCondition = rule.Condition;
         rulePriority = rule.Priority;
     }
@@ -166,6 +288,10 @@ public partial class WorkflowRulesModal : ComponentBase
         {
             targetStepNumber = null;
         }
+        if (actionId != "validate")
+        {
+            targetFieldId = null;
+        }
     }
 
     private void SaveRule()
@@ -180,7 +306,8 @@ public partial class WorkflowRulesModal : ComponentBase
             {
                 rule.Action = selectedAction;
                 rule.Description = ruleDescription;
-                rule.TargetStepNumber = selectedAction == "completeWorkflow" ? null : targetStepNumber;
+                rule.TargetStepNumber = selectedAction is "completeWorkflow" or "validate" ? null : targetStepNumber;
+                rule.TargetFieldId = selectedAction == "validate" ? targetFieldId : null;
                 rule.Condition = currentCondition;
                 rule.Priority = rulePriority;
             }
@@ -193,7 +320,8 @@ public partial class WorkflowRulesModal : ComponentBase
                 Id = Guid.NewGuid().ToString(),
                 Action = selectedAction,
                 Description = ruleDescription,
-                TargetStepNumber = selectedAction == "completeWorkflow" ? null : targetStepNumber,
+                TargetStepNumber = selectedAction is "completeWorkflow" or "validate" ? null : targetStepNumber,
+                TargetFieldId = selectedAction == "validate" ? targetFieldId : null,
                 Condition = currentCondition,
                 Priority = rulePriority,
                 IsActive = true
@@ -213,12 +341,23 @@ public partial class WorkflowRulesModal : ComponentBase
         showConditionBuilder = true;
     }
 
-    private void HandleConditionSaved(List<ConditionalRule> rules)
+    private void HandleConditionSaved(ConditionalRule savedRule)
     {
-        //wael not working
-        
-        //currentCondition = condition;
+        // Extract condition from the saved rule
+        currentCondition = savedRule.Condition;
         showConditionBuilder = false;
+    }
+
+    private ConditionalRule? GetExistingRuleForConditionBuilder()
+    {
+        if (currentCondition == null) return null;
+
+        return new ConditionalRule
+        {
+            Id = Guid.NewGuid().ToString(),
+            Action = selectedAction,
+            Condition = currentCondition
+        };
     }
 
     private int GetActiveRuleCount() => rules.Count(r => r.IsActive);
@@ -272,9 +411,10 @@ public partial class WorkflowRulesModal : ComponentBase
 
     private static (string Icon, string CssClass, string Label) GetActionInfo(string action) => action switch
     {
-        "skipStep" => ("bi-skip-forward", "skip", "Skip Step"),
-        "goToStep" => ("bi-arrow-right-circle", "goto", "Go To Step"),
-        "completeWorkflow" => ("bi-check-circle", "complete", "Complete Workflow"),
+        "skipStep" => ("bi-skip-forward-fill", "skip", "Skip"),
+        "goToStep" => ("bi-arrow-return-left", "goto", "Go To"),
+        "completeWorkflow" => ("bi-check-circle-fill", "complete", "Complete"),
+        "validate" => ("bi-shield-check", "validate", "Validate"),
         _ => ("bi-question", "", action)
     };
 
@@ -288,6 +428,8 @@ public partial class WorkflowRulesModal : ComponentBase
                 $"Navigate to Step {rule.TargetStepNumber} when condition is met",
             "completeWorkflow" =>
                 "Complete workflow immediately when condition is met",
+            "validate" when !string.IsNullOrEmpty(rule.TargetFieldId) =>
+                $"Validate {rule.TargetFieldId} when condition is met",
             _ => "Unknown action"
         };
     }
@@ -339,6 +481,7 @@ public partial class WorkflowRulesModal : ComponentBase
             Description = string.IsNullOrWhiteSpace(r.Description) ? null : r.Description,
             Action = r.Action,
             TargetStepNumber = r.TargetStepNumber,
+            TargetFieldId = r.TargetFieldId,
             Condition = r.Condition!,
             Priority = r.Priority,
             IsActive = r.IsActive
@@ -355,6 +498,17 @@ public partial class WorkflowRulesModal : ComponentBase
     }
 
     /// <summary>
+    /// Tab enumeration for the rules modal.
+    /// </summary>
+    private enum RuleTab
+    {
+        Skip,
+        GoTo,
+        Completion,
+        Validation
+    }
+
+    /// <summary>
     /// View model for workflow rules.
     /// </summary>
     private class WorkflowRuleViewModel
@@ -363,6 +517,7 @@ public partial class WorkflowRulesModal : ComponentBase
         public string Action { get; set; } = "skipStep";
         public string Description { get; set; } = "";
         public int? TargetStepNumber { get; set; }
+        public string? TargetFieldId { get; set; }
         public Condition? Condition { get; set; }
         public int Priority { get; set; } = 100;
         public bool IsActive { get; set; } = true;

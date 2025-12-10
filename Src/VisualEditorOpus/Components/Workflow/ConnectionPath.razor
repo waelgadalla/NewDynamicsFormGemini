@@ -1,0 +1,157 @@
+@namespace VisualEditorOpus.Components.Workflow
+
+<g class="connection-group" @onclick="HandleClick" @onclick:stopPropagation>
+    <path class="connection-path @GetConnectionClass()"
+          d="@PathData"
+          marker-end="@GetMarkerUrl()"
+          @onmouseover="() => IsHovered = true"
+          @onmouseout="() => IsHovered = false" />
+
+    @if (IsSelected || IsHovered)
+    {
+        <foreignObject x="@DeleteButtonPosition.X" y="@DeleteButtonPosition.Y" width="24" height="24">
+            <button class="connection-delete-btn" @onclick="HandleDelete" @onclick:stopPropagation>
+                <i class="bi bi-x"></i>
+            </button>
+        </foreignObject>
+    }
+</g>
+
+@code {
+    [Parameter] public WorkflowConnection Connection { get; set; } = default!;
+    [Parameter] public ConnectionType PathType { get; set; }
+    [Parameter] public bool IsSelected { get; set; }
+    [Parameter] public EventCallback<string> OnSelected { get; set; }
+    [Parameter] public EventCallback<string> OnDeleted { get; set; }
+
+    [CascadingParameter] public Dictionary<string, NodePosition>? NodePositions { get; set; }
+
+    private bool IsHovered { get; set; }
+
+    private string PathData
+    {
+        get
+        {
+            if (NodePositions == null) return "";
+
+            var sourcePos = GetHandlePosition(Connection.SourceNodeId, Connection.SourceHandle);
+            var targetPos = GetHandlePosition(Connection.TargetNodeId, Connection.TargetHandle);
+
+            if (sourcePos == null || targetPos == null) return "";
+
+            return GeneratePath(sourcePos, targetPos);
+        }
+    }
+
+    private WfPoint DeleteButtonPosition
+    {
+        get
+        {
+            // Calculate midpoint of path
+            var sourcePos = GetHandlePosition(Connection.SourceNodeId, Connection.SourceHandle);
+            var targetPos = GetHandlePosition(Connection.TargetNodeId, Connection.TargetHandle);
+
+            if (sourcePos == null || targetPos == null) return new WfPoint(0, 0);
+
+            return new WfPoint(
+                (sourcePos.X + targetPos.X) / 2 - 12,
+                (sourcePos.Y + targetPos.Y) / 2 - 12
+            );
+        }
+    }
+
+    private WfPoint? GetHandlePosition(string nodeId, HandlePosition handle)
+    {
+        if (NodePositions == null || !NodePositions.TryGetValue(nodeId, out var nodePos))
+            return null;
+
+        return handle switch
+        {
+            HandlePosition.Top => new WfPoint(nodePos.X + nodePos.Width / 2, nodePos.Y),
+            HandlePosition.Bottom => new WfPoint(nodePos.X + nodePos.Width / 2, nodePos.Y + nodePos.Height),
+            HandlePosition.Left => new WfPoint(nodePos.X, nodePos.Y + nodePos.Height / 2),
+            HandlePosition.Right => new WfPoint(nodePos.X + nodePos.Width, nodePos.Y + nodePos.Height / 2),
+            _ => new WfPoint(nodePos.X + nodePos.Width / 2, nodePos.Y + nodePos.Height / 2)
+        };
+    }
+
+    private string GeneratePath(WfPoint start, WfPoint end)
+    {
+        return PathType switch
+        {
+            ConnectionType.Bezier => GenerateBezierPath(start, end),
+            ConnectionType.Step => GenerateStepPath(start, end),
+            ConnectionType.SmoothStep => GenerateSmoothStepPath(start, end),
+            ConnectionType.Straight => $"M {start.X:F1},{start.Y:F1} L {end.X:F1},{end.Y:F1}",
+            _ => GenerateBezierPath(start, end)
+        };
+    }
+
+    private string GenerateBezierPath(WfPoint start, WfPoint end)
+    {
+        var controlPointOffset = Math.Abs(end.Y - start.Y) / 2;
+        return $"M {start.X:F1},{start.Y:F1} C {start.X:F1},{start.Y + controlPointOffset:F1} {end.X:F1},{end.Y - controlPointOffset:F1} {end.X:F1},{end.Y:F1}";
+    }
+
+    private string GenerateStepPath(WfPoint start, WfPoint end)
+    {
+        var midY = (start.Y + end.Y) / 2;
+        return $"M {start.X:F1},{start.Y:F1} L {start.X:F1},{midY:F1} L {end.X:F1},{midY:F1} L {end.X:F1},{end.Y:F1}";
+    }
+
+    private string GenerateSmoothStepPath(WfPoint start, WfPoint end)
+    {
+        var midY = (start.Y + end.Y) / 2;
+        var radius = Math.Min(10, Math.Abs(end.X - start.X) / 4);
+        var dir = end.X > start.X ? 1 : -1;
+
+        return $"M {start.X:F1},{start.Y:F1} " +
+               $"L {start.X:F1},{midY - radius:F1} " +
+               $"Q {start.X:F1},{midY:F1} {start.X + dir * radius:F1},{midY:F1} " +
+               $"L {end.X - dir * radius:F1},{midY:F1} " +
+               $"Q {end.X:F1},{midY:F1} {end.X:F1},{midY + radius:F1} " +
+               $"L {end.X:F1},{end.Y:F1}";
+    }
+
+    private string GetConnectionClass()
+    {
+        var classes = new List<string>();
+
+        if (IsSelected) classes.Add("selected");
+        if (IsHovered) classes.Add("hovered");
+
+        // Branch type styling
+        classes.Add(Connection.BranchType switch
+        {
+            BranchType.Yes => "success",
+            BranchType.No => "warning",
+            BranchType.Error => "error",
+            _ => "default"
+        });
+
+        return string.Join(" ", classes);
+    }
+
+    private string GetMarkerUrl()
+    {
+        if (IsSelected || IsHovered) return "url(#arrow-active)";
+
+        return Connection.BranchType switch
+        {
+            BranchType.Yes => "url(#arrow-success)",
+            BranchType.No => "url(#arrow-warning)",
+            BranchType.Error => "url(#arrow-error)",
+            _ => "url(#arrow-default)"
+        };
+    }
+
+    private async Task HandleClick()
+    {
+        await OnSelected.InvokeAsync(Connection.Id);
+    }
+
+    private async Task HandleDelete()
+    {
+        await OnDeleted.InvokeAsync(Connection.Id);
+    }
+}

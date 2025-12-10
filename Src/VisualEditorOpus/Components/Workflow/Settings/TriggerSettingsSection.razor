@@ -1,0 +1,152 @@
+@namespace VisualEditorOpus.Components.Workflow.Settings
+
+<div class="settings-fields">
+    <div class="form-group">
+        <label class="form-label">Start Trigger</label>
+        <div class="trigger-options">
+            @foreach (var trigger in Enum.GetValues<StartTriggerType>())
+            {
+                <span class="trigger-chip @(Settings.StartTrigger == trigger ? "active" : "")"
+                      @onclick="() => SetTrigger(trigger)">
+                    <i class="bi @GetTriggerIcon(trigger)"></i>
+                    @trigger
+                </span>
+            }
+        </div>
+    </div>
+
+    @if (Settings.StartTrigger == StartTriggerType.Url)
+    {
+        <div class="form-group">
+            <label class="form-label">Trigger URL Path</label>
+            <input type="text"
+                   class="form-input"
+                   value="@Settings.TriggerUrl"
+                   @oninput="e => Update(s => s with { TriggerUrl = e.Value?.ToString() })"
+                   placeholder="/forms/my-workflow" />
+        </div>
+    }
+
+    @if (Settings.StartTrigger == StartTriggerType.Scheduled)
+    {
+        <div class="form-group">
+            <label class="form-label">Schedule (Cron Expression)</label>
+            <input type="text"
+                   class="form-input"
+                   value="@Settings.ScheduleCron"
+                   @oninput="e => Update(s => s with { ScheduleCron = e.Value?.ToString() })"
+                   placeholder="0 9 * * MON-FRI" />
+            <span class="help-text">Runs at 9 AM on weekdays</span>
+        </div>
+    }
+
+    @if (Settings.StartTrigger == StartTriggerType.Event)
+    {
+        <div class="form-group">
+            <label class="form-label">Event Name</label>
+            <input type="text"
+                   class="form-input"
+                   value="@Settings.TriggerEvent"
+                   @oninput="e => Update(s => s with { TriggerEvent = e.Value?.ToString() })"
+                   placeholder="user.created" />
+        </div>
+    }
+
+    <div class="form-group">
+        <label class="form-label">On Complete</label>
+        <select class="form-select"
+                value="@Settings.OnComplete"
+                @onchange="OnCompletionActionChange">
+            @foreach (var action in Enum.GetValues<SettingsCompletionAction>())
+            {
+                <option value="@action">@FormatAction(action)</option>
+            }
+        </select>
+    </div>
+
+    @if (Settings.OnComplete == SettingsCompletionAction.ShowMessage)
+    {
+        <div class="form-group">
+            <label class="form-label">Success Message</label>
+            <input type="text"
+                   class="form-input"
+                   value="@Settings.SuccessMessage"
+                   @oninput="OnSuccessMessageChange"
+                   placeholder="Thank you for your submission!" />
+        </div>
+    }
+
+    @if (Settings.OnComplete == SettingsCompletionAction.Redirect)
+    {
+        <div class="form-group">
+            <label class="form-label">Redirect URL</label>
+            <input type="text"
+                   class="form-input"
+                   value="@Settings.RedirectUrl"
+                   @oninput="e => Update(s => s with { RedirectUrl = e.Value?.ToString() })"
+                   placeholder="https://example.com/thank-you" />
+        </div>
+    }
+
+    @if (Settings.OnComplete == SettingsCompletionAction.TriggerWorkflow)
+    {
+        <div class="form-group">
+            <label class="form-label">Next Workflow ID</label>
+            <input type="text"
+                   class="form-input"
+                   value="@Settings.NextWorkflowId"
+                   @oninput="e => Update(s => s with { NextWorkflowId = e.Value?.ToString() })"
+                   placeholder="workflow-id-123" />
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public TriggerSettings Settings { get; set; } = new();
+    [Parameter] public EventCallback<TriggerSettings> OnSettingsChanged { get; set; }
+
+    private void SetTrigger(StartTriggerType trigger)
+    {
+        Update(s => s with { StartTrigger = trigger });
+    }
+
+    private void Update(Func<TriggerSettings, TriggerSettings> updater)
+    {
+        OnSettingsChanged.InvokeAsync(updater(Settings));
+    }
+
+    private void OnCompletionActionChange(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString();
+        if (!string.IsNullOrEmpty(value) && Enum.TryParse<SettingsCompletionAction>(value, out var action))
+        {
+            Update(s => s with { OnComplete = action });
+        }
+    }
+
+    private void OnSuccessMessageChange(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString() ?? "";
+        Update(s => s with { SuccessMessage = value });
+    }
+
+    private string GetTriggerIcon(StartTriggerType trigger) => trigger switch
+    {
+        StartTriggerType.Manual => "bi-hand-index",
+        StartTriggerType.Url => "bi-link-45deg",
+        StartTriggerType.Scheduled => "bi-calendar-event",
+        StartTriggerType.Event => "bi-broadcast",
+        StartTriggerType.Api => "bi-code-slash",
+        _ => "bi-circle"
+    };
+
+    private string FormatAction(SettingsCompletionAction action) => action switch
+    {
+        SettingsCompletionAction.ShowMessage => "Show Success Message",
+        SettingsCompletionAction.Redirect => "Redirect to URL",
+        SettingsCompletionAction.SubmitToApi => "Submit to API",
+        SettingsCompletionAction.TriggerWorkflow => "Trigger Another Workflow",
+        SettingsCompletionAction.Custom => "Custom Action",
+        _ => action.ToString()
+    };
+}

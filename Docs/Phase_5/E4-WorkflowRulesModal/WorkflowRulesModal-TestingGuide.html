@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E.4 Workflow Rules Modal - Testing Guide</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: rgba(99, 102, 241, 0.1);
+            --success: #10B981;
+            --success-light: rgba(16, 185, 129, 0.1);
+            --warning: #F59E0B;
+            --warning-light: rgba(245, 158, 11, 0.1);
+            --error: #EF4444;
+            --error-light: rgba(239, 68, 68, 0.1);
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --bg-tertiary: #F3F4F6;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --border-color: #E5E7EB;
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        [data-theme="dark"] {
+            --primary: #818CF8;
+            --primary-light: rgba(129, 140, 248, 0.15);
+            --bg-primary: #1F2937;
+            --bg-secondary: #111827;
+            --bg-tertiary: #374151;
+            --text-primary: #F9FAFB;
+            --text-secondary: #D1D5DB;
+            --text-muted: #9CA3AF;
+            --border-color: #374151;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .page-title span {
+            color: var(--primary);
+        }
+
+        .theme-toggle {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--primary);
+        }
+
+        .subsection {
+            margin-bottom: 24px;
+        }
+
+        .subsection-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            transition: background 0.2s;
+        }
+
+        .checklist-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            accent-color: var(--success);
+            cursor: pointer;
+        }
+
+        .checklist-item.checked {
+            background: var(--success-light);
+        }
+
+        .checklist-item.checked .item-text {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .item-content {
+            flex: 1;
+        }
+
+        .item-text {
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .item-details {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .file-list {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-top: 12px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .file-item i {
+            color: var(--primary);
+        }
+
+        .file-status {
+            margin-left: auto;
+            padding: 2px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-modified {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--success);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .summary-card {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            text-align: center;
+        }
+
+        .summary-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .summary-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin-top: 12px;
+        }
+
+        .code-comment { color: #6a9955; }
+        .code-keyword { color: #569cd6; }
+        .code-string { color: #ce9178; }
+        .code-type { color: #4ec9b0; }
+
+        .feature-card {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            margin-bottom: 12px;
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-md);
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .feature-icon.skip {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .feature-icon.goto {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .feature-icon.complete {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .feature-icon.validate {
+            background: var(--error-light);
+            color: var(--error);
+        }
+
+        .feature-content h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .feature-content p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="page-header">
+        <h1 class="page-title">E.4 <span>Workflow Rules Modal</span> - Testing Guide</h1>
+        <button class="theme-toggle" onclick="toggleTheme()">
+            <i class="bi bi-moon"></i>
+            Toggle Theme
+        </button>
+    </div>
+
+    <!-- Progress Summary -->
+    <div class="section">
+        <h2 class="section-title">
+            <i class="bi bi-bar-chart-fill"></i>
+            Testing Progress
+        </h2>
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="summary-value" id="completedCount">0</div>
+                <div class="summary-label">Completed</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-value" id="totalCount">0</div>
+                <div class="summary-label">Total Tests</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-value" id="percentComplete">0%</div>
+                <div class="summary-label">Progress</div>
+            </div>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+        </div>
+        <div class="progress-text">
+            <span>Testing Progress</span>
+            <span id="progressPercent">0%</span>
+        </div>
+    </div>
+
+    <!-- Rule Types Overview -->
+    <div class="section">
+        <h2 class="section-title">
+            <i class="bi bi-diagram-3"></i>
+            Rule Types Overview
+        </h2>
+        <div class="feature-card">
+            <div class="feature-icon skip">
+                <i class="bi bi-skip-forward-fill"></i>
+            </div>
+            <div class="feature-content">
+                <h4>Skip Rules</h4>
+                <p>Skip a specific step/module when conditions are met. Example: Skip manager approval for amounts under $1000.</p>
+            </div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon goto">
+                <i class="bi bi-arrow-return-left"></i>
+            </div>
+            <div class="feature-content">
+                <h4>Go To Rules</h4>
+                <p>Navigate to a specific step when conditions are met. Example: Return to personal info if validation fails.</p>
+            </div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon complete">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <div class="feature-content">
+                <h4>Completion Rules</h4>
+                <p>Complete the workflow when conditions are met. Example: Auto-complete workflow for pre-approved requests.</p>
+            </div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon validate">
+                <i class="bi bi-shield-check"></i>
+            </div>
+            <div class="feature-content">
+                <h4>Validation Rules</h4>
+                <p>Custom field validation based on conditions. Example: Require additional documents for high-value transactions.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 1: Manual Testing Steps -->
+    <div class="section">
+        <h2 class="section-title">
+            <i class="bi bi-list-check"></i>
+            Section 1: Manual Testing Steps
+        </h2>
+
+        <!-- Modal and Tabs -->
+        <div class="subsection">
+            <h3 class="subsection-title">Modal and Tabs</h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Modal opens with correct title and icon</div>
+                        <div class="item-details">Title: "Workflow Rules", Icon: bi-diagram-3</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Active rule count badge displays in header</div>
+                        <div class="item-details">Shows total number of active rules</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Four tabs display with correct icons</div>
+                        <div class="item-details">Skip Rules, Go To Rules, Completion Rules, Validation Rules</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Tab badges show rule count per type</div>
+                        <div class="item-details">Each tab shows number of rules in that category</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Tab switching works correctly</div>
+                        <div class="item-details">Click each tab, verify active state and content change</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Active tab has highlighted styling</div>
+                        <div class="item-details">White background, primary color text, shadow</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Rule Cards -->
+        <div class="subsection">
+            <h3 class="subsection-title">Rule Cards</h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Rule cards display with toggle switch</div>
+                        <div class="item-details">Toggle switch on left side of card header</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Rule name and description display correctly</div>
+                        <div class="item-details">Name bold, description in muted text below</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Rule type badge shows with correct color</div>
+                        <div class="item-details">Skip=orange, GoTo=indigo, Complete=green, Validate=red</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Edit and delete buttons appear</div>
+                        <div class="item-details">Pencil icon for edit, trash icon for delete</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Condition display shows in code format</div>
+                        <div class="item-details">Shows "IF field operator value" in monospace</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Action display shows icon and target</div>
+                        <div class="item-details">Action icon + label + target value</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Priority badge displays</div>
+                        <div class="item-details">Shows "Priority: X" on right side</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Card hover shows border highlight</div>
+                        <div class="item-details">Primary color border on hover</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Disabled cards show reduced opacity</div>
+                        <div class="item-details">Inactive rules appear at 60% opacity</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Toggle Functionality -->
+        <div class="subsection">
+            <h3 class="subsection-title">Toggle Functionality</h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Toggle switch animates on click</div>
+                        <div class="item-details">Slides from left to right with color change</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Active toggle shows primary color</div>
+                        <div class="item-details">Indigo background when enabled</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Inactive toggle shows gray background</div>
+                        <div class="item-details">Gray/muted background when disabled</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Toggle state persists correctly</div>
+                        <div class="item-details">Rule IsActive property updates</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Add Rule Form -->
+        <div class="subsection">
+            <h3 class="subsection-title">Add Rule Form</h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Add rule button appears below rules list</div>
+                        <div class="item-details">Dashed border button with plus icon</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Click Add button shows form</div>
+                        <div class="item-details">Form section expands with animation</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Action type selection shows card options</div>
+                        <div class="item-details">Cards for available actions based on tab</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Description input accepts text</div>
+                        <div class="item-details">Text input with placeholder</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Target step dropdown populates</div>
+                        <div class="item-details">Shows all workflow steps for Skip/GoTo</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Condition Builder button opens modal</div>
+                        <div class="item-details">Click "Builder" shows condition builder</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Priority input accepts numbers</div>
+                        <div class="item-details">Number input with min=1, max=1000</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Save button disabled until valid</div>
+                        <div class="item-details">Requires description, condition, and target</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Cancel button resets form</div>
+                        <div class="item-details">Returns to list view without changes</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Edit and Delete -->
+        <div class="subsection">
+            <h3 class="subsection-title">Edit and Delete</h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Edit button populates form with rule data</div>
+                        <div class="item-details">All fields filled with existing rule values</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Edit form title changes to "Edit Rule"</div>
+                        <div class="item-details">Title shows pencil icon and edit text</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Update button saves changes</div>
+                        <div class="item-details">Rule updated in list</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Delete button removes rule</div>
+                        <div class="item-details">Rule removed from list immediately</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Empty State -->
+        <div class="subsection">
+            <h3 class="subsection-title">Empty State</h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Empty state shows when no rules in tab</div>
+                        <div class="item-details">Centered icon, title, and description</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Empty state icon matches tab type</div>
+                        <div class="item-details">Different icon per rule type</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Add button in empty state works</div>
+                        <div class="item-details">Opens add rule form</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Footer -->
+        <div class="subsection">
+            <h3 class="subsection-title">Footer</h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Footer info message displays</div>
+                        <div class="item-details">"Rules are evaluated in priority order"</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Cancel button closes modal</div>
+                        <div class="item-details">Discards unsaved changes</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Save Rules button saves all changes</div>
+                        <div class="item-details">OnSave callback invoked with rules</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Section 2: Implementation Files -->
+    <div class="section">
+        <h2 class="section-title">
+            <i class="bi bi-folder-fill"></i>
+            Section 2: Implementation Files Modified
+        </h2>
+        <div class="file-list">
+            <div class="file-item">
+                <i class="bi bi-file-earmark-code"></i>
+                <span>Components/Editor/Modals/WorkflowRulesModal.razor</span>
+                <span class="file-status status-modified">Modified</span>
+            </div>
+            <div class="file-item">
+                <i class="bi bi-file-earmark-code"></i>
+                <span>Components/Editor/Modals/WorkflowRulesModal.razor.cs</span>
+                <span class="file-status status-modified">Modified</span>
+            </div>
+            <div class="file-item">
+                <i class="bi bi-file-earmark-code"></i>
+                <span>Components/Editor/Modals/WorkflowRulesModal.razor.css</span>
+                <span class="file-status status-modified">Modified</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 3: Verification Checklist -->
+    <div class="section">
+        <h2 class="section-title">
+            <i class="bi bi-check2-square"></i>
+            Section 3: Verification Checklist
+        </h2>
+
+        <div class="subsection">
+            <h3 class="subsection-title">Build Verification</h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Project builds with 0 errors</div>
+                        <div class="item-details">Run: dotnet build Src/VisualEditorOpus</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Component renders without runtime errors</div>
+                        <div class="item-details">Check browser console for errors</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="subsection">
+            <h3 class="subsection-title">Visual Verification</h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Modal matches mockup design</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Tabs have correct styling</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Rule cards display correctly</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Toggle switches animate smoothly</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Form elements have proper styling</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="subsection">
+            <h3 class="subsection-title">Theme Verification</h3>
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Light mode displays correctly</div>
+                    </div>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" onchange="updateProgress(this)">
+                    <div class="item-content">
+                        <div class="item-text">Dark mode displays correctly</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Usage Example -->
+    <div class="section">
+        <h2 class="section-title">
+            <i class="bi bi-code-slash"></i>
+            Usage Example
+        </h2>
+        <p style="color: var(--text-secondary); margin-bottom: 16px;">
+            Example of how to use the WorkflowRulesModal component:
+        </p>
+        <div class="code-block">
+<span class="code-comment">@* In parent component *@</span>
+<span class="code-keyword">@using</span> VisualEditorOpus.Components.Editor.Modals
+
+<span class="code-comment">&lt;!-- Button to open modal --&gt;</span>
+&lt;<span class="code-type">button</span> @onclick=<span class="code-string">"() => showRulesModal = true"</span>&gt;
+    Manage Workflow Rules
+&lt;/<span class="code-type">button</span>&gt;
+
+<span class="code-comment">&lt;!-- Modal component --&gt;</span>
+&lt;<span class="code-type">WorkflowRulesModal</span>
+    @bind-IsOpen=<span class="code-string">"showRulesModal"</span>
+    Workflow=<span class="code-string">"@currentWorkflow"</span>
+    WorkflowModules=<span class="code-string">"@modules"</span>
+    WorkflowRules=<span class="code-string">"@rules"</span>
+    OnSave=<span class="code-string">"HandleRulesSaved"</span>
+    OnCancel=<span class="code-string">"HandleCancel"</span> /&gt;
+
+@code {
+    <span class="code-keyword">private</span> <span class="code-keyword">bool</span> showRulesModal;
+    <span class="code-keyword">private</span> FormWorkflowSchema currentWorkflow;
+    <span class="code-keyword">private</span> List&lt;FormModuleSchema&gt; modules;
+    <span class="code-keyword">private</span> List&lt;ConditionalRule&gt; rules;
+
+    <span class="code-keyword">private</span> <span class="code-keyword">async</span> Task HandleRulesSaved(List&lt;ConditionalRule&gt; savedRules)
+    {
+        rules = savedRules;
+        <span class="code-comment">// Save to workflow schema</span>
+    }
+}
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            body.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+        }
+
+        function updateProgress(checkbox) {
+            const item = checkbox.closest('.checklist-item');
+            if (checkbox.checked) {
+                item.classList.add('checked');
+            } else {
+                item.classList.remove('checked');
+            }
+            calculateProgress();
+        }
+
+        function calculateProgress() {
+            const checkboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+            const total = checkboxes.length;
+            let completed = 0;
+
+            checkboxes.forEach(cb => {
+                if (cb.checked) completed++;
+            });
+
+            const percent = Math.round((completed / total) * 100);
+
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('percentComplete').textContent = percent + '%';
+            document.getElementById('progressBar').style.width = percent + '%';
+            document.getElementById('progressPercent').textContent = percent + '%';
+
+            // Save progress to localStorage
+            const state = [];
+            checkboxes.forEach((cb, i) => state.push(cb.checked));
+            localStorage.setItem('workflow-rules-testing-progress', JSON.stringify(state));
+        }
+
+        // Load saved progress on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('workflow-rules-testing-progress');
+            if (saved) {
+                const state = JSON.parse(saved);
+                const checkboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+                checkboxes.forEach((cb, i) => {
+                    if (state[i]) {
+                        cb.checked = true;
+                        cb.closest('.checklist-item').classList.add('checked');
+                    }
+                });
+            }
+            calculateProgress();
+        });
+    </script>
+</body>
+</html>

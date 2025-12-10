@@ -1,0 +1,144 @@
+@namespace VisualEditorOpus.Components.Workflow.Settings
+
+<div class="settings-panel @(IsCollapsed ? "collapsed" : "")">
+    <div class="panel-header">
+        <div class="panel-title">
+            <i class="bi bi-gear"></i>
+            <span>Workflow Settings</span>
+        </div>
+        <button class="btn-icon" @onclick="ToggleCollapse" title="@(IsCollapsed ? "Expand" : "Collapse")">
+            <i class="bi bi-chevron-@(IsCollapsed ? "left" : "right")"></i>
+        </button>
+    </div>
+
+    @if (!IsCollapsed)
+    {
+        <div class="panel-content">
+            <SettingsSection Title="General" Icon="bi-sliders" IsExpanded="true">
+                <GeneralSettingsSection Settings="Settings"
+                                        OnSettingsChanged="HandleSettingsChanged" />
+            </SettingsSection>
+
+            <SettingsSection Title="Behavior" Icon="bi-lightning">
+                <BehaviorSettingsSection Settings="Settings.Behavior"
+                                         OnSettingsChanged="HandleBehaviorChanged" />
+            </SettingsSection>
+
+            <SettingsSection Title="Triggers" Icon="bi-play-circle">
+                <TriggerSettingsSection Settings="Settings.Triggers"
+                                        OnSettingsChanged="HandleTriggersChanged" />
+            </SettingsSection>
+
+            <SettingsSection Title="Data Integration" Icon="bi-database">
+                <DataIntegrationSettingsSection Settings="Settings.DataIntegration"
+                                                OnSettingsChanged="HandleDataIntegrationChanged" />
+            </SettingsSection>
+
+            <SettingsSection Title="Appearance" Icon="bi-palette">
+                <AppearanceSettingsSection Settings="Settings.Appearance"
+                                           OnSettingsChanged="HandleAppearanceChanged" />
+            </SettingsSection>
+
+            <SettingsSection Title="Validation" Icon="bi-shield-check">
+                <ValidationSettingsSection Settings="Settings.Validation"
+                                           Status="ValidationStatus"
+                                           OnSettingsChanged="HandleValidationChanged" />
+            </SettingsSection>
+
+            <SettingsSection Title="Access Control" Icon="bi-lock" IsExpanded="false">
+                <AccessControlSettingsSection Settings="Settings.AccessControl"
+                                              OnSettingsChanged="HandleAccessControlChanged" />
+            </SettingsSection>
+        </div>
+
+        <div class="panel-footer">
+            <div class="footer-actions">
+                <button class="btn btn-secondary" @onclick="ResetSettings">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                    Reset
+                </button>
+                <button class="btn btn-primary" @onclick="ApplySettings">
+                    <i class="bi bi-check-lg"></i>
+                    Apply
+                </button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public WorkflowPanelSettings Settings { get; set; } = new();
+    [Parameter] public EventCallback<WorkflowPanelSettings> SettingsChanged { get; set; }
+    [Parameter] public ValidationStatus ValidationStatus { get; set; } = new();
+    [Parameter] public bool IsCollapsed { get; set; } = false;
+    [Parameter] public EventCallback<bool> IsCollapsedChanged { get; set; }
+    [Parameter] public EventCallback OnApply { get; set; }
+    [Parameter] public EventCallback OnReset { get; set; }
+
+    private WorkflowPanelSettings _originalSettings = new();
+
+    protected override void OnParametersSet()
+    {
+        _originalSettings = Settings;
+    }
+
+    private void ToggleCollapse()
+    {
+        IsCollapsed = !IsCollapsed;
+        IsCollapsedChanged.InvokeAsync(IsCollapsed);
+    }
+
+    private async Task HandleSettingsChanged(WorkflowPanelSettings settings)
+    {
+        Settings = settings;
+        await SettingsChanged.InvokeAsync(settings);
+    }
+
+    private async Task HandleBehaviorChanged(BehaviorSettings behavior)
+    {
+        Settings = Settings with { Behavior = behavior };
+        await SettingsChanged.InvokeAsync(Settings);
+    }
+
+    private async Task HandleTriggersChanged(TriggerSettings triggers)
+    {
+        Settings = Settings with { Triggers = triggers };
+        await SettingsChanged.InvokeAsync(Settings);
+    }
+
+    private async Task HandleDataIntegrationChanged(DataIntegrationSettings dataIntegration)
+    {
+        Settings = Settings with { DataIntegration = dataIntegration };
+        await SettingsChanged.InvokeAsync(Settings);
+    }
+
+    private async Task HandleAppearanceChanged(AppearanceSettings appearance)
+    {
+        Settings = Settings with { Appearance = appearance };
+        await SettingsChanged.InvokeAsync(Settings);
+    }
+
+    private async Task HandleValidationChanged(ValidationSettings validation)
+    {
+        Settings = Settings with { Validation = validation };
+        await SettingsChanged.InvokeAsync(Settings);
+    }
+
+    private async Task HandleAccessControlChanged(AccessControlSettings accessControl)
+    {
+        Settings = Settings with { AccessControl = accessControl };
+        await SettingsChanged.InvokeAsync(Settings);
+    }
+
+    private async Task ApplySettings()
+    {
+        await OnApply.InvokeAsync();
+    }
+
+    private async Task ResetSettings()
+    {
+        Settings = _originalSettings;
+        await SettingsChanged.InvokeAsync(Settings);
+        await OnReset.InvokeAsync();
+    }
+}

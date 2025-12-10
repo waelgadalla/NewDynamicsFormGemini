@@ -1,0 +1,88 @@
+@namespace VisualEditorOpus.Components.Workflow.Nodes
+@using DynamicForms.Core.V4.Enums
+
+<WfNodeBase
+    Id="@Id"
+    Title="@(Node?.Name ?? "Decision")"
+    IconName="signpost-split"
+    Position="@Position"
+    IsSelected="@IsSelected"
+    HasTopHandle="true"
+    HasBottomHandle="true"
+    HasLeftHandle="true"
+    HasRightHandle="true"
+    NodeTypeClass="wf-node-decision"
+    OnSelected="OnSelected"
+    OnPositionChanged="OnPositionChanged"
+    OnConnectionStart="OnConnectionStart"
+    OnMenuRequested="OnMenuRequested">
+
+    <ChildContent>
+        <div class="decision-condition">
+            @GetConditionSummary()
+        </div>
+        <div class="decision-branches">
+            <span class="decision-branch yes">
+                <i class="bi bi-check-circle-fill"></i>
+                @(Node?.YesBranchLabel ?? "Yes")
+            </span>
+            <span class="decision-branch no">
+                <i class="bi bi-x-circle-fill"></i>
+                @(Node?.NoBranchLabel ?? "No")
+            </span>
+        </div>
+    </ChildContent>
+
+    <FooterContent>
+        <span>@GetBranchCount() branches</span>
+    </FooterContent>
+</WfNodeBase>
+
+@code {
+    [Parameter] public string Id { get; set; } = "";
+    [Parameter] public WorkflowNodeData? Node { get; set; }
+    [Parameter] public WfPoint Position { get; set; } = WfPoint.Zero;
+    [Parameter] public bool IsSelected { get; set; }
+
+    [Parameter] public EventCallback<string> OnSelected { get; set; }
+    [Parameter] public EventCallback<(string NodeId, WfPoint Position)> OnPositionChanged { get; set; }
+    [Parameter] public EventCallback<(string NodeId, HandlePosition Handle)> OnConnectionStart { get; set; }
+    [Parameter] public EventCallback OnMenuRequested { get; set; }
+
+    private string GetConditionSummary()
+    {
+        if (Node?.Condition == null) return "No condition set";
+
+        var condition = Node.Condition;
+        if (condition.Conditions?.Any() == true)
+        {
+            var firstCondition = condition.Conditions.First();
+            if (firstCondition != null)
+            {
+                return $"If {firstCondition.FieldId} {GetOperatorSymbol(firstCondition.Operator)} {firstCondition.Value}";
+            }
+        }
+
+        return "Complex condition";
+    }
+
+    private string GetOperatorSymbol(ConditionOperator op) => op switch
+    {
+        ConditionOperator.Equals => "=",
+        ConditionOperator.NotEquals => "!=",
+        ConditionOperator.GreaterThan => ">",
+        ConditionOperator.LessThan => "<",
+        ConditionOperator.GreaterThanOrEqual => ">=",
+        ConditionOperator.LessThanOrEqual => "<=",
+        ConditionOperator.Contains => "contains",
+        ConditionOperator.StartsWith => "starts with",
+        ConditionOperator.EndsWith => "ends with",
+        _ => "?"
+    };
+
+    private int GetBranchCount()
+    {
+        // Count connected branches - default Yes/No
+        return 2;
+    }
+}

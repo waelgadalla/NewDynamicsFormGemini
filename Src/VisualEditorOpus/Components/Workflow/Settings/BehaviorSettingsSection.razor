@@ -1,0 +1,97 @@
+@namespace VisualEditorOpus.Components.Workflow.Settings
+
+<div class="settings-fields">
+    <div class="toggle-group">
+        <span class="toggle-label">Allow Step Navigation</span>
+        <label class="toggle-switch">
+            <input type="checkbox"
+                   checked="@Settings.AllowStepNavigation"
+                   @onchange="e => Update(s => s with { AllowStepNavigation = (bool)e.Value! })" />
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+
+    <div class="toggle-group">
+        <span class="toggle-label">Show Progress Bar</span>
+        <label class="toggle-switch">
+            <input type="checkbox"
+                   checked="@Settings.ShowProgressBar"
+                   @onchange="e => Update(s => s with { ShowProgressBar = (bool)e.Value! })" />
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+
+    <div class="toggle-group">
+        <span class="toggle-label">Enable Auto-Save</span>
+        <label class="toggle-switch">
+            <input type="checkbox"
+                   checked="@Settings.EnableAutoSave"
+                   @onchange="e => Update(s => s with { EnableAutoSave = (bool)e.Value! })" />
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+
+    @if (Settings.EnableAutoSave)
+    {
+        <div class="form-group">
+            <label class="form-label">Auto-Save Interval (seconds)</label>
+            <div class="number-input">
+                <button type="button" @onclick="() => AdjustInterval(-5)">
+                    <i class="bi bi-dash"></i>
+                </button>
+                <input type="number"
+                       class="form-input"
+                       value="@Settings.AutoSaveIntervalSeconds"
+                       @onchange="OnAutoSaveIntervalChange" />
+                <button type="button" @onclick="() => AdjustInterval(5)">
+                    <i class="bi bi-plus"></i>
+                </button>
+            </div>
+        </div>
+    }
+
+    <div class="toggle-group">
+        <span class="toggle-label">Require Confirmation on Exit</span>
+        <label class="toggle-switch">
+            <input type="checkbox"
+                   checked="@Settings.RequireExitConfirmation"
+                   @onchange="e => Update(s => s with { RequireExitConfirmation = (bool)e.Value! })" />
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+
+    <div class="toggle-group">
+        <span class="toggle-label">Show Field Help</span>
+        <label class="toggle-switch">
+            <input type="checkbox"
+                   checked="@Settings.ShowFieldHelp"
+                   @onchange="e => Update(s => s with { ShowFieldHelp = (bool)e.Value! })" />
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+</div>
+
+@code {
+    [Parameter] public BehaviorSettings Settings { get; set; } = new();
+    [Parameter] public EventCallback<BehaviorSettings> OnSettingsChanged { get; set; }
+
+    private void Update(Func<BehaviorSettings, BehaviorSettings> updater)
+    {
+        OnSettingsChanged.InvokeAsync(updater(Settings));
+    }
+
+    private void OnAutoSaveIntervalChange(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString();
+        if (int.TryParse(value, out var interval))
+        {
+            Update(s => s with { AutoSaveIntervalSeconds = Math.Max(5, interval) });
+        }
+    }
+
+    private void AdjustInterval(int delta)
+    {
+        var newValue = Math.Max(5, Settings.AutoSaveIntervalSeconds + delta);
+        Update(s => s with { AutoSaveIntervalSeconds = newValue });
+    }
+}

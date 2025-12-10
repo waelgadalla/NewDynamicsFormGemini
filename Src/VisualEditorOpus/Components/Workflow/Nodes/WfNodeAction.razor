@@ -1,0 +1,86 @@
+@namespace VisualEditorOpus.Components.Workflow.Nodes
+
+<WfNodeBase
+    Id="@Id"
+    Title="@(Node?.Name ?? "Action")"
+    IconName="@GetActionIcon()"
+    Position="@Position"
+    IsSelected="@IsSelected"
+    HasTopHandle="true"
+    HasBottomHandle="true"
+    HasLeftHandle="false"
+    HasRightHandle="false"
+    NodeTypeClass="wf-node-action"
+    OnSelected="OnSelected"
+    OnPositionChanged="OnPositionChanged"
+    OnConnectionStart="OnConnectionStart"
+    OnMenuRequested="OnMenuRequested">
+
+    <ChildContent>
+        <div class="action-description">
+            @GetActionDescription()
+        </div>
+        @if (Node?.ActionType == Models.ActionType.SendEmail)
+        {
+            <div class="action-recipients">
+                <i class="bi bi-envelope"></i>
+                @Node?.EmailRecipients
+            </div>
+        }
+    </ChildContent>
+
+    <FooterContent>
+        <span>@GetActionTypeLabel()</span>
+    </FooterContent>
+</WfNodeBase>
+
+@code {
+    [Parameter] public string Id { get; set; } = "";
+    [Parameter] public WorkflowNodeData? Node { get; set; }
+    [Parameter] public WfPoint Position { get; set; } = WfPoint.Zero;
+    [Parameter] public bool IsSelected { get; set; }
+
+    [Parameter] public EventCallback<string> OnSelected { get; set; }
+    [Parameter] public EventCallback<(string NodeId, WfPoint Position)> OnPositionChanged { get; set; }
+    [Parameter] public EventCallback<(string NodeId, HandlePosition Handle)> OnConnectionStart { get; set; }
+    [Parameter] public EventCallback OnMenuRequested { get; set; }
+
+    private string GetActionIcon() => Node?.ActionType switch
+    {
+        Models.ActionType.SendEmail => "envelope-fill",
+        Models.ActionType.CallApi => "globe",
+        Models.ActionType.SetFieldValue => "pencil-square",
+        Models.ActionType.CreateRecord => "plus-circle",
+        Models.ActionType.UpdateRecord => "arrow-repeat",
+        Models.ActionType.DeleteRecord => "trash",
+        Models.ActionType.SendNotification => "bell-fill",
+        Models.ActionType.RunScript => "code-slash",
+        _ => "lightning-fill"
+    };
+
+    private string GetActionTypeLabel() => Node?.ActionType switch
+    {
+        Models.ActionType.SendEmail => "Email Action",
+        Models.ActionType.CallApi => "API Call",
+        Models.ActionType.SetFieldValue => "Set Value",
+        Models.ActionType.CreateRecord => "Create Record",
+        Models.ActionType.UpdateRecord => "Update Record",
+        Models.ActionType.DeleteRecord => "Delete Record",
+        Models.ActionType.SendNotification => "Notification",
+        Models.ActionType.RunScript => "Script",
+        _ => "Action"
+    };
+
+    private string GetActionDescription() => Node?.ActionType switch
+    {
+        Models.ActionType.SendEmail => $"Send email to {Node?.EmailRecipients}",
+        Models.ActionType.CallApi => $"{Node?.ApiMethod} {Node?.ApiEndpoint}",
+        Models.ActionType.SetFieldValue => $"Set {Node?.TargetFieldId} = {Node?.FieldValue}",
+        Models.ActionType.CreateRecord => $"Create in {Node?.TargetTable}",
+        Models.ActionType.UpdateRecord => $"Update {Node?.TargetTable}",
+        Models.ActionType.DeleteRecord => $"Delete from {Node?.TargetTable}",
+        Models.ActionType.SendNotification => Node?.NotificationMessage ?? "Send notification",
+        Models.ActionType.RunScript => "Execute custom script",
+        _ => "Configure action"
+    };
+}

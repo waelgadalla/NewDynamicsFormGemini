@@ -1,0 +1,66 @@
+@namespace VisualEditorOpus.Components.Workflow.Nodes
+
+<WfNodeBase
+    Id="@Id"
+    Title="@(string.IsNullOrEmpty(Node?.Name) ? "End" : Node.Name)"
+    IconName="stop-fill"
+    Position="@Position"
+    IsSelected="@IsSelected"
+    HasTopHandle="true"
+    HasBottomHandle="false"
+    HasLeftHandle="false"
+    HasRightHandle="false"
+    NodeTypeClass="wf-node-end"
+    OnSelected="OnSelected"
+    OnPositionChanged="OnPositionChanged"
+    OnConnectionStart="OnConnectionStart"
+    OnMenuRequested="OnMenuRequested">
+
+    <ChildContent>
+        <div class="end-action">
+            @GetCompletionDescription()
+        </div>
+    </ChildContent>
+
+    <FooterContent>
+        <span>Action: @GetCompletionAction()</span>
+    </FooterContent>
+</WfNodeBase>
+
+@code {
+    [Parameter] public string Id { get; set; } = "";
+    [Parameter] public WorkflowNodeData? Node { get; set; }
+    [Parameter] public WfPoint Position { get; set; } = WfPoint.Zero;
+    [Parameter] public bool IsSelected { get; set; }
+
+    [Parameter] public EventCallback<string> OnSelected { get; set; }
+    [Parameter] public EventCallback<(string NodeId, WfPoint Position)> OnPositionChanged { get; set; }
+    [Parameter] public EventCallback<(string NodeId, HandlePosition Handle)> OnConnectionStart { get; set; }
+    [Parameter] public EventCallback OnMenuRequested { get; set; }
+
+    private string GetCompletionAction()
+    {
+        return Node?.CompletionAction switch
+        {
+            Models.CompletionAction.Submit => "Submit",
+            Models.CompletionAction.Save => "Save",
+            Models.CompletionAction.Redirect => "Redirect",
+            Models.CompletionAction.ShowMessage => "Show Message",
+            Models.CompletionAction.CallApi => "Call API",
+            _ => "Submit"
+        };
+    }
+
+    private string GetCompletionDescription()
+    {
+        return Node?.CompletionAction switch
+        {
+            Models.CompletionAction.Submit => "Submit form data and complete",
+            Models.CompletionAction.Save => "Save as draft and exit",
+            Models.CompletionAction.Redirect => $"Redirect to: {Node?.RedirectUrl}",
+            Models.CompletionAction.ShowMessage => Node?.CompletionMessage ?? "Thank you!",
+            Models.CompletionAction.CallApi => $"POST to: {Node?.ApiEndpoint}",
+            _ => "Workflow complete"
+        };
+    }
+}

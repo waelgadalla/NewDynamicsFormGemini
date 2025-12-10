@@ -1,0 +1,30 @@
+@namespace VisualEditorOpus.Components.Workflow.Settings
+
+<div class="settings-section">
+    <div class="section-header" @onclick="Toggle">
+        <div class="section-title">
+            <i class="bi @Icon"></i>
+            <span>@Title</span>
+        </div>
+        <i class="bi bi-chevron-down section-toggle @(_isExpanded ? "" : "collapsed")"></i>
+    </div>
+    <div class="section-content @(_isExpanded ? "" : "collapsed")">
+        @ChildContent
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string Icon { get; set; } = "bi-gear";
+    [Parameter] public bool IsExpanded { get; set; } = false;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private bool _isExpanded;
+
+    protected override void OnInitialized()
+    {
+        _isExpanded = IsExpanded;
+    }
+
+    private void Toggle() => _isExpanded = !_isExpanded;
+}

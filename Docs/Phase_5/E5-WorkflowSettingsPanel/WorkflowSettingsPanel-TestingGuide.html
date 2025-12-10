@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E.5 WorkflowSettingsPanel - Testing Guide</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #eef2ff;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --info: #3b82f6;
+            --info-light: #dbeafe;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --bg-tertiary: #f3f4f6;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --border-color: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .progress-bar {
+            background: var(--bg-tertiary);
+            border-radius: 9999px;
+            height: 8px;
+            margin-top: 1.5rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: var(--success);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 9999px;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: var(--bg-secondary);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+        }
+
+        .section-header:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .section-header h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .section-header .icon {
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .section-header .icon.testing {
+            background: var(--info-light);
+            color: var(--info);
+        }
+
+        .section-header .icon.manual {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .section-header .icon.checklist {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .section-content {
+            padding: 1.5rem;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            transition: background 0.15s ease;
+        }
+
+        .checklist-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 1.25rem;
+            height: 1.25rem;
+            margin-top: 0.125rem;
+            accent-color: var(--success);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .checklist-item label {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .checklist-item.completed label {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.5rem;
+            height: 1.5rem;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 50%;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .category {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            padding-left: 0.75rem;
+        }
+
+        .category:first-child {
+            margin-top: 0;
+        }
+
+        .task-item {
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+        }
+
+        .task-item h4 {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .task-item p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .task-item code {
+            background: var(--bg-tertiary);
+            padding: 0.125rem 0.375rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 0.8125rem;
+        }
+
+        .file-path {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            color: var(--primary);
+            background: var(--primary-light);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.125rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-required {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+
+        .badge-optional {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        .counter {
+            background: var(--bg-tertiary);
+            padding: 0.25rem 0.625rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.15s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #4f46e5;
+        }
+
+        .btn-secondary {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-secondary);
+        }
+
+        .created-files {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .created-files h4 {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .file-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .file-list-item {
+            font-size: 0.8125rem;
+            font-family: 'SF Mono', Monaco, monospace;
+            color: var(--text-primary);
+            padding: 0.25rem 0;
+        }
+
+        .file-list-item i {
+            color: var(--success);
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>E.5 WorkflowSettingsPanel - Testing Guide</h1>
+            <p class="subtitle">Manual testing steps and verification checklist</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <p class="progress-text"><span id="completedCount">0</span> of <span id="totalCount">0</span> items completed</p>
+        </header>
+
+        <!-- Section 1: Manual Testing Steps -->
+        <section>
+            <div class="section-header" onclick="toggleSection(this)">
+                <div class="icon testing">
+                    <i class="bi bi-clipboard-check"></i>
+                </div>
+                <h2>Section 1: Manual Testing Steps</h2>
+                <i class="bi bi-chevron-down"></i>
+            </div>
+            <div class="section-content">
+                <p class="category">Panel Collapse/Expand</p>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-1" onchange="updateProgress()">
+                    <label for="test-1"><span class="step-number">1</span>Click the collapse button (chevron icon) in the panel header to collapse the panel</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-2" onchange="updateProgress()">
+                    <label for="test-2"><span class="step-number">2</span>Verify the panel width reduces to ~48px and only shows icons</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-3" onchange="updateProgress()">
+                    <label for="test-3"><span class="step-number">3</span>Click again to expand - verify all sections reappear</label>
+                </div>
+
+                <p class="category">General Settings Section</p>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-4" onchange="updateProgress()">
+                    <label for="test-4"><span class="step-number">4</span>Enter a workflow name and verify it updates in real-time</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-5" onchange="updateProgress()">
+                    <label for="test-5"><span class="step-number">5</span>Add a description in the textarea field</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-6" onchange="updateProgress()">
+                    <label for="test-6"><span class="step-number">6</span>Modify the version number (e.g., "1.2.0")</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-7" onchange="updateProgress()">
+                    <label for="test-7"><span class="step-number">7</span>Verify the status badge displays correctly (Draft, Published, etc.)</label>
+                </div>
+
+                <p class="category">Behavior Settings Section</p>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-8" onchange="updateProgress()">
+                    <label for="test-8"><span class="step-number">8</span>Toggle "Allow Step Navigation" on/off</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-9" onchange="updateProgress()">
+                    <label for="test-9"><span class="step-number">9</span>Toggle "Show Progress Bar" on/off</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-10" onchange="updateProgress()">
+                    <label for="test-10"><span class="step-number">10</span>Toggle "Enable Auto-Save" - verify interval input appears/disappears</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-11" onchange="updateProgress()">
+                    <label for="test-11"><span class="step-number">11</span>Use +/- buttons to adjust auto-save interval (minimum 5 seconds)</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-12" onchange="updateProgress()">
+                    <label for="test-12"><span class="step-number">12</span>Toggle "Require Confirmation on Exit" and "Show Field Help"</label>
+                </div>
+
+                <p class="category">Triggers Section</p>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-13" onchange="updateProgress()">
+                    <label for="test-13"><span class="step-number">13</span>Click each trigger chip (Manual, URL, Scheduled, Event, Api)</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-14" onchange="updateProgress()">
+                    <label for="test-14"><span class="step-number">14</span>Select "URL" trigger - verify URL path input appears</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-15" onchange="updateProgress()">
+                    <label for="test-15"><span class="step-number">15</span>Select "Scheduled" trigger - verify cron expression input appears</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-16" onchange="updateProgress()">
+                    <label for="test-16"><span class="step-number">16</span>Change "On Complete" dropdown - verify related inputs show/hide</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-17" onchange="updateProgress()">
+                    <label for="test-17"><span class="step-number">17</span>Select "Show Message" - enter a success message</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-18" onchange="updateProgress()">
+                    <label for="test-18"><span class="step-number">18</span>Select "Redirect" - enter a redirect URL</label>
+                </div>
+
+                <p class="category">Data Integration Section</p>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-19" onchange="updateProgress()">
+                    <label for="test-19"><span class="step-number">19</span>Change HTTP method dropdown (GET, POST, PUT, PATCH)</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-20" onchange="updateProgress()">
+                    <label for="test-20"><span class="step-number">20</span>Enter a submit endpoint URL</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-21" onchange="updateProgress()">
+                    <label for="test-21"><span class="step-number">21</span>Toggle "Include Metadata", "Enable Webhooks", "Enable Real-Time Sync"</label>
+                </div>
+
+                <p class="category">Appearance Section</p>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-22" onchange="updateProgress()">
+                    <label for="test-22"><span class="step-number">22</span>Use color picker to select a primary color</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-23" onchange="updateProgress()">
+                    <label for="test-23"><span class="step-number">23</span>Enter a hex color code manually (e.g., #ff5722)</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-24" onchange="updateProgress()">
+                    <label for="test-24"><span class="step-number">24</span>Change layout mode dropdown (Wizard, Accordion, Tabs, Single Page)</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-25" onchange="updateProgress()">
+                    <label for="test-25"><span class="step-number">25</span>Toggle appearance options (Step Numbers, Animations, Hide Header, Compact)</label>
+                </div>
+
+                <p class="category">Validation Section</p>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-26" onchange="updateProgress()">
+                    <label for="test-26"><span class="step-number">26</span>Verify validation issues display with correct severity icons (error/warning/info)</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-27" onchange="updateProgress()">
+                    <label for="test-27"><span class="step-number">27</span>Verify "All validations passed" message shows when no issues</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-28" onchange="updateProgress()">
+                    <label for="test-28"><span class="step-number">28</span>Change validation mode dropdown</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-29" onchange="updateProgress()">
+                    <label for="test-29"><span class="step-number">29</span>Toggle validation options (Inline Errors, Summary, Scroll to Error, Block Navigation)</label>
+                </div>
+
+                <p class="category">Access Control Section</p>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-30" onchange="updateProgress()">
+                    <label for="test-30"><span class="step-number">30</span>Toggle "Require Authentication" - verify roles section appears</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-31" onchange="updateProgress()">
+                    <label for="test-31"><span class="step-number">31</span>Check/uncheck role checkboxes (Admin, Editor, Viewer, Guest)</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-32" onchange="updateProgress()">
+                    <label for="test-32"><span class="step-number">32</span>Adjust max submissions per user with +/- buttons</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-33" onchange="updateProgress()">
+                    <label for="test-33"><span class="step-number">33</span>Toggle "Require CAPTCHA"</label>
+                </div>
+
+                <p class="category">Apply and Reset</p>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-34" onchange="updateProgress()">
+                    <label for="test-34"><span class="step-number">34</span>Make changes and click "Apply" button - verify changes are saved</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-35" onchange="updateProgress()">
+                    <label for="test-35"><span class="step-number">35</span>Make changes and click "Reset" button - verify original values are restored</label>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Manual Implementation Tasks -->
+        <section>
+            <div class="section-header" onclick="toggleSection(this)">
+                <div class="icon manual">
+                    <i class="bi bi-tools"></i>
+                </div>
+                <h2>Section 2: Files Created</h2>
+                <i class="bi bi-chevron-down"></i>
+            </div>
+            <div class="section-content">
+                <p style="margin-bottom: 1rem; color: var(--text-secondary);">The following files have been created as part of this implementation:</p>
+
+                <div class="created-files">
+                    <h4>Models</h4>
+                    <div class="file-list">
+                        <div class="file-list-item"><i class="bi bi-check-circle-fill"></i>Models/WorkflowSettingsModels.cs</div>
+                    </div>
+                </div>
+
+                <div class="created-files">
+                    <h4>Components</h4>
+                    <div class="file-list">
+                        <div class="file-list-item"><i class="bi bi-check-circle-fill"></i>Components/Workflow/Settings/WorkflowSettingsPanel.razor</div>
+                        <div class="file-list-item"><i class="bi bi-check-circle-fill"></i>Components/Workflow/Settings/WorkflowSettingsPanel.razor.css</div>
+                        <div class="file-list-item"><i class="bi bi-check-circle-fill"></i>Components/Workflow/Settings/SettingsSection.razor</div>
+                        <div class="file-list-item"><i class="bi bi-check-circle-fill"></i>Components/Workflow/Settings/SettingsSection.razor.css</div>
+                        <div class="file-list-item"><i class="bi bi-check-circle-fill"></i>Components/Workflow/Settings/GeneralSettingsSection.razor</div>
+                        <div class="file-list-item"><i class="bi bi-check-circle-fill"></i>Components/Workflow/Settings/GeneralSettingsSection.razor.css</div>
+                        <div class="file-list-item"><i class="bi bi-check-circle-fill"></i>Components/Workflow/Settings/BehaviorSettingsSection.razor</div>
+                        <div class="file-list-item"><i class="bi bi-check-circle-fill"></i>Components/Workflow/Settings/BehaviorSettingsSection.razor.css</div>
+                        <div class="file-list-item"><i class="bi bi-check-circle-fill"></i>Components/Workflow/Settings/TriggerSettingsSection.razor</div>
+                        <div class="file-list-item"><i class="bi bi-check-circle-fill"></i>Components/Workflow/Settings/TriggerSettingsSection.razor.css</div>
+                        <div class="file-list-item"><i class="bi bi-check-circle-fill"></i>Components/Workflow/Settings/DataIntegrationSettingsSection.razor</div>
+                        <div class="file-list-item"><i class="bi bi-check-circle-fill"></i>Components/Workflow/Settings/DataIntegrationSettingsSection.razor.css</div>
+                        <div class="file-list-item"><i class="bi bi-check-circle-fill"></i>Components/Workflow/Settings/AppearanceSettingsSection.razor</div>
+                        <div class="file-list-item"><i class="bi bi-check-circle-fill"></i>Components/Workflow/Settings/AppearanceSettingsSection.razor.css</div>
+                        <div class="file-list-item"><i class="bi bi-check-circle-fill"></i>Components/Workflow/Settings/ValidationSettingsSection.razor</div>
+                        <div class="file-list-item"><i class="bi bi-check-circle-fill"></i>Components/Workflow/Settings/ValidationSettingsSection.razor.css</div>
+                        <div class="file-list-item"><i class="bi bi-check-circle-fill"></i>Components/Workflow/Settings/AccessControlSettingsSection.razor</div>
+                        <div class="file-list-item"><i class="bi bi-check-circle-fill"></i>Components/Workflow/Settings/AccessControlSettingsSection.razor.css</div>
+                    </div>
+                </div>
+
+                <div class="created-files">
+                    <h4>Stylesheets</h4>
+                    <div class="file-list">
+                        <div class="file-list-item"><i class="bi bi-check-circle-fill"></i>wwwroot/css/workflow-settings.css</div>
+                    </div>
+                </div>
+
+                <div class="created-files">
+                    <h4>Updated Files</h4>
+                    <div class="file-list">
+                        <div class="file-list-item"><i class="bi bi-check-circle-fill"></i>Components/_Imports.razor (added Settings namespace)</div>
+                        <div class="file-list-item"><i class="bi bi-check-circle-fill"></i>wwwroot/css/app.css (added workflow-settings.css import)</div>
+                    </div>
+                </div>
+
+                <p class="category" style="margin-top: 1.5rem;">Manual Tasks Required</p>
+
+                <div class="task-item">
+                    <h4><span class="badge badge-optional">Optional</span> Integrate with Workflow Designer Page</h4>
+                    <p>Add the WorkflowSettingsPanel component to your workflow designer page layout.</p>
+                    <code>&lt;WorkflowSettingsPanel @bind-Settings="WorkflowSettings" /&gt;</code>
+                </div>
+
+                <div class="task-item">
+                    <h4><span class="badge badge-optional">Optional</span> Implement Settings Persistence</h4>
+                    <p>Connect the OnApply callback to save settings to your backend or local storage.</p>
+                </div>
+
+                <div class="task-item">
+                    <h4><span class="badge badge-optional">Optional</span> Implement Workflow Validation Service</h4>
+                    <p>Create a service to validate workflow and populate ValidationStatus with issues.</p>
+                </div>
+
+                <div class="task-item">
+                    <h4><span class="badge badge-optional">Optional</span> Dynamic Primary Color</h4>
+                    <p>Implement CSS variable updates when primary color changes in Appearance settings.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Verification Checklist -->
+        <section>
+            <div class="section-header" onclick="toggleSection(this)">
+                <div class="icon checklist">
+                    <i class="bi bi-check2-square"></i>
+                </div>
+                <h2>Section 3: Verification Checklist</h2>
+                <span class="counter" id="verifyCounter">0/17</span>
+                <i class="bi bi-chevron-down"></i>
+            </div>
+            <div class="section-content">
+                <p style="margin-bottom: 1rem; color: var(--text-secondary);">Use this checklist to verify the implementation is complete and working correctly:</p>
+
+                <p class="category">Panel Structure</p>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-1" onchange="updateProgress()">
+                    <label for="verify-1">Panel collapses and expands correctly</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-2" onchange="updateProgress()">
+                    <label for="verify-2">All 7 sections are visible and collapsible independently</label>
+                </div>
+
+                <p class="category">General Section</p>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-3" onchange="updateProgress()">
+                    <label for="verify-3">Name, description, and version inputs work correctly</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-4" onchange="updateProgress()">
+                    <label for="verify-4">Status badge displays with correct color and icon</label>
+                </div>
+
+                <p class="category">Behavior Section</p>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-5" onchange="updateProgress()">
+                    <label for="verify-5">All toggle switches function correctly</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-6" onchange="updateProgress()">
+                    <label for="verify-6">Auto-save interval +/- buttons work (minimum 5 seconds)</label>
+                </div>
+
+                <p class="category">Triggers Section</p>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-7" onchange="updateProgress()">
+                    <label for="verify-7">Trigger type chips are selectable with active state</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-8" onchange="updateProgress()">
+                    <label for="verify-8">Conditional inputs appear for URL/Scheduled/Event triggers</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-9" onchange="updateProgress()">
+                    <label for="verify-9">On Complete dropdown shows appropriate follow-up inputs</label>
+                </div>
+
+                <p class="category">Data Integration Section</p>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-10" onchange="updateProgress()">
+                    <label for="verify-10">HTTP method selector and endpoint URL work</label>
+                </div>
+
+                <p class="category">Appearance Section</p>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-11" onchange="updateProgress()">
+                    <label for="verify-11">Color picker and hex input are synchronized</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-12" onchange="updateProgress()">
+                    <label for="verify-12">Layout mode dropdown works correctly</label>
+                </div>
+
+                <p class="category">Validation Section</p>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-13" onchange="updateProgress()">
+                    <label for="verify-13">Validation issues display with correct severity styling</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-14" onchange="updateProgress()">
+                    <label for="verify-14">Validation mode dropdown works correctly</label>
+                </div>
+
+                <p class="category">Access Control Section</p>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-15" onchange="updateProgress()">
+                    <label for="verify-15">Role checkboxes appear when authentication is required</label>
+                </div>
+
+                <p class="category">Footer Actions</p>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-16" onchange="updateProgress()">
+                    <label for="verify-16">Apply button triggers OnApply callback</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-17" onchange="updateProgress()">
+                    <label for="verify-17">Reset button restores original settings</label>
+                </div>
+            </div>
+        </section>
+
+        <div class="actions">
+            <button class="btn btn-secondary" onclick="resetAll()">
+                <i class="bi bi-arrow-counterclockwise"></i>
+                Reset All
+            </button>
+            <button class="btn btn-primary" onclick="saveProgress()">
+                <i class="bi bi-cloud-check"></i>
+                Save Progress
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function updateProgress() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const checked = document.querySelectorAll('input[type="checkbox"]:checked');
+
+            const total = checkboxes.length;
+            const completed = checked.length;
+            const percentage = total > 0 ? (completed / total) * 100 : 0;
+
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('totalCount').textContent = total;
+
+            // Update verification counter
+            const verifyCheckboxes = document.querySelectorAll('[id^="verify-"]');
+            const verifyChecked = document.querySelectorAll('[id^="verify-"]:checked');
+            document.getElementById('verifyCounter').textContent = verifyChecked.length + '/' + verifyCheckboxes.length;
+
+            // Update completed styling
+            checkboxes.forEach(cb => {
+                const item = cb.closest('.checklist-item');
+                if (item) {
+                    item.classList.toggle('completed', cb.checked);
+                }
+            });
+
+            // Save to localStorage
+            saveProgress();
+        }
+
+        function toggleSection(header) {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('.bi-chevron-down, .bi-chevron-up');
+
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                icon.classList.remove('bi-chevron-up');
+                icon.classList.add('bi-chevron-down');
+            } else {
+                content.style.display = 'none';
+                icon.classList.remove('bi-chevron-down');
+                icon.classList.add('bi-chevron-up');
+            }
+        }
+
+        function saveProgress() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const state = {};
+            checkboxes.forEach(cb => {
+                state[cb.id] = cb.checked;
+            });
+            localStorage.setItem('workflowSettingsPanelTestingProgress', JSON.stringify(state));
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem('workflowSettingsPanelTestingProgress');
+            if (saved) {
+                const state = JSON.parse(saved);
+                Object.entries(state).forEach(([id, checked]) => {
+                    const cb = document.getElementById(id);
+                    if (cb) cb.checked = checked;
+                });
+            }
+            updateProgress();
+        }
+
+        function resetAll() {
+            if (confirm('Are you sure you want to reset all progress?')) {
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                    cb.checked = false;
+                });
+                localStorage.removeItem('workflowSettingsPanelTestingProgress');
+                updateProgress();
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', loadProgress);
+    </script>
+</body>
+</html>

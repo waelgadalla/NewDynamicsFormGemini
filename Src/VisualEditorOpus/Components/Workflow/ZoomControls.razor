@@ -1,0 +1,56 @@
+@namespace VisualEditorOpus.Components.Workflow
+
+<div class="zoom-controls">
+    <button class="zoom-btn" @onclick="ZoomIn" disabled="@(Zoom >= MaxZoom)" title="Zoom In (+)">
+        <i class="bi bi-plus-lg"></i>
+    </button>
+
+    <div class="zoom-level">@(Math.Round(Zoom * 100))%</div>
+
+    <button class="zoom-btn" @onclick="ZoomOut" disabled="@(Zoom <= MinZoom)" title="Zoom Out (-)">
+        <i class="bi bi-dash-lg"></i>
+    </button>
+
+    <div class="zoom-divider"></div>
+
+    <button class="zoom-btn" @onclick="FitView" title="Fit to View">
+        <i class="bi bi-aspect-ratio"></i>
+    </button>
+
+    <button class="zoom-btn" @onclick="ResetView" title="Reset View (Ctrl+0)">
+        <i class="bi bi-arrow-counterclockwise"></i>
+    </button>
+</div>
+
+@code {
+    [Parameter] public double Zoom { get; set; } = 1;
+    [Parameter] public double MinZoom { get; set; } = 0.25;
+    [Parameter] public double MaxZoom { get; set; } = 2;
+    [Parameter] public double ZoomStep { get; set; } = 0.1;
+
+    [Parameter] public EventCallback<double> OnZoomChanged { get; set; }
+    [Parameter] public EventCallback OnFitView { get; set; }
+    [Parameter] public EventCallback OnResetView { get; set; }
+
+    private async Task ZoomIn()
+    {
+        var newZoom = Math.Min(MaxZoom, Math.Round((Zoom + ZoomStep) * 10) / 10);
+        await OnZoomChanged.InvokeAsync(newZoom);
+    }
+
+    private async Task ZoomOut()
+    {
+        var newZoom = Math.Max(MinZoom, Math.Round((Zoom - ZoomStep) * 10) / 10);
+        await OnZoomChanged.InvokeAsync(newZoom);
+    }
+
+    private async Task FitView()
+    {
+        await OnFitView.InvokeAsync();
+    }
+
+    private async Task ResetView()
+    {
+        await OnResetView.InvokeAsync();
+    }
+}

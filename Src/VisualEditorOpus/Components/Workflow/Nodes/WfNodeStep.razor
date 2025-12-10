@@ -1,0 +1,53 @@
+@namespace VisualEditorOpus.Components.Workflow.Nodes
+@using DynamicForms.Core.V4.Schemas
+
+<WfNodeBase
+    Id="@Id"
+    Title="@(Module?.TitleEn ?? Node?.Name ?? "Step")"
+    IconName="ui-checks"
+    Position="@Position"
+    IsSelected="@IsSelected"
+    HasTopHandle="true"
+    HasBottomHandle="true"
+    HasLeftHandle="false"
+    HasRightHandle="false"
+    NodeTypeClass="wf-node-step"
+    OnSelected="OnSelected"
+    OnPositionChanged="OnPositionChanged"
+    OnConnectionStart="OnConnectionStart"
+    OnMenuRequested="OnMenuRequested">
+
+    <ChildContent>
+        <div class="step-description">
+            @(Module?.DescriptionEn ?? "Configure this step")
+        </div>
+        @if (Node?.SkipCondition != null)
+        {
+            <div class="step-skip-indicator">
+                <i class="bi bi-skip-forward"></i>
+                Has skip condition
+            </div>
+        }
+    </ChildContent>
+
+    <FooterContent>
+        <span>@(Module?.Fields?.Length ?? 0) fields</span>
+        @if (Node?.IsRequired == true)
+        {
+            <span class="step-required">Required</span>
+        }
+    </FooterContent>
+</WfNodeBase>
+
+@code {
+    [Parameter] public string Id { get; set; } = "";
+    [Parameter] public WorkflowNodeData? Node { get; set; }
+    [Parameter] public FormModuleSchema? Module { get; set; }
+    [Parameter] public WfPoint Position { get; set; } = WfPoint.Zero;
+    [Parameter] public bool IsSelected { get; set; }
+
+    [Parameter] public EventCallback<string> OnSelected { get; set; }
+    [Parameter] public EventCallback<(string NodeId, WfPoint Position)> OnPositionChanged { get; set; }
+    [Parameter] public EventCallback<(string NodeId, HandlePosition Handle)> OnConnectionStart { get; set; }
+    [Parameter] public EventCallback OnMenuRequested { get; set; }
+}

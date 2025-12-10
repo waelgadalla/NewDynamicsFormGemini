@@ -1,0 +1,10 @@
+@namespace VisualEditorOpus.Components.Workflow
+
+<div class="pan-indicator @(IsVisible ? "visible" : "")">
+    <i class="bi bi-arrows-move"></i>
+    <span>Panning</span>
+</div>
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+}

@@ -1,0 +1,128 @@
+@namespace VisualEditorOpus.Components.Workflow.Settings
+
+<div class="settings-fields">
+    @if (Status.Issues.Any())
+    {
+        <div class="validation-list">
+            @foreach (var issue in Status.Issues.Take(5))
+            {
+                <div class="validation-item">
+                    <span class="validation-icon @GetSeverityClass(issue.Severity)">
+                        <i class="bi @GetSeverityIcon(issue.Severity)"></i>
+                    </span>
+                    <span class="validation-text">@issue.Message</span>
+                </div>
+            }
+            @if (Status.Issues.Count > 5)
+            {
+                <div class="validation-more">
+                    +@(Status.Issues.Count - 5) more issues
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="validation-success">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>All validations passed</span>
+        </div>
+    }
+
+    <div class="form-group">
+        <label class="form-label">Validation Mode</label>
+        <select class="form-select"
+                value="@Settings.Mode"
+                @onchange="OnValidationModeChange">
+            @foreach (var mode in Enum.GetValues<ValidationMode>())
+            {
+                <option value="@mode">@FormatMode(mode)</option>
+            }
+        </select>
+    </div>
+
+    <div class="toggle-group">
+        <span class="toggle-label">Show Inline Errors</span>
+        <label class="toggle-switch">
+            <input type="checkbox"
+                   checked="@Settings.ShowInlineErrors"
+                   @onchange="e => Update(s => s with { ShowInlineErrors = (bool)e.Value! })" />
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+
+    <div class="toggle-group">
+        <span class="toggle-label">Show Validation Summary</span>
+        <label class="toggle-switch">
+            <input type="checkbox"
+                   checked="@Settings.ShowValidationSummary"
+                   @onchange="e => Update(s => s with { ShowValidationSummary = (bool)e.Value! })" />
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+
+    <div class="toggle-group">
+        <span class="toggle-label">Scroll to First Error</span>
+        <label class="toggle-switch">
+            <input type="checkbox"
+                   checked="@Settings.ScrollToFirstError"
+                   @onchange="e => Update(s => s with { ScrollToFirstError = (bool)e.Value! })" />
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+
+    <div class="toggle-group">
+        <span class="toggle-label">Block Navigation on Error</span>
+        <label class="toggle-switch">
+            <input type="checkbox"
+                   checked="@Settings.BlockNavigationOnError"
+                   @onchange="e => Update(s => s with { BlockNavigationOnError = (bool)e.Value! })" />
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+</div>
+
+@code {
+    [Parameter] public ValidationSettings Settings { get; set; } = new();
+    [Parameter] public ValidationStatus Status { get; set; } = new();
+    [Parameter] public EventCallback<ValidationSettings> OnSettingsChanged { get; set; }
+
+    private void Update(Func<ValidationSettings, ValidationSettings> updater)
+    {
+        OnSettingsChanged.InvokeAsync(updater(Settings));
+    }
+
+    private void OnValidationModeChange(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString();
+        if (!string.IsNullOrEmpty(value) && Enum.TryParse<ValidationMode>(value, out var mode))
+        {
+            Update(s => s with { Mode = mode });
+        }
+    }
+
+    private string GetSeverityClass(IssueSeverity severity) => severity switch
+    {
+        IssueSeverity.Error => "error",
+        IssueSeverity.Warning => "warning",
+        IssueSeverity.Info => "info",
+        _ => ""
+    };
+
+    private string GetSeverityIcon(IssueSeverity severity) => severity switch
+    {
+        IssueSeverity.Error => "bi-x",
+        IssueSeverity.Warning => "bi-exclamation",
+        IssueSeverity.Info => "bi-info",
+        _ => "bi-circle"
+    };
+
+    private string FormatMode(ValidationMode mode) => mode switch
+    {
+        ValidationMode.OnStepChange => "Validate on Step Change",
+        ValidationMode.OnSubmitOnly => "Validate on Submit Only",
+        ValidationMode.RealTime => "Real-time Validation",
+        ValidationMode.OnBlur => "Validate on Field Blur",
+        _ => mode.ToString()
+    };
+}
