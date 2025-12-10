@@ -11,7 +11,8 @@
       "Bash(findstr:*)",
       "Bash(Get-Content \"C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormGemini\\Src\\VisualEditorOpus\\Components\\Properties\\Sections\\AccessibilitySection.razor\")",
       "Bash(Select-String -Pattern \"^\\s*\\}\" -AllMatches)",
-      "Bash(Select-Object -Last 15)"
+      "Bash(Select-Object -Last 15)",
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "ask": []

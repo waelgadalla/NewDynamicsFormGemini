@@ -18,6 +18,7 @@ builder.Services.AddScoped<IToastService, ToastService>();
 builder.Services.AddScoped<IUndoRedoService, UndoRedoService>();
 builder.Services.AddScoped<ISchemaValidationService, SchemaValidationService>();
 builder.Services.AddScoped<IEditorStateService, EditorStateService>();
+builder.Services.AddScoped<IJsonImportExportService, JsonImportExportService>();
 
 var app = builder.Build();
 

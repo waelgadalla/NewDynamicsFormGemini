@@ -1,0 +1,95 @@
+@namespace VisualEditorOpus.Components.ImportExport
+@using VisualEditorOpus.Models
+@using VisualEditorOpus.Services
+@inject IJsonImportExportService ImportExportService
+@inject IJSRuntime JS
+
+<div class="history-section">
+    <div class="history-header">
+        <span class="history-title">
+            <i class="bi bi-clock-history"></i>
+            Recent Activity
+        </span>
+        @if (History.Any())
+        {
+            <button class="btn-link" @onclick="ClearHistory">Clear</button>
+        }
+    </div>
+    <div class="history-list">
+        @if (!History.Any())
+        {
+            <div class="history-empty">
+                <i class="bi bi-inbox"></i>
+                <span>No recent activity</span>
+            </div>
+        }
+        else
+        {
+            @foreach (var item in History.Take(10))
+            {
+                <div class="history-item @(!item.Success ? "failed" : "")">
+                    <div class="history-icon @item.Operation.ToString().ToLower()">
+                        <i class="bi bi-@(item.Operation == ImportExportOperationType.Export ? "box-arrow-up" : "box-arrow-in-down")"></i>
+                    </div>
+                    <div class="history-content">
+                        <div class="history-name">@item.FileName</div>
+                        <div class="history-meta">
+                            <span>@item.Operation</span>
+                            <span>@FormatSize(item.Size)</span>
+                            <span>@GetRelativeTime(item.Timestamp)</span>
+                            @if (!item.Success)
+                            {
+                                <span class="history-error">Failed</span>
+                            }
+                        </div>
+                    </div>
+                    @if (item.Operation == ImportExportOperationType.Export && item.Success && !string.IsNullOrEmpty(item.Content))
+                    {
+                        <button class="history-action" @onclick="() => RedownloadItem(item)">
+                            Download Again
+                        </button>
+                    }
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public EventCallback<ImportExportHistoryItem> OnRedownload { get; set; }
+
+    private IReadOnlyList<ImportExportHistoryItem> History => ImportExportService.GetHistory();
+
+    private void ClearHistory()
+    {
+        ImportExportService.ClearHistory();
+        StateHasChanged();
+    }
+
+    private async Task RedownloadItem(ImportExportHistoryItem item)
+    {
+        if (!string.IsNullOrEmpty(item.Content))
+        {
+            await JS.InvokeVoidAsync("downloadJson", item.Content, item.FileName);
+        }
+        await OnRedownload.InvokeAsync(item);
+    }
+
+    private string FormatSize(int bytes)
+    {
+        if (bytes < 1024) return $"{bytes} B";
+        if (bytes < 1024 * 1024) return $"{bytes / 1024.0:F1} KB";
+        return $"{bytes / (1024.0 * 1024.0):F1} MB";
+    }
+
+    private string GetRelativeTime(DateTime time)
+    {
+        var diff = DateTime.UtcNow - time;
+
+        if (diff.TotalSeconds < 60) return "Just now";
+        if (diff.TotalMinutes < 60) return $"{(int)diff.TotalMinutes} min ago";
+        if (diff.TotalHours < 24) return $"{(int)diff.TotalHours} hour(s) ago";
+        if (diff.TotalDays < 7) return $"{(int)diff.TotalDays} day(s) ago";
+        return time.ToString("MMM d, yyyy");
+    }
+}

@@ -1,0 +1,163 @@
+@namespace VisualEditorOpus.Components.ImportExport
+@using DynamicForms.Core.V4.Schemas
+@using VisualEditorOpus.Models
+@using VisualEditorOpus.Services
+@inject IJsonImportExportService ImportExportService
+@inject IJSRuntime JS
+
+<div class="export-panel">
+    <div class="panel-header">
+        <span class="panel-title">
+            <i class="bi bi-box-arrow-up"></i>
+            Export Form Schema
+        </span>
+    </div>
+    <div class="panel-content">
+        <div class="export-options">
+            <!-- Format Selection -->
+            <div class="option-group">
+                <span class="option-label">Export Format</span>
+                <div class="option-cards">
+                    @foreach (var format in new[] { ExportFormat.Json, ExportFormat.JsonSchema, ExportFormat.TypeScript })
+                    {
+                        var isDisabled = format == ExportFormat.TypeScript;
+                        <div class="option-card @(Options.Format == format ? "selected" : "") @(isDisabled ? "disabled" : "")"
+                             @onclick="() => { if (!isDisabled) SelectFormat(format); }">
+                            <div class="option-card-icon">
+                                <i class="bi bi-@GetFormatIcon(format)"></i>
+                            </div>
+                            <span class="option-card-label">@GetFormatLabel(format)</span>
+                            <span class="option-card-desc">@GetFormatDescription(format)</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Export Options -->
+            <div class="option-group">
+                <span class="option-label">Options</span>
+                <div class="checkbox-group">
+                    <label class="checkbox-item">
+                        <input type="checkbox" checked="@Options.IncludeMetadata"
+                               @onchange="e => Options = Options with { IncludeMetadata = (bool)(e.Value ?? false) }" />
+                        <div class="checkbox-label">
+                            <div class="checkbox-label-main">Include Metadata</div>
+                            <div class="checkbox-label-desc">Created date, author, version</div>
+                        </div>
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" checked="@Options.PrettyPrint"
+                               @onchange="e => Options = Options with { PrettyPrint = (bool)(e.Value ?? false) }" />
+                        <div class="checkbox-label">
+                            <div class="checkbox-label-main">Pretty Print</div>
+                            <div class="checkbox-label-desc">Format with indentation</div>
+                        </div>
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" checked="@Options.Minify"
+                               @onchange="e => Options = Options with { Minify = (bool)(e.Value ?? false) }" />
+                        <div class="checkbox-label">
+                            <div class="checkbox-label-main">Minify Output</div>
+                            <div class="checkbox-label-desc">Remove whitespace (smaller file)</div>
+                        </div>
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" checked="@Options.IncludeFieldIds"
+                               @onchange="e => Options = Options with { IncludeFieldIds = (bool)(e.Value ?? false) }" />
+                        <div class="checkbox-label">
+                            <div class="checkbox-label-main">Include Field IDs</div>
+                            <div class="checkbox-label-desc">Preserve internal identifiers</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-secondary" @onclick="CopyToClipboard" disabled="@(Module == null)">
+                <i class="bi bi-clipboard"></i>
+                Copy to Clipboard
+            </button>
+            <button class="btn btn-primary" @onclick="DownloadJson" disabled="@(Module == null)">
+                <i class="bi bi-download"></i>
+                Download JSON
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public FormModuleSchema? Module { get; set; }
+    [Parameter] public EventCallback<string> OnExported { get; set; }
+
+    private ExportOptions Options { get; set; } = new();
+
+    private void SelectFormat(ExportFormat format)
+    {
+        Options = Options with { Format = format };
+    }
+
+    private async Task CopyToClipboard()
+    {
+        if (Module == null) return;
+
+        try
+        {
+            var json = await ImportExportService.SerializeAsync(Module, Options);
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", json);
+            await OnExported.InvokeAsync("Copied to clipboard!");
+        }
+        catch (Exception ex)
+        {
+            await OnExported.InvokeAsync($"Error: {ex.Message}");
+        }
+    }
+
+    private async Task DownloadJson()
+    {
+        if (Module == null) return;
+
+        try
+        {
+            var result = await ImportExportService.ExportAsync(Module, Options);
+
+            if (result.Success)
+            {
+                await JS.InvokeVoidAsync("downloadJson", result.Content, result.FileName);
+                await OnExported.InvokeAsync($"Downloaded {result.FileName}");
+            }
+            else
+            {
+                await OnExported.InvokeAsync($"Error: {result.ErrorMessage}");
+            }
+        }
+        catch (Exception ex)
+        {
+            await OnExported.InvokeAsync($"Error: {ex.Message}");
+        }
+    }
+
+    private string GetFormatIcon(ExportFormat format) => format switch
+    {
+        ExportFormat.Json => "filetype-json",
+        ExportFormat.JsonSchema => "filetype-json",
+        ExportFormat.TypeScript => "code-square",
+        _ => "file-code"
+    };
+
+    private string GetFormatLabel(ExportFormat format) => format switch
+    {
+        ExportFormat.Json => "JSON",
+        ExportFormat.JsonSchema => "JSON Schema",
+        ExportFormat.TypeScript => "TypeScript",
+        _ => format.ToString()
+    };
+
+    private string GetFormatDescription(ExportFormat format) => format switch
+    {
+        ExportFormat.Json => "Standard format",
+        ExportFormat.JsonSchema => "With validation",
+        ExportFormat.TypeScript => "Coming soon",
+        _ => ""
+    };
+}

@@ -1,0 +1,301 @@
+@namespace VisualEditorOpus.Components.ImportExport
+@using DynamicForms.Core.V4.Schemas
+@using VisualEditorOpus.Models
+@using VisualEditorOpus.Services
+@using Microsoft.AspNetCore.Components.Forms
+@inject IJsonImportExportService ImportExportService
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+<div class="import-panel">
+    <div class="panel-header">
+        <span class="panel-title">
+            <i class="bi bi-box-arrow-in-down"></i>
+            Import Form Schema
+        </span>
+    </div>
+    <div class="panel-content">
+        @if (!HasFile)
+        {
+            <!-- Drop Zone -->
+            <div class="drop-zone @(IsDragOver ? "dragover" : "")"
+                 @ondragover="HandleDragOver"
+                 @ondragover:preventDefault
+                 @ondragleave="HandleDragLeave"
+                 @ondrop="HandleDrop"
+                 @ondrop:preventDefault
+                 @onclick="TriggerFileInput">
+                <div class="drop-zone-icon">
+                    <i class="bi bi-cloud-arrow-up"></i>
+                </div>
+                <div class="drop-zone-text">
+                    <div class="drop-zone-title">Drag and drop your JSON file here</div>
+                    <div class="drop-zone-subtitle">Supports .json files up to 5MB</div>
+                </div>
+                <div class="drop-zone-or">or</div>
+                <button class="browse-btn" @onclick:stopPropagation="true" @onclick="TriggerFileInput">Browse Files</button>
+            </div>
+            <InputFile @ref="fileInput" OnChange="HandleFileSelected" accept=".json" style="display:none" />
+        }
+        else
+        {
+            <!-- File Preview -->
+            <div class="file-preview">
+                <div class="file-preview-header">
+                    <div class="file-info">
+                        <div class="file-icon">
+                            <i class="bi bi-file-earmark-code"></i>
+                        </div>
+                        <div class="file-details">
+                            <span class="file-name">@FileName</span>
+                            <span class="file-size">@FormatSize(FileSize)</span>
+                        </div>
+                    </div>
+                    <button class="file-remove" @onclick="RemoveFile">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+
+                <!-- Validation Preview -->
+                @if (ValidationResult != null)
+                {
+                    <div class="validation-preview @(ValidationResult.IsValid ? "valid" : "invalid")">
+                        <div class="validation-header">
+                            <i class="bi bi-@(ValidationResult.IsValid ? "check-circle-fill" : "x-circle-fill")"></i>
+                            @(ValidationResult.IsValid ? "Valid JSON Schema Detected" : "Validation Errors")
+                        </div>
+                        <div class="validation-details">
+                            @if (ValidationResult.IsValid)
+                            {
+                                <div class="validation-item success">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    <span>Valid JSON syntax</span>
+                                </div>
+                            }
+                            @foreach (var error in ValidationResult.Errors)
+                            {
+                                <div class="validation-item error">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                    <span>@error.Message</span>
+                                </div>
+                            }
+                            @foreach (var warning in ValidationResult.Warnings)
+                            {
+                                <div class="validation-item @warning.Severity.ToString().ToLower()">
+                                    <i class="bi bi-@GetWarningIcon(warning.Severity)"></i>
+                                    <span>@warning.Message</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <!-- Import Options -->
+                <div class="import-options">
+                    <div class="import-options-title">Import Mode</div>
+                    <div class="radio-group">
+                        @foreach (var mode in new[] { ImportMode.Replace, ImportMode.Merge, ImportMode.CreateNew })
+                        {
+                            <label class="radio-item @(Options.Mode == mode ? "selected" : "")"
+                                   @onclick="() => SelectMode(mode)">
+                                <input type="radio" name="importMode" checked="@(Options.Mode == mode)" />
+                                <div>
+                                    <div class="radio-label-main">@GetModeLabel(mode)</div>
+                                    <div class="radio-label-desc">@GetModeDescription(mode)</div>
+                                </div>
+                            </label>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress -->
+            @if (IsImporting)
+            {
+                <div class="progress-container active">
+                    <div class="progress-header">
+                        <span class="progress-label">Importing form schema...</span>
+                        <span class="progress-percent">@Progress%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: @Progress%"></div>
+                    </div>
+                </div>
+            }
+
+            <div class="action-buttons">
+                <button class="btn btn-secondary" @onclick="RemoveFile" disabled="@IsImporting">
+                    Cancel
+                </button>
+                <button class="btn btn-primary" @onclick="ImportFile"
+                        disabled="@(!CanImport || IsImporting)">
+                    <i class="bi bi-upload"></i>
+                    Import Form
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public EventCallback<FormModuleSchema> OnImported { get; set; }
+    [Parameter] public EventCallback<string> OnError { get; set; }
+
+    private InputFile? fileInput;
+    private DotNetObjectReference<ImportPanel>? objRef;
+
+    private bool HasFile => !string.IsNullOrEmpty(FileContent);
+    private string FileName { get; set; } = "";
+    private long FileSize { get; set; }
+    private string FileContent { get; set; } = "";
+    private ImportValidationResult? ValidationResult { get; set; }
+    private ImportOptions Options { get; set; } = new();
+    private bool IsDragOver { get; set; }
+    private bool IsImporting { get; set; }
+    private int Progress { get; set; }
+    private bool CanImport => ValidationResult?.IsValid == true && !IsImporting;
+
+    protected override void OnInitialized()
+    {
+        objRef = DotNetObjectReference.Create(this);
+    }
+
+    private void HandleDragOver()
+    {
+        IsDragOver = true;
+    }
+
+    private void HandleDragLeave()
+    {
+        IsDragOver = false;
+    }
+
+    private async Task HandleDrop()
+    {
+        IsDragOver = false;
+        // File will be handled by InputFile component
+    }
+
+    private async Task TriggerFileInput()
+    {
+        if (fileInput?.Element != null)
+        {
+            await JS.InvokeVoidAsync("triggerInputFile", fileInput.Element);
+        }
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file == null) return;
+
+        FileName = file.Name;
+        FileSize = file.Size;
+
+        try
+        {
+            using var stream = file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024);
+            using var reader = new StreamReader(stream);
+            FileContent = await reader.ReadToEndAsync();
+
+            ValidationResult = await ImportExportService.ValidateAsync(FileContent);
+            Options = Options with { FileName = FileName };
+        }
+        catch (Exception ex)
+        {
+            ValidationResult = new ImportValidationResult
+            {
+                IsValid = false,
+                Errors = new List<ImportValidationError>
+                {
+                    new() { Message = ex.Message, Severity = ImportValidationSeverity.Error }
+                }
+            };
+        }
+    }
+
+    private void RemoveFile()
+    {
+        FileName = "";
+        FileSize = 0;
+        FileContent = "";
+        ValidationResult = null;
+        Progress = 0;
+    }
+
+    private void SelectMode(ImportMode mode)
+    {
+        Options = Options with { Mode = mode };
+    }
+
+    private async Task ImportFile()
+    {
+        if (!CanImport) return;
+
+        IsImporting = true;
+        Progress = 0;
+
+        try
+        {
+            // Simulate progress
+            for (int i = 0; i <= 100; i += 25)
+            {
+                Progress = i;
+                StateHasChanged();
+                await Task.Delay(150);
+            }
+
+            var result = await ImportExportService.ImportAsync(FileContent, Options);
+
+            if (result.Success && result.Module != null)
+            {
+                await OnImported.InvokeAsync(result.Module);
+                RemoveFile();
+            }
+            else
+            {
+                await OnError.InvokeAsync(result.Errors.FirstOrDefault()?.Message ?? "Import failed");
+            }
+        }
+        finally
+        {
+            IsImporting = false;
+        }
+    }
+
+    private string FormatSize(long bytes)
+    {
+        if (bytes < 1024) return $"{bytes} B";
+        if (bytes < 1024 * 1024) return $"{bytes / 1024.0:F1} KB";
+        return $"{bytes / (1024.0 * 1024.0):F1} MB";
+    }
+
+    private string GetWarningIcon(ImportValidationSeverity severity) => severity switch
+    {
+        ImportValidationSeverity.Info => "info-circle-fill",
+        ImportValidationSeverity.Warning => "exclamation-triangle-fill",
+        ImportValidationSeverity.Error => "x-circle-fill",
+        _ => "info-circle-fill"
+    };
+
+    private string GetModeLabel(ImportMode mode) => mode switch
+    {
+        ImportMode.Replace => "Replace Current Form",
+        ImportMode.Merge => "Merge Fields",
+        ImportMode.CreateNew => "Create New Form",
+        _ => mode.ToString()
+    };
+
+    private string GetModeDescription(ImportMode mode) => mode switch
+    {
+        ImportMode.Replace => "Completely replace with imported schema",
+        ImportMode.Merge => "Add new fields, update existing ones",
+        ImportMode.CreateNew => "Import as a separate form module",
+        _ => ""
+    };
+
+    public async ValueTask DisposeAsync()
+    {
+        objRef?.Dispose();
+    }
+}

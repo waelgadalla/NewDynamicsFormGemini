@@ -51,7 +51,6 @@ C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOp
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\scopedcss\projectbundle\VisualEditorOpus.bundle.scp.css
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\77qt3z1qa8-khy4lop6wu.gz
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\gwgaane6aq-hilhbb4ehj.gz
-C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\t379d7n0fg-8k1by65dlb.gz
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\57vpsgixxw-q0pvdyifc2.gz
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\wagyuzj3kn-6kwwi37hk8.gz
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\xtlhv547bj-ulqw1ye5bp.gz
@@ -113,10 +112,14 @@ C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOp
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\staticwebassets.build.json.cache
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\staticwebassets.development.json
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\staticwebassets.build.endpoints.json
-C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\VisualEd.020C9F90.Up2Date
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\VisualEditorOpus.dll
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\refint\VisualEditorOpus.dll
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\VisualEditorOpus.pdb
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\VisualEditorOpus.genruntimeconfig.cache
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\ref\VisualEditorOpus.dll
+C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\3idp691egw-osq2owxlq9.gz
+C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\0810bnylss-xoan3rwqp4.gz
+C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\3hl2tq92qe-4yq7wy4jqa.gz
+C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\9o76wkhs5k-1s5zspudmr.gz
+C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\t379d7n0fg-rd3y0ysk9y.gz

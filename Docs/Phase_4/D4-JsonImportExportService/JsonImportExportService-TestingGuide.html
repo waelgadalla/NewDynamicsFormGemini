@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D.4 JSON Import/Export Service - Testing & Implementation Guide</title>
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: rgba(99, 102, 241, 0.1);
+            --success: #10B981;
+            --success-light: rgba(16, 185, 129, 0.1);
+            --warning: #F59E0B;
+            --warning-light: rgba(245, 158, 11, 0.1);
+            --error: #EF4444;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --bg-tertiary: #F3F4F6;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --border-color: #E5E7EB;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+        }
+
+        .progress-bar {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            height: 12px;
+            margin: 16px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, var(--primary), var(--success));
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 8px;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .section {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .section-icon.testing {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .section-icon.manual {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .section-icon.checklist {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .section h2 {
+            font-size: 20px;
+            color: var(--text-primary);
+        }
+
+        .checklist-group {
+            margin-bottom: 20px;
+        }
+
+        .checklist-group h3 {
+            font-size: 14px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            background: var(--bg-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .checklist-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .checklist-item.completed {
+            background: var(--success-light);
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            accent-color: var(--success);
+            cursor: pointer;
+        }
+
+        .checklist-item label {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .checklist-item.completed label {
+            text-decoration: line-through;
+            color: var(--text-secondary);
+        }
+
+        .step-number {
+            background: var(--primary);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+
+        .note {
+            background: var(--warning-light);
+            border-left: 4px solid var(--warning);
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+        }
+
+        .note-title {
+            font-weight: 600;
+            color: var(--warning);
+            margin-bottom: 4px;
+        }
+
+        .file-path {
+            background: var(--bg-tertiary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+
+        .task-list {
+            list-style: none;
+        }
+
+        .task-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .task-list li:last-child {
+            border-bottom: none;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge.required {
+            background: var(--error);
+            color: white;
+        }
+
+        .badge.optional {
+            background: var(--text-secondary);
+            color: white;
+        }
+
+        .badge.done {
+            background: var(--success);
+            color: white;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 600px) {
+            .summary-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>D.4 JSON Import/Export Service - Testing Guide</h1>
+            <p>Manual testing steps and implementation verification checklist</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text"><span id="completedCount">0</span> of <span id="totalCount">0</span> items completed</div>
+        </div>
+
+        <!-- Section 1: Manual Testing Steps -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon testing">&#128269;</div>
+                <h2>Section 1: Manual Testing Steps</h2>
+            </div>
+
+            <div class="checklist-group">
+                <h3>1. Export Panel - Format Selection</h3>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-1" onchange="updateProgress()">
+                    <label for="test-1"><span class="step-number">1</span>Open the Import/Export panel in the Module Editor</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-2" onchange="updateProgress()">
+                    <label for="test-2"><span class="step-number">2</span>Verify "JSON" format card is selected by default</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-3" onchange="updateProgress()">
+                    <label for="test-3"><span class="step-number">3</span>Click "JSON Schema" card - verify it becomes selected</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-4" onchange="updateProgress()">
+                    <label for="test-4"><span class="step-number">4</span>Click "TypeScript" card - verify it shows as disabled/coming soon</label>
+                </div>
+            </div>
+
+            <div class="checklist-group">
+                <h3>2. Export Panel - Options</h3>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-5" onchange="updateProgress()">
+                    <label for="test-5"><span class="step-number">1</span>Verify "Include Metadata" checkbox is checked by default</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-6" onchange="updateProgress()">
+                    <label for="test-6"><span class="step-number">2</span>Verify "Pretty Print" checkbox is checked by default</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-7" onchange="updateProgress()">
+                    <label for="test-7"><span class="step-number">3</span>Verify "Minify Output" checkbox is unchecked by default</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-8" onchange="updateProgress()">
+                    <label for="test-8"><span class="step-number">4</span>Toggle each checkbox and verify state changes</label>
+                </div>
+            </div>
+
+            <div class="checklist-group">
+                <h3>3. Export - Copy to Clipboard</h3>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-9" onchange="updateProgress()">
+                    <label for="test-9"><span class="step-number">1</span>Click "Copy to Clipboard" button</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-10" onchange="updateProgress()">
+                    <label for="test-10"><span class="step-number">2</span>Paste in a text editor - verify JSON is copied</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-11" onchange="updateProgress()">
+                    <label for="test-11"><span class="step-number">3</span>Verify success message/toast appears</label>
+                </div>
+            </div>
+
+            <div class="checklist-group">
+                <h3>4. Export - Download JSON</h3>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-12" onchange="updateProgress()">
+                    <label for="test-12"><span class="step-number">1</span>Click "Download JSON" button</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-13" onchange="updateProgress()">
+                    <label for="test-13"><span class="step-number">2</span>Verify .json file downloads</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-14" onchange="updateProgress()">
+                    <label for="test-14"><span class="step-number">3</span>Verify filename matches form title</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-15" onchange="updateProgress()">
+                    <label for="test-15"><span class="step-number">4</span>Open downloaded file - verify valid JSON</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-16" onchange="updateProgress()">
+                    <label for="test-16"><span class="step-number">5</span>Verify metadata is included when option selected</label>
+                </div>
+            </div>
+
+            <div class="checklist-group">
+                <h3>5. Import Panel - Drop Zone</h3>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-17" onchange="updateProgress()">
+                    <label for="test-17"><span class="step-number">1</span>Drag a JSON file over drop zone - verify highlight</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-18" onchange="updateProgress()">
+                    <label for="test-18"><span class="step-number">2</span>Drop the file - verify file is accepted</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-19" onchange="updateProgress()">
+                    <label for="test-19"><span class="step-number">3</span>Click "Browse Files" - verify file picker opens</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-20" onchange="updateProgress()">
+                    <label for="test-20"><span class="step-number">4</span>Select a JSON file - verify file preview appears</label>
+                </div>
+            </div>
+
+            <div class="checklist-group">
+                <h3>6. Import Panel - File Preview</h3>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-21" onchange="updateProgress()">
+                    <label for="test-21"><span class="step-number">1</span>Verify file name displays correctly</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-22" onchange="updateProgress()">
+                    <label for="test-22"><span class="step-number">2</span>Verify file size displays correctly</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-23" onchange="updateProgress()">
+                    <label for="test-23"><span class="step-number">3</span>Click X button - verify file is removed</label>
+                </div>
+            </div>
+
+            <div class="checklist-group">
+                <h3>7. Import - Validation</h3>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-24" onchange="updateProgress()">
+                    <label for="test-24"><span class="step-number">1</span>Import valid JSON - verify green success indicator</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-25" onchange="updateProgress()">
+                    <label for="test-25"><span class="step-number">2</span>Import invalid JSON - verify red error indicator</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-26" onchange="updateProgress()">
+                    <label for="test-26"><span class="step-number">3</span>Verify error message is displayed</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-27" onchange="updateProgress()">
+                    <label for="test-27"><span class="step-number">4</span>Import JSON without French labels - verify warning appears</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-28" onchange="updateProgress()">
+                    <label for="test-28"><span class="step-number">5</span>Verify field count info is displayed</label>
+                </div>
+            </div>
+
+            <div class="checklist-group">
+                <h3>8. Import - Mode Selection</h3>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-29" onchange="updateProgress()">
+                    <label for="test-29"><span class="step-number">1</span>Verify "Replace Current Form" is selected by default</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-30" onchange="updateProgress()">
+                    <label for="test-30"><span class="step-number">2</span>Click "Merge Fields" - verify selection changes</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-31" onchange="updateProgress()">
+                    <label for="test-31"><span class="step-number">3</span>Click "Create New Form" - verify selection changes</label>
+                </div>
+            </div>
+
+            <div class="checklist-group">
+                <h3>9. Import - Progress & Execution</h3>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-32" onchange="updateProgress()">
+                    <label for="test-32"><span class="step-number">1</span>Verify Import button is disabled when invalid JSON</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-33" onchange="updateProgress()">
+                    <label for="test-33"><span class="step-number">2</span>Click Import with valid JSON - verify progress bar appears</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-34" onchange="updateProgress()">
+                    <label for="test-34"><span class="step-number">3</span>Verify progress percentage updates</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-35" onchange="updateProgress()">
+                    <label for="test-35"><span class="step-number">4</span>Verify form is imported successfully</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-36" onchange="updateProgress()">
+                    <label for="test-36"><span class="step-number">5</span>Verify Cancel button cancels import</label>
+                </div>
+            </div>
+
+            <div class="checklist-group">
+                <h3>10. History Panel</h3>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-37" onchange="updateProgress()">
+                    <label for="test-37"><span class="step-number">1</span>Export a file - verify it appears in history</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-38" onchange="updateProgress()">
+                    <label for="test-38"><span class="step-number">2</span>Import a file - verify it appears in history</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-39" onchange="updateProgress()">
+                    <label for="test-39"><span class="step-number">3</span>Verify file name, size, and timestamp display</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-40" onchange="updateProgress()">
+                    <label for="test-40"><span class="step-number">4</span>Click "Download Again" on export - verify re-download</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-41" onchange="updateProgress()">
+                    <label for="test-41"><span class="step-number">5</span>Click "Clear" - verify history is cleared</label>
+                </div>
+            </div>
+
+            <div class="checklist-group">
+                <h3>11. Dark Mode</h3>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-42" onchange="updateProgress()">
+                    <label for="test-42"><span class="step-number">1</span>Toggle dark mode in application</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-43" onchange="updateProgress()">
+                    <label for="test-43"><span class="step-number">2</span>Verify all panel elements are visible</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="test-44" onchange="updateProgress()">
+                    <label for="test-44"><span class="step-number">3</span>Verify colors/contrast are correct</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Manual Implementation Tasks -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon manual">&#9997;</div>
+                <h2>Section 2: Manual Implementation Tasks</h2>
+            </div>
+
+            <div class="note">
+                <div class="note-title">Implementation Complete</div>
+                All implementation tasks have been completed. The following files were created:
+            </div>
+
+            <ul class="task-list">
+                <li>
+                    <span class="badge done">Done</span>
+                    <strong>Models</strong>
+                    <br><span class="file-path">Models/ImportExportModels.cs</span>
+                </li>
+                <li>
+                    <span class="badge done">Done</span>
+                    <strong>Service Interface</strong>
+                    <br><span class="file-path">Services/IJsonImportExportService.cs</span>
+                </li>
+                <li>
+                    <span class="badge done">Done</span>
+                    <strong>Service Implementation</strong>
+                    <br><span class="file-path">Services/JsonImportExportService.cs</span>
+                </li>
+                <li>
+                    <span class="badge done">Done</span>
+                    <strong>Export Panel Component</strong>
+                    <br><span class="file-path">Components/ImportExport/ExportPanel.razor</span>
+                </li>
+                <li>
+                    <span class="badge done">Done</span>
+                    <strong>Import Panel Component</strong>
+                    <br><span class="file-path">Components/ImportExport/ImportPanel.razor</span>
+                </li>
+                <li>
+                    <span class="badge done">Done</span>
+                    <strong>History Panel Component</strong>
+                    <br><span class="file-path">Components/ImportExport/HistoryPanel.razor</span>
+                </li>
+                <li>
+                    <span class="badge done">Done</span>
+                    <strong>CSS Styles</strong>
+                    <br><span class="file-path">wwwroot/css/import-export.css</span>
+                </li>
+                <li>
+                    <span class="badge done">Done</span>
+                    <strong>JavaScript Interop</strong>
+                    <br><span class="file-path">wwwroot/js/import-export.js</span>
+                </li>
+                <li>
+                    <span class="badge done">Done</span>
+                    <strong>Service Registration in Program.cs</strong>
+                    <div class="code-block">builder.Services.AddScoped&lt;IJsonImportExportService, JsonImportExportService&gt;();</div>
+                </li>
+            </ul>
+
+            <h3 style="margin-top: 24px; margin-bottom: 12px;">Integration Required</h3>
+            <ul class="task-list">
+                <li>
+                    <span class="badge required">Required</span>
+                    <strong>Add panels to your Module Editor page</strong>
+                    <div class="code-block">&lt;ExportPanel Module="@CurrentModule" OnExported="HandleExported" /&gt;
+&lt;ImportPanel OnImported="HandleImported" OnError="HandleError" /&gt;
+&lt;HistoryPanel /&gt;</div>
+                </li>
+                <li>
+                    <span class="badge optional">Optional</span>
+                    <strong>Implement Merge import mode</strong> - Complex logic for merging fields
+                </li>
+                <li>
+                    <span class="badge optional">Optional</span>
+                    <strong>Implement TypeScript export</strong> - Generate TypeScript type definitions
+                </li>
+            </ul>
+        </div>
+
+        <!-- Section 3: Verification Checklist -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon checklist">&#9989;</div>
+                <h2>Section 3: Verification Checklist</h2>
+            </div>
+
+            <div class="checklist-group">
+                <h3>Export Panel</h3>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-1" onchange="updateProgress()">
+                    <label for="verify-1">Export panel displays format cards</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-2" onchange="updateProgress()">
+                    <label for="verify-2">JSON format card selectable</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-3" onchange="updateProgress()">
+                    <label for="verify-3">JSON Schema format card selectable</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-4" onchange="updateProgress()">
+                    <label for="verify-4">TypeScript format shows disabled/coming soon</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-5" onchange="updateProgress()">
+                    <label for="verify-5">Include Metadata checkbox works</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-6" onchange="updateProgress()">
+                    <label for="verify-6">Pretty Print checkbox works</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-7" onchange="updateProgress()">
+                    <label for="verify-7">Minify checkbox works</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-8" onchange="updateProgress()">
+                    <label for="verify-8">Include Field IDs checkbox works</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-9" onchange="updateProgress()">
+                    <label for="verify-9">Copy to Clipboard copies JSON</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-10" onchange="updateProgress()">
+                    <label for="verify-10">Download JSON saves file</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-11" onchange="updateProgress()">
+                    <label for="verify-11">File named correctly (module-name.json)</label>
+                </div>
+            </div>
+
+            <div class="checklist-group">
+                <h3>Import Panel</h3>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-12" onchange="updateProgress()">
+                    <label for="verify-12">Drop zone highlights on drag over</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-13" onchange="updateProgress()">
+                    <label for="verify-13">File input accepts .json files</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-14" onchange="updateProgress()">
+                    <label for="verify-14">File preview shows name and size</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-15" onchange="updateProgress()">
+                    <label for="verify-15">Remove file button works</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-16" onchange="updateProgress()">
+                    <label for="verify-16">Valid JSON shows success validation</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-17" onchange="updateProgress()">
+                    <label for="verify-17">Invalid JSON shows error validation</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-18" onchange="updateProgress()">
+                    <label for="verify-18">Missing French translations show warning</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-19" onchange="updateProgress()">
+                    <label for="verify-19">Replace mode radio works</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-20" onchange="updateProgress()">
+                    <label for="verify-20">Merge mode radio works</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-21" onchange="updateProgress()">
+                    <label for="verify-21">Create New mode radio works</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-22" onchange="updateProgress()">
+                    <label for="verify-22">Import button disabled when invalid</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-23" onchange="updateProgress()">
+                    <label for="verify-23">Progress bar shows during import</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-24" onchange="updateProgress()">
+                    <label for="verify-24">Import creates FormModuleSchema</label>
+                </div>
+            </div>
+
+            <div class="checklist-group">
+                <h3>History Panel</h3>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-25" onchange="updateProgress()">
+                    <label for="verify-25">History shows recent operations</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-26" onchange="updateProgress()">
+                    <label for="verify-26">Export operations show in history</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-27" onchange="updateProgress()">
+                    <label for="verify-27">Import operations show in history</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-28" onchange="updateProgress()">
+                    <label for="verify-28">Re-download button works</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-29" onchange="updateProgress()">
+                    <label for="verify-29">Clear history button works</label>
+                </div>
+            </div>
+
+            <div class="checklist-group">
+                <h3>Styling</h3>
+                <div class="checklist-item">
+                    <input type="checkbox" id="verify-30" onchange="updateProgress()">
+                    <label for="verify-30">Dark mode styling correct</label>
+                </div>
+            </div>
+
+            <div class="summary-stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="testingComplete">0</div>
+                    <div class="stat-label">Testing Steps</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="verifyComplete">0</div>
+                    <div class="stat-label">Verifications</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="percentComplete">0%</div>
+                    <div class="stat-label">Overall</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load saved progress from localStorage
+        function loadProgress() {
+            const saved = localStorage.getItem('importExportTestProgress');
+            if (saved) {
+                const checked = JSON.parse(saved);
+                checked.forEach(id => {
+                    const checkbox = document.getElementById(id);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        checkbox.closest('.checklist-item')?.classList.add('completed');
+                    }
+                });
+            }
+            updateProgress();
+        }
+
+        // Save progress to localStorage
+        function saveProgress() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            const checked = Array.from(checkboxes).map(cb => cb.id);
+            localStorage.setItem('importExportTestProgress', JSON.stringify(checked));
+        }
+
+        // Update progress bar and counts
+        function updateProgress() {
+            const allCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+            const checkedBoxes = document.querySelectorAll('input[type="checkbox"]:checked');
+
+            const total = allCheckboxes.length;
+            const completed = checkedBoxes.length;
+            const percent = Math.round((completed / total) * 100);
+
+            document.getElementById('progressFill').style.width = percent + '%';
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('totalCount').textContent = total;
+
+            // Count by section
+            const testingCheckboxes = document.querySelectorAll('[id^="test-"]');
+            const testingChecked = document.querySelectorAll('[id^="test-"]:checked');
+            const verifyCheckboxes = document.querySelectorAll('[id^="verify-"]');
+            const verifyChecked = document.querySelectorAll('[id^="verify-"]:checked');
+
+            document.getElementById('testingComplete').textContent = testingChecked.length + '/' + testingCheckboxes.length;
+            document.getElementById('verifyComplete').textContent = verifyChecked.length + '/' + verifyCheckboxes.length;
+            document.getElementById('percentComplete').textContent = percent + '%';
+
+            // Update completed styling
+            allCheckboxes.forEach(cb => {
+                const item = cb.closest('.checklist-item');
+                if (item) {
+                    if (cb.checked) {
+                        item.classList.add('completed');
+                    } else {
+                        item.classList.remove('completed');
+                    }
+                }
+            });
+
+            saveProgress();
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', loadProgress);
+    </script>
+</body>
+</html>

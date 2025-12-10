@@ -1,0 +1,30 @@
+@namespace VisualEditorOpus.Components.Preview
+@using VisualEditorOpus.Models
+
+<div class="validation-panel">
+    <div class="validation-header">
+        <span class="validation-title">
+            <i class="bi bi-exclamation-circle-fill"></i>
+            @Errors.Count Error@(Errors.Count != 1 ? "s" : "") Found
+        </span>
+        <button class="validation-close" @onclick="OnClose">&times;</button>
+    </div>
+    <div class="validation-list">
+        @foreach (var error in Errors)
+        {
+            <div class="validation-error" @onclick="() => OnErrorClick.InvokeAsync(error)">
+                <i class="bi bi-x-circle-fill"></i>
+                <div class="validation-error-content">
+                    <div class="validation-error-msg">@error.Message</div>
+                    <div class="validation-error-loc">Line @error.Line, Column @error.Column</div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public List<JsonValidationError> Errors { get; set; } = new();
+    [Parameter] public EventCallback<JsonValidationError> OnErrorClick { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+}

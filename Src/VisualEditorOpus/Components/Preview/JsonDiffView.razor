@@ -1,0 +1,108 @@
+@namespace VisualEditorOpus.Components.Preview
+@using VisualEditorOpus.Models
+
+<div class="diff-view active">
+    <div class="diff-pane">
+        <div class="diff-header">
+            <i class="bi bi-file-earmark-code"></i> Original (Saved)
+        </div>
+        <div class="diff-content">
+            @foreach (var line in DiffLines)
+            {
+                <div class="diff-line @GetLineClass(line.Type, isOriginal: true)">
+                    @line.Content
+                </div>
+            }
+        </div>
+    </div>
+    <div class="diff-pane">
+        <div class="diff-header">
+            <i class="bi bi-file-earmark-code-fill"></i> Current (Unsaved)
+        </div>
+        <div class="diff-content">
+            @foreach (var line in DiffLines)
+            {
+                <div class="diff-line @GetLineClass(line.Type, isOriginal: false)">
+                    @line.NewContent
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Original { get; set; } = "";
+    [Parameter] public string Current { get; set; } = "";
+
+    private List<DiffLine> DiffLines { get; set; } = new();
+
+    protected override void OnParametersSet()
+    {
+        ComputeDiff();
+    }
+
+    private void ComputeDiff()
+    {
+        DiffLines.Clear();
+
+        var originalLines = Original.Split('\n');
+        var currentLines = Current.Split('\n');
+
+        // Simple line-by-line diff (for production, use a proper diff algorithm like Myers)
+        var maxLines = Math.Max(originalLines.Length, currentLines.Length);
+
+        for (int i = 0; i < maxLines; i++)
+        {
+            var origLine = i < originalLines.Length ? originalLines[i] : null;
+            var currLine = i < currentLines.Length ? currentLines[i] : null;
+
+            if (origLine == currLine)
+            {
+                DiffLines.Add(new DiffLine
+                {
+                    Content = origLine ?? "",
+                    NewContent = currLine ?? "",
+                    Type = DiffLineType.Unchanged
+                });
+            }
+            else if (origLine == null)
+            {
+                DiffLines.Add(new DiffLine
+                {
+                    Content = "",
+                    NewContent = currLine ?? "",
+                    Type = DiffLineType.Added
+                });
+            }
+            else if (currLine == null)
+            {
+                DiffLines.Add(new DiffLine
+                {
+                    Content = origLine,
+                    NewContent = "",
+                    Type = DiffLineType.Removed
+                });
+            }
+            else
+            {
+                DiffLines.Add(new DiffLine
+                {
+                    Content = origLine,
+                    NewContent = currLine,
+                    Type = DiffLineType.Modified
+                });
+            }
+        }
+    }
+
+    private string GetLineClass(DiffLineType type, bool isOriginal)
+    {
+        return type switch
+        {
+            DiffLineType.Added => isOriginal ? "" : "added",
+            DiffLineType.Removed => isOriginal ? "removed" : "",
+            DiffLineType.Modified => "modified",
+            _ => ""
+        };
+    }
+}

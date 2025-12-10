@@ -1,0 +1,66 @@
+@namespace VisualEditorOpus.Components.Preview
+
+<div class="search-bar">
+    <div class="search-input-wrapper">
+        <i class="bi bi-search"></i>
+        <input type="text"
+               class="search-input"
+               placeholder="Search in JSON..."
+               value="@SearchText"
+               @oninput="e => OnSearchChange.InvokeAsync(e.Value?.ToString())"
+               @onkeydown="HandleKeyDown"
+               @ref="searchInputRef" />
+    </div>
+    @if (MatchCount > 0)
+    {
+        <span class="search-count">@(CurrentMatch + 1) of @MatchCount matches</span>
+    }
+    else if (!string.IsNullOrEmpty(SearchText))
+    {
+        <span class="search-count no-matches">No matches</span>
+    }
+    <div class="search-nav">
+        <button @onclick="OnPrevious" disabled="@(MatchCount == 0)" title="Previous (Shift+Enter)">
+            <i class="bi bi-chevron-up"></i>
+        </button>
+        <button @onclick="OnNext" disabled="@(MatchCount == 0)" title="Next (Enter)">
+            <i class="bi bi-chevron-down"></i>
+        </button>
+    </div>
+    <button class="search-close" @onclick="OnClose">&times;</button>
+</div>
+
+@code {
+    [Parameter] public string SearchText { get; set; } = "";
+    [Parameter] public int MatchCount { get; set; }
+    [Parameter] public int CurrentMatch { get; set; }
+    [Parameter] public EventCallback<string> OnSearchChange { get; set; }
+    [Parameter] public EventCallback OnNext { get; set; }
+    [Parameter] public EventCallback OnPrevious { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private ElementReference searchInputRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await searchInputRef.FocusAsync();
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            if (e.ShiftKey)
+                await OnPrevious.InvokeAsync();
+            else
+                await OnNext.InvokeAsync();
+        }
+        else if (e.Key == "Escape")
+        {
+            await OnClose.InvokeAsync();
+        }
+    }
+}

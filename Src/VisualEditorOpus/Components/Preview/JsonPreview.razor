@@ -1,0 +1,358 @@
+@namespace VisualEditorOpus.Components.Preview
+@using System.Text
+@using System.Text.Json
+@using System.Text.RegularExpressions
+@using DynamicForms.Core.V4.Schemas
+@using VisualEditorOpus.Models
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+<div class="json-preview-container">
+    <JsonToolbar
+        ViewMode="@CurrentViewMode"
+        IsValid="@IsJsonValid"
+        Stats="@JsonStats"
+        OnViewModeChange="SetViewMode"
+        OnSearch="ToggleSearch"
+        OnCopy="CopyJson"
+        OnDownload="DownloadJson"
+        OnImport="ImportJson"
+        OnFormat="FormatJson" />
+
+    @if (ShowSearch)
+    {
+        <JsonSearchBar
+            SearchText="@SearchText"
+            MatchCount="@SearchMatches.Count"
+            CurrentMatch="@CurrentSearchIndex"
+            OnSearchChange="HandleSearch"
+            OnNext="NextMatch"
+            OnPrevious="PreviousMatch"
+            OnClose="() => ShowSearch = false" />
+    }
+
+    @if (CurrentViewMode == JsonViewMode.Diff)
+    {
+        <JsonDiffView
+            Original="@OriginalJson"
+            Current="@CurrentJson" />
+    }
+    else
+    {
+        <div class="json-editor-area">
+            <LineNumbers
+                LineCount="@LineCount"
+                ErrorLines="@ValidationErrorLines" />
+
+            <div class="json-content @(IsEditable ? "editable" : "")"
+                 @ref="jsonContentRef"
+                 contenteditable="@IsEditable"
+                 @oninput="HandleJsonEdit"
+                 @onclick="HandleContentClick">
+                @((MarkupString)HighlightedJson)
+            </div>
+        </div>
+    }
+
+    @if (ValidationErrors.Any())
+    {
+        <JsonValidationPanel
+            Errors="@ValidationErrors"
+            OnErrorClick="NavigateToError"
+            OnClose="ClearValidationErrors" />
+    }
+
+    <JsonStatusBar
+        IsValid="@IsJsonValid"
+        LastModified="@LastModified"
+        CursorPosition="@CursorPosition"
+        Encoding="UTF-8"
+        FileType="JSON" />
+</div>
+
+@code {
+    [Parameter] public FormModuleSchema? Module { get; set; }
+    [Parameter] public EventCallback<FormModuleSchema> OnModuleChanged { get; set; }
+    [Parameter] public bool IsEditable { get; set; } = false;
+
+    private ElementReference jsonContentRef;
+    private DotNetObjectReference<JsonPreview>? objRef;
+
+    private JsonViewMode CurrentViewMode { get; set; } = JsonViewMode.Formatted;
+    private string CurrentJson { get; set; } = "";
+    private string OriginalJson { get; set; } = "";
+    private string HighlightedJson { get; set; } = "";
+    private bool IsJsonValid { get; set; } = true;
+    private int LineCount { get; set; } = 0;
+    private JsonStats JsonStats { get; set; } = new();
+
+    // Search
+    private bool ShowSearch { get; set; } = false;
+    private string SearchText { get; set; } = "";
+    private List<SearchMatch> SearchMatches { get; set; } = new();
+    private int CurrentSearchIndex { get; set; } = 0;
+
+    // Validation
+    private List<JsonValidationError> ValidationErrors { get; set; } = new();
+    private HashSet<int> ValidationErrorLines => ValidationErrors.Select(e => e.Line).ToHashSet();
+
+    // Status
+    private DateTime LastModified { get; set; } = DateTime.Now;
+    private (int Line, int Column) CursorPosition { get; set; } = (1, 1);
+
+    protected override void OnParametersSet()
+    {
+        if (Module != null)
+        {
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+            CurrentJson = JsonSerializer.Serialize(Module, options);
+            OriginalJson = CurrentJson;
+            UpdateDisplay();
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            objRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("initJsonPreview", objRef, jsonContentRef);
+        }
+    }
+
+    private void UpdateDisplay()
+    {
+        var lines = CurrentJson.Split('\n');
+        LineCount = lines.Length;
+        HighlightedJson = SyntaxHighlight(CurrentJson);
+
+        // Calculate stats
+        JsonStats = new JsonStats
+        {
+            Size = Encoding.UTF8.GetByteCount(CurrentJson),
+            Lines = LineCount,
+            FieldCount = Module?.Fields?.Length ?? 0
+        };
+
+        ValidateJson();
+    }
+
+    private string SyntaxHighlight(string json)
+    {
+        if (string.IsNullOrEmpty(json)) return "";
+
+        var escaped = System.Web.HttpUtility.HtmlEncode(json);
+
+        // Apply syntax highlighting - order matters!
+        // Keys: "key":
+        escaped = Regex.Replace(escaped, @"&quot;([^&]+)&quot;:",
+            "<span class=\"json-key\">\"$1\"</span>:");
+        // String values: : "value"
+        escaped = Regex.Replace(escaped, @": &quot;([^&]*)&quot;",
+            ": <span class=\"json-string\">\"$1\"</span>");
+        // Numbers
+        escaped = Regex.Replace(escaped, @": (-?\d+\.?\d*)",
+            ": <span class=\"json-number\">$1</span>");
+        // Booleans
+        escaped = Regex.Replace(escaped, @": (true|false)",
+            ": <span class=\"json-boolean\">$1</span>");
+        // Null
+        escaped = Regex.Replace(escaped, @": (null)",
+            ": <span class=\"json-null\">$1</span>");
+        // Brackets
+        escaped = Regex.Replace(escaped, @"([{}\[\]])",
+            "<span class=\"json-bracket\">$1</span>");
+
+        return escaped;
+    }
+
+    private void ValidateJson()
+    {
+        ValidationErrors.Clear();
+        try
+        {
+            JsonDocument.Parse(CurrentJson);
+            IsJsonValid = true;
+        }
+        catch (JsonException ex)
+        {
+            IsJsonValid = false;
+            ValidationErrors.Add(new JsonValidationError
+            {
+                Message = ex.Message,
+                Line = (int)(ex.LineNumber ?? 1) + 1,
+                Column = (int)(ex.BytePositionInLine ?? 1) + 1
+            });
+        }
+    }
+
+    private void SetViewMode(JsonViewMode mode)
+    {
+        CurrentViewMode = mode;
+    }
+
+    [JSInvokable]
+    public void ToggleSearch()
+    {
+        ShowSearch = !ShowSearch;
+        if (!ShowSearch)
+        {
+            SearchText = "";
+            SearchMatches.Clear();
+        }
+        StateHasChanged();
+    }
+
+    private void HandleSearch(string text)
+    {
+        SearchText = text;
+        SearchMatches.Clear();
+        CurrentSearchIndex = 0;
+
+        if (string.IsNullOrEmpty(text)) return;
+
+        var regex = new Regex(Regex.Escape(text), RegexOptions.IgnoreCase);
+        var matches = regex.Matches(CurrentJson);
+
+        foreach (Match match in matches)
+        {
+            var beforeMatch = CurrentJson[..match.Index];
+            var line = beforeMatch.Count(c => c == '\n') + 1;
+            var lastNewline = beforeMatch.LastIndexOf('\n');
+            var column = match.Index - (lastNewline >= 0 ? lastNewline : 0);
+
+            SearchMatches.Add(new SearchMatch
+            {
+                Index = match.Index,
+                Length = match.Length,
+                Line = line,
+                Column = column
+            });
+        }
+    }
+
+    private void NextMatch()
+    {
+        if (SearchMatches.Any())
+        {
+            CurrentSearchIndex = (CurrentSearchIndex + 1) % SearchMatches.Count;
+        }
+    }
+
+    private void PreviousMatch()
+    {
+        if (SearchMatches.Any())
+        {
+            CurrentSearchIndex = CurrentSearchIndex == 0
+                ? SearchMatches.Count - 1
+                : CurrentSearchIndex - 1;
+        }
+    }
+
+    private async Task CopyJson()
+    {
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", CurrentJson);
+    }
+
+    private async Task DownloadJson()
+    {
+        var fileName = $"{Module?.TitleEn ?? "form"}-schema.json".Replace(" ", "-").ToLower();
+        await JS.InvokeVoidAsync("downloadJson", CurrentJson, fileName);
+    }
+
+    private async Task ImportJson()
+    {
+        await JS.InvokeVoidAsync("triggerFileInput", objRef);
+    }
+
+    [JSInvokable]
+    public async Task HandleFileImport(string jsonContent)
+    {
+        try
+        {
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            var module = JsonSerializer.Deserialize<FormModuleSchema>(jsonContent, options);
+
+            if (module != null)
+            {
+                await OnModuleChanged.InvokeAsync(module);
+            }
+        }
+        catch (JsonException ex)
+        {
+            ValidationErrors.Add(new JsonValidationError
+            {
+                Message = $"Import failed: {ex.Message}",
+                Line = 1,
+                Column = 1
+            });
+            StateHasChanged();
+        }
+    }
+
+    private void FormatJson()
+    {
+        try
+        {
+            var doc = JsonDocument.Parse(CurrentJson);
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            CurrentJson = JsonSerializer.Serialize(doc.RootElement, options);
+            UpdateDisplay();
+        }
+        catch { }
+    }
+
+    private void HandleJsonEdit(ChangeEventArgs e)
+    {
+        if (!IsEditable) return;
+
+        CurrentJson = e.Value?.ToString() ?? "";
+        LastModified = DateTime.Now;
+        UpdateDisplay();
+    }
+
+    private void HandleContentClick(MouseEventArgs e)
+    {
+        // Could update cursor position here
+    }
+
+    private void NavigateToError(JsonValidationError error)
+    {
+        // Scroll to error line - could be implemented with JS interop
+    }
+
+    private void ClearValidationErrors()
+    {
+        ValidationErrors.Clear();
+    }
+
+    [JSInvokable]
+    public void UpdateScrollPosition(double position)
+    {
+        // Could update minimap viewport position
+        StateHasChanged();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (objRef != null)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("disposeJsonPreview");
+            }
+            catch
+            {
+                // Ignore disposal errors during navigation
+            }
+            objRef.Dispose();
+        }
+    }
+}

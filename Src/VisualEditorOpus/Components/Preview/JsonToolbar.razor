@@ -1,0 +1,73 @@
+@namespace VisualEditorOpus.Components.Preview
+@using VisualEditorOpus.Models
+
+<div class="json-toolbar">
+    <div class="json-toolbar-left">
+        <div class="view-toggle">
+            <button class="view-toggle-btn @(ViewMode == JsonViewMode.Formatted ? "active" : "")"
+                    @onclick="() => OnViewModeChange.InvokeAsync(JsonViewMode.Formatted)">
+                Formatted
+            </button>
+            <button class="view-toggle-btn @(ViewMode == JsonViewMode.Raw ? "active" : "")"
+                    @onclick="() => OnViewModeChange.InvokeAsync(JsonViewMode.Raw)">
+                Raw
+            </button>
+            <button class="view-toggle-btn @(ViewMode == JsonViewMode.Diff ? "active" : "")"
+                    @onclick="() => OnViewModeChange.InvokeAsync(JsonViewMode.Diff)">
+                Diff
+            </button>
+        </div>
+        <div class="json-stats">
+            <span class="stat-item">
+                <i class="bi bi-file-code"></i>
+                <span class="stat-value">@FormatSize(Stats.Size)</span>
+            </span>
+            <span class="stat-item">
+                <i class="bi bi-list-ol"></i>
+                <span class="stat-value">@Stats.Lines lines</span>
+            </span>
+            <span class="stat-item">
+                <i class="bi bi-diagram-3"></i>
+                <span class="stat-value">@Stats.FieldCount fields</span>
+            </span>
+        </div>
+    </div>
+    <div class="json-toolbar-right">
+        <button class="toolbar-btn" @onclick="OnSearch" title="Search (Ctrl+F)">
+            <i class="bi bi-search"></i>
+            Search
+        </button>
+        <div class="toolbar-divider"></div>
+        <button class="toolbar-btn" @onclick="OnCopy" title="Copy JSON">
+            <i class="bi bi-clipboard"></i>
+            Copy
+        </button>
+        <button class="toolbar-btn" @onclick="OnDownload" title="Download JSON">
+            <i class="bi bi-download"></i>
+            Download
+        </button>
+        <button class="toolbar-btn primary" @onclick="OnImport" title="Import JSON">
+            <i class="bi bi-upload"></i>
+            Import
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public JsonViewMode ViewMode { get; set; }
+    [Parameter] public bool IsValid { get; set; }
+    [Parameter] public JsonStats Stats { get; set; } = new();
+    [Parameter] public EventCallback<JsonViewMode> OnViewModeChange { get; set; }
+    [Parameter] public EventCallback OnSearch { get; set; }
+    [Parameter] public EventCallback OnCopy { get; set; }
+    [Parameter] public EventCallback OnDownload { get; set; }
+    [Parameter] public EventCallback OnImport { get; set; }
+    [Parameter] public EventCallback OnFormat { get; set; }
+
+    private string FormatSize(int bytes)
+    {
+        if (bytes < 1024) return $"{bytes} B";
+        if (bytes < 1024 * 1024) return $"{bytes / 1024.0:F1} KB";
+        return $"{bytes / (1024.0 * 1024.0):F1} MB";
+    }
+}

@@ -1,0 +1,16 @@
+@namespace VisualEditorOpus.Components.Preview
+
+<div class="line-numbers">
+    @for (int i = 1; i <= LineCount; i++)
+    {
+        var lineNum = i;
+        <div class="line-number @(ErrorLines.Contains(lineNum) ? "error" : "")">
+            @lineNum
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int LineCount { get; set; }
+    [Parameter] public HashSet<int> ErrorLines { get; set; } = new();
+}
