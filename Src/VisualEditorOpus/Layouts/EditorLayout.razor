@@ -1,17 +1,32 @@
 @inherits LayoutComponentBase
 @implements IDisposable
+@implements IAsyncDisposable
+@inject IJSRuntime JS
 
-<div data-theme="@(ThemeService.IsDarkMode ? "dark" : "light")">
+<div data-theme="@(ThemeService.IsDarkMode ? "dark" : "light")" class="editor-root" @onkeydown="HandleKeyDown" tabindex="-1">
     <GlobalNav />
     <div class="main-content">
         <EditorHeader />
         <EditorToolbar />
         <div class="editor-container">
-            <LeftSidebar />
-            <div class="canvas-container">
-                @Body
-            </div>
-            <RightSidebar />
+            @if (EditorState.CurrentView == EditorView.Design)
+            {
+                <LeftSidebar />
+                <div class="canvas-container">
+                    @Body
+                </div>
+                <RightSidebar />
+            }
+            else if (EditorState.CurrentView == EditorView.Preview)
+            {
+                <FormPreview />
+            }
+            else if (EditorState.CurrentView == EditorView.Json)
+            {
+                <div class="json-container">
+                    <JsonPreviewPlaceholder />
+                </div>
+            }
         </div>
     </div>
     <ToastContainer />
@@ -19,14 +34,76 @@
 
 @code {
     [Inject] private IThemeService ThemeService { get; set; } = default!;
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private DotNetObjectReference<EditorLayout>? _objRef;
 
     protected override void OnInitialized()
     {
         ThemeService.OnThemeChanged += StateHasChanged;
+        EditorState.OnViewChanged += OnViewChanged;
+        EditorState.OnStateChanged += StateHasChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _objRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("registerKeyboardShortcuts", _objRef);
+        }
+    }
+
+    private void OnViewChanged(EditorView view)
+    {
+        StateHasChanged();
+    }
+
+    private void HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.CtrlKey && !e.ShiftKey && !e.AltKey)
+        {
+            switch (e.Key)
+            {
+                case "1":
+                    EditorState.SetView(EditorView.Design);
+                    break;
+                case "2":
+                    EditorState.SetView(EditorView.Preview);
+                    break;
+                case "3":
+                    EditorState.SetView(EditorView.Json);
+                    break;
+            }
+        }
+    }
+
+    [JSInvokable]
+    public void SwitchToView(int viewIndex)
+    {
+        EditorState.SetView((EditorView)viewIndex);
     }
 
     public void Dispose()
     {
         ThemeService.OnThemeChanged -= StateHasChanged;
+        EditorState.OnViewChanged -= OnViewChanged;
+        EditorState.OnStateChanged -= StateHasChanged;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_objRef is not null)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("unregisterKeyboardShortcuts");
+            }
+            catch (JSDisconnectedException)
+            {
+                // Ignore - circuit already disconnected
+            }
+            _objRef.Dispose();
+        }
     }
 }

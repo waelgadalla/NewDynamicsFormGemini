@@ -1,0 +1,249 @@
+@* Renders individual field based on FieldType *@
+@using FieldOption = DynamicForms.Core.V4.Schemas.FieldOption
+
+<div class="form-field @(HasErrors ? "has-error" : "")">
+    <label class="field-label">
+        @Label
+        @if (Field.Validation?.IsRequired == true)
+        {
+            <span class="required">*</span>
+        }
+    </label>
+
+    @switch (Field.FieldType)
+    {
+        case "TextBox":
+        case "Email":
+        case "Phone":
+            <input type="@InputType"
+                   class="field-input @(HasErrors ? "error" : "")"
+                   value="@ValueString"
+                   placeholder="@Placeholder"
+                   @oninput="HandleInput" />
+            break;
+
+        case "Number":
+        case "Currency":
+            <input type="number"
+                   class="field-input @(HasErrors ? "error" : "")"
+                   value="@ValueString"
+                   placeholder="@Placeholder"
+                   @oninput="HandleInput" />
+            break;
+
+        case "TextArea":
+            <textarea class="field-input field-textarea @(HasErrors ? "error" : "")"
+                      placeholder="@Placeholder"
+                      @oninput="HandleInput">@ValueString</textarea>
+            break;
+
+        case "DropDown":
+            <select class="field-input form-select @(HasErrors ? "error" : "")"
+                    @onchange="HandleSelectChange">
+                <option value="">@SelectPlaceholder</option>
+                @foreach (var option in Field.Options ?? Array.Empty<FieldOption>())
+                {
+                    <option value="@option.Value" selected="@(ValueString == option.Value)">
+                        @GetOptionLabel(option)
+                    </option>
+                }
+            </select>
+            break;
+
+        case "RadioGroup":
+            <div class="radio-group">
+                @foreach (var option in Field.Options ?? Array.Empty<FieldOption>())
+                {
+                    <label class="radio-item">
+                        <input type="radio"
+                               name="@Field.Id"
+                               value="@option.Value"
+                               checked="@(ValueString == option.Value)"
+                               @onchange="() => OnValueChange.InvokeAsync(option.Value)" />
+                        <span>@GetOptionLabel(option)</span>
+                    </label>
+                }
+            </div>
+            break;
+
+        case "CheckboxList":
+            <div class="checkbox-group">
+                @foreach (var option in Field.Options ?? Array.Empty<FieldOption>())
+                {
+                    <label class="checkbox-item">
+                        <input type="checkbox"
+                               value="@option.Value"
+                               checked="@IsChecked(option.Value)"
+                               @onchange="() => ToggleCheckbox(option.Value)" />
+                        <span>@GetOptionLabel(option)</span>
+                    </label>
+                }
+            </div>
+            break;
+
+        case "Checkbox":
+            <label class="checkbox-item single-checkbox">
+                <input type="checkbox"
+                       checked="@(ValueString == "true")"
+                       @onchange="e => OnValueChange.InvokeAsync(((bool)(e.Value ?? false)).ToString().ToLower())" />
+                <span>@GetLabel(Field.CheckboxTextEn, Field.CheckboxTextFr)</span>
+            </label>
+            break;
+
+        case "Toggle":
+            <div class="toggle-field">
+                <label class="toggle-switch">
+                    <input type="checkbox"
+                           checked="@(ValueString == "true")"
+                           @onchange="e => OnValueChange.InvokeAsync(((bool)(e.Value ?? false)).ToString().ToLower())" />
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            break;
+
+        case "DatePicker":
+            <input type="date"
+                   class="field-input @(HasErrors ? "error" : "")"
+                   value="@ValueString"
+                   @oninput="HandleInput" />
+            break;
+
+        case "DateTime":
+            <input type="datetime-local"
+                   class="field-input @(HasErrors ? "error" : "")"
+                   value="@ValueString"
+                   @oninput="HandleInput" />
+            break;
+
+        case "Time":
+            <input type="time"
+                   class="field-input @(HasErrors ? "error" : "")"
+                   value="@ValueString"
+                   @oninput="HandleInput" />
+            break;
+
+        case "FileUpload":
+            <div class="file-upload-field">
+                <input type="file"
+                       id="@($"file_{Field.Id}")"
+                       class="file-input"
+                       @onchange="HandleFileChange" />
+                <label for="@($"file_{Field.Id}")" class="file-label">
+                    <i class="bi bi-cloud-upload"></i>
+                    <span>@(Language == "fr" ? "Choisir un fichier" : "Choose file")</span>
+                </label>
+                @if (!string.IsNullOrEmpty(ValueString))
+                {
+                    <span class="file-name">@ValueString</span>
+                }
+            </div>
+            break;
+
+        default:
+            <input type="text"
+                   class="field-input @(HasErrors ? "error" : "")"
+                   value="@ValueString"
+                   placeholder="@Placeholder"
+                   @oninput="HandleInput" />
+            break;
+    }
+
+    @if (!string.IsNullOrEmpty(HelpText))
+    {
+        <div class="field-help">@HelpText</div>
+    }
+
+    @if (HasErrors)
+    {
+        @foreach (var error in Errors)
+        {
+            <div class="field-error">
+                <i class="bi bi-exclamation-circle"></i>
+                @error
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public FormFieldSchema Field { get; set; } = default!;
+    [Parameter] public string Language { get; set; } = "en";
+    [Parameter] public object? Value { get; set; }
+    [Parameter] public IEnumerable<string> Errors { get; set; } = Enumerable.Empty<string>();
+    [Parameter] public EventCallback<object> OnValueChange { get; set; }
+
+    private bool HasErrors => Errors.Any();
+    private string ValueString => Value?.ToString() ?? "";
+
+    private string Label => GetLabel(Field.LabelEn, Field.LabelFr);
+
+    private string? Placeholder => Language == "fr"
+        ? Field.PlaceholderFr ?? Field.PlaceholderEn
+        : Field.PlaceholderEn;
+
+    private string? HelpText => Language == "fr"
+        ? Field.HelpFr ?? Field.HelpEn
+        : Field.HelpEn;
+
+    private string SelectPlaceholder => Language == "fr"
+        ? Field.PlaceholderFr ?? "Sélectionner..."
+        : Field.PlaceholderEn ?? "Select...";
+
+    private string InputType => Field.FieldType switch
+    {
+        "Email" => "email",
+        "Phone" => "tel",
+        "Password" => "password",
+        _ => "text"
+    };
+
+    private string GetLabel(string? en, string? fr) =>
+        Language == "fr" && !string.IsNullOrEmpty(fr) ? fr : en ?? Field.Id;
+
+    private string GetOptionLabel(FieldOption option) =>
+        Language == "fr" && !string.IsNullOrEmpty(option.LabelFr)
+            ? option.LabelFr
+            : option.LabelEn;
+
+    private void HandleInput(ChangeEventArgs e)
+    {
+        OnValueChange.InvokeAsync(e.Value?.ToString() ?? "");
+    }
+
+    private void HandleSelectChange(ChangeEventArgs e)
+    {
+        OnValueChange.InvokeAsync(e.Value?.ToString() ?? "");
+    }
+
+    private void HandleFileChange(ChangeEventArgs e)
+    {
+        // In preview mode, just show the filename
+        OnValueChange.InvokeAsync("file_selected.pdf");
+    }
+
+    private bool IsChecked(string value)
+    {
+        if (Value is IEnumerable<string> list)
+            return list.Contains(value);
+        if (Value is string str)
+            return str.Split(',').Contains(value);
+        return false;
+    }
+
+    private async Task ToggleCheckbox(string value)
+    {
+        var list = Value switch
+        {
+            IEnumerable<string> enumerable => enumerable.ToList(),
+            string str when !string.IsNullOrEmpty(str) => str.Split(',').ToList(),
+            _ => new List<string>()
+        };
+
+        if (list.Contains(value))
+            list.Remove(value);
+        else
+            list.Add(value);
+
+        await OnValueChange.InvokeAsync(list);
+    }
+}

@@ -1,0 +1,60 @@
+@* Placeholder for JSON Preview - to be implemented *@
+@inject IEditorStateService EditorState
+@using System.Text.Json
+
+<div class="view-placeholder json-view">
+    <div class="json-toolbar">
+        <span class="json-title">
+            <i class="bi bi-code-slash"></i>
+            JSON Schema
+        </span>
+        <button class="json-copy-btn" @onclick="CopyToClipboard" title="Copy to clipboard">
+            <i class="bi bi-clipboard"></i>
+            Copy
+        </button>
+    </div>
+    <div class="json-content">
+        <pre><code>@GetFormattedJson()</code></pre>
+    </div>
+</div>
+
+@code {
+    [Inject] private IToastService ToastService { get; set; } = default!;
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+
+    private string GetFormattedJson()
+    {
+        if (EditorState.CurrentModule is null)
+        {
+            return "// No module loaded";
+        }
+
+        try
+        {
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+            return JsonSerializer.Serialize(EditorState.CurrentModule, options);
+        }
+        catch (Exception ex)
+        {
+            return $"// Error serializing module: {ex.Message}";
+        }
+    }
+
+    private async Task CopyToClipboard()
+    {
+        var json = GetFormattedJson();
+        var success = await JS.InvokeAsync<bool>("copyToClipboard", json);
+        if (success)
+        {
+            ToastService.ShowSuccess("JSON copied to clipboard");
+        }
+        else
+        {
+            ToastService.ShowError("Failed to copy to clipboard");
+        }
+    }
+}

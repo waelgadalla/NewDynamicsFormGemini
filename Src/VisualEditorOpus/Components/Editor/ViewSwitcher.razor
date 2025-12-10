@@ -1,0 +1,35 @@
+@* View switcher for Design/Preview/JSON views *@
+
+<div class="view-switcher">
+    <button class="view-tab @(CurrentView == EditorView.Design ? "active" : "")"
+            @onclick="() => SetView(EditorView.Design)"
+            title="Design View (Ctrl+1)">
+        <i class="bi bi-pencil-square"></i>
+        <span>Design</span>
+    </button>
+    <button class="view-tab @(CurrentView == EditorView.Preview ? "active" : "")"
+            @onclick="() => SetView(EditorView.Preview)"
+            title="Preview (Ctrl+2)">
+        <i class="bi bi-eye"></i>
+        <span>Preview</span>
+    </button>
+    <button class="view-tab @(CurrentView == EditorView.Json ? "active" : "")"
+            @onclick="() => SetView(EditorView.Json)"
+            title="JSON View (Ctrl+3)">
+        <i class="bi bi-code-slash"></i>
+        <span>JSON</span>
+    </button>
+</div>
+
+@code {
+    [Parameter] public EditorView CurrentView { get; set; } = EditorView.Design;
+    [Parameter] public EventCallback<EditorView> OnViewChanged { get; set; }
+
+    private async Task SetView(EditorView view)
+    {
+        if (view != CurrentView)
+        {
+            await OnViewChanged.InvokeAsync(view);
+        }
+    }
+}

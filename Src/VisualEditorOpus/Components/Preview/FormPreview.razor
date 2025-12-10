@@ -1,0 +1,86 @@
+@* Form Preview - renders form as end-user would see it *@
+@implements IDisposable
+
+<div class="preview-container">
+    <PreviewToolbar
+        Device="@CurrentDevice"
+        Language="@CurrentLanguage"
+        Zoom="@ZoomLevel"
+        OnDeviceChange="SetDevice"
+        OnLanguageChange="SetLanguage"
+        OnZoomChange="SetZoom" />
+
+    <div class="device-frame @DeviceClass">
+        <div class="device-chrome">
+            <div class="device-dot red"></div>
+            <div class="device-dot yellow"></div>
+            <div class="device-dot green"></div>
+            <div class="device-url">preview.forms.example.com/@(Module?.Id ?? 0)</div>
+        </div>
+        <div class="device-content-wrapper" style="transform: scale(@ZoomScale); transform-origin: top center;">
+            <div class="device-content">
+                <div class="preview-badge">
+                    <i class="bi bi-eye"></i>
+                    Preview Mode
+                </div>
+                <RenderedForm
+                    Module="@Module"
+                    Language="@CurrentLanguage"
+                    OnSubmit="HandleSubmit" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+    [Inject] private IToastService ToastService { get; set; } = default!;
+
+    private FormModuleSchema? Module => EditorState.CurrentModule;
+
+    private PreviewDevice CurrentDevice { get; set; } = PreviewDevice.Desktop;
+    private string CurrentLanguage { get; set; } = "en";
+    private int ZoomLevel { get; set; } = 100;
+
+    private string ZoomScale => (ZoomLevel / 100.0).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
+
+    private string DeviceClass => CurrentDevice switch
+    {
+        PreviewDevice.Tablet => "device-tablet",
+        PreviewDevice.Mobile => "device-mobile",
+        _ => "device-desktop"
+    };
+
+    protected override void OnInitialized()
+    {
+        EditorState.OnModuleChanged += StateHasChanged;
+    }
+
+    private void SetDevice(PreviewDevice device)
+    {
+        CurrentDevice = device;
+        StateHasChanged();
+    }
+
+    private void SetLanguage(string lang)
+    {
+        CurrentLanguage = lang;
+        StateHasChanged();
+    }
+
+    private void SetZoom(int zoom)
+    {
+        ZoomLevel = Math.Clamp(zoom, 50, 150);
+        StateHasChanged();
+    }
+
+    private void HandleSubmit(Dictionary<string, object> formData)
+    {
+        ToastService.ShowSuccess("Form submitted successfully! (Preview mode - no data saved)");
+    }
+
+    public void Dispose()
+    {
+        EditorState.OnModuleChanged -= StateHasChanged;
+    }
+}

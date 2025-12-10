@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FormPreview - Testing Guide</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: rgba(99, 102, 241, 0.1);
+            --success: #10B981;
+            --success-light: rgba(16, 185, 129, 0.1);
+            --warning: #F59E0B;
+            --warning-light: rgba(245, 158, 11, 0.1);
+            --danger: #EF4444;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --bg-tertiary: #F3F4F6;
+            --border-color: #E5E7EB;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+        }
+
+        .progress-bar {
+            background: var(--bg-tertiary);
+            border-radius: 100px;
+            height: 8px;
+            margin: 24px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: var(--success);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        .section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .section h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section h2 i {
+            color: var(--primary);
+        }
+
+        .test-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            border-radius: var(--radius-md);
+            margin-bottom: 8px;
+            transition: background 0.2s;
+        }
+
+        .test-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .test-item.completed {
+            background: var(--success-light);
+        }
+
+        .test-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--success);
+            margin-top: 2px;
+        }
+
+        .test-content {
+            flex: 1;
+        }
+
+        .test-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .test-description {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .test-steps {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            padding-left: 16px;
+        }
+
+        .test-steps li {
+            margin-bottom: 4px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge.device {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .manual-task {
+            padding: 16px;
+            background: var(--warning-light);
+            border-radius: var(--radius-md);
+            margin-bottom: 12px;
+        }
+
+        .manual-task h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .manual-task h4 i {
+            color: var(--warning);
+        }
+
+        .manual-task p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .manual-task code {
+            background: var(--bg-primary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .file-ref {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            margin-top: 16px;
+            font-size: 13px;
+            flex-wrap: wrap;
+        }
+
+        .file-ref i {
+            color: var(--primary);
+        }
+
+        .file-ref code {
+            background: var(--bg-primary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 2px;
+        }
+
+        .reset-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .reset-btn:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .field-type-ref {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .field-type-item {
+            padding: 8px 12px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .field-type-item i {
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="bi bi-eye"></i> FormPreview Testing Guide</h1>
+            <p>Phase 4 - D2: Form Preview Component</p>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text">
+            <span id="completedCount">0</span> of <span id="totalCount">0</span> tests completed
+        </div>
+
+        <!-- Section 1: Device Simulation Tests -->
+        <div class="section">
+            <h2><i class="bi bi-display"></i> Device Simulation Tests</h2>
+
+            <div class="test-item" data-test="1">
+                <input type="checkbox" id="test1">
+                <div class="test-content">
+                    <div class="test-title">Device switcher shows three buttons</div>
+                    <div class="test-description">Verify Desktop, Tablet, and Mobile buttons are visible in toolbar</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="2">
+                <input type="checkbox" id="test2">
+                <div class="test-content">
+                    <div class="test-title">Desktop view displays full width <span class="badge device">100%</span></div>
+                    <div class="test-description">Click Desktop button - form should take full available width</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="3">
+                <input type="checkbox" id="test3">
+                <div class="test-content">
+                    <div class="test-title">Tablet view constrained to 768px <span class="badge device">768px</span></div>
+                    <div class="test-description">Click Tablet button - frame should shrink to 768px max-width</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="4">
+                <input type="checkbox" id="test4">
+                <div class="test-content">
+                    <div class="test-title">Mobile view constrained to 375px <span class="badge device">375px</span></div>
+                    <div class="test-description">Click Mobile button - frame should shrink to 375px max-width</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="5">
+                <input type="checkbox" id="test5">
+                <div class="test-content">
+                    <div class="test-title">Active device button shows selected state</div>
+                    <div class="test-description">Selected device should have primary color and shadow styling</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Language Switcher -->
+        <div class="section">
+            <h2><i class="bi bi-translate"></i> Language Switcher Tests</h2>
+
+            <div class="test-item" data-test="6">
+                <input type="checkbox" id="test6">
+                <div class="test-content">
+                    <div class="test-title">EN/FR toggle buttons visible</div>
+                    <div class="test-description">Language toggle should show EN and FR buttons</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="7">
+                <input type="checkbox" id="test7">
+                <div class="test-content">
+                    <div class="test-title">English labels display when EN selected</div>
+                    <div class="test-description">Form title, labels, placeholders should show English text</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="8">
+                <input type="checkbox" id="test8">
+                <div class="test-content">
+                    <div class="test-title">French labels display when FR selected</div>
+                    <div class="test-description">Form title, labels, placeholders should switch to French text</div>
+                    <ol class="test-steps">
+                        <li>Click FR button</li>
+                        <li>Verify form title changes to French</li>
+                        <li>Verify field labels change to French</li>
+                        <li>Verify validation messages are in French</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Zoom Controls -->
+        <div class="section">
+            <h2><i class="bi bi-zoom-in"></i> Zoom Controls Tests</h2>
+
+            <div class="test-item" data-test="9">
+                <input type="checkbox" id="test9">
+                <div class="test-content">
+                    <div class="test-title">Zoom percentage displays correctly</div>
+                    <div class="test-description">Default should show 100%</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="10">
+                <input type="checkbox" id="test10">
+                <div class="test-content">
+                    <div class="test-title">Zoom out button decreases zoom</div>
+                    <div class="test-description">Click minus button - should decrease by 10% (minimum 50%)</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="11">
+                <input type="checkbox" id="test11">
+                <div class="test-content">
+                    <div class="test-title">Zoom in button increases zoom</div>
+                    <div class="test-description">Click plus button - should increase by 10% (maximum 150%)</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="12">
+                <input type="checkbox" id="test12">
+                <div class="test-content">
+                    <div class="test-title">Zoom limits enforced</div>
+                    <div class="test-description">Buttons should be disabled at 50% minimum and 150% maximum</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="13">
+                <input type="checkbox" id="test13">
+                <div class="test-content">
+                    <div class="test-title">Form scales with zoom</div>
+                    <div class="test-description">Form content should visually scale when zoom changes</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Browser Chrome -->
+        <div class="section">
+            <h2><i class="bi bi-window"></i> Browser Chrome Tests</h2>
+
+            <div class="test-item" data-test="14">
+                <input type="checkbox" id="test14">
+                <div class="test-content">
+                    <div class="test-title">Browser chrome shows traffic light dots</div>
+                    <div class="test-description">Red, yellow, and green dots should appear in top-left of frame</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="15">
+                <input type="checkbox" id="test15">
+                <div class="test-content">
+                    <div class="test-title">URL bar displays form ID</div>
+                    <div class="test-description">URL bar should show "preview.forms.example.com/{moduleId}"</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="16">
+                <input type="checkbox" id="test16">
+                <div class="test-content">
+                    <div class="test-title">Preview badge displays</div>
+                    <div class="test-description">"Preview Mode" badge should appear in top-right corner</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5: Form Rendering -->
+        <div class="section">
+            <h2><i class="bi bi-ui-checks"></i> Form Rendering Tests</h2>
+
+            <div class="test-item" data-test="17">
+                <input type="checkbox" id="test17">
+                <div class="test-content">
+                    <div class="test-title">Form title renders</div>
+                    <div class="test-description">Module TitleEn/TitleFr should display as main heading</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="18">
+                <input type="checkbox" id="test18">
+                <div class="test-content">
+                    <div class="test-title">Form description renders</div>
+                    <div class="test-description">Module DescriptionEn/DescriptionFr should display below title</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="19">
+                <input type="checkbox" id="test19">
+                <div class="test-content">
+                    <div class="test-title">Sections group fields correctly</div>
+                    <div class="test-description">Fields with Section parents should be grouped under section headings</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="20">
+                <input type="checkbox" id="test20">
+                <div class="test-content">
+                    <div class="test-title">Empty form shows placeholder message</div>
+                    <div class="test-description">When no fields exist, should show "No fields to display" message</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 6: Field Types -->
+        <div class="section">
+            <h2><i class="bi bi-input-cursor-text"></i> Field Type Rendering Tests</h2>
+
+            <div class="test-item" data-test="21">
+                <input type="checkbox" id="test21">
+                <div class="test-content">
+                    <div class="test-title">TextBox renders as text input</div>
+                    <div class="test-description">Should render as standard text input with placeholder</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="22">
+                <input type="checkbox" id="test22">
+                <div class="test-content">
+                    <div class="test-title">Email renders with email type</div>
+                    <div class="test-description">Should have type="email" for proper mobile keyboard</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="23">
+                <input type="checkbox" id="test23">
+                <div class="test-content">
+                    <div class="test-title">Number renders as number input</div>
+                    <div class="test-description">Should have type="number" with spin buttons</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="24">
+                <input type="checkbox" id="test24">
+                <div class="test-content">
+                    <div class="test-title">DropDown renders as select</div>
+                    <div class="test-description">Should show all options from Field.Options array</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="25">
+                <input type="checkbox" id="test25">
+                <div class="test-content">
+                    <div class="test-title">RadioGroup renders radio buttons</div>
+                    <div class="test-description">Should show all options as radio button list</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="26">
+                <input type="checkbox" id="test26">
+                <div class="test-content">
+                    <div class="test-title">CheckboxList renders checkboxes</div>
+                    <div class="test-description">Should show all options as checkbox list (multi-select)</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="27">
+                <input type="checkbox" id="test27">
+                <div class="test-content">
+                    <div class="test-title">DatePicker renders date input</div>
+                    <div class="test-description">Should show date picker with calendar popup</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="28">
+                <input type="checkbox" id="test28">
+                <div class="test-content">
+                    <div class="test-title">Toggle renders switch</div>
+                    <div class="test-description">Should display as styled toggle switch</div>
+                </div>
+            </div>
+
+            <div class="field-type-ref">
+                <div class="field-type-item"><i class="bi bi-type"></i> TextBox</div>
+                <div class="field-type-item"><i class="bi bi-envelope"></i> Email</div>
+                <div class="field-type-item"><i class="bi bi-telephone"></i> Phone</div>
+                <div class="field-type-item"><i class="bi bi-123"></i> Number</div>
+                <div class="field-type-item"><i class="bi bi-text-paragraph"></i> TextArea</div>
+                <div class="field-type-item"><i class="bi bi-chevron-down"></i> DropDown</div>
+                <div class="field-type-item"><i class="bi bi-ui-radios"></i> RadioGroup</div>
+                <div class="field-type-item"><i class="bi bi-ui-checks"></i> CheckboxList</div>
+                <div class="field-type-item"><i class="bi bi-calendar"></i> DatePicker</div>
+                <div class="field-type-item"><i class="bi bi-clock"></i> Time</div>
+                <div class="field-type-item"><i class="bi bi-toggle-on"></i> Toggle</div>
+                <div class="field-type-item"><i class="bi bi-upload"></i> FileUpload</div>
+            </div>
+        </div>
+
+        <!-- Section 7: Validation -->
+        <div class="section">
+            <h2><i class="bi bi-shield-check"></i> Validation Tests</h2>
+
+            <div class="test-item" data-test="29">
+                <input type="checkbox" id="test29">
+                <div class="test-content">
+                    <div class="test-title">Required asterisk shows</div>
+                    <div class="test-description">Fields with IsRequired=true should show red asterisk after label</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="30">
+                <input type="checkbox" id="test30">
+                <div class="test-content">
+                    <div class="test-title">Required validation triggers on empty</div>
+                    <div class="test-description">Leaving required field empty should show error message</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="31">
+                <input type="checkbox" id="test31">
+                <div class="test-content">
+                    <div class="test-title">Email validation works</div>
+                    <div class="test-description">Invalid email format should show "Please enter a valid email address"</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="32">
+                <input type="checkbox" id="test32">
+                <div class="test-content">
+                    <div class="test-title">Error messages display with icon</div>
+                    <div class="test-description">Validation errors should show with exclamation-circle icon</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="33">
+                <input type="checkbox" id="test33">
+                <div class="test-content">
+                    <div class="test-title">Error styling applied to field</div>
+                    <div class="test-description">Invalid fields should have red border</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="34">
+                <input type="checkbox" id="test34">
+                <div class="test-content">
+                    <div class="test-title">Help text displays</div>
+                    <div class="test-description">Field help text should appear below input in muted color</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 8: Form Actions -->
+        <div class="section">
+            <h2><i class="bi bi-send"></i> Form Actions Tests</h2>
+
+            <div class="test-item" data-test="35">
+                <input type="checkbox" id="test35">
+                <div class="test-content">
+                    <div class="test-title">Submit button validates all fields</div>
+                    <div class="test-description">Clicking Submit should validate all fields and show errors</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="36">
+                <input type="checkbox" id="test36">
+                <div class="test-content">
+                    <div class="test-title">Submit shows success toast when valid</div>
+                    <div class="test-description">Valid form submission should show success message</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="37">
+                <input type="checkbox" id="test37">
+                <div class="test-content">
+                    <div class="test-title">Reset clears all form data</div>
+                    <div class="test-description">Reset button should clear all inputs and validation errors</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 9: Dark Mode -->
+        <div class="section">
+            <h2><i class="bi bi-moon"></i> Dark Mode Tests</h2>
+
+            <div class="test-item" data-test="38">
+                <input type="checkbox" id="test38">
+                <div class="test-content">
+                    <div class="test-title">Preview adapts to dark theme</div>
+                    <div class="test-description">Toggle dark mode and verify colors adapt correctly</div>
+                    <ol class="test-steps">
+                        <li>Enable dark mode in the application</li>
+                        <li>Verify toolbar background is dark</li>
+                        <li>Verify device frame adapts</li>
+                        <li>Verify form content is readable</li>
+                        <li>Verify buttons and inputs adapt</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 10: Manual Tasks -->
+        <div class="section">
+            <h2><i class="bi bi-gear"></i> Manual Implementation Tasks</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 14px;">
+                These features may require additional implementation:
+            </p>
+
+            <div class="manual-task">
+                <h4><i class="bi bi-exclamation-triangle"></i> Additional Field Types</h4>
+                <p>The following field types need specialized renderers:</p>
+                <ul style="margin-top: 8px; padding-left: 20px; font-size: 13px; color: var(--text-secondary);">
+                    <li><strong>FileUpload</strong> - File selection with preview</li>
+                    <li><strong>Image</strong> - Image upload with crop/resize</li>
+                    <li><strong>Signature</strong> - Signature pad component</li>
+                    <li><strong>RichText</strong> - WYSIWYG editor</li>
+                    <li><strong>DataGrid/Repeater</strong> - Table-style input</li>
+                </ul>
+            </div>
+
+            <div class="manual-task">
+                <h4><i class="bi bi-exclamation-triangle"></i> TypeConfig Validation</h4>
+                <p>Type-specific validation from TypeConfig (min/max for numbers, date ranges, etc.) needs implementation in ValidateField method.</p>
+            </div>
+
+            <div class="file-ref">
+                <i class="bi bi-file-code"></i>
+                <span>Files created:</span>
+                <code>FormPreview.razor</code>
+                <code>FormPreview.razor.css</code>
+                <code>PreviewToolbar.razor</code>
+                <code>RenderedForm.razor</code>
+                <code>RenderedField.razor</code>
+                <code>PreviewDevice.cs</code>
+            </div>
+        </div>
+
+        <!-- Reset Button -->
+        <div style="text-align: center; margin-top: 32px;">
+            <button class="reset-btn" onclick="resetProgress()">
+                <i class="bi bi-arrow-counterclockwise"></i>
+                Reset Progress
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'formpreview-testing-progress';
+
+        function loadProgress() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                const completed = JSON.parse(saved);
+                completed.forEach(id => {
+                    const checkbox = document.getElementById(id);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        checkbox.closest('.test-item').classList.add('completed');
+                    }
+                });
+            }
+            updateProgress();
+        }
+
+        function saveProgress() {
+            const checkboxes = document.querySelectorAll('.test-item input[type="checkbox"]');
+            const completed = Array.from(checkboxes)
+                .filter(cb => cb.checked)
+                .map(cb => cb.id);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(completed));
+        }
+
+        function updateProgress() {
+            const total = document.querySelectorAll('.test-item input[type="checkbox"]').length;
+            const completed = document.querySelectorAll('.test-item input[type="checkbox"]:checked').length;
+
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('progressFill').style.width = `${(completed / total) * 100}%`;
+        }
+
+        function resetProgress() {
+            if (confirm('Reset all testing progress?')) {
+                localStorage.removeItem(STORAGE_KEY);
+                document.querySelectorAll('.test-item input[type="checkbox"]').forEach(cb => {
+                    cb.checked = false;
+                    cb.closest('.test-item').classList.remove('completed');
+                });
+                updateProgress();
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProgress();
+
+            document.querySelectorAll('.test-item input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    this.closest('.test-item').classList.toggle('completed', this.checked);
+                    saveProgress();
+                    updateProgress();
+                });
+            });
+        });
+    </script>
+</body>
+</html>

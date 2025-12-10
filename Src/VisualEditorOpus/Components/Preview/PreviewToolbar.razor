@@ -1,0 +1,55 @@
+@* Preview toolbar with device, language, and zoom controls *@
+
+<div class="preview-toolbar">
+    <div class="preview-toolbar-left">
+        <div class="device-switcher">
+            <button class="device-btn @(Device == PreviewDevice.Desktop ? "active" : "")"
+                    @onclick="() => OnDeviceChange.InvokeAsync(PreviewDevice.Desktop)"
+                    title="Desktop">
+                <i class="bi bi-display"></i>
+            </button>
+            <button class="device-btn @(Device == PreviewDevice.Tablet ? "active" : "")"
+                    @onclick="() => OnDeviceChange.InvokeAsync(PreviewDevice.Tablet)"
+                    title="Tablet (768px)">
+                <i class="bi bi-tablet"></i>
+            </button>
+            <button class="device-btn @(Device == PreviewDevice.Mobile ? "active" : "")"
+                    @onclick="() => OnDeviceChange.InvokeAsync(PreviewDevice.Mobile)"
+                    title="Mobile (375px)">
+                <i class="bi bi-phone"></i>
+            </button>
+        </div>
+        <div class="language-toggle">
+            <button class="lang-btn @(Language == "en" ? "active" : "")"
+                    @onclick='() => OnLanguageChange.InvokeAsync("en")'
+                    title="English">EN</button>
+            <button class="lang-btn @(Language == "fr" ? "active" : "")"
+                    @onclick='() => OnLanguageChange.InvokeAsync("fr")'
+                    title="French">FR</button>
+        </div>
+    </div>
+    <div class="zoom-controls">
+        <button class="zoom-btn"
+                @onclick="() => OnZoomChange.InvokeAsync(Zoom - 10)"
+                disabled="@(Zoom <= 50)"
+                title="Zoom out">
+            <i class="bi bi-dash"></i>
+        </button>
+        <span class="zoom-value">@Zoom%</span>
+        <button class="zoom-btn"
+                @onclick="() => OnZoomChange.InvokeAsync(Zoom + 10)"
+                disabled="@(Zoom >= 150)"
+                title="Zoom in">
+            <i class="bi bi-plus"></i>
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public PreviewDevice Device { get; set; } = PreviewDevice.Desktop;
+    [Parameter] public string Language { get; set; } = "en";
+    [Parameter] public int Zoom { get; set; } = 100;
+    [Parameter] public EventCallback<PreviewDevice> OnDeviceChange { get; set; }
+    [Parameter] public EventCallback<string> OnLanguageChange { get; set; }
+    [Parameter] public EventCallback<int> OnZoomChange { get; set; }
+}

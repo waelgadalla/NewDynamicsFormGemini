@@ -18,6 +18,9 @@ public class EditorStateService : IEditorStateService
     public event Action<string?>? OnFieldSelected;
     public event Action? OnModuleChanged;
     public event Action? OnWorkflowChanged;
+    public event Action<EditorView>? OnViewChanged;
+
+    private EditorView _currentView = EditorView.Design;
 
     public EditorStateService(
         IFormHierarchyService hierarchyService,
@@ -40,6 +43,7 @@ public class EditorStateService : IEditorStateService
     public bool CanUndo => _undoRedo.CanUndo;
     public bool CanRedo => _undoRedo.CanRedo;
     public bool HasClipboard => _state.ClipboardField is not null;
+    public EditorView CurrentView => _currentView;
 
     // === Workflow Operations ===
     public void LoadWorkflow(FormWorkflowSchema workflow)
@@ -327,6 +331,16 @@ public class EditorStateService : IEditorStateService
 
         var nextModule = _undoRedo.Redo(_state.Module);
         LoadModule(nextModule);
+    }
+
+    // === View ===
+    public void SetView(EditorView view)
+    {
+        if (_currentView == view) return;
+
+        _currentView = view;
+        OnViewChanged?.Invoke(view);
+        OnStateChanged?.Invoke();
     }
 
     // === Helpers ===

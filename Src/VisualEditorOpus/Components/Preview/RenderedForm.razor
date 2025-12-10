@@ -1,0 +1,218 @@
+@* Rendered form that displays the form as end-user would see it *@
+
+<div class="rendered-form">
+    <h1 class="form-title">@GetLabel(Module?.TitleEn, Module?.TitleFr)</h1>
+    @if (!string.IsNullOrEmpty(GetLabel(Module?.DescriptionEn, Module?.DescriptionFr)))
+    {
+        <p class="form-description">@GetLabel(Module?.DescriptionEn, Module?.DescriptionFr)</p>
+    }
+
+    @if (Module?.Fields == null || Module.Fields.Length == 0)
+    {
+        <div class="empty-form">
+            <i class="bi bi-inbox"></i>
+            <p>No fields to display. Add fields in Design mode.</p>
+        </div>
+    }
+    else
+    {
+        @foreach (var section in GroupedFields)
+        {
+            <div class="form-section">
+                @if (section.Parent != null)
+                {
+                    <h3 class="section-title">@GetLabel(section.Parent.LabelEn, section.Parent.LabelFr)</h3>
+                }
+
+                @foreach (var field in section.Fields)
+                {
+                    @if (!IsLayoutField(field.FieldType))
+                    {
+                        <RenderedField
+                            Field="@field"
+                            Language="@Language"
+                            Value="@GetFieldValue(field.Id)"
+                            Errors="@GetFieldErrors(field.Id)"
+                            OnValueChange="value => SetFieldValue(field.Id, value)" />
+                    }
+                }
+            </div>
+        }
+
+        <div class="form-actions">
+            <button class="btn btn-primary" @onclick="Submit">
+                <i class="bi bi-check-lg"></i>
+                Submit
+            </button>
+            <button class="btn btn-secondary" @onclick="Reset">
+                <i class="bi bi-arrow-counterclockwise"></i>
+                Reset
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public FormModuleSchema? Module { get; set; }
+    [Parameter] public string Language { get; set; } = "en";
+    [Parameter] public EventCallback<Dictionary<string, object>> OnSubmit { get; set; }
+
+    private Dictionary<string, object> FormData { get; set; } = new();
+    private Dictionary<string, List<string>> ValidationErrors { get; set; } = new();
+
+    private IEnumerable<FieldSection> GroupedFields => GroupFieldsByParent();
+
+    private string GetLabel(string? en, string? fr) =>
+        Language == "fr" && !string.IsNullOrEmpty(fr) ? fr : en ?? "";
+
+    private object? GetFieldValue(string fieldId) =>
+        FormData.TryGetValue(fieldId, out var value) ? value : null;
+
+    private IEnumerable<string> GetFieldErrors(string fieldId) =>
+        ValidationErrors.TryGetValue(fieldId, out var errors) ? errors : Enumerable.Empty<string>();
+
+    private void SetFieldValue(string fieldId, object value)
+    {
+        FormData[fieldId] = value;
+        ValidateField(fieldId);
+        StateHasChanged();
+    }
+
+    private bool IsLayoutField(string fieldType) =>
+        fieldType is "Section" or "Divider" or "Heading" or "Paragraph";
+
+    private void ValidateField(string fieldId)
+    {
+        var field = Module?.Fields?.FirstOrDefault(f => f.Id == fieldId);
+        if (field == null) return;
+
+        var errors = new List<string>();
+        var value = GetFieldValue(fieldId);
+        var valueStr = value?.ToString() ?? "";
+
+        // Required validation
+        if (field.Validation?.IsRequired == true && string.IsNullOrWhiteSpace(valueStr))
+        {
+            var requiredMsg = Language == "fr"
+                ? (field.Validation.RequiredMessageFr ?? "Ce champ est requis")
+                : (field.Validation.RequiredMessageEn ?? "This field is required");
+            errors.Add(requiredMsg);
+        }
+
+        // Email validation
+        if (field.FieldType == "Email" && !string.IsNullOrWhiteSpace(valueStr))
+        {
+            if (!IsValidEmail(valueStr))
+            {
+                errors.Add(Language == "fr"
+                    ? "Veuillez entrer une adresse courriel valide"
+                    : "Please enter a valid email address");
+            }
+        }
+
+        // Pattern validation
+        if (!string.IsNullOrEmpty(field.Validation?.Pattern) && !string.IsNullOrWhiteSpace(valueStr))
+        {
+            try
+            {
+                var regex = new System.Text.RegularExpressions.Regex(field.Validation.Pattern);
+                if (!regex.IsMatch(valueStr))
+                {
+                    var patternMsg = Language == "fr"
+                        ? (field.Validation.PatternMessageFr ?? "Le format est invalide")
+                        : (field.Validation.PatternMessageEn ?? "Invalid format");
+                    errors.Add(patternMsg);
+                }
+            }
+            catch
+            {
+                // Invalid regex pattern - ignore
+            }
+        }
+
+        // Min/Max length validation
+        if (field.Validation?.MinLength.HasValue == true && valueStr.Length < field.Validation.MinLength.Value)
+        {
+            errors.Add(Language == "fr"
+                ? $"Minimum {field.Validation.MinLength} caractères requis"
+                : $"Minimum {field.Validation.MinLength} characters required");
+        }
+
+        if (field.Validation?.MaxLength.HasValue == true && valueStr.Length > field.Validation.MaxLength.Value)
+        {
+            errors.Add(Language == "fr"
+                ? $"Maximum {field.Validation.MaxLength} caractères permis"
+                : $"Maximum {field.Validation.MaxLength} characters allowed");
+        }
+
+        ValidationErrors[fieldId] = errors;
+    }
+
+    private bool IsValidEmail(string email) =>
+        System.Text.RegularExpressions.Regex.IsMatch(email,
+            @"^[^@\s]+@[^@\s]+\.[^@\s]+$", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+    private IEnumerable<FieldSection> GroupFieldsByParent()
+    {
+        if (Module?.Fields == null) return Enumerable.Empty<FieldSection>();
+
+        var rootFields = Module.Fields.Where(f => f.ParentId == null).OrderBy(f => f.Order);
+        var sections = new List<FieldSection>();
+        List<FormFieldSchema>? defaultSectionFields = null;
+
+        foreach (var field in rootFields)
+        {
+            if (field.FieldType == "Section")
+            {
+                var children = Module.Fields
+                    .Where(f => f.ParentId == field.Id)
+                    .OrderBy(f => f.Order)
+                    .ToList();
+                sections.Add(new FieldSection(field, children));
+            }
+            else if (!IsLayoutField(field.FieldType))
+            {
+                // Add to default section (no parent)
+                if (defaultSectionFields == null)
+                {
+                    defaultSectionFields = new List<FormFieldSchema>();
+                    sections.Insert(0, new FieldSection(null, defaultSectionFields));
+                }
+                defaultSectionFields.Add(field);
+            }
+        }
+
+        return sections;
+    }
+
+    private async Task Submit()
+    {
+        // Validate all fields
+        foreach (var field in Module?.Fields ?? Array.Empty<FormFieldSchema>())
+        {
+            if (!IsLayoutField(field.FieldType))
+            {
+                ValidateField(field.Id);
+            }
+        }
+
+        // Check if any errors exist
+        if (!ValidationErrors.Values.Any(e => e.Any()))
+        {
+            await OnSubmit.InvokeAsync(FormData);
+        }
+        else
+        {
+            StateHasChanged();
+        }
+    }
+
+    private void Reset()
+    {
+        FormData.Clear();
+        ValidationErrors.Clear();
+        StateHasChanged();
+    }
+
+    private record FieldSection(FormFieldSchema? Parent, IEnumerable<FormFieldSchema> Fields);
+}

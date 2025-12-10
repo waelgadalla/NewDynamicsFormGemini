@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ViewSwitcher - Testing Guide</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: rgba(99, 102, 241, 0.1);
+            --success: #10B981;
+            --success-light: rgba(16, 185, 129, 0.1);
+            --warning: #F59E0B;
+            --warning-light: rgba(245, 158, 11, 0.1);
+            --danger: #EF4444;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --bg-tertiary: #F3F4F6;
+            --border-color: #E5E7EB;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+        }
+
+        .progress-bar {
+            background: var(--bg-tertiary);
+            border-radius: 100px;
+            height: 8px;
+            margin: 24px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: var(--success);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        .section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .section h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section h2 i {
+            color: var(--primary);
+        }
+
+        .test-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            border-radius: var(--radius-md);
+            margin-bottom: 8px;
+            transition: background 0.2s;
+        }
+
+        .test-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .test-item.completed {
+            background: var(--success-light);
+        }
+
+        .test-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--success);
+            margin-top: 2px;
+        }
+
+        .test-content {
+            flex: 1;
+        }
+
+        .test-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .test-description {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .test-steps {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            padding-left: 16px;
+        }
+
+        .test-steps li {
+            margin-bottom: 4px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge.required {
+            background: var(--danger);
+            color: white;
+        }
+
+        .badge.keyboard {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-family: monospace;
+        }
+
+        .manual-task {
+            padding: 16px;
+            background: var(--warning-light);
+            border-radius: var(--radius-md);
+            margin-bottom: 12px;
+        }
+
+        .manual-task h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .manual-task h4 i {
+            color: var(--warning);
+        }
+
+        .manual-task p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .manual-task code {
+            background: var(--bg-primary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .file-ref {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            margin-top: 16px;
+            font-size: 13px;
+        }
+
+        .file-ref i {
+            color: var(--primary);
+        }
+
+        .file-ref code {
+            background: var(--bg-primary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .reset-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .reset-btn:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .shortcut-ref {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: 8px;
+        }
+
+        .key {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 24px;
+            height: 22px;
+            padding: 0 6px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: monospace;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="bi bi-toggles"></i> ViewSwitcher Testing Guide</h1>
+            <p>Phase 4 - D1: View Switcher Component</p>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text">
+            <span id="completedCount">0</span> of <span id="totalCount">0</span> tests completed
+        </div>
+
+        <!-- Section 1: ViewSwitcher Component Tests -->
+        <div class="section">
+            <h2><i class="bi bi-ui-checks"></i> ViewSwitcher Component Tests</h2>
+
+            <div class="test-item" data-test="1">
+                <input type="checkbox" id="test1">
+                <div class="test-content">
+                    <div class="test-title">ViewSwitcher displays three tabs</div>
+                    <div class="test-description">Verify the component shows Design, Preview, and JSON tabs</div>
+                    <ol class="test-steps">
+                        <li>Open the form editor page</li>
+                        <li>Look at the center of the toolbar</li>
+                        <li>Confirm three buttons are visible: Design, Preview, JSON</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="2">
+                <input type="checkbox" id="test2">
+                <div class="test-content">
+                    <div class="test-title">Design tab shows correct icon <span class="badge keyboard">bi-pencil-square</span></div>
+                    <div class="test-description">The Design tab should display a pencil/square icon</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="3">
+                <input type="checkbox" id="test3">
+                <div class="test-content">
+                    <div class="test-title">Preview tab shows correct icon <span class="badge keyboard">bi-eye</span></div>
+                    <div class="test-description">The Preview tab should display an eye icon</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="4">
+                <input type="checkbox" id="test4">
+                <div class="test-content">
+                    <div class="test-title">JSON tab shows correct icon <span class="badge keyboard">bi-code-slash</span></div>
+                    <div class="test-description">The JSON tab should display a code/slash icon</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="5">
+                <input type="checkbox" id="test5">
+                <div class="test-content">
+                    <div class="test-title">Clicking Design tab activates it</div>
+                    <div class="test-description">Click the Design tab and verify it shows active styling (primary color background)</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="6">
+                <input type="checkbox" id="test6">
+                <div class="test-content">
+                    <div class="test-title">Clicking Preview tab activates it</div>
+                    <div class="test-description">Click the Preview tab and verify it becomes active</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="7">
+                <input type="checkbox" id="test7">
+                <div class="test-content">
+                    <div class="test-title">Clicking JSON tab activates it</div>
+                    <div class="test-description">Click the JSON tab and verify it becomes active</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="8">
+                <input type="checkbox" id="test8">
+                <div class="test-content">
+                    <div class="test-title">Active tab shows correct styling</div>
+                    <div class="test-description">Active tab should have white background, primary color text, and subtle shadow</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="9">
+                <input type="checkbox" id="test9">
+                <div class="test-content">
+                    <div class="test-title">Hover state works on inactive tabs</div>
+                    <div class="test-description">Hovering inactive tabs should show subtle background highlight</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Keyboard Shortcuts -->
+        <div class="section">
+            <h2><i class="bi bi-keyboard"></i> Keyboard Shortcuts</h2>
+
+            <div class="test-item" data-test="10">
+                <input type="checkbox" id="test10">
+                <div class="test-content">
+                    <div class="test-title">
+                        Ctrl+1 switches to Design View
+                        <span class="shortcut-ref"><span class="key">Ctrl</span><span class="key">1</span></span>
+                    </div>
+                    <div class="test-description">Press Ctrl+1 anywhere in the editor to switch to Design view</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="11">
+                <input type="checkbox" id="test11">
+                <div class="test-content">
+                    <div class="test-title">
+                        Ctrl+2 switches to Preview
+                        <span class="shortcut-ref"><span class="key">Ctrl</span><span class="key">2</span></span>
+                    </div>
+                    <div class="test-description">Press Ctrl+2 anywhere in the editor to switch to Preview view</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="12">
+                <input type="checkbox" id="test12">
+                <div class="test-content">
+                    <div class="test-title">
+                        Ctrl+3 switches to JSON View
+                        <span class="shortcut-ref"><span class="key">Ctrl</span><span class="key">3</span></span>
+                    </div>
+                    <div class="test-description">Press Ctrl+3 anywhere in the editor to switch to JSON view</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="13">
+                <input type="checkbox" id="test13">
+                <div class="test-content">
+                    <div class="test-title">Keyboard shortcuts work from any view</div>
+                    <div class="test-description">Test that shortcuts work regardless of which view is currently active</div>
+                    <ol class="test-steps">
+                        <li>Start in Design view, press Ctrl+3 (should go to JSON)</li>
+                        <li>From JSON, press Ctrl+2 (should go to Preview)</li>
+                        <li>From Preview, press Ctrl+1 (should go back to Design)</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Toolbar Tests -->
+        <div class="section">
+            <h2><i class="bi bi-tools"></i> Editor Toolbar Tests</h2>
+
+            <div class="test-item" data-test="14">
+                <input type="checkbox" id="test14">
+                <div class="test-content">
+                    <div class="test-title">Module name displays in toolbar</div>
+                    <div class="test-description">The form/module name should appear on the left side of the toolbar</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="15">
+                <input type="checkbox" id="test15">
+                <div class="test-content">
+                    <div class="test-title">Field count badge displays correctly</div>
+                    <div class="test-description">Badge should show "X Fields" next to module name (only when fields exist)</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="16">
+                <input type="checkbox" id="test16">
+                <div class="test-content">
+                    <div class="test-title">Undo button disabled when cannot undo</div>
+                    <div class="test-description">On fresh load with no changes, Undo should be disabled (grayed out)</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="17">
+                <input type="checkbox" id="test17">
+                <div class="test-content">
+                    <div class="test-title">Redo button disabled when cannot redo</div>
+                    <div class="test-description">With no undone actions, Redo should be disabled</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="18">
+                <input type="checkbox" id="test18">
+                <div class="test-content">
+                    <div class="test-title">Save button is visible and clickable</div>
+                    <div class="test-description">Save button should be styled as primary (purple) and always enabled</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="19">
+                <input type="checkbox" id="test19">
+                <div class="test-content">
+                    <div class="test-title">Duplicate/Delete disabled when no field selected</div>
+                    <div class="test-description">Without a field selected, these buttons should be disabled</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="20">
+                <input type="checkbox" id="test20">
+                <div class="test-content">
+                    <div class="test-title">Duplicate/Delete disabled in non-Design views</div>
+                    <div class="test-description">Even with a field selected, these should be disabled in Preview/JSON views</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Visual & Dark Mode -->
+        <div class="section">
+            <h2><i class="bi bi-palette"></i> Visual & Theme Tests</h2>
+
+            <div class="test-item" data-test="21">
+                <input type="checkbox" id="test21">
+                <div class="test-content">
+                    <div class="test-title">ViewSwitcher has correct light mode styling</div>
+                    <div class="test-description">Gray background container, white active tab, proper shadows</div>
+                </div>
+            </div>
+
+            <div class="test-item" data-test="22">
+                <input type="checkbox" id="test22">
+                <div class="test-content">
+                    <div class="test-title">ViewSwitcher has correct dark mode styling</div>
+                    <div class="test-description">Toggle dark mode and verify colors adapt appropriately</div>
+                    <ol class="test-steps">
+                        <li>Enable dark mode in the application</li>
+                        <li>Verify background colors are darker</li>
+                        <li>Verify text remains readable</li>
+                        <li>Verify active tab styling is still visible</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5: Manual Implementation Tasks -->
+        <div class="section">
+            <h2><i class="bi bi-gear"></i> Manual Implementation Tasks</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 14px;">
+                These tasks may require manual implementation depending on your editor setup:
+            </p>
+
+            <div class="manual-task">
+                <h4><i class="bi bi-exclamation-triangle"></i> View Content Components</h4>
+                <p>The ViewSwitcher switches between views, but you need to implement the actual view content components:</p>
+                <ul style="margin-top: 8px; padding-left: 20px; font-size: 13px; color: var(--text-secondary);">
+                    <li><strong>DesignView</strong> - The existing form builder canvas (may already exist)</li>
+                    <li><strong>FormPreview</strong> - Rendered form preview component</li>
+                    <li><strong>JsonPreview</strong> - JSON schema viewer/editor</li>
+                </ul>
+            </div>
+
+            <div class="manual-task">
+                <h4><i class="bi bi-exclamation-triangle"></i> Editor Container Integration</h4>
+                <p>The parent component that contains the toolbar needs to:</p>
+                <ul style="margin-top: 8px; padding-left: 20px; font-size: 13px; color: var(--text-secondary);">
+                    <li>Maintain <code>CurrentView</code> state</li>
+                    <li>Pass view state to <code>EditorToolbar</code></li>
+                    <li>Handle <code>OnViewChanged</code> callback</li>
+                    <li>Switch content based on current view</li>
+                </ul>
+            </div>
+
+            <div class="manual-task">
+                <h4><i class="bi bi-exclamation-triangle"></i> Save Functionality</h4>
+                <p>The <code>OnSave</code> callback needs to be implemented in the parent component to persist form changes.</p>
+            </div>
+
+            <div class="file-ref">
+                <i class="bi bi-file-code"></i>
+                <span>Files created:</span>
+                <code>ViewSwitcher.razor</code>
+                <code>ViewSwitcher.razor.css</code>
+                <code>EditorView.cs</code>
+                <code>editor.js</code>
+            </div>
+        </div>
+
+        <!-- Reset Button -->
+        <div style="text-align: center; margin-top: 32px;">
+            <button class="reset-btn" onclick="resetProgress()">
+                <i class="bi bi-arrow-counterclockwise"></i>
+                Reset Progress
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'viewswitcher-testing-progress';
+
+        function loadProgress() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                const completed = JSON.parse(saved);
+                completed.forEach(id => {
+                    const checkbox = document.getElementById(id);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        checkbox.closest('.test-item').classList.add('completed');
+                    }
+                });
+            }
+            updateProgress();
+        }
+
+        function saveProgress() {
+            const checkboxes = document.querySelectorAll('.test-item input[type="checkbox"]');
+            const completed = Array.from(checkboxes)
+                .filter(cb => cb.checked)
+                .map(cb => cb.id);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(completed));
+        }
+
+        function updateProgress() {
+            const total = document.querySelectorAll('.test-item input[type="checkbox"]').length;
+            const completed = document.querySelectorAll('.test-item input[type="checkbox"]:checked').length;
+
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('progressFill').style.width = `${(completed / total) * 100}%`;
+        }
+
+        function resetProgress() {
+            if (confirm('Reset all testing progress?')) {
+                localStorage.removeItem(STORAGE_KEY);
+                document.querySelectorAll('.test-item input[type="checkbox"]').forEach(cb => {
+                    cb.checked = false;
+                    cb.closest('.test-item').classList.remove('completed');
+                });
+                updateProgress();
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProgress();
+
+            document.querySelectorAll('.test-item input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    this.closest('.test-item').classList.toggle('completed', this.checked);
+                    saveProgress();
+                    updateProgress();
+                });
+            });
+        });
+    </script>
+</body>
+</html>

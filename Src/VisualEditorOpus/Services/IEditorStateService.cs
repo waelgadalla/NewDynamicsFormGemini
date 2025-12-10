@@ -17,12 +17,14 @@ public interface IEditorStateService
     string? SelectedFieldId { get; }
     FormFieldSchema? SelectedField { get; }
     FormFieldNode? SelectedFieldNode { get; }
+    EditorView CurrentView { get; }
 
     // === Events ===
     event Action? OnStateChanged;
     event Action<string?>? OnFieldSelected;
     event Action? OnModuleChanged;
     event Action? OnWorkflowChanged;
+    event Action<EditorView>? OnViewChanged;
 
     // === Workflow Operations ===
     void LoadWorkflow(FormWorkflowSchema workflow);
@@ -58,6 +60,9 @@ public interface IEditorStateService
     bool CanRedo { get; }
     void Undo();
     void Redo();
+
+    // === View ===
+    void SetView(EditorView view);
 }
 
 public enum MoveDirection { Up, Down }
