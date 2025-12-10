@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ModalBase Component - Testing Guide</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-dark: #4F46E5;
+            --primary-light: #EEF2FF;
+            --success: #10B981;
+            --success-light: #D1FAE5;
+            --danger: #EF4444;
+            --danger-light: #FEE2E2;
+            --warning: #F59E0B;
+            --warning-light: #FEF3C7;
+            --info: #3B82F6;
+            --info-light: #DBEAFE;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8FAFC;
+            --bg-tertiary: #F1F5F9;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --text-muted: #94A3B8;
+            --border-color: #E2E8F0;
+            --border-strong: #CBD5E1;
+            --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --radius-sm: 4px;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h1 i { color: var(--primary); }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin-bottom: 32px;
+        }
+
+        h2 {
+            font-size: 20px;
+            margin: 32px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        h2 i { color: var(--primary); font-size: 18px; }
+
+        h3 {
+            font-size: 16px;
+            margin: 24px 0 12px;
+            color: var(--text-primary);
+        }
+
+        .card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .checklist li:last-child {
+            border-bottom: none;
+        }
+
+        .checklist input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .checklist label {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .checklist .item-title {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .checklist .item-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .code-block {
+            background: #1E293B;
+            color: #E2E8F0;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+
+        .file-path {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-tertiary);
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            font-family: monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin: 8px 0;
+        }
+
+        .file-path i { color: var(--primary); }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-success { background: var(--success-light); color: var(--success); }
+        .badge-warning { background: var(--warning-light); color: var(--warning); }
+        .badge-info { background: var(--info-light); color: var(--info); }
+        .badge-danger { background: var(--danger-light); color: var(--danger); }
+
+        .progress-bar {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            height: 8px;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: var(--radius-md);
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .note {
+            background: var(--info-light);
+            border-left: 4px solid var(--info);
+            padding: 12px 16px;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            margin: 16px 0;
+            font-size: 14px;
+        }
+
+        .warning {
+            background: var(--warning-light);
+            border-left: 4px solid var(--warning);
+            padding: 12px 16px;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            margin: 16px 0;
+            font-size: 14px;
+        }
+
+        .test-steps ol {
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .test-steps li {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+        }
+
+        .test-steps .step-content {
+            flex: 1;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .summary-item {
+            background: var(--bg-tertiary);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .summary-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .summary-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        kbd {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 2px 6px;
+            font-size: 12px;
+            font-family: inherit;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="bi bi-window"></i> ModalBase Component - Testing Guide</h1>
+        <p class="subtitle">Foundation modal component testing and manual implementation verification</p>
+
+        <!-- Progress Summary -->
+        <div class="card">
+            <h3>Testing Progress</h3>
+            <div class="progress-text"><span id="progressCount">0</span> of <span id="totalCount">15</span> tests completed</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-number" id="passedCount">0</div>
+                    <div class="summary-label">Tests Passed</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-number" id="remainingCount">15</div>
+                    <div class="summary-label">Remaining</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 1: Manual Testing Steps -->
+        <h2><i class="bi bi-list-check"></i> Section 1: Manual Testing Steps</h2>
+
+        <div class="card">
+            <h3>1.1 Modal Open/Close Animations</h3>
+            <div class="test-steps">
+                <ol>
+                    <li>
+                        <span class="step-number">1</span>
+                        <div class="step-content">
+                            <strong>Test modal opening animation</strong><br>
+                            Click a button to open the modal and verify:
+                            <ul>
+                                <li>Backdrop fades in (200ms)</li>
+                                <li>Modal scales from 0.95 to 1.0</li>
+                                <li>Modal slides up from 10px offset</li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="step-number">2</span>
+                        <div class="step-content">
+                            <strong>Test modal closing animation</strong><br>
+                            Close the modal and verify:
+                            <ul>
+                                <li>Modal scales down and fades out</li>
+                                <li>Backdrop fades out after modal</li>
+                                <li>No visual glitches or jumps</li>
+                            </ul>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>1.2 Keyboard Interactions</h3>
+            <div class="test-steps">
+                <ol>
+                    <li>
+                        <span class="step-number">1</span>
+                        <div class="step-content">
+                            <strong>Test ESC key</strong><br>
+                            Open modal and press <kbd>Esc</kbd>. Modal should close smoothly when CloseOnEscape is true.
+                        </div>
+                    </li>
+                    <li>
+                        <span class="step-number">2</span>
+                        <div class="step-content">
+                            <strong>Test Tab key focus trap</strong><br>
+                            Open modal with multiple focusable elements, press <kbd>Tab</kbd> repeatedly. Focus should cycle within the modal only.
+                        </div>
+                    </li>
+                    <li>
+                        <span class="step-number">3</span>
+                        <div class="step-content">
+                            <strong>Test Shift+Tab</strong><br>
+                            Press <kbd>Shift</kbd>+<kbd>Tab</kbd> to navigate backwards through focusable elements within modal.
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>1.3 Backdrop Click Behavior</h3>
+            <div class="test-steps">
+                <ol>
+                    <li>
+                        <span class="step-number">1</span>
+                        <div class="step-content">
+                            <strong>Test backdrop click closes modal</strong><br>
+                            Click on the backdrop (outside the modal). Modal should close when CloseOnBackdropClick is true.
+                        </div>
+                    </li>
+                    <li>
+                        <span class="step-number">2</span>
+                        <div class="step-content">
+                            <strong>Test modal content click doesn't close</strong><br>
+                            Click inside the modal content. Modal should NOT close.
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>1.4 Size Variants</h3>
+            <p>Test each size variant by setting the Size parameter:</p>
+            <ul>
+                <li><span class="badge badge-info">Small</span> - 400px max-width</li>
+                <li><span class="badge badge-info">Medium</span> - 560px max-width (default)</li>
+                <li><span class="badge badge-info">Large</span> - 720px max-width</li>
+                <li><span class="badge badge-info">ExtraLarge</span> - 900px max-width</li>
+                <li><span class="badge badge-info">Fullscreen</span> - Full viewport with padding</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>1.5 Loading State</h3>
+            <div class="test-steps">
+                <ol>
+                    <li>
+                        <span class="step-number">1</span>
+                        <div class="step-content">
+                            <strong>Enable loading state</strong><br>
+                            Set IsLoading="true" and verify loading spinner overlay appears in modal body.
+                        </div>
+                    </li>
+                    <li>
+                        <span class="step-number">2</span>
+                        <div class="step-content">
+                            <strong>Disable loading state</strong><br>
+                            Set IsLoading="false" and verify content is visible and interactive.
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>1.6 Accessibility Testing</h3>
+            <div class="test-steps">
+                <ol>
+                    <li>
+                        <span class="step-number">1</span>
+                        <div class="step-content">
+                            <strong>Screen reader announcement</strong><br>
+                            Open modal with screen reader active. Should announce modal title and content.
+                        </div>
+                    </li>
+                    <li>
+                        <span class="step-number">2</span>
+                        <div class="step-content">
+                            <strong>ARIA attributes</strong><br>
+                            Inspect modal element for: role="dialog", aria-modal="true", aria-labelledby
+                        </div>
+                    </li>
+                    <li>
+                        <span class="step-number">3</span>
+                        <div class="step-content">
+                            <strong>Close button accessibility</strong><br>
+                            Verify close button has aria-label="Close"
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>1.7 Dark Mode Testing</h3>
+            <div class="test-steps">
+                <ol>
+                    <li>
+                        <span class="step-number">1</span>
+                        <div class="step-content">
+                            <strong>Enable dark mode</strong><br>
+                            Set data-theme="dark" on body element and open modal.
+                        </div>
+                    </li>
+                    <li>
+                        <span class="step-number">2</span>
+                        <div class="step-content">
+                            <strong>Verify styling</strong><br>
+                            Check: background colors, text colors, borders, shadows update correctly.
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Section 2: Manual Implementation Tasks -->
+        <h2><i class="bi bi-tools"></i> Section 2: Manual Implementation Tasks</h2>
+
+        <div class="card">
+            <h3>2.1 Files Created</h3>
+            <p>The following files have been created:</p>
+
+            <div class="file-path"><i class="bi bi-file-code"></i> Src/VisualEditorOpus/Models/ModalSize.cs</div>
+            <p>Enum defining modal size variants: Small, Medium, Large, ExtraLarge, Fullscreen</p>
+
+            <div class="file-path"><i class="bi bi-file-code"></i> Src/VisualEditorOpus/Components/Shared/ModalBase.razor</div>
+            <p>Main Razor component markup</p>
+
+            <div class="file-path"><i class="bi bi-file-code"></i> Src/VisualEditorOpus/Components/Shared/ModalBase.razor.cs</div>
+            <p>Code-behind with parameters, event handlers, and logic</p>
+
+            <div class="file-path"><i class="bi bi-file-code"></i> Src/VisualEditorOpus/Components/Shared/ModalBase.razor.css</div>
+            <p>Component-scoped styles</p>
+
+            <div class="file-path"><i class="bi bi-file-code"></i> Src/VisualEditorOpus/wwwroot/css/modals.css</div>
+            <p>Base modal styles (backdrop, container, header, body, footer)</p>
+        </div>
+
+        <div class="card">
+            <h3>2.2 CSS Import Added</h3>
+            <p>The modals.css file has been added to app.css imports:</p>
+            <div class="code-block">@import url('modals.css');</div>
+        </div>
+
+        <div class="card">
+            <h3>2.3 Tasks Requiring Manual Verification</h3>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="task1">
+                    <label for="task1">
+                        <span class="item-title">Verify _Imports.razor includes VisualEditorOpus.Models</span>
+                        <span class="item-desc">Check that @using VisualEditorOpus.Models is present for ModalSize enum access</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task2">
+                    <label for="task2">
+                        <span class="item-title">Test modal with actual content</span>
+                        <span class="item-desc">Create a test page that uses ModalBase with form content</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task3">
+                    <label for="task3">
+                        <span class="item-title">Verify LoadingSpinner component is available</span>
+                        <span class="item-desc">ModalBase uses LoadingSpinner for IsLoading state - ensure it's imported</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task4">
+                    <label for="task4">
+                        <span class="item-title">Test two-way binding</span>
+                        <span class="item-desc">Test @bind-IsOpen pattern works correctly with parent component</span>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>2.4 Example Usage</h3>
+            <p>Add this code to a test page to verify the modal works:</p>
+            <div class="code-block">&lt;button class="btn btn-primary" @onclick="() => showModal = true"&gt;
+    Open Modal
+&lt;/button&gt;
+
+&lt;ModalBase @bind-IsOpen="showModal"
+           Title="Test Modal"
+           Icon="bi-gear"
+           Size="ModalSize.Medium"&gt;
+
+    &lt;div class="form-group"&gt;
+        &lt;label class="form-label"&gt;Field Name&lt;/label&gt;
+        &lt;input type="text" class="form-input" placeholder="Enter value..." /&gt;
+    &lt;/div&gt;
+
+    &lt;FooterContent&gt;
+        &lt;button class="btn btn-ghost" @onclick="() => showModal = false"&gt;Cancel&lt;/button&gt;
+        &lt;button class="btn btn-primary"&gt;Save&lt;/button&gt;
+    &lt;/FooterContent&gt;
+&lt;/ModalBase&gt;
+
+@code {
+    private bool showModal = false;
+}</div>
+        </div>
+
+        <!-- Section 3: Verification Checklist -->
+        <h2><i class="bi bi-check2-square"></i> Section 3: Verification Checklist</h2>
+
+        <div class="card">
+            <ul class="checklist" id="verificationChecklist">
+                <li>
+                    <input type="checkbox" id="v1" onchange="updateProgress()">
+                    <label for="v1">
+                        <span class="item-title">Modal opens with fade + scale animation</span>
+                        <span class="item-desc">Backdrop fades in, modal scales from 0.95 to 1.0 and slides up</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v2" onchange="updateProgress()">
+                    <label for="v2">
+                        <span class="item-title">Modal closes with reverse animation</span>
+                        <span class="item-desc">Modal scales down and fades, then backdrop fades out</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v3" onchange="updateProgress()">
+                    <label for="v3">
+                        <span class="item-title">ESC key closes modal when enabled</span>
+                        <span class="item-desc">CloseOnEscape=true allows closing with Escape key</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v4" onchange="updateProgress()">
+                    <label for="v4">
+                        <span class="item-title">Click outside closes modal when enabled</span>
+                        <span class="item-desc">CloseOnBackdropClick=true allows closing by clicking backdrop</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v5" onchange="updateProgress()">
+                    <label for="v5">
+                        <span class="item-title">Focus trapped within modal</span>
+                        <span class="item-desc">Tab key cycles through focusable elements only within modal</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v6" onchange="updateProgress()">
+                    <label for="v6">
+                        <span class="item-title">Size variant: Small (400px)</span>
+                        <span class="item-desc">Modal displays at 400px max-width with modal-sm class</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v7" onchange="updateProgress()">
+                    <label for="v7">
+                        <span class="item-title">Size variant: Medium (560px)</span>
+                        <span class="item-desc">Modal displays at 560px max-width (default size)</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v8" onchange="updateProgress()">
+                    <label for="v8">
+                        <span class="item-title">Size variant: Large (720px)</span>
+                        <span class="item-desc">Modal displays at 720px max-width with modal-lg class</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v9" onchange="updateProgress()">
+                    <label for="v9">
+                        <span class="item-title">Size variant: ExtraLarge (900px)</span>
+                        <span class="item-desc">Modal displays at 900px max-width with modal-xl class</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v10" onchange="updateProgress()">
+                    <label for="v10">
+                        <span class="item-title">Size variant: Fullscreen</span>
+                        <span class="item-desc">Modal fills viewport with modal-fullscreen class</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v11" onchange="updateProgress()">
+                    <label for="v11">
+                        <span class="item-title">Loading state displays spinner overlay</span>
+                        <span class="item-desc">IsLoading=true shows LoadingSpinner in modal body</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v12" onchange="updateProgress()">
+                    <label for="v12">
+                        <span class="item-title">Header icon displays correctly</span>
+                        <span class="item-desc">Icon parameter renders Bootstrap icon in title</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v13" onchange="updateProgress()">
+                    <label for="v13">
+                        <span class="item-title">Header badge displays correctly</span>
+                        <span class="item-desc">Badge parameter renders badge element after title</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v14" onchange="updateProgress()">
+                    <label for="v14">
+                        <span class="item-title">Footer content renders correctly</span>
+                        <span class="item-desc">FooterContent RenderFragment renders in modal footer</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v15" onchange="updateProgress()">
+                    <label for="v15">
+                        <span class="item-title">Dark mode styling correct</span>
+                        <span class="item-desc">Modal respects dark theme colors and shadows</span>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="note">
+            <strong>Tip:</strong> Use browser DevTools to inspect ARIA attributes and test with keyboard navigation.
+        </div>
+
+        <div class="warning">
+            <strong>Note:</strong> Focus trap and focus restoration may require additional JS interop for complete implementation. Test basic keyboard navigation first.
+        </div>
+    </div>
+
+    <script>
+        function updateProgress() {
+            const checkboxes = document.querySelectorAll('#verificationChecklist input[type="checkbox"]');
+            const total = checkboxes.length;
+            let checked = 0;
+
+            checkboxes.forEach(cb => {
+                if (cb.checked) checked++;
+            });
+
+            const percentage = Math.round((checked / total) * 100);
+
+            document.getElementById('progressCount').textContent = checked;
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('passedCount').textContent = checked;
+            document.getElementById('remainingCount').textContent = total - checked;
+            document.getElementById('progressFill').style.width = percentage + '%';
+
+            // Save progress to localStorage
+            const state = {};
+            checkboxes.forEach(cb => {
+                state[cb.id] = cb.checked;
+            });
+            localStorage.setItem('modalbase-testing-progress', JSON.stringify(state));
+        }
+
+        // Load saved progress
+        function loadProgress() {
+            const saved = localStorage.getItem('modalbase-testing-progress');
+            if (saved) {
+                const state = JSON.parse(saved);
+                Object.keys(state).forEach(id => {
+                    const cb = document.getElementById(id);
+                    if (cb) cb.checked = state[id];
+                });
+                updateProgress();
+            }
+        }
+
+        loadProgress();
+    </script>
+</body>
+</html>

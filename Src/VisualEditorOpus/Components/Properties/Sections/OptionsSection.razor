@@ -41,7 +41,7 @@
     [Inject] private IEditorStateService EditorState { get; set; } = default!;
 
     private FormFieldSchema? Field => EditorState.SelectedField;
-    private FieldOption[] Options => Field?.Options ?? Array.Empty<FieldOption>();
+    private DynamicForms.Core.V4.Schemas.FieldOption[] Options => Field?.Options ?? Array.Empty<DynamicForms.Core.V4.Schemas.FieldOption>();
     private int OptionCount => Options.Length;
 
     protected override void OnInitialized()
@@ -53,7 +53,7 @@
     {
         if (Field is null) return;
 
-        var newOption = new FieldOption(
+        var newOption = new DynamicForms.Core.V4.Schemas.FieldOption(
             Value: $"option_{Options.Length + 1}",
             LabelEn: $"Option {Options.Length + 1}",
             LabelFr: $"Option {Options.Length + 1}"
@@ -88,7 +88,7 @@
         UpdateOption(index, o => o with { LabelFr = e.Value?.ToString() });
     }
 
-    private void UpdateOption(int index, Func<FieldOption, FieldOption> transform)
+    private void UpdateOption(int index, Func<DynamicForms.Core.V4.Schemas.FieldOption, DynamicForms.Core.V4.Schemas.FieldOption> transform)
     {
         if (Field is null || index < 0 || index >= Options.Length) return;
 

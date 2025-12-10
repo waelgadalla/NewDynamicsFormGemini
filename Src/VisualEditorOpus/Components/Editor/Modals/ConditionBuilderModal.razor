@@ -1,0 +1,136 @@
+@* Visual condition builder modal for creating conditional logic rules *@
+@using VisualEditorOpus.Models
+@using VisualEditorOpus.Components.Shared
+@using DynamicForms.Core.V4.Enums
+@using DynamicForms.Core.V4.Schemas
+
+<ModalBase @bind-IsOpen="IsOpen"
+           Title="@GetModalTitle()"
+           Icon="bi-diagram-3"
+           Size="ModalSize.Large"
+           OnClose="HandleCancel">
+    <ChildContent>
+    <div class="condition-builder">
+        @* Action Selector *@
+        <div class="action-selector">
+            <label class="section-label">When condition is TRUE, perform this action:</label>
+            <div class="action-chips">
+                @foreach (var action in Actions)
+                {
+                    <button class="action-chip @(selectedAction == action.Key ? "selected" : "")"
+                            @onclick="() => SelectAction(action.Key)"
+                            type="button">
+                        <i class="bi @action.Value.Icon"></i>
+                        @action.Value.Label
+                    </button>
+                }
+            </div>
+        </div>
+
+        @* Target Field Selector *@
+        <div class="target-selector">
+            <div class="form-group">
+                <label class="form-label">Target Field</label>
+                <select class="form-select" @bind="selectedTargetFieldId">
+                    <option value="">-- Select target field --</option>
+                    @foreach (var group in TargetFieldsByModule)
+                    {
+                        <optgroup label="@group.Key">
+                            @foreach (var field in group.Value)
+                            {
+                                <option value="@field.FieldId">@field.DisplayName</option>
+                            }
+                        </optgroup>
+                    }
+                </select>
+            </div>
+            <div class="target-info">
+                @if (!string.IsNullOrEmpty(selectedTargetFieldId) && !string.IsNullOrEmpty(selectedAction))
+                {
+                    <span>
+                        This field will be
+                        <strong class="action-highlight @selectedAction">@GetActionPastTense(selectedAction)</strong>
+                        when conditions are met
+                    </span>
+                }
+            </div>
+        </div>
+
+        @* Condition Builder Header *@
+        <div class="condition-builder-header">
+            <h4><i class="bi bi-funnel"></i> Conditions</h4>
+            <button class="btn btn-sm btn-outline"
+                    @onclick="AddGroup"
+                    type="button">
+                <i class="bi bi-plus"></i> Add Group
+            </button>
+        </div>
+
+        @* Condition Groups *@
+        <div class="condition-groups">
+            @foreach (var group in rootGroups)
+            {
+                <ConditionGroup @key="group.Id"
+                                Model="group"
+                                AvailableFields="availableFields"
+                                Depth="0"
+                                OnDelete="() => RemoveGroup(group)"
+                                OnChanged="HandleConditionChanged" />
+            }
+        </div>
+
+        @* Preview Section *@
+        <div class="preview-section">
+            <div class="preview-tabs">
+                <button class="preview-tab @(previewTab == "human" ? "active" : "")"
+                            @onclick='() => previewTab = "human"'
+                        type="button">
+                    Human Readable
+                </button>
+                <button class="preview-tab @(previewTab == "json" ? "active" : "")"
+                            @onclick='() => previewTab = "json"'
+                        type="button">
+                    JSON
+                </button>
+            </div>
+
+            @if (previewTab == "human")
+            {
+                <div class="preview-human">
+                    @((MarkupString)GenerateHumanReadablePreview())
+                </div>
+            }
+            else
+            {
+                <pre class="preview-code">@GenerateJsonPreview()</pre>
+            }
+        </div>
+
+        @* Validation Errors *@
+        @if (validationErrors.Any())
+        {
+            <div class="validation-errors">
+                @foreach (var error in validationErrors)
+                {
+                    <div class="validation-error">
+                        <i class="bi bi-exclamation-circle"></i>
+                        @error
+                    </div>
+                }
+            </div>
+        }
+    </div>
+    </ChildContent>
+    <FooterContent>
+        <button class="btn btn-ghost" @onclick="HandleCancel" type="button">Cancel</button>
+        <div class="footer-actions">
+            <button class="btn btn-primary"
+                    @onclick="HandleSave"
+                    disabled="@(!CanSave)"
+                    type="button">
+                <i class="bi bi-check-lg"></i> Save Condition
+            </button>
+        </div>
+    </FooterContent>
+
+</ModalBase>

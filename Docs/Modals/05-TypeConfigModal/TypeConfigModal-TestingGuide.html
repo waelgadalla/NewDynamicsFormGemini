@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TypeConfigModal - Testing Guide</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: #EEF2FF;
+            --success: #10B981;
+            --success-light: #D1FAE5;
+            --danger: #EF4444;
+            --danger-light: #FEE2E2;
+            --warning: #F59E0B;
+            --warning-light: #FEF3C7;
+            --info: #3B82F6;
+            --info-light: #DBEAFE;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8FAFC;
+            --bg-tertiary: #F1F5F9;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --text-muted: #94A3B8;
+            --border-color: #E2E8F0;
+            --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .header h1 i { color: var(--primary); }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        .section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .section-header i {
+            font-size: 20px;
+            color: var(--primary);
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-success { background: var(--success-light); color: var(--success); }
+        .badge-warning { background: var(--warning-light); color: var(--warning); }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            cursor: pointer;
+            accent-color: var(--success);
+        }
+
+        .checklist-item label {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .checklist-item.checked label {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .checklist-item .description {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .subsection {
+            margin-top: 20px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+        }
+
+        .subsection h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .subsection h3 i {
+            color: var(--text-secondary);
+        }
+
+        .code-block {
+            background: #1E293B;
+            color: #E2E8F0;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+
+        .file-path {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            background: var(--bg-tertiary);
+            padding: 4px 8px;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+        }
+
+        .task-list {
+            list-style: none;
+        }
+
+        .task-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--bg-tertiary);
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .task-list li:last-child {
+            border-bottom: none;
+        }
+
+        .task-list li i {
+            color: var(--warning);
+            margin-top: 3px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--success);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .note {
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            margin: 16px 0;
+        }
+
+        .note-warning {
+            background: var(--warning-light);
+            color: #92400E;
+            border-left: 4px solid var(--warning);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        td {
+            font-size: 14px;
+        }
+
+        .status-created {
+            color: var(--success);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="bi bi-sliders"></i> TypeConfigModal Testing Guide</h1>
+            <p>Manual testing steps and verification checklist for field type configuration modals</p>
+        </div>
+
+        <!-- Files Created -->
+        <div class="section">
+            <div class="section-header">
+                <i class="bi bi-files"></i>
+                <h2>Files Created</h2>
+                <span class="badge badge-success">Complete</span>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>File</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>TypeConfigModal.razor</td>
+                        <td><span class="file-path">Components/Editor/Modals/TypeConfig/</span></td>
+                        <td class="status-created"><i class="bi bi-check-circle"></i> Created</td>
+                    </tr>
+                    <tr>
+                        <td>TypeConfigModal.razor.cs</td>
+                        <td><span class="file-path">Components/Editor/Modals/TypeConfig/</span></td>
+                        <td class="status-created"><i class="bi bi-check-circle"></i> Created</td>
+                    </tr>
+                    <tr>
+                        <td>DateConfigEditor.razor</td>
+                        <td><span class="file-path">Components/Editor/Modals/TypeConfig/</span></td>
+                        <td class="status-created"><i class="bi bi-check-circle"></i> Created</td>
+                    </tr>
+                    <tr>
+                        <td>FileUploadConfigEditor.razor</td>
+                        <td><span class="file-path">Components/Editor/Modals/TypeConfig/</span></td>
+                        <td class="status-created"><i class="bi bi-check-circle"></i> Created</td>
+                    </tr>
+                    <tr>
+                        <td>AutoCompleteConfigEditor.razor</td>
+                        <td><span class="file-path">Components/Editor/Modals/TypeConfig/</span></td>
+                        <td class="status-created"><i class="bi bi-check-circle"></i> Created</td>
+                    </tr>
+                    <tr>
+                        <td>DataGridConfigEditor.razor</td>
+                        <td><span class="file-path">Components/Editor/Modals/TypeConfig/</span></td>
+                        <td class="status-created"><i class="bi bi-check-circle"></i> Created</td>
+                    </tr>
+                    <tr>
+                        <td>TypeConfigModal.razor.css</td>
+                        <td><span class="file-path">Components/Editor/Modals/TypeConfig/</span></td>
+                        <td class="status-created"><i class="bi bi-check-circle"></i> Created</td>
+                    </tr>
+                    <tr>
+                        <td>TypeConfigModels.cs</td>
+                        <td><span class="file-path">Models/</span></td>
+                        <td class="status-created"><i class="bi bi-check-circle"></i> Created</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Section 1: Manual Testing Steps -->
+        <div class="section">
+            <div class="section-header">
+                <i class="bi bi-list-check"></i>
+                <h2>Section 1: Manual Testing Steps</h2>
+            </div>
+
+            <div class="subsection">
+                <h3><i class="bi bi-calendar"></i> DateConfigEditor Testing</h3>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="date1" onchange="updateProgress()">
+                        <label for="date1">
+                            Toggle "Allow Future Dates"
+                            <div class="description">Click the toggle and verify it changes state (active/inactive)</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="date2" onchange="updateProgress()">
+                        <label for="date2">
+                            Toggle "Allow Past Dates"
+                            <div class="description">Click the toggle and verify it changes state</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="date3" onchange="updateProgress()">
+                        <label for="date3">
+                            Select Minimum Date preset
+                            <div class="description">Try each option: No minimum, Today, 30 days ago, 1 year ago</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="date4" onchange="updateProgress()">
+                        <label for="date4">
+                            Select Maximum Date preset
+                            <div class="description">Try each option: No maximum, Today, 30 days from now, 1 year from now</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="date5" onchange="updateProgress()">
+                        <label for="date5">
+                            Custom date input appears
+                            <div class="description">Select "Custom date..." and verify text input appears</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="date6" onchange="updateProgress()">
+                        <label for="date6">
+                            Configuration preview updates
+                            <div class="description">Verify JSON preview shows correct values as you change settings</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <h3><i class="bi bi-upload"></i> FileUploadConfigEditor Testing</h3>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="file1" onchange="updateProgress()">
+                        <label for="file1">
+                            Add extension by typing + Enter
+                            <div class="description">Type ".pdf" in the input and press Enter, verify tag appears</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="file2" onchange="updateProgress()">
+                        <label for="file2">
+                            Remove extension by clicking X
+                            <div class="description">Click the X on a tag and verify it's removed</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="file3" onchange="updateProgress()">
+                        <label for="file3">
+                            "Documents" preset button
+                            <div class="description">Click and verify .pdf, .doc, .docx, .xls, .xlsx, .ppt, .pptx are added</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="file4" onchange="updateProgress()">
+                        <label for="file4">
+                            "Images" preset button
+                            <div class="description">Click and verify .jpg, .jpeg, .png, .gif, .webp are added</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="file5" onchange="updateProgress()">
+                        <label for="file5">
+                            File size value and unit
+                            <div class="description">Change value to 25 and unit to MB, verify bytes calculation in hint</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="file6" onchange="updateProgress()">
+                        <label for="file6">
+                            Toggle "Allow Multiple Files"
+                            <div class="description">Click toggle and verify state changes</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="file7" onchange="updateProgress()">
+                        <label for="file7">
+                            Toggle "Virus Scan Required"
+                            <div class="description">Click toggle and verify state changes</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <h3><i class="bi bi-search"></i> AutoCompleteConfigEditor Testing</h3>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="auto1" onchange="updateProgress()">
+                        <label for="auto1">
+                            Data Source URL input
+                            <div class="description">Enter "/api/v1/search" and verify it's accepted</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="auto2" onchange="updateProgress()">
+                        <label for="auto2">
+                            Empty URL shows validation error
+                            <div class="description">Clear the URL field and verify error message appears</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="auto3" onchange="updateProgress()">
+                        <label for="auto3">
+                            Query Parameter input
+                            <div class="description">Change to "search" and verify it updates</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="auto4" onchange="updateProgress()">
+                        <label for="auto4">
+                            Min Characters range (1-10)
+                            <div class="description">Enter values outside range and verify behavior</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="auto5" onchange="updateProgress()">
+                        <label for="auto5">
+                            Value Field required validation
+                            <div class="description">Clear Value Field and verify error appears</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="auto6" onchange="updateProgress()">
+                        <label for="auto6">
+                            Display Field required validation
+                            <div class="description">Clear Display Field and verify error appears</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="auto7" onchange="updateProgress()">
+                        <label for="auto7">
+                            Item Template (optional)
+                            <div class="description">Enter "{{Name}} ({{Code}})" and verify it's accepted</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <h3><i class="bi bi-table"></i> DataGridConfigEditor Testing</h3>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="grid1" onchange="updateProgress()">
+                        <label for="grid1">
+                            Toggle "Allow Add Rows"
+                            <div class="description">Click toggle and verify state changes</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="grid2" onchange="updateProgress()">
+                        <label for="grid2">
+                            Toggle "Allow Edit Rows"
+                            <div class="description">Click toggle and verify state changes</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="grid3" onchange="updateProgress()">
+                        <label for="grid3">
+                            Toggle "Allow Delete Rows"
+                            <div class="description">Click toggle and verify state changes</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="grid4" onchange="updateProgress()">
+                        <label for="grid4">
+                            Max Rows input
+                            <div class="description">Enter 10 and verify it's saved</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="grid5" onchange="updateProgress()">
+                        <label for="grid5">
+                            Editor Mode dropdown
+                            <div class="description">Switch between Modal and Inline modes</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="grid6" onchange="updateProgress()">
+                        <label for="grid6">
+                            Add Column button opens editor
+                            <div class="description">Click "Add Column" and verify editor overlay appears</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="grid7" onchange="updateProgress()">
+                        <label for="grid7">
+                            Save column adds to list
+                            <div class="description">Fill in column details and save, verify it appears in list</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="grid8" onchange="updateProgress()">
+                        <label for="grid8">
+                            Edit column pencil button
+                            <div class="description">Click pencil icon on a column and verify editor opens with values</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="grid9" onchange="updateProgress()">
+                        <label for="grid9">
+                            Delete column trash button
+                            <div class="description">Click trash icon and verify column is removed</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="grid10" onchange="updateProgress()">
+                        <label for="grid10">
+                            Reorder columns (up/down arrows)
+                            <div class="description">Click up/down arrows and verify columns reorder</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <h3><i class="bi bi-arrow-repeat"></i> Dynamic Editor Switching</h3>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="switch1" onchange="updateProgress()">
+                        <label for="switch1">
+                            DatePicker shows DateConfigEditor
+                            <div class="description">Open modal with FieldType="DatePicker" and verify correct editor</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="switch2" onchange="updateProgress()">
+                        <label for="switch2">
+                            FileUpload shows FileUploadConfigEditor
+                            <div class="description">Open modal with FieldType="FileUpload" and verify correct editor</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="switch3" onchange="updateProgress()">
+                        <label for="switch3">
+                            AutoComplete shows AutoCompleteConfigEditor
+                            <div class="description">Open modal with FieldType="AutoComplete" and verify correct editor</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="switch4" onchange="updateProgress()">
+                        <label for="switch4">
+                            DataGrid shows DataGridConfigEditor
+                            <div class="description">Open modal with FieldType="DataGrid" and verify correct editor</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 2: Manual Implementation Tasks -->
+        <div class="section">
+            <div class="section-header">
+                <i class="bi bi-tools"></i>
+                <h2>Section 2: Manual Implementation Tasks</h2>
+                <span class="badge badge-warning">Action Required</span>
+            </div>
+
+            <div class="note note-warning">
+                <i class="bi bi-exclamation-triangle"></i>
+                The following tasks require manual implementation by you to fully integrate the component.
+            </div>
+
+            <ul class="task-list">
+                <li>
+                    <i class="bi bi-arrow-right-circle"></i>
+                    <div>
+                        <strong>Integration with RightSidebar "Configure" button</strong>
+                        <div class="description">Add a Configure button to the properties panel that opens TypeConfigModal:</div>
+                        <div class="code-block">@if (HasTypeConfig(SelectedField.FieldType))
+{
+    &lt;button class="btn btn-sm btn-outline" @onclick="OpenTypeConfig"&gt;
+        &lt;i class="bi bi-sliders"&gt;&lt;/i&gt;
+        @(SelectedField.TypeConfig != null ? "Edit Configuration" : "Configure")
+    &lt;/button&gt;
+}
+
+&lt;TypeConfigModal @bind-IsOpen="showTypeConfig"
+                 FieldType="@SelectedField.FieldType"
+                 ExistingConfig="@SelectedField.TypeConfig"
+                 OnSave="HandleTypeConfigSave" /&gt;</div>
+                    </div>
+                </li>
+                <li>
+                    <i class="bi bi-arrow-right-circle"></i>
+                    <div>
+                        <strong>HasTypeConfig helper function</strong>
+                        <div class="description">Add this helper to determine which field types support TypeConfig:</div>
+                        <div class="code-block">private bool HasTypeConfig(string fieldType) =&gt; fieldType is
+    "DatePicker" or "TimePicker" or "DateTimePicker" or
+    "FileUpload" or "AutoComplete" or "DataGrid";</div>
+                    </div>
+                </li>
+                <li>
+                    <i class="bi bi-arrow-right-circle"></i>
+                    <div>
+                        <strong>HandleTypeConfigSave implementation</strong>
+                        <div class="description">Handle saving the configuration back to the field:</div>
+                        <div class="code-block">private void HandleTypeConfigSave(FieldTypeConfig config)
+{
+    // Update the field's TypeConfig property
+    SelectedField = SelectedField with { TypeConfig = config };
+    // Trigger state update
+}</div>
+                    </div>
+                </li>
+                <li>
+                    <i class="bi bi-arrow-right-circle"></i>
+                    <div>
+                        <strong>CSS import (if needed)</strong>
+                        <div class="description">The TypeConfigModal.razor.css is a scoped stylesheet that should auto-apply. If styles don't appear, ensure Blazor CSS isolation is working properly.</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Section 3: Verification Checklist -->
+        <div class="section">
+            <div class="section-header">
+                <i class="bi bi-check2-square"></i>
+                <h2>Section 3: Verification Checklist</h2>
+            </div>
+
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify1" onchange="updateProgress()">
+                    <label for="verify1">TypeConfigModal opens with correct editor based on FieldType</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify2" onchange="updateProgress()">
+                    <label for="verify2">DateConfigEditor: Allow Future toggle works</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify3" onchange="updateProgress()">
+                    <label for="verify3">DateConfigEditor: Allow Past toggle works</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify4" onchange="updateProgress()">
+                    <label for="verify4">DateConfigEditor: Preset date options populate correctly</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify5" onchange="updateProgress()">
+                    <label for="verify5">DateConfigEditor: Custom date input appears when selected</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify6" onchange="updateProgress()">
+                    <label for="verify6">FileUploadConfigEditor: Add extension by typing + Enter</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify7" onchange="updateProgress()">
+                    <label for="verify7">FileUploadConfigEditor: Remove extension by clicking X</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify8" onchange="updateProgress()">
+                    <label for="verify8">FileUploadConfigEditor: Preset buttons add correct extensions</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify9" onchange="updateProgress()">
+                    <label for="verify9">FileUploadConfigEditor: File size converts to bytes correctly</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify10" onchange="updateProgress()">
+                    <label for="verify10">FileUploadConfigEditor: Allow Multiple toggle works</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify11" onchange="updateProgress()">
+                    <label for="verify11">FileUploadConfigEditor: Virus Scan toggle works</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify12" onchange="updateProgress()">
+                    <label for="verify12">AutoCompleteConfigEditor: All text inputs bind correctly</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify13" onchange="updateProgress()">
+                    <label for="verify13">AutoCompleteConfigEditor: Validation for required fields</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify14" onchange="updateProgress()">
+                    <label for="verify14">AutoCompleteConfigEditor: Min characters range 1-10</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify15" onchange="updateProgress()">
+                    <label for="verify15">DataGridConfigEditor: Allow Add/Edit/Delete toggles work</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify16" onchange="updateProgress()">
+                    <label for="verify16">DataGridConfigEditor: Max Rows input works</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify17" onchange="updateProgress()">
+                    <label for="verify17">DataGridConfigEditor: Editor Mode dropdown works</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify18" onchange="updateProgress()">
+                    <label for="verify18">DataGridConfigEditor: Column list displays</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify19" onchange="updateProgress()">
+                    <label for="verify19">All editors produce valid FieldTypeConfig on save</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify20" onchange="updateProgress()">
+                    <label for="verify20">Configuration preview shows correct JSON</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify21" onchange="updateProgress()">
+                    <label for="verify21">Dark mode styling correct</label>
+                </li>
+            </ul>
+
+            <!-- Progress Bar -->
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div class="progress-text" id="progressText">0 of 55 tests completed (0%)</div>
+        </div>
+
+        <!-- Component Usage Example -->
+        <div class="section">
+            <div class="section-header">
+                <i class="bi bi-code-slash"></i>
+                <h2>Component Usage Example</h2>
+            </div>
+
+            <div class="code-block">&lt;!-- In your parent component --&gt;
+@using VisualEditorOpus.Components.Editor.Modals.TypeConfig
+
+@code {
+    private bool showTypeConfig;
+    private FormFieldSchema selectedField;
+
+    private bool HasTypeConfig(string fieldType) =&gt; fieldType is
+        "DatePicker" or "TimePicker" or "DateTimePicker" or
+        "FileUpload" or "AutoComplete" or "DataGrid";
+
+    private void OpenTypeConfig() =&gt; showTypeConfig = true;
+
+    private void HandleTypeConfigSave(FieldTypeConfig config)
+    {
+        selectedField = selectedField with { TypeConfig = config };
+    }
+}
+
+@if (HasTypeConfig(selectedField.FieldType))
+{
+    &lt;button class="btn btn-outline" @onclick="OpenTypeConfig"&gt;
+        &lt;i class="bi bi-sliders"&gt;&lt;/i&gt; Configure
+    &lt;/button&gt;
+}
+
+&lt;TypeConfigModal @bind-IsOpen="showTypeConfig"
+                 FieldType="@selectedField.FieldType"
+                 ExistingConfig="@selectedField.TypeConfig"
+                 OnSave="HandleTypeConfigSave"
+                 OnCancel="() =&gt; showTypeConfig = false" /&gt;</div>
+        </div>
+    </div>
+
+    <script>
+        function updateProgress() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const checked = document.querySelectorAll('input[type="checkbox"]:checked').length;
+            const total = checkboxes.length;
+            const percent = Math.round((checked / total) * 100);
+
+            document.getElementById('progressFill').style.width = percent + '%';
+            document.getElementById('progressText').textContent =
+                `${checked} of ${total} tests completed (${percent}%)`;
+
+            // Update item styling
+            checkboxes.forEach(checkbox => {
+                const item = checkbox.closest('.checklist-item');
+                if (checkbox.checked) {
+                    item.classList.add('checked');
+                } else {
+                    item.classList.remove('checked');
+                }
+            });
+
+            // Save to localStorage
+            const state = {};
+            checkboxes.forEach(cb => {
+                state[cb.id] = cb.checked;
+            });
+            localStorage.setItem('typeConfigTestingProgress', JSON.stringify(state));
+        }
+
+        // Load saved state
+        document.addEventListener('DOMContentLoaded', function() {
+            const saved = localStorage.getItem('typeConfigTestingProgress');
+            if (saved) {
+                const state = JSON.parse(saved);
+                Object.entries(state).forEach(([id, checked]) => {
+                    const checkbox = document.getElementById(id);
+                    if (checkbox) {
+                        checkbox.checked = checked;
+                    }
+                });
+                updateProgress();
+            }
+        });
+    </script>
+</body>
+</html>

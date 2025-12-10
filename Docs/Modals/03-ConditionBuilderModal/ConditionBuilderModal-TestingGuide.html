@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConditionBuilderModal - Testing Guide</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-dark: #4F46E5;
+            --primary-light: #EEF2FF;
+            --success: #10B981;
+            --success-light: #D1FAE5;
+            --danger: #EF4444;
+            --danger-light: #FEE2E2;
+            --warning: #F59E0B;
+            --warning-light: #FEF3C7;
+            --info: #3B82F6;
+            --info-light: #DBEAFE;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8FAFC;
+            --bg-tertiary: #F1F5F9;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --text-muted: #94A3B8;
+            --border-color: #E2E8F0;
+            --border-strong: #CBD5E1;
+            --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius-sm: 4px;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h1 i { color: var(--primary); }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin-bottom: 32px;
+        }
+
+        h2 {
+            font-size: 20px;
+            margin: 32px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        h2 i { color: var(--primary); font-size: 18px; }
+
+        h3 {
+            font-size: 16px;
+            margin: 24px 0 12px;
+            color: var(--text-primary);
+        }
+
+        .card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .checklist li:last-child {
+            border-bottom: none;
+        }
+
+        .checklist input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .checklist label {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .checklist .item-title {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .checklist .item-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .code-block {
+            background: #1E293B;
+            color: #E2E8F0;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+
+        .file-path {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-tertiary);
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            font-family: monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin: 8px 0;
+        }
+
+        .file-path i { color: var(--primary); }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-success { background: var(--success-light); color: var(--success); }
+        .badge-warning { background: var(--warning-light); color: var(--warning); }
+        .badge-info { background: var(--info-light); color: var(--info); }
+        .badge-danger { background: var(--danger-light); color: var(--danger); }
+
+        .progress-bar {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            height: 8px;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: var(--radius-md);
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .note {
+            background: var(--info-light);
+            border-left: 4px solid var(--info);
+            padding: 12px 16px;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            margin: 16px 0;
+            font-size: 14px;
+        }
+
+        .warning {
+            background: var(--warning-light);
+            border-left: 4px solid var(--warning);
+            padding: 12px 16px;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            margin: 16px 0;
+            font-size: 14px;
+        }
+
+        .test-steps ol {
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .test-steps li {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+        }
+
+        .test-steps .step-content {
+            flex: 1;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .summary-item {
+            background: var(--bg-tertiary);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .summary-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .summary-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        ul { margin-left: 20px; margin-top: 8px; }
+        ul li { margin-bottom: 4px; list-style: disc; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--bg-tertiary);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        td { font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="bi bi-diagram-3"></i> ConditionBuilderModal - Testing Guide</h1>
+        <p class="subtitle">Visual condition builder for creating complex conditional logic rules</p>
+
+        <!-- Progress Summary -->
+        <div class="card">
+            <h3>Testing Progress</h3>
+            <div class="progress-text"><span id="progressCount">0</span> of <span id="totalCount">21</span> tests completed</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-number" id="passedCount">0</div>
+                    <div class="summary-label">Tests Passed</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-number" id="remainingCount">21</div>
+                    <div class="summary-label">Remaining</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 1: Manual Testing Steps -->
+        <h2><i class="bi bi-list-check"></i> Section 1: Manual Testing Steps</h2>
+
+        <div class="card">
+            <h3>1.1 Simple Single Condition</h3>
+            <div class="test-steps">
+                <ol>
+                    <li>
+                        <span class="step-number">1</span>
+                        <div class="step-content">
+                            <strong>Open the condition builder</strong><br>
+                            Click the button to open the modal. Verify:
+                            <ul>
+                                <li>Modal opens with Large size</li>
+                                <li>"Show" action is selected by default</li>
+                                <li>One empty condition group exists</li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="step-number">2</span>
+                        <div class="step-content">
+                            <strong>Create a simple condition</strong><br>
+                            <ul>
+                                <li>Select target field: "email"</li>
+                                <li>In condition row: field = "age", operator = "Greater Than", value = "18"</li>
+                                <li>Verify human-readable preview shows: SHOW field "email" WHEN (age > "18")</li>
+                            </ul>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>1.2 AND/OR/NOT Group Testing</h3>
+            <div class="test-steps">
+                <ol>
+                    <li>
+                        <span class="step-number">1</span>
+                        <div class="step-content">
+                            <strong>Test logical operator toggle</strong><br>
+                            Click the "AND" badge in the group header. It should cycle through:
+                            <ul>
+                                <li>AND (purple/primary color) - "All conditions must be true"</li>
+                                <li>OR (yellow/warning color) - "At least one condition must be true"</li>
+                                <li>NOT (red/danger color) - "Condition must be false"</li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="step-number">2</span>
+                        <div class="step-content">
+                            <strong>Add multiple conditions to a group</strong><br>
+                            Click "Add Condition" button multiple times. Verify:
+                            <ul>
+                                <li>New condition rows appear</li>
+                                <li>Each row can be deleted individually</li>
+                                <li>Preview updates in real-time</li>
+                            </ul>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>1.3 Nested Groups</h3>
+            <div class="test-steps">
+                <ol>
+                    <li>
+                        <span class="step-number">1</span>
+                        <div class="step-content">
+                            <strong>Add nested group</strong><br>
+                            Click the folder+ icon in the group header to add a nested group. Verify:
+                            <ul>
+                                <li>Nested group appears indented</li>
+                                <li>Has its own logical operator toggle</li>
+                                <li>Can contain conditions and further nested groups</li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="step-number">2</span>
+                        <div class="step-content">
+                            <strong>Create complex nested logic</strong><br>
+                            Build: (age > 18 AND country = "CA") AND (status = "employed" OR status = "self-employed")<br>
+                            Verify preview shows correct nesting with parentheses.
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>1.4 Field Picker Testing</h3>
+            <div class="test-steps">
+                <ol>
+                    <li>
+                        <span class="step-number">1</span>
+                        <div class="step-content">
+                            <strong>Test field dropdown grouping</strong><br>
+                            Open a field dropdown. Verify:
+                            <ul>
+                                <li>Fields are grouped by module (Current Module, Step1, etc.)</li>
+                                <li>Each field shows its type in parentheses</li>
+                                <li>Cross-module fields use dot notation (Step1.age)</li>
+                            </ul>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>1.5 Operator Testing by Field Type</h3>
+            <p>Select different field types and verify appropriate operators are shown:</p>
+            <table>
+                <tr>
+                    <th>Field Type</th>
+                    <th>Expected Operators</th>
+                </tr>
+                <tr>
+                    <td>TextBox</td>
+                    <td>equals, not equals, contains, starts with, ends with, in, not in, is null, is empty</td>
+                </tr>
+                <tr>
+                    <td>Number</td>
+                    <td>equals, not equals, >, >=, <, <=, in, not in, is null</td>
+                </tr>
+                <tr>
+                    <td>DatePicker</td>
+                    <td>equals, not equals, >, >=, <, <=, is null</td>
+                </tr>
+                <tr>
+                    <td>DropDown</td>
+                    <td>equals, not equals, in, not in, is null</td>
+                </tr>
+                <tr>
+                    <td>Checkbox</td>
+                    <td>equals, not equals (true/false)</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h3>1.6 Value Input Testing</h3>
+            <div class="test-steps">
+                <ol>
+                    <li>
+                        <span class="step-number">1</span>
+                        <div class="step-content">
+                            <strong>Test value input types</strong><br>
+                            <ul>
+                                <li>TextBox field: text input</li>
+                                <li>Number field: number input</li>
+                                <li>DatePicker field: date input</li>
+                                <li>DropDown field: select with options</li>
+                                <li>Checkbox field: select with true/false</li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="step-number">2</span>
+                        <div class="step-content">
+                            <strong>Test operators without values</strong><br>
+                            Select "is null" or "is empty" operators. Verify value input shows "No value needed" hint.
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>1.7 Preview Testing</h3>
+            <div class="test-steps">
+                <ol>
+                    <li>
+                        <span class="step-number">1</span>
+                        <div class="step-content">
+                            <strong>Human-readable preview</strong><br>
+                            Verify preview updates in real-time with:
+                            <ul>
+                                <li>Action highlighted (SHOW, HIDE, etc.)</li>
+                                <li>Field names in blue</li>
+                                <li>Operators in yellow/orange</li>
+                                <li>Values in green</li>
+                                <li>Keywords (AND, OR, NOT, WHEN) in purple</li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="step-number">2</span>
+                        <div class="step-content">
+                            <strong>JSON preview</strong><br>
+                            Click "JSON" tab. Verify valid JSON structure with:
+                            <ul>
+                                <li>Id, Action, TargetFieldId</li>
+                                <li>Condition object with Field/Operator/Value or LogicalOp/Conditions</li>
+                            </ul>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>1.8 Validation Testing</h3>
+            <div class="test-steps">
+                <ol>
+                    <li>
+                        <span class="step-number">1</span>
+                        <div class="step-content">
+                            <strong>Test incomplete form</strong><br>
+                            Try to save with:
+                            <ul>
+                                <li>No target field - should show error</li>
+                                <li>Empty conditions - should show error</li>
+                                <li>Incomplete conditions (no field selected) - should show error</li>
+                            </ul>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Section 2: Manual Implementation Tasks -->
+        <h2><i class="bi bi-tools"></i> Section 2: Manual Implementation Tasks</h2>
+
+        <div class="card">
+            <h3>2.1 Files Created</h3>
+
+            <h4>Models</h4>
+            <div class="file-path"><i class="bi bi-file-code"></i> Src/VisualEditorOpus/Models/ConditionGroupModel.cs</div>
+            <div class="file-path"><i class="bi bi-file-code"></i> Src/VisualEditorOpus/Models/ConditionRowModel.cs</div>
+            <div class="file-path"><i class="bi bi-file-code"></i> Src/VisualEditorOpus/Models/FieldReference.cs</div>
+
+            <h4>Components</h4>
+            <div class="file-path"><i class="bi bi-file-code"></i> Src/VisualEditorOpus/Components/Editor/Modals/ConditionRow.razor</div>
+            <div class="file-path"><i class="bi bi-file-code"></i> Src/VisualEditorOpus/Components/Editor/Modals/ConditionRow.razor.css</div>
+            <div class="file-path"><i class="bi bi-file-code"></i> Src/VisualEditorOpus/Components/Editor/Modals/ConditionGroup.razor</div>
+            <div class="file-path"><i class="bi bi-file-code"></i> Src/VisualEditorOpus/Components/Editor/Modals/ConditionGroup.razor.css</div>
+            <div class="file-path"><i class="bi bi-file-code"></i> Src/VisualEditorOpus/Components/Editor/Modals/ConditionBuilderModal.razor</div>
+            <div class="file-path"><i class="bi bi-file-code"></i> Src/VisualEditorOpus/Components/Editor/Modals/ConditionBuilderModal.razor.cs</div>
+            <div class="file-path"><i class="bi bi-file-code"></i> Src/VisualEditorOpus/Components/Editor/Modals/ConditionBuilderModal.razor.css</div>
+        </div>
+
+        <div class="card">
+            <h3>2.2 Integration Tasks</h3>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="task1">
+                    <label for="task1">
+                        <span class="item-title">Add using statements to _Imports.razor</span>
+                        <span class="item-desc">@using VisualEditorOpus.Components.Editor.Modals</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task2">
+                    <label for="task2">
+                        <span class="item-title">Integrate with ConditionalSection.razor</span>
+                        <span class="item-desc">Wire up the "Add Condition" button to open this modal</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task3">
+                    <label for="task3">
+                        <span class="item-title">Implement EditorStateService.UpdateFieldRules</span>
+                        <span class="item-desc">Handle saving ConditionalRule to field schema</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task4">
+                    <label for="task4">
+                        <span class="item-title">Pass workflow modules for cross-module references</span>
+                        <span class="item-desc">Populate WorkflowModules parameter when in workflow context</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="task5">
+                    <label for="task5">
+                        <span class="item-title">Test edit mode</span>
+                        <span class="item-desc">Pass ExistingRule parameter to edit existing conditions</span>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>2.3 Example Usage</h3>
+            <div class="code-block">@* In ConditionalSection.razor or parent component *@
+
+&lt;button class="btn btn-sm btn-primary" @onclick="OpenConditionBuilder"&gt;
+    &lt;i class="bi bi-plus"&gt;&lt;/i&gt; Add Condition
+&lt;/button&gt;
+
+&lt;ConditionBuilderModal @bind-IsOpen="showConditionBuilder"
+                        ExistingRule="@editingRule"
+                        CurrentModule="@CurrentModule"
+                        Workflow="@Workflow"
+                        WorkflowModules="@WorkflowModules"
+                        DefaultTargetFieldId="@SelectedField?.Id"
+                        OnSave="HandleConditionSave"
+                        OnCancel="() =&gt; showConditionBuilder = false" /&gt;
+
+@code {
+    private bool showConditionBuilder = false;
+    private ConditionalRule? editingRule;
+
+    private void OpenConditionBuilder(ConditionalRule? rule = null)
+    {
+        editingRule = rule;
+        showConditionBuilder = true;
+    }
+
+    private async Task HandleConditionSave(ConditionalRule rule)
+    {
+        // Add or update rule in field's ConditionalRules array
+        await EditorStateService.UpdateFieldRulesAsync(SelectedField.Id, rule);
+        showConditionBuilder = false;
+    }
+}</div>
+        </div>
+
+        <!-- Section 3: Verification Checklist -->
+        <h2><i class="bi bi-check2-square"></i> Section 3: Verification Checklist</h2>
+
+        <div class="card">
+            <ul class="checklist" id="verificationChecklist">
+                <li>
+                    <input type="checkbox" id="v1" onchange="updateProgress()">
+                    <label for="v1">
+                        <span class="item-title">Modal opens with ModalBase (Large size)</span>
+                        <span class="item-desc">Uses ModalBase component with Size="ModalSize.Large"</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v2" onchange="updateProgress()">
+                    <label for="v2">
+                        <span class="item-title">Action selector shows all 6 actions with icons</span>
+                        <span class="item-desc">Show, Hide, Enable, Disable, Set Required, Set Optional</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v3" onchange="updateProgress()">
+                    <label for="v3">
+                        <span class="item-title">Target field picker works correctly</span>
+                        <span class="item-desc">Dropdown shows fields grouped by module</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v4" onchange="updateProgress()">
+                    <label for="v4">
+                        <span class="item-title">Can create simple single condition</span>
+                        <span class="item-desc">Select field, operator, value - preview updates</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v5" onchange="updateProgress()">
+                    <label for="v5">
+                        <span class="item-title">Can create AND group with multiple conditions</span>
+                        <span class="item-desc">Add multiple conditions, all must be true</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v6" onchange="updateProgress()">
+                    <label for="v6">
+                        <span class="item-title">Can create OR group with multiple conditions</span>
+                        <span class="item-desc">Toggle to OR, at least one must be true</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v7" onchange="updateProgress()">
+                    <label for="v7">
+                        <span class="item-title">Can create NOT group</span>
+                        <span class="item-desc">Toggle to NOT, condition must be false</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v8" onchange="updateProgress()">
+                    <label for="v8">
+                        <span class="item-title">Can toggle logical operator (AND/OR/NOT)</span>
+                        <span class="item-desc">Click operator badge to cycle through options</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v9" onchange="updateProgress()">
+                    <label for="v9">
+                        <span class="item-title">Can add/remove conditions within group</span>
+                        <span class="item-desc">Add Condition button and X button work</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v10" onchange="updateProgress()">
+                    <label for="v10">
+                        <span class="item-title">Can add/remove nested groups</span>
+                        <span class="item-desc">Folder+ button adds nested group, trash removes</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v11" onchange="updateProgress()">
+                    <label for="v11">
+                        <span class="item-title">Nested groups indent correctly</span>
+                        <span class="item-desc">Visual indentation and left border indicate nesting</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v12" onchange="updateProgress()">
+                    <label for="v12">
+                        <span class="item-title">Field dropdown shows current module fields</span>
+                        <span class="item-desc">Fields from CurrentModule appear in dropdown</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v13" onchange="updateProgress()">
+                    <label for="v13">
+                        <span class="item-title">Field dropdown shows cross-module fields</span>
+                        <span class="item-desc">When workflow present, other modules' fields appear</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v14" onchange="updateProgress()">
+                    <label for="v14">
+                        <span class="item-title">Operators filter based on field type</span>
+                        <span class="item-desc">Number fields show numeric operators, text shows text operators</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v15" onchange="updateProgress()">
+                    <label for="v15">
+                        <span class="item-title">Value input adapts to field type</span>
+                        <span class="item-desc">Text/number/date inputs or dropdowns as appropriate</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v16" onchange="updateProgress()">
+                    <label for="v16">
+                        <span class="item-title">Human-readable preview updates in real-time</span>
+                        <span class="item-desc">Preview changes as conditions are modified</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v17" onchange="updateProgress()">
+                    <label for="v17">
+                        <span class="item-title">JSON preview shows valid JSON</span>
+                        <span class="item-desc">Can switch to JSON tab and see valid structure</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v18" onchange="updateProgress()">
+                    <label for="v18">
+                        <span class="item-title">Loading existing rule populates correctly</span>
+                        <span class="item-desc">ExistingRule parameter loads data into form</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v19" onchange="updateProgress()">
+                    <label for="v19">
+                        <span class="item-title">Save produces valid ConditionalRule object</span>
+                        <span class="item-desc">OnSave callback receives complete rule</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v20" onchange="updateProgress()">
+                    <label for="v20">
+                        <span class="item-title">Validation prevents saving incomplete conditions</span>
+                        <span class="item-desc">Error messages appear for missing data</span>
+                    </label>
+                </li>
+                <li>
+                    <input type="checkbox" id="v21" onchange="updateProgress()">
+                    <label for="v21">
+                        <span class="item-title">Dark mode styling correct</span>
+                        <span class="item-desc">All elements adapt to dark theme colors</span>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="note">
+            <strong>Tip:</strong> Test with both simple and complex conditions. The most common use case is a simple "field equals value" condition, but nested AND/OR logic should also work.
+        </div>
+
+        <div class="warning">
+            <strong>Important:</strong> Cross-module field references require the WorkflowModules parameter to be populated. Without it, only current module fields will be available.
+        </div>
+    </div>
+
+    <script>
+        function updateProgress() {
+            const checkboxes = document.querySelectorAll('#verificationChecklist input[type="checkbox"]');
+            const total = checkboxes.length;
+            let checked = 0;
+
+            checkboxes.forEach(cb => {
+                if (cb.checked) checked++;
+            });
+
+            const percentage = Math.round((checked / total) * 100);
+
+            document.getElementById('progressCount').textContent = checked;
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('passedCount').textContent = checked;
+            document.getElementById('remainingCount').textContent = total - checked;
+            document.getElementById('progressFill').style.width = percentage + '%';
+
+            // Save progress to localStorage
+            const state = {};
+            checkboxes.forEach(cb => {
+                state[cb.id] = cb.checked;
+            });
+            localStorage.setItem('conditionbuilder-testing-progress', JSON.stringify(state));
+        }
+
+        // Load saved progress
+        function loadProgress() {
+            const saved = localStorage.getItem('conditionbuilder-testing-progress');
+            if (saved) {
+                const state = JSON.parse(saved);
+                Object.keys(state).forEach(id => {
+                    const cb = document.getElementById(id);
+                    if (cb) cb.checked = state[id];
+                });
+                updateProgress();
+            }
+        }
+
+        loadProgress();
+    </script>
+</body>
+</html>

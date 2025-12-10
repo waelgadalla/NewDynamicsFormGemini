@@ -1,0 +1,166 @@
+@* Confirmation dialog for delete operations with danger styling *@
+@using VisualEditorOpus.Models
+
+<ModalBase @bind-IsOpen="IsOpen"
+           Title="@Title"
+           Icon="bi-trash"
+           Size="ModalSize.Small"
+           CloseOnBackdropClick="@(!IsDeleting)"
+           CloseOnEscape="@(!IsDeleting)"
+           OnClose="HandleCancel">
+    <ChildContent>
+    <div class="delete-content">
+        @* Circular danger icon *@
+        <div class="delete-icon">
+            <i class="bi bi-trash"></i>
+        </div>
+
+        @* Title *@
+        <div class="delete-title">Are you sure?</div>
+
+        @* Message *@
+        <div class="delete-message">@Message</div>
+
+        @* Item name *@
+        @if (!string.IsNullOrEmpty(ItemName))
+        {
+            <div class="delete-item-name">@ItemName</div>
+        }
+
+        @* Warning message (conditional) *@
+        @if (!string.IsNullOrEmpty(WarningMessage))
+        {
+            <div class="delete-warning">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span>@WarningMessage</span>
+            </div>
+        }
+
+        @* Children list (conditional) *@
+        @if (ChildItems?.Any() == true)
+        {
+            <div class="children-list">
+                <div class="children-list-title">Items to be deleted (@ChildItems.Count())</div>
+                @foreach (var child in ChildItems)
+                {
+                    <div class="children-item">
+                        <i class="bi @child.Icon"></i>
+                        <span>@child.Name</span>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+    </ChildContent>
+    <FooterContent>
+        <span class="keyboard-hint"><kbd>Esc</kbd> to cancel</span>
+        <button class="btn btn-ghost"
+                @onclick="HandleCancel"
+                disabled="@IsDeleting"
+                type="button">
+            @CancelButtonText
+        </button>
+        <button class="btn btn-danger @(IsDeleting ? "btn-loading" : "")"
+                @onclick="HandleConfirm"
+                disabled="@IsDeleting"
+                type="button">
+            @if (!IsDeleting)
+            {
+                <i class="bi bi-trash"></i>
+            }
+            <span>@ConfirmButtonText</span>
+        </button>
+    </FooterContent>
+
+</ModalBase>
+
+@code {
+    /// <summary>
+    /// Gets or sets whether the modal is open.
+    /// </summary>
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    /// <summary>
+    /// Event callback for two-way binding of IsOpen.
+    /// </summary>
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    /// <summary>
+    /// The modal header title.
+    /// </summary>
+    [Parameter]
+    public string Title { get; set; } = "Delete Item";
+
+    /// <summary>
+    /// The confirmation message displayed in the modal body.
+    /// </summary>
+    [Parameter]
+    public string Message { get; set; } = "Are you sure you want to delete this item? This action cannot be undone.";
+
+    /// <summary>
+    /// The name of the item being deleted, displayed in a monospace box.
+    /// </summary>
+    [Parameter]
+    public string ItemName { get; set; } = "";
+
+    /// <summary>
+    /// Optional warning message for cascading deletes.
+    /// </summary>
+    [Parameter]
+    public string? WarningMessage { get; set; }
+
+    /// <summary>
+    /// Optional list of child items that will be deleted.
+    /// </summary>
+    [Parameter]
+    public IEnumerable<DeleteChildItem>? ChildItems { get; set; }
+
+    /// <summary>
+    /// Text for the confirm/delete button.
+    /// </summary>
+    [Parameter]
+    public string ConfirmButtonText { get; set; } = "Delete";
+
+    /// <summary>
+    /// Text for the cancel button.
+    /// </summary>
+    [Parameter]
+    public string CancelButtonText { get; set; } = "Cancel";
+
+    /// <summary>
+    /// Whether a delete operation is in progress.
+    /// </summary>
+    [Parameter]
+    public bool IsDeleting { get; set; }
+
+    /// <summary>
+    /// Callback invoked when the confirm button is clicked.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnConfirm { get; set; }
+
+    /// <summary>
+    /// Callback invoked when the modal is cancelled.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private async Task HandleConfirm()
+    {
+        if (!IsDeleting)
+        {
+            await OnConfirm.InvokeAsync();
+        }
+    }
+
+    private async Task HandleCancel()
+    {
+        if (!IsDeleting)
+        {
+            await OnCancel.InvokeAsync();
+            await IsOpenChanged.InvokeAsync(false);
+        }
+    }
+}

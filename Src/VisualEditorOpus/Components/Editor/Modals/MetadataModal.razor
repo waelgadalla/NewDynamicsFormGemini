@@ -1,0 +1,151 @@
+@* Modal for editing module-level metadata *@
+@using VisualEditorOpus.Models
+@using VisualEditorOpus.Components.Shared
+@using DynamicForms.Core.V4.Schemas
+
+<ModalBase @bind-IsOpen="IsOpen"
+           Title="Module Metadata"
+           Icon="bi-file-earmark-text"
+           Size="ModalSize.Medium"
+           OnClose="HandleCancel">
+    <ChildContent>
+    <div class="metadata-editor">
+        @* System Information (Read-only) *@
+        <div class="section-title">
+            <i class="bi bi-info-circle"></i> System Information
+        </div>
+        <div class="info-section">
+            <div class="info-row">
+                <span class="info-label">Module ID</span>
+                <span class="info-value">@Module.Id</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Version</span>
+                <span class="info-value">@Module.Version.ToString("F1")</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Created</span>
+                <span class="info-value">@FormatDate(Module.DateCreated)</span>
+            </div>
+            @if (Module.DateUpdated.HasValue)
+            {
+                <div class="info-row">
+                    <span class="info-label">Last Modified</span>
+                    <span class="info-value">@FormatDate(Module.DateUpdated.Value)</span>
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(Module.CreatedBy))
+            {
+                <div class="info-row">
+                    <span class="info-label">Created By</span>
+                    <span class="info-value">@Module.CreatedBy</span>
+                </div>
+            }
+            @if (Module.OpportunityId.HasValue)
+            {
+                <div class="info-row">
+                    <span class="info-label">Opportunity ID</span>
+                    <span class="info-value">@Module.OpportunityId</span>
+                </div>
+            }
+        </div>
+
+        @* Titles Section *@
+        <div class="section-title">
+            <i class="bi bi-type"></i> Titles
+        </div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">
+                    Title (English)
+                    <span class="required-indicator">*</span>
+                </label>
+                <input type="text"
+                       class="form-input @(string.IsNullOrWhiteSpace(model.TitleEn) ? "is-invalid" : "")"
+                       @bind="model.TitleEn"
+                       placeholder="Enter title in English" />
+                @if (string.IsNullOrWhiteSpace(model.TitleEn))
+                {
+                    <p class="validation-error">Title (English) is required</p>
+                }
+            </div>
+            <div class="form-group">
+                <label class="form-label">Title (French)</label>
+                <input type="text"
+                       class="form-input"
+                       @bind="model.TitleFr"
+                       placeholder="Entrez le titre en fran&#231;ais" />
+            </div>
+        </div>
+
+        @* Descriptions Section *@
+        <div class="section-title">
+            <i class="bi bi-text-paragraph"></i> Descriptions
+        </div>
+        <div class="form-group">
+            <label class="form-label">Description (English)</label>
+            <textarea class="form-textarea"
+                      @bind="model.DescriptionEn"
+                      placeholder="Enter a description of this module..."></textarea>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Description (French)</label>
+            <textarea class="form-textarea"
+                      @bind="model.DescriptionFr"
+                      placeholder="Entrez une description de ce module..."></textarea>
+        </div>
+
+        @* Instructions Section *@
+        <div class="section-title">
+            <i class="bi bi-lightbulb"></i> Instructions
+        </div>
+        <div class="form-group">
+            <label class="form-label">Instructions (English)</label>
+            <textarea class="form-textarea"
+                      @bind="model.InstructionsEn"
+                      placeholder="Enter instructions for filling out this form..."></textarea>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Instructions (French)</label>
+            <textarea class="form-textarea"
+                      @bind="model.InstructionsFr"
+                      placeholder="Entrez les instructions pour remplir ce formulaire..."></textarea>
+        </div>
+
+        @* Database Configuration Section *@
+        <div class="section-title">
+            <i class="bi bi-database"></i> Database Configuration
+        </div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">Table Name</label>
+                <input type="text"
+                       class="form-input font-mono"
+                       @bind="model.TableName"
+                       placeholder="TableName" />
+                <p class="form-hint">Database table for storing form data</p>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Schema Name</label>
+                <select class="form-select" @bind="model.SchemaName">
+                    <option value="dbo">dbo</option>
+                    <option value="forms">forms</option>
+                    <option value="app">app</option>
+                    <option value="custom">custom</option>
+                </select>
+                <p class="form-hint">Database schema</p>
+            </div>
+        </div>
+    </div>
+    </ChildContent>
+    <FooterContent>
+        <button class="btn btn-ghost" @onclick="HandleCancel" type="button">Cancel</button>
+        <button class="btn btn-primary"
+                @onclick="HandleSave"
+                disabled="@(!IsValid)"
+                type="button">
+            <i class="bi bi-check-lg"></i> Save Metadata
+        </button>
+    </FooterContent>
+
+</ModalBase>

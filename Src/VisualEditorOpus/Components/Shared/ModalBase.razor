@@ -1,0 +1,73 @@
+@* Foundation modal component for all dialog windows *@
+@using VisualEditorOpus.Models
+
+@if (IsOpen)
+{
+    <div class="modal-backdrop @(IsVisible ? "active" : "")"
+         @onclick="HandleBackdropClick"
+         @onkeydown="HandleKeyDown"
+         tabindex="-1"
+         @ref="backdropRef">
+        <div class="modal @GetSizeClass() @CssClass"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="@titleId"
+             @onclick:stopPropagation="true"
+             @ref="modalRef">
+
+            @* Modal Header *@
+            <div class="modal-header">
+                <div class="modal-title" id="@titleId">
+                    @if (!string.IsNullOrEmpty(Icon))
+                    {
+                        <i class="bi @Icon"></i>
+                    }
+                    <span>@Title</span>
+                    @if (!string.IsNullOrEmpty(Badge))
+                    {
+                        <span class="badge badge-primary">@Badge</span>
+                    }
+                </div>
+                <div class="modal-header-actions">
+                    @if (HeaderExtra != null)
+                    {
+                        @HeaderExtra
+                    }
+                    @if (ShowCloseButton)
+                    {
+                        <button class="modal-close"
+                                @onclick="HandleClose"
+                                type="button"
+                                aria-label="Close"
+                                title="Close (Esc)">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    }
+                </div>
+            </div>
+
+            @* Modal Body *@
+            <div class="modal-body">
+                @if (IsLoading)
+                {
+                    <div class="modal-loading-overlay">
+                        <LoadingSpinner Size="SpinnerSize.Large" />
+                        <span class="modal-loading-text">Loading...</span>
+                    </div>
+                }
+                else
+                {
+                    @ChildContent
+                }
+            </div>
+
+            @* Modal Footer *@
+            @if (FooterContent != null)
+            {
+                <div class="modal-footer">
+                    @FooterContent
+                </div>
+            }
+        </div>
+    </div>
+}

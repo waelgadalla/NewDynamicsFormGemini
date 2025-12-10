@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MetadataModal - Testing Guide</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: #EEF2FF;
+            --success: #10B981;
+            --success-light: #D1FAE5;
+            --danger: #EF4444;
+            --danger-light: #FEE2E2;
+            --warning: #F59E0B;
+            --warning-light: #FEF3C7;
+            --info: #3B82F6;
+            --info-light: #DBEAFE;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8FAFC;
+            --bg-tertiary: #F1F5F9;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --text-muted: #94A3B8;
+            --border-color: #E2E8F0;
+            --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .header h1 i { color: var(--primary); }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        .section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .section-header i {
+            font-size: 20px;
+            color: var(--primary);
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-success { background: var(--success-light); color: var(--success); }
+        .badge-warning { background: var(--warning-light); color: var(--warning); }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            cursor: pointer;
+            accent-color: var(--success);
+        }
+
+        .checklist-item label {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .checklist-item.checked label {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .checklist-item .description {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .subsection {
+            margin-top: 20px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+        }
+
+        .subsection h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .subsection h3 i {
+            color: var(--text-secondary);
+        }
+
+        .code-block {
+            background: #1E293B;
+            color: #E2E8F0;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+
+        .file-path {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            background: var(--bg-tertiary);
+            padding: 4px 8px;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+        }
+
+        .task-list {
+            list-style: none;
+        }
+
+        .task-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--bg-tertiary);
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .task-list li:last-child {
+            border-bottom: none;
+        }
+
+        .task-list li i {
+            color: var(--warning);
+            margin-top: 3px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--success);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .note {
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            margin: 16px 0;
+        }
+
+        .note-warning {
+            background: var(--warning-light);
+            color: #92400E;
+            border-left: 4px solid var(--warning);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        td {
+            font-size: 14px;
+        }
+
+        .status-created {
+            color: var(--success);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="bi bi-file-earmark-text"></i> MetadataModal Testing Guide</h1>
+            <p>Manual testing steps and verification checklist for the module metadata editor modal</p>
+        </div>
+
+        <!-- Files Created -->
+        <div class="section">
+            <div class="section-header">
+                <i class="bi bi-files"></i>
+                <h2>Files Created</h2>
+                <span class="badge badge-success">Complete</span>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>File</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>MetadataModal.razor</td>
+                        <td><span class="file-path">Components/Editor/Modals/</span></td>
+                        <td class="status-created"><i class="bi bi-check-circle"></i> Created</td>
+                    </tr>
+                    <tr>
+                        <td>MetadataModal.razor.cs</td>
+                        <td><span class="file-path">Components/Editor/Modals/</span></td>
+                        <td class="status-created"><i class="bi bi-check-circle"></i> Created</td>
+                    </tr>
+                    <tr>
+                        <td>MetadataModal.razor.css</td>
+                        <td><span class="file-path">Components/Editor/Modals/</span></td>
+                        <td class="status-created"><i class="bi bi-check-circle"></i> Created</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Section 1: Manual Testing Steps -->
+        <div class="section">
+            <div class="section-header">
+                <i class="bi bi-list-check"></i>
+                <h2>Section 1: Manual Testing Steps</h2>
+            </div>
+
+            <div class="subsection">
+                <h3><i class="bi bi-info-circle"></i> System Information Section</h3>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test1" onchange="updateProgress()">
+                        <label for="test1">
+                            Verify Module ID displays correctly
+                            <div class="description">The module's unique ID should be shown as read-only</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test2" onchange="updateProgress()">
+                        <label for="test2">
+                            Verify Version displays correctly
+                            <div class="description">Version should show with one decimal place (e.g., "1.0")</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test3" onchange="updateProgress()">
+                        <label for="test3">
+                            Verify Created Date displays formatted
+                            <div class="description">Should display like "Dec 5, 2025 at 2:30 PM"</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test4" onchange="updateProgress()">
+                        <label for="test4">
+                            Verify Last Modified Date displays (if exists)
+                            <div class="description">Should only show if DateUpdated has a value</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test5" onchange="updateProgress()">
+                        <label for="test5">
+                            Verify Created By displays (if exists)
+                            <div class="description">Should only show if CreatedBy has a value</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test6" onchange="updateProgress()">
+                        <label for="test6">
+                            Verify Opportunity ID displays (if exists)
+                            <div class="description">Should only show if OpportunityId has a value</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <h3><i class="bi bi-type"></i> Titles Section</h3>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test7" onchange="updateProgress()">
+                        <label for="test7">
+                            Title (English) input binds correctly
+                            <div class="description">Enter text and verify it updates the model</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test8" onchange="updateProgress()">
+                        <label for="test8">
+                            Title (English) shows required indicator
+                            <div class="description">Red asterisk (*) should appear next to the label</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test9" onchange="updateProgress()">
+                        <label for="test9">
+                            Title (English) validation error shows when empty
+                            <div class="description">Clear the field and verify error message appears</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test10" onchange="updateProgress()">
+                        <label for="test10">
+                            Title (French) input binds correctly
+                            <div class="description">Enter text and verify it updates the model (optional field)</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <h3><i class="bi bi-text-paragraph"></i> Descriptions Section</h3>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test11" onchange="updateProgress()">
+                        <label for="test11">
+                            Description (English) textarea binds correctly
+                            <div class="description">Enter multi-line text and verify it saves</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test12" onchange="updateProgress()">
+                        <label for="test12">
+                            Description (French) textarea binds correctly
+                            <div class="description">Enter multi-line text and verify it saves</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test13" onchange="updateProgress()">
+                        <label for="test13">
+                            Textareas are resizable
+                            <div class="description">Drag the corner to resize the textarea vertically</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <h3><i class="bi bi-lightbulb"></i> Instructions Section</h3>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test14" onchange="updateProgress()">
+                        <label for="test14">
+                            Instructions (English) textarea binds correctly
+                            <div class="description">Enter instructions text and verify it saves</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test15" onchange="updateProgress()">
+                        <label for="test15">
+                            Instructions (French) textarea binds correctly
+                            <div class="description">Enter instructions text and verify it saves</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <h3><i class="bi bi-database"></i> Database Configuration</h3>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test16" onchange="updateProgress()">
+                        <label for="test16">
+                            Table Name input binds correctly
+                            <div class="description">Enter a table name like "PersonalInfo" and verify it saves</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test17" onchange="updateProgress()">
+                        <label for="test17">
+                            Table Name has monospace font
+                            <div class="description">Text should appear in monospace/code font</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test18" onchange="updateProgress()">
+                        <label for="test18">
+                            Schema Name dropdown works
+                            <div class="description">Select each option: dbo, forms, app, custom</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <h3><i class="bi bi-floppy"></i> Save and Cancel</h3>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test19" onchange="updateProgress()">
+                        <label for="test19">
+                            Save button disabled when TitleEn is empty
+                            <div class="description">Clear Title (English) and verify Save button is disabled</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test20" onchange="updateProgress()">
+                        <label for="test20">
+                            Save creates updated FormModuleSchema
+                            <div class="description">Click Save and verify OnSave callback receives updated module</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test21" onchange="updateProgress()">
+                        <label for="test21">
+                            Cancel closes modal without saving
+                            <div class="description">Make changes, click Cancel, reopen and verify changes are reverted</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test22" onchange="updateProgress()">
+                        <label for="test22">
+                            DateUpdated is set on save
+                            <div class="description">After saving, verify DateUpdated is set to current time</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 2: Manual Implementation Tasks -->
+        <div class="section">
+            <div class="section-header">
+                <i class="bi bi-tools"></i>
+                <h2>Section 2: Manual Implementation Tasks</h2>
+                <span class="badge badge-warning">Action Required</span>
+            </div>
+
+            <div class="note note-warning">
+                <i class="bi bi-exclamation-triangle"></i>
+                The following tasks require manual implementation by you to fully integrate the component.
+            </div>
+
+            <ul class="task-list">
+                <li>
+                    <i class="bi bi-arrow-right-circle"></i>
+                    <div>
+                        <strong>Integration with module header or settings menu</strong>
+                        <div class="description">Add a button to open MetadataModal from the editor toolbar or header:</div>
+                        <div class="code-block">&lt;button class="btn btn-ghost" @onclick="() =&gt; showMetadataModal = true"&gt;
+    &lt;i class="bi bi-file-earmark-text"&gt;&lt;/i&gt; Metadata
+&lt;/button&gt;
+
+&lt;MetadataModal @bind-IsOpen="showMetadataModal"
+               Module="@currentModule"
+               OnSave="HandleMetadataSave" /&gt;</div>
+                    </div>
+                </li>
+                <li>
+                    <i class="bi bi-arrow-right-circle"></i>
+                    <div>
+                        <strong>HandleMetadataSave implementation</strong>
+                        <div class="description">Handle saving the updated module:</div>
+                        <div class="code-block">private void HandleMetadataSave(FormModuleSchema updatedModule)
+{
+    currentModule = updatedModule;
+    // Trigger any necessary state updates
+    StateHasChanged();
+}</div>
+                    </div>
+                </li>
+                <li>
+                    <i class="bi bi-arrow-right-circle"></i>
+                    <div>
+                        <strong>Additional schema options (optional)</strong>
+                        <div class="description">If you need more schema options besides dbo, forms, app, custom, update the dropdown in MetadataModal.razor</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Section 3: Verification Checklist -->
+        <div class="section">
+            <div class="section-header">
+                <i class="bi bi-check2-square"></i>
+                <h2>Section 3: Verification Checklist</h2>
+            </div>
+
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify1" onchange="updateProgress()">
+                    <label for="verify1">Modal opens with ModalBase (Medium size)</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify2" onchange="updateProgress()">
+                    <label for="verify2">System Information section displays read-only data</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify3" onchange="updateProgress()">
+                    <label for="verify3">Module ID displays correctly</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify4" onchange="updateProgress()">
+                    <label for="verify4">Version displays correctly</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify5" onchange="updateProgress()">
+                    <label for="verify5">Created Date displays formatted</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify6" onchange="updateProgress()">
+                    <label for="verify6">Last Modified Date displays formatted (when present)</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify7" onchange="updateProgress()">
+                    <label for="verify7">Created By displays correctly (when present)</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify8" onchange="updateProgress()">
+                    <label for="verify8">TitleEn input binds correctly</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify9" onchange="updateProgress()">
+                    <label for="verify9">TitleFr input binds correctly</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify10" onchange="updateProgress()">
+                    <label for="verify10">DescriptionEn textarea binds correctly</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify11" onchange="updateProgress()">
+                    <label for="verify11">DescriptionFr textarea binds correctly</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify12" onchange="updateProgress()">
+                    <label for="verify12">InstructionsEn textarea binds correctly</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify13" onchange="updateProgress()">
+                    <label for="verify13">InstructionsFr textarea binds correctly</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify14" onchange="updateProgress()">
+                    <label for="verify14">TableName input binds correctly</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify15" onchange="updateProgress()">
+                    <label for="verify15">SchemaName dropdown works with options (dbo, forms, app, custom)</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify16" onchange="updateProgress()">
+                    <label for="verify16">Save button disabled when TitleEn is empty</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify17" onchange="updateProgress()">
+                    <label for="verify17">Save creates updated FormModuleSchema with `with` keyword</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify18" onchange="updateProgress()">
+                    <label for="verify18">Cancel closes modal without saving</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify19" onchange="updateProgress()">
+                    <label for="verify19">Dark mode styling correct</label>
+                </li>
+            </ul>
+
+            <!-- Progress Bar -->
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div class="progress-text" id="progressText">0 of 41 tests completed (0%)</div>
+        </div>
+
+        <!-- Component Usage Example -->
+        <div class="section">
+            <div class="section-header">
+                <i class="bi bi-code-slash"></i>
+                <h2>Component Usage Example</h2>
+            </div>
+
+            <div class="code-block">&lt;!-- In your parent component --&gt;
+@using VisualEditorOpus.Components.Editor.Modals
+
+@code {
+    private bool showMetadataModal;
+    private FormModuleSchema currentModule;
+
+    private void HandleMetadataSave(FormModuleSchema updatedModule)
+    {
+        currentModule = updatedModule;
+        // Module now has updated titles, descriptions, instructions, and database config
+        // DateUpdated is automatically set to current time
+    }
+}
+
+&lt;button class="btn btn-outline" @onclick="() =&gt; showMetadataModal = true"&gt;
+    &lt;i class="bi bi-file-earmark-text"&gt;&lt;/i&gt; Edit Metadata
+&lt;/button&gt;
+
+&lt;MetadataModal @bind-IsOpen="showMetadataModal"
+               Module="@currentModule"
+               OnSave="HandleMetadataSave"
+               OnCancel="() =&gt; showMetadataModal = false" /&gt;</div>
+        </div>
+    </div>
+
+    <script>
+        function updateProgress() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const checked = document.querySelectorAll('input[type="checkbox"]:checked').length;
+            const total = checkboxes.length;
+            const percent = Math.round((checked / total) * 100);
+
+            document.getElementById('progressFill').style.width = percent + '%';
+            document.getElementById('progressText').textContent =
+                `${checked} of ${total} tests completed (${percent}%)`;
+
+            // Update item styling
+            checkboxes.forEach(checkbox => {
+                const item = checkbox.closest('.checklist-item');
+                if (checkbox.checked) {
+                    item.classList.add('checked');
+                } else {
+                    item.classList.remove('checked');
+                }
+            });
+
+            // Save to localStorage
+            const state = {};
+            checkboxes.forEach(cb => {
+                state[cb.id] = cb.checked;
+            });
+            localStorage.setItem('metadataModalTestingProgress', JSON.stringify(state));
+        }
+
+        // Load saved state
+        document.addEventListener('DOMContentLoaded', function() {
+            const saved = localStorage.getItem('metadataModalTestingProgress');
+            if (saved) {
+                const state = JSON.parse(saved);
+                Object.entries(state).forEach(([id, checked]) => {
+                    const checkbox = document.getElementById(id);
+                    if (checkbox) {
+                        checkbox.checked = checked;
+                    }
+                });
+                updateProgress();
+            }
+        });
+    </script>
+</body>
+</html>

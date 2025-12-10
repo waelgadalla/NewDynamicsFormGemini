@@ -1,0 +1,192 @@
+/* ===== CONFIRM DELETE MODAL SCOPED STYLES ===== */
+
+.delete-content {
+    text-align: center;
+    padding: 8px 0;
+}
+
+/* Circular danger icon */
+.delete-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--danger-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+}
+
+.delete-icon i {
+    font-size: 28px;
+    color: var(--danger);
+}
+
+/* Title */
+.delete-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+/* Message */
+.delete-message {
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 16px;
+    font-size: 14px;
+}
+
+/* Item name box */
+.delete-item-name {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 10px 16px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    word-break: break-all;
+    color: var(--text-primary);
+}
+
+/* Warning section */
+.delete-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--warning-light);
+    border: 1px solid var(--warning);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    margin-top: 16px;
+    text-align: left;
+}
+
+.delete-warning i {
+    color: var(--warning);
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.delete-warning span {
+    font-size: 13px;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+/* Children list */
+.children-list {
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    margin-top: 12px;
+    text-align: left;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.children-list-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 8px;
+}
+
+.children-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.children-item:last-child {
+    border-bottom: none;
+}
+
+.children-item i {
+    color: var(--text-muted);
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+/* Keyboard hint */
+.keyboard-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+kbd {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 2px 6px;
+    font-size: 10px;
+    font-family: inherit;
+}
+
+/* Loading state button */
+.btn-loading {
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+}
+
+.btn-loading i,
+.btn-loading span {
+    visibility: hidden;
+}
+
+.btn-loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    margin-top: -8px;
+    margin-left: -8px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: deleteSpinner 0.6s linear infinite;
+}
+
+@keyframes deleteSpinner {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Dark mode adjustments */
+::deep [data-theme="dark"] .delete-warning {
+    background: rgba(245, 158, 11, 0.15);
+}
+
+::deep [data-theme="dark"] .children-list {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+/* Scrollbar for children list */
+.children-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.children-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.children-list::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 2px;
+}

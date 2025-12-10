@@ -1,0 +1,310 @@
+/* ===== IMPORT JSON MODAL SCOPED STYLES ===== */
+
+.import-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ===== TAB NAVIGATION ===== */
+.import-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg-tertiary);
+    padding: 4px;
+    border-radius: var(--radius-md);
+}
+
+.import-tab {
+    flex: 1;
+    padding: 10px 16px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all var(--transition-fast);
+}
+
+.import-tab:hover {
+    color: var(--text-primary);
+}
+
+.import-tab.active {
+    background: var(--bg-primary);
+    color: var(--primary);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.import-tab i {
+    font-size: 14px;
+}
+
+/* ===== DROP ZONE ===== */
+.drop-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 48px 24px;
+    text-align: center;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+    background: var(--bg-secondary);
+}
+
+.drop-zone:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.drop-zone.drag-over {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    border-style: solid;
+}
+
+.drop-zone.has-file {
+    border-style: solid;
+    border-color: var(--success);
+    background: var(--success-light);
+}
+
+.drop-zone-icon {
+    font-size: 48px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+}
+
+.drop-zone:hover .drop-zone-icon,
+.drop-zone.drag-over .drop-zone-icon {
+    color: var(--primary);
+}
+
+.drop-zone.has-file .drop-zone-icon {
+    color: var(--success);
+}
+
+.drop-zone-text {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.drop-zone-hint {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.file-input-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    overflow: hidden;
+}
+
+/* ===== PASTE CONTAINER ===== */
+.paste-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.json-input {
+    width: 100%;
+    min-height: 200px;
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.5;
+    resize: vertical;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.json-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.json-input::placeholder {
+    color: var(--text-muted);
+}
+
+.validate-btn {
+    align-self: flex-start;
+}
+
+/* ===== VALIDATION RESULT ===== */
+.validation-result {
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.validation-result.success {
+    background: var(--success-light);
+    color: var(--success);
+}
+
+.validation-result.error {
+    background: var(--danger-light);
+    color: var(--danger);
+}
+
+.validation-result i {
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.validation-result-text {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.validation-details {
+    margin-top: 4px;
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+/* ===== IMPORT PREVIEW ===== */
+.import-preview {
+    padding: 16px;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-lg);
+}
+
+.preview-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+
+.preview-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+.preview-item:last-child {
+    border-bottom: none;
+}
+
+.preview-item span:first-child {
+    color: var(--text-secondary);
+}
+
+.preview-item strong {
+    color: var(--primary);
+}
+
+/* ===== IMPORT OPTIONS ===== */
+.import-options {
+    padding: 16px;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-lg);
+}
+
+.option-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.option-item:first-of-type {
+    padding-top: 0;
+}
+
+.option-item:last-child {
+    padding-bottom: 0;
+}
+
+.option-item input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.option-item span {
+    line-height: 1.4;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 640px) {
+    .drop-zone {
+        padding: 32px 16px;
+    }
+
+    .drop-zone-icon {
+        font-size: 36px;
+    }
+
+    .drop-zone-text {
+        font-size: 14px;
+    }
+
+    .json-input {
+        min-height: 150px;
+        font-size: 12px;
+    }
+
+    .preview-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+}
+
+/* ===== DARK MODE ===== */
+::deep [data-theme="dark"] .drop-zone {
+    background: rgba(30, 41, 59, 0.5);
+}
+
+::deep [data-theme="dark"] .drop-zone:hover,
+::deep [data-theme="dark"] .drop-zone.drag-over {
+    background: rgba(99, 102, 241, 0.1);
+}
+
+::deep [data-theme="dark"] .drop-zone.has-file {
+    background: rgba(16, 185, 129, 0.1);
+}
+
+::deep [data-theme="dark"] .import-preview,
+::deep [data-theme="dark"] .import-options {
+    background: rgba(30, 41, 59, 0.5);
+}
+
+::deep [data-theme="dark"] .import-tabs {
+    background: rgba(30, 41, 59, 0.5);
+}
+
+::deep [data-theme="dark"] .import-tab.active {
+    background: var(--bg-primary);
+}

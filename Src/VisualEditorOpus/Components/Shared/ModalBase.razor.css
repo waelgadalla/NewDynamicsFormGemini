@@ -1,0 +1,42 @@
+/* ===== MODAL BASE SCOPED STYLES ===== */
+
+/* Header actions container */
+.modal-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Loading overlay */
+.modal-loading-overlay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    gap: 16px;
+}
+
+.modal-loading-text {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+/* Focus visible states */
+::deep .modal-close:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+::deep .modal-body button:focus-visible,
+::deep .modal-body input:focus-visible,
+::deep .modal-body select:focus-visible,
+::deep .modal-body textarea:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+::deep .modal-footer button:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}

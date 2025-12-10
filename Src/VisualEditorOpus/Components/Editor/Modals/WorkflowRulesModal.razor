@@ -1,0 +1,206 @@
+@* Modal for managing workflow-level conditional rules *@
+@using VisualEditorOpus.Models
+@using VisualEditorOpus.Components.Shared
+@using DynamicForms.Core.V4.Schemas
+@using DynamicForms.Core.V4.Enums
+
+<ModalBase @bind-IsOpen="IsOpen"
+           Title="Workflow Rules"
+           Icon="bi-signpost-split"
+           Size="ModalSize.Large"
+           OnClose="HandleCancel">
+    <HeaderExtra>
+        <span class="badge badge-warning">@GetActiveRuleCount() Active</span>
+    </HeaderExtra>
+    <ChildContent>
+    <div class="workflow-rules-editor">
+        @* Rules Header *@
+        <div class="rules-header">
+            <h4><i class="bi bi-list-check"></i> Conditional Rules</h4>
+            @if (!isAddingRule && !isEditingRule)
+            {
+                <button class="btn btn-sm btn-primary" @onclick="AddRule" type="button">
+                    <i class="bi bi-plus"></i> Add Rule
+                </button>
+            }
+        </div>
+
+        @* Rules List *@
+        @if (rules.Count > 0 && !isAddingRule && !isEditingRule)
+        {
+            <div class="rules-list">
+                @foreach (var rule in rules)
+                {
+                    var actionInfo = GetActionInfo(rule.Action);
+                    <div class="rule-item">
+                        <div class="rule-icon @actionInfo.CssClass">
+                            <i class="bi @actionInfo.Icon"></i>
+                        </div>
+                        <div class="rule-content">
+                            <div class="rule-title">
+                                @(string.IsNullOrEmpty(rule.Description) ? actionInfo.Label : rule.Description)
+                            </div>
+                            <div class="rule-description">
+                                @GetRuleTargetDescription(rule)
+                            </div>
+                            <div class="rule-condition">@FormatCondition(rule.Condition)</div>
+                        </div>
+                        <div class="rule-toggle">
+                            <span>@(rule.IsActive ? "Active" : "Inactive")</span>
+                            <div class="toggle @(rule.IsActive ? "active" : "")"
+                                 @onclick="@(() => ToggleRuleActive(rule.Id))"></div>
+                        </div>
+                        <div class="rule-actions">
+                            <button class="btn btn-sm btn-ghost" @onclick="@(() => EditRule(rule.Id))" type="button" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-ghost" @onclick="@(() => DeleteRule(rule.Id))" type="button" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else if (rules.Count == 0 && !isAddingRule && !isEditingRule)
+        {
+            @* Empty State *@
+            <div class="empty-state">
+                <i class="bi bi-signpost-split"></i>
+                <p>No workflow rules configured</p>
+                <button class="btn btn-primary btn-sm" @onclick="AddRule" type="button">
+                    <i class="bi bi-plus"></i> Add First Rule
+                </button>
+            </div>
+        }
+
+        @* Add/Edit Rule Section *@
+        @if (isAddingRule || isEditingRule)
+        {
+            <div class="add-rule-section">
+                <h4>
+                    <i class="bi @(isEditingRule ? "bi-pencil" : "bi-plus-circle")"></i>
+                    @(isEditingRule ? "Edit Rule" : "Add New Rule")
+                </h4>
+
+                @* Action Type Selection *@
+                <div class="form-group">
+                    <label class="form-label">Action Type</label>
+                    <div class="action-cards">
+                        @foreach (var action in ActionTypes)
+                        {
+                            <div class="action-card @(selectedAction == action.Id ? "selected" : "")"
+                                 @onclick="@(() => SelectAction(action.Id))">
+                                <div class="action-card-icon @action.CssClass">
+                                    <i class="bi @action.Icon"></i>
+                                </div>
+                                <div class="action-card-name">@action.Name</div>
+                                <div class="action-card-desc">@action.Description</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">
+                            Rule Description
+                            <span class="required-indicator">*</span>
+                        </label>
+                        <input type="text"
+                               class="form-input @(string.IsNullOrWhiteSpace(ruleDescription) ? "is-invalid" : "")"
+                               @bind="ruleDescription"
+                               placeholder="e.g., Skip employment step for minors" />
+                    </div>
+
+                    @if (selectedAction != "completeWorkflow")
+                    {
+                        <div class="form-group">
+                            <label class="form-label">
+                                Target Step
+                                <span class="required-indicator">*</span>
+                            </label>
+                            <select class="form-select" @bind="targetStepNumber">
+                                <option value="">Select step...</option>
+                                @foreach (var step in GetAvailableSteps())
+                                {
+                                    <option value="@step.Number">Step @step.Number: @step.Title</option>
+                                }
+                            </select>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="form-group">
+                            <label class="form-label">Target Step</label>
+                            <div class="form-hint-block">
+                                Not required for "Complete Workflow" action
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Condition
+                        <span class="required-indicator">*</span>
+                    </label>
+                    <div class="condition-input-row">
+                        <input type="text"
+                               class="form-input font-mono"
+                               value="@FormatCondition(currentCondition)"
+                               readonly
+                               placeholder="Click 'Builder' to create condition" />
+                        <button class="btn btn-outline" @onclick="OpenConditionBuilder" type="button">
+                            <i class="bi bi-diagram-3"></i> Builder
+                        </button>
+                    </div>
+                    @if (currentCondition == null)
+                    {
+                        <p class="validation-error">A condition is required</p>
+                    }
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Priority</label>
+                    <input type="number"
+                           class="form-input"
+                           @bind="rulePriority"
+                           min="1"
+                           max="1000"
+                           style="max-width: 150px;" />
+                    <p class="form-hint">Lower numbers have higher priority (default: 100)</p>
+                </div>
+
+                <div class="add-rule-actions">
+                    <button class="btn btn-ghost" @onclick="CancelEdit" type="button">Cancel</button>
+                    <button class="btn btn-primary"
+                            @onclick="SaveRule"
+                            disabled="@(!IsRuleValid)"
+                            type="button">
+                        <i class="bi @(isEditingRule ? "bi-check-lg" : "bi-plus")"></i>
+                        @(isEditingRule ? "Update Rule" : "Add Rule")
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+    </ChildContent>
+    <FooterContent>
+        <button class="btn btn-ghost" @onclick="HandleCancel" type="button">Close</button>
+        <button class="btn btn-primary" @onclick="HandleSave" type="button">
+            <i class="bi bi-check-lg"></i> Save Changes
+        </button>
+    </FooterContent>
+
+</ModalBase>
+
+@* Condition Builder Modal - Integration placeholder *@
+@if (showConditionBuilder)
+{
+    <ConditionBuilderModal @bind-IsOpen="showConditionBuilder"
+                           ExistingCondition="currentCondition"
+                           AvailableFields="GetAllWorkflowFields()"
+                           OnSave="HandleConditionSaved"
+                           OnCancel="@(() => showConditionBuilder = false)" />
+}

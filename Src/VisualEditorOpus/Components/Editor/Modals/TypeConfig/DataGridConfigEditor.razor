@@ -1,0 +1,287 @@
+@* Editor for DataGridConfig *@
+@using VisualEditorOpus.Models
+
+<div class="config-editor">
+    @* Permission Toggles *@
+    <div class="toggle-group">
+        <div class="toggle-info">
+            <div class="toggle-label">Allow Add Rows</div>
+            <div class="toggle-desc">Users can add new rows to the grid</div>
+        </div>
+        <div class="toggle @(Config.AllowAdd ? "active" : "")"
+             @onclick="() => { Config.AllowAdd = !Config.AllowAdd; NotifyChanged(); }">
+        </div>
+    </div>
+
+    <div class="toggle-group">
+        <div class="toggle-info">
+            <div class="toggle-label">Allow Edit Rows</div>
+            <div class="toggle-desc">Users can edit existing rows</div>
+        </div>
+        <div class="toggle @(Config.AllowEdit ? "active" : "")"
+             @onclick="() => { Config.AllowEdit = !Config.AllowEdit; NotifyChanged(); }">
+        </div>
+    </div>
+
+    <div class="toggle-group">
+        <div class="toggle-info">
+            <div class="toggle-label">Allow Delete Rows</div>
+            <div class="toggle-desc">Users can delete rows from the grid</div>
+        </div>
+        <div class="toggle @(Config.AllowDelete ? "active" : "")"
+             @onclick="() => { Config.AllowDelete = !Config.AllowDelete; NotifyChanged(); }">
+        </div>
+    </div>
+
+    @* Max Rows & Editor Mode *@
+    <div class="form-grid">
+        <div class="form-group">
+            <label class="form-label">Maximum Rows</label>
+            <input type="number"
+                   class="form-input"
+                   @bind="Config.MaxRows"
+                   @bind:after="NotifyChanged"
+                   min="1"
+                   placeholder="No limit" />
+            <p class="form-hint">Leave empty for unlimited rows</p>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Editor Mode</label>
+            <select class="form-select" @bind="Config.EditorMode" @bind:after="NotifyChanged">
+                <option value="Modal">Modal Dialog</option>
+                <option value="Inline">Inline Editing</option>
+            </select>
+            <p class="form-hint">How row editing appears to users</p>
+        </div>
+    </div>
+
+    @* Columns Section *@
+    <div class="section-divider">
+        <span>Columns (@Config.Columns.Count)</span>
+    </div>
+
+    @if (Config.Columns.Any())
+    {
+        <div class="column-list">
+            @foreach (var (column, index) in Config.Columns.Select((c, i) => (c, i)))
+            {
+                <div class="column-item">
+                    <i class="bi bi-grip-vertical column-drag"></i>
+                    <div class="column-info">
+                        <div class="column-name">@column.LabelEn</div>
+                        <div class="column-type">
+                            @column.FieldType
+                            @if (column.IsRequired)
+                            {
+                                <span class="column-required">- Required</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="column-actions">
+                        <button class="btn btn-xs btn-ghost"
+                                type="button"
+                                @onclick="() => MoveColumnUp(index)"
+                                disabled="@(index == 0)"
+                                title="Move up">
+                            <i class="bi bi-chevron-up"></i>
+                        </button>
+                        <button class="btn btn-xs btn-ghost"
+                                type="button"
+                                @onclick="() => MoveColumnDown(index)"
+                                disabled="@(index == Config.Columns.Count - 1)"
+                                title="Move down">
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <button class="btn btn-xs btn-ghost"
+                                type="button"
+                                @onclick="() => EditColumn(index)"
+                                title="Edit column">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-xs btn-ghost text-danger"
+                                type="button"
+                                @onclick="() => RemoveColumn(index)"
+                                title="Remove column">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-columns">
+            <i class="bi bi-table"></i>
+            <p>No columns defined yet</p>
+            <p class="text-muted">Add columns to define the grid structure</p>
+        </div>
+    }
+
+    <button class="add-column-btn" type="button" @onclick="AddColumn">
+        <i class="bi bi-plus"></i> Add Column
+    </button>
+
+    @* Column Editor Inline Form *@
+    @if (isEditingColumn)
+    {
+        <div class="column-editor-overlay">
+            <div class="column-editor">
+                <div class="column-editor-header">
+                    <h4>@(editingColumnIndex >= 0 ? "Edit Column" : "Add Column")</h4>
+                    <button class="btn btn-xs btn-ghost" type="button" @onclick="CancelColumnEdit">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+
+                <div class="column-editor-body">
+                    <div class="form-group">
+                        <label class="form-label">Column ID</label>
+                        <input type="text"
+                               class="form-input"
+                               @bind="editingColumn.Id"
+                               placeholder="columnId" />
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Label (English)</label>
+                            <input type="text"
+                                   class="form-input"
+                                   @bind="editingColumn.LabelEn"
+                                   placeholder="Column Label" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Label (French)</label>
+                            <input type="text"
+                                   class="form-input"
+                                   @bind="editingColumn.LabelFr"
+                                   placeholder="Libellé de colonne" />
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Field Type</label>
+                            <select class="form-select" @bind="editingColumn.FieldType">
+                                <option value="TextBox">Text Box</option>
+                                <option value="Number">Number</option>
+                                <option value="Currency">Currency</option>
+                                <option value="DatePicker">Date Picker</option>
+                                <option value="DropDown">Dropdown</option>
+                                <option value="Checkbox">Checkbox</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Required</label>
+                            <div class="toggle @(editingColumn.IsRequired ? "active" : "")"
+                                 @onclick="() => editingColumn.IsRequired = !editingColumn.IsRequired"
+                                 style="margin-top: 8px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column-editor-footer">
+                    <button class="btn btn-ghost" type="button" @onclick="CancelColumnEdit">Cancel</button>
+                    <button class="btn btn-primary" type="button" @onclick="SaveColumn">
+                        <i class="bi bi-check-lg"></i> Save Column
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private bool isEditingColumn;
+    private int editingColumnIndex = -1;
+    private DataGridColumnModel editingColumn = new();
+
+    [Parameter]
+    public DataGridConfigModel Config { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<DataGridConfigModel> ConfigChanged { get; set; }
+
+    private async Task NotifyChanged()
+    {
+        await ConfigChanged.InvokeAsync(Config);
+    }
+
+    private void AddColumn()
+    {
+        editingColumnIndex = -1;
+        editingColumn = new DataGridColumnModel
+        {
+            Id = $"column{Config.Columns.Count + 1}",
+            LabelEn = $"Column {Config.Columns.Count + 1}",
+            FieldType = "TextBox"
+        };
+        isEditingColumn = true;
+    }
+
+    private void EditColumn(int index)
+    {
+        editingColumnIndex = index;
+        var original = Config.Columns[index];
+        editingColumn = new DataGridColumnModel
+        {
+            Id = original.Id,
+            LabelEn = original.LabelEn,
+            LabelFr = original.LabelFr,
+            FieldType = original.FieldType,
+            IsRequired = original.IsRequired,
+            Width = original.Width
+        };
+        isEditingColumn = true;
+    }
+
+    private async Task SaveColumn()
+    {
+        if (string.IsNullOrWhiteSpace(editingColumn.Id) || string.IsNullOrWhiteSpace(editingColumn.LabelEn))
+            return;
+
+        if (editingColumnIndex >= 0)
+        {
+            Config.Columns[editingColumnIndex] = editingColumn;
+        }
+        else
+        {
+            Config.Columns.Add(editingColumn);
+        }
+
+        isEditingColumn = false;
+        editingColumnIndex = -1;
+        await NotifyChanged();
+    }
+
+    private void CancelColumnEdit()
+    {
+        isEditingColumn = false;
+        editingColumnIndex = -1;
+    }
+
+    private async Task RemoveColumn(int index)
+    {
+        Config.Columns.RemoveAt(index);
+        await NotifyChanged();
+    }
+
+    private async Task MoveColumnUp(int index)
+    {
+        if (index <= 0) return;
+        (Config.Columns[index], Config.Columns[index - 1]) = (Config.Columns[index - 1], Config.Columns[index]);
+        await NotifyChanged();
+    }
+
+    private async Task MoveColumnDown(int index)
+    {
+        if (index >= Config.Columns.Count - 1) return;
+        (Config.Columns[index], Config.Columns[index + 1]) = (Config.Columns[index + 1], Config.Columns[index]);
+        await NotifyChanged();
+    }
+}

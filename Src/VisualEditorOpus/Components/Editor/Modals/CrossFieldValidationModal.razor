@@ -1,0 +1,119 @@
+@* Modal for creating and editing cross-field validation rules *@
+@using VisualEditorOpus.Models
+@using VisualEditorOpus.Components.Shared
+@using DynamicForms.Core.V4.Schemas
+
+<ModalBase @bind-IsOpen="IsOpen"
+           Title="Cross-Field Validation"
+           Icon="bi-link-45deg"
+           Size="ModalSize.Medium"
+           OnClose="HandleCancel">
+    <ChildContent>
+    <div class="validation-editor">
+        @* Validation Type Selection *@
+        <div class="form-group">
+            <label class="form-label">Validation Type</label>
+            <div class="type-cards">
+                @foreach (var type in ValidationTypes)
+                {
+                    <div class="type-card @(selectedType == type.Id ? "selected" : "")"
+                         @onclick="@(() => SelectType(type.Id))">
+                        <div class="type-card-icon"><i class="bi @type.Icon"></i></div>
+                        <div class="type-card-name">@type.Name</div>
+                        <div class="type-card-desc">@type.Description</div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        @* Field Selection *@
+        <div class="form-group">
+            <label class="form-label">Select Fields</label>
+
+            @* Selected Fields Tags *@
+            @if (selectedFieldIds.Count > 0)
+            {
+                <div class="selected-fields">
+                    @foreach (var fieldId in selectedFieldIds)
+                    {
+                        <span class="field-tag">
+                            @fieldId
+                            <button type="button" @onclick="@(() => RemoveField(fieldId))" title="Remove">&times;</button>
+                        </span>
+                    }
+                </div>
+            }
+
+            @* Field Checkbox List *@
+            <div class="field-selector">
+                @if (CurrentModule?.Fields != null)
+                {
+                    @foreach (var field in CurrentModule.Fields)
+                    {
+                        <label class="field-option @(selectedFieldIds.Contains(field.Id) ? "selected" : "")">
+                            <input type="checkbox"
+                                   checked="@selectedFieldIds.Contains(field.Id)"
+                                   @onchange="@(() => ToggleField(field.Id))" />
+                            <div>
+                                <div class="field-option-name">@field.Id</div>
+                                <div class="field-option-type">@field.FieldType</div>
+                            </div>
+                        </label>
+                    }
+                }
+                else
+                {
+                    <div class="empty-message">No fields available in the current module</div>
+                }
+            </div>
+            <p class="form-hint">Select 2 or more fields to include in this validation</p>
+        </div>
+
+        @* Error Messages *@
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">Error Message (English)</label>
+                <textarea class="form-textarea"
+                          @bind="errorMessageEn"
+                          placeholder="Enter error message in English..."></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Error Message (French)</label>
+                <textarea class="form-textarea"
+                          @bind="errorMessageFr"
+                          placeholder="Entrez le message d'erreur en fran&#231;ais..."></textarea>
+            </div>
+        </div>
+
+        @* Rule Preview *@
+        @if (selectedFieldIds.Count >= 2)
+        {
+            <div class="validation-preview">
+                <div class="preview-title">Rule Preview</div>
+                <div class="preview-rule">
+                    @((MarkupString)GetPreviewHtml())
+                </div>
+            </div>
+        }
+        else if (selectedFieldIds.Count > 0)
+        {
+            <div class="validation-preview warning">
+                <div class="preview-title">Validation Required</div>
+                <div class="preview-rule">
+                    Please select at least 2 fields to create a cross-field validation rule.
+                </div>
+            </div>
+        }
+    </div>
+    </ChildContent>
+    <FooterContent>
+        <button class="btn btn-ghost" @onclick="HandleCancel" type="button">Cancel</button>
+        <button class="btn btn-primary"
+                @onclick="HandleSave"
+                disabled="@(!IsValid)"
+                type="button">
+            <i class="bi bi-check-lg"></i> Save Validation
+        </button>
+    </FooterContent>
+
+</ModalBase>

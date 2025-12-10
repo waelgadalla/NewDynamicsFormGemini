@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ImportJsonModal - Testing Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: #EEF2FF;
+            --success: #10B981;
+            --success-light: #D1FAE5;
+            --warning: #F59E0B;
+            --warning-light: #FEF3C7;
+            --danger: #EF4444;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8FAFC;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --border-color: #E2E8F0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h1::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 32px;
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin-bottom: 32px;
+        }
+
+        .progress-bar {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 32px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .progress-title {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .progress-count {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .progress-track {
+            height: 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), #818CF8);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: var(--bg-secondary);
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title {
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-badge {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .section-content {
+            padding: 20px;
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            accent-color: var(--primary);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .checklist-item label {
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .checklist-item.checked label {
+            color: var(--text-secondary);
+            text-decoration: line-through;
+        }
+
+        .item-description {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .category-label {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-right: 8px;
+        }
+
+        .category-file { background: #DBEAFE; color: #1D4ED8; }
+        .category-paste { background: #E0E7FF; color: #4338CA; }
+        .category-validate { background: #D1FAE5; color: #059669; }
+        .category-preview { background: #FEF3C7; color: #B45309; }
+        .category-import { background: #FCE7F3; color: #BE185D; }
+        .category-ui { background: #F3E8FF; color: #7C3AED; }
+
+        .code-block {
+            background: #1E293B;
+            color: #E2E8F0;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+
+        .code-block .comment {
+            color: #64748B;
+        }
+
+        .code-block .string {
+            color: #86EFAC;
+        }
+
+        .code-block .property {
+            color: #93C5FD;
+        }
+
+        .note-box {
+            background: var(--warning-light);
+            border-left: 4px solid var(--warning);
+            padding: 16px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+        }
+
+        .note-box strong {
+            color: var(--warning);
+        }
+
+        .task-list {
+            list-style: none;
+        }
+
+        .task-item {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .task-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .btn-reset {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn-reset:hover {
+            background: #DC2626;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ImportJsonModal Testing Guide</h1>
+        <p class="subtitle">Comprehensive testing checklist for the ImportJsonModal component</p>
+
+        <div class="progress-bar">
+            <div class="progress-header">
+                <span class="progress-title">Testing Progress</span>
+                <span class="progress-count"><span id="completedCount">0</span> / <span id="totalCount">0</span> items</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Section 1: File Upload Testing -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Section 1: File Upload Testing</span>
+                <span class="section-badge">8 items</span>
+            </div>
+            <div class="section-content">
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item1" data-section="1">
+                        <label for="item1">
+                            <span class="category-label category-file">FILE</span>
+                            Modal opens with "Upload File" tab active by default
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item2" data-section="1">
+                        <label for="item2">
+                            <span class="category-label category-file">FILE</span>
+                            Drop zone displays dashed border with upload icon
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item3" data-section="1">
+                        <label for="item3">
+                            <span class="category-label category-file">FILE</span>
+                            Clicking drop zone opens file browser
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item4" data-section="1">
+                        <label for="item4">
+                            <span class="category-label category-file">FILE</span>
+                            File browser filters to .json files only
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item5" data-section="1">
+                        <label for="item5">
+                            <span class="category-label category-file">FILE</span>
+                            Drop zone highlights on drag over (border color change)
+                            <div class="item-description">Border should change to primary color and background should lighten</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item6" data-section="1">
+                        <label for="item6">
+                            <span class="category-label category-file">FILE</span>
+                            Dropping a JSON file reads its content
+                            <div class="item-description">File name should appear in the drop zone</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item7" data-section="1">
+                        <label for="item7">
+                            <span class="category-label category-file">FILE</span>
+                            Files larger than 5MB show error message
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item8" data-section="1">
+                        <label for="item8">
+                            <span class="category-label category-file">FILE</span>
+                            Non-JSON files show error message
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 2: Tab Switching -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Section 2: Tab Switching</span>
+                <span class="section-badge">4 items</span>
+            </div>
+            <div class="section-content">
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item9" data-section="2">
+                        <label for="item9">
+                            <span class="category-label category-ui">UI</span>
+                            Tab bar displays both tabs (Upload File, Paste JSON)
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item10" data-section="2">
+                        <label for="item10">
+                            <span class="category-label category-ui">UI</span>
+                            Clicking "Paste JSON" tab switches to paste textarea
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item11" data-section="2">
+                        <label for="item11">
+                            <span class="category-label category-ui">UI</span>
+                            Active tab has visual highlight (background color)
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item12" data-section="2">
+                        <label for="item12">
+                            <span class="category-label category-ui">UI</span>
+                            Tab switching clears previous validation results
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 3: Paste JSON Testing -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Section 3: Paste JSON Testing</span>
+                <span class="section-badge">5 items</span>
+            </div>
+            <div class="section-content">
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item13" data-section="3">
+                        <label for="item13">
+                            <span class="category-label category-paste">PASTE</span>
+                            Textarea displays with monospace font
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item14" data-section="3">
+                        <label for="item14">
+                            <span class="category-label category-paste">PASTE</span>
+                            Textarea accepts pasted content
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item15" data-section="3">
+                        <label for="item15">
+                            <span class="category-label category-paste">PASTE</span>
+                            "Validate JSON" button is visible below textarea
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item16" data-section="3">
+                        <label for="item16">
+                            <span class="category-label category-paste">PASTE</span>
+                            Textarea is resizable vertically
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item17" data-section="3">
+                        <label for="item17">
+                            <span class="category-label category-paste">PASTE</span>
+                            Textarea shows placeholder text when empty
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 4: JSON Validation -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Section 4: JSON Validation</span>
+                <span class="section-badge">8 items</span>
+            </div>
+            <div class="section-content">
+                <div class="note-box">
+                    <strong>Test JSON Samples:</strong> Use the sample JSON below for testing validation.
+                </div>
+
+                <p style="margin: 16px 0 8px; font-weight: 600;">Valid FormModuleSchema:</p>
+                <div class="code-block">
+{
+  <span class="property">"Id"</span>: <span class="string">42</span>,
+  <span class="property">"TitleEn"</span>: <span class="string">"Personal Information"</span>,
+  <span class="property">"TitleFr"</span>: <span class="string">"Informations personnelles"</span>,
+  <span class="property">"Version"</span>: <span class="string">1.0</span>,
+  <span class="property">"Fields"</span>: [
+    { <span class="property">"Id"</span>: <span class="string">"firstName"</span>, <span class="property">"FieldType"</span>: <span class="string">"TextBox"</span> },
+    { <span class="property">"Id"</span>: <span class="string">"lastName"</span>, <span class="property">"FieldType"</span>: <span class="string">"TextBox"</span> }
+  ],
+  <span class="property">"DateCreated"</span>: <span class="string">"2024-01-15T10:00:00Z"</span>
+}
+                </div>
+
+                <p style="margin: 16px 0 8px; font-weight: 600;">Valid FormWorkflowSchema:</p>
+                <div class="code-block">
+{
+  <span class="property">"Id"</span>: <span class="string">1</span>,
+  <span class="property">"TitleEn"</span>: <span class="string">"Application Workflow"</span>,
+  <span class="property">"Version"</span>: <span class="string">1.0</span>,
+  <span class="property">"ModuleIds"</span>: [<span class="string">42</span>, <span class="string">43</span>, <span class="string">44</span>],
+  <span class="property">"DateCreated"</span>: <span class="string">"2024-01-15T10:00:00Z"</span>
+}
+                </div>
+
+                <ul class="checklist" style="margin-top: 20px;">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item18" data-section="4">
+                        <label for="item18">
+                            <span class="category-label category-validate">VALIDATE</span>
+                            Valid module JSON shows success message with green styling
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item19" data-section="4">
+                        <label for="item19">
+                            <span class="category-label category-validate">VALIDATE</span>
+                            Success message shows "FormModuleSchema detected with X fields"
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item20" data-section="4">
+                        <label for="item20">
+                            <span class="category-label category-validate">VALIDATE</span>
+                            Valid workflow JSON shows success message
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item21" data-section="4">
+                        <label for="item21">
+                            <span class="category-label category-validate">VALIDATE</span>
+                            Success message shows "FormWorkflowSchema detected with X modules"
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item22" data-section="4">
+                        <label for="item22">
+                            <span class="category-label category-validate">VALIDATE</span>
+                            Invalid JSON shows error message with red styling
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item23" data-section="4">
+                        <label for="item23">
+                            <span class="category-label category-validate">VALIDATE</span>
+                            Valid JSON but unrecognized schema shows appropriate error
+                            <div class="item-description">Try: {"foo": "bar"}</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item24" data-section="4">
+                        <label for="item24">
+                            <span class="category-label category-validate">VALIDATE</span>
+                            Empty input shows "Please enter JSON content" message
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item25" data-section="4">
+                        <label for="item25">
+                            <span class="category-label category-validate">VALIDATE</span>
+                            Malformed JSON shows parse error details
+                            <div class="item-description">Try: {invalid json}</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 5: Import Preview -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Section 5: Import Preview</span>
+                <span class="section-badge">6 items</span>
+            </div>
+            <div class="section-content">
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item26" data-section="5">
+                        <label for="item26">
+                            <span class="category-label category-preview">PREVIEW</span>
+                            Preview section appears only after successful validation
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item27" data-section="5">
+                        <label for="item27">
+                            <span class="category-label category-preview">PREVIEW</span>
+                            Preview shows "Type" as "Form Module" or "Form Workflow"
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item28" data-section="5">
+                        <label for="item28">
+                            <span class="category-label category-preview">PREVIEW</span>
+                            Preview shows "Title" from TitleEn field
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item29" data-section="5">
+                        <label for="item29">
+                            <span class="category-label category-preview">PREVIEW</span>
+                            Preview shows field count for modules
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item30" data-section="5">
+                        <label for="item30">
+                            <span class="category-label category-preview">PREVIEW</span>
+                            Preview shows module count for workflows
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item31" data-section="5">
+                        <label for="item31">
+                            <span class="category-label category-preview">PREVIEW</span>
+                            Preview shows Version number
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 6: Import Options -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Section 6: Import Options</span>
+                <span class="section-badge">4 items</span>
+            </div>
+            <div class="section-content">
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item32" data-section="6">
+                        <label for="item32">
+                            <span class="category-label category-import">IMPORT</span>
+                            Import Options section appears after successful validation
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item33" data-section="6">
+                        <label for="item33">
+                            <span class="category-label category-import">IMPORT</span>
+                            "Replace" option is selected by default
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item34" data-section="6">
+                        <label for="item34">
+                            <span class="category-label category-import">IMPORT</span>
+                            "Merge" option can be selected
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item35" data-section="6">
+                        <label for="item35">
+                            <span class="category-label category-import">IMPORT</span>
+                            Radio buttons are mutually exclusive
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 7: Import Action -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Section 7: Import Action</span>
+                <span class="section-badge">5 items</span>
+            </div>
+            <div class="section-content">
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item36" data-section="7">
+                        <label for="item36">
+                            <span class="category-label category-import">IMPORT</span>
+                            Import button is disabled when JSON is invalid
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item37" data-section="7">
+                        <label for="item37">
+                            <span class="category-label category-import">IMPORT</span>
+                            Import button is enabled when JSON is valid
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item38" data-section="7">
+                        <label for="item38">
+                            <span class="category-label category-import">IMPORT</span>
+                            Clicking Import invokes OnImportModule for module JSON
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item39" data-section="7">
+                        <label for="item39">
+                            <span class="category-label category-import">IMPORT</span>
+                            Clicking Import invokes OnImportWorkflow for workflow JSON
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item40" data-section="7">
+                        <label for="item40">
+                            <span class="category-label category-import">IMPORT</span>
+                            Modal closes after successful import
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 8: Modal Behavior -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Section 8: Modal Behavior</span>
+                <span class="section-badge">4 items</span>
+            </div>
+            <div class="section-content">
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item41" data-section="8">
+                        <label for="item41">
+                            <span class="category-label category-ui">UI</span>
+                            Cancel button closes the modal
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item42" data-section="8">
+                        <label for="item42">
+                            <span class="category-label category-ui">UI</span>
+                            X button in header closes the modal
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item43" data-section="8">
+                        <label for="item43">
+                            <span class="category-label category-ui">UI</span>
+                            Escape key closes the modal
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item44" data-section="8">
+                        <label for="item44">
+                            <span class="category-label category-ui">UI</span>
+                            State resets when modal reopens
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 9: Dark Mode -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Section 9: Dark Mode</span>
+                <span class="section-badge">5 items</span>
+            </div>
+            <div class="section-content">
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item45" data-section="9">
+                        <label for="item45">
+                            <span class="category-label category-ui">UI</span>
+                            Drop zone has appropriate dark mode styling
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item46" data-section="9">
+                        <label for="item46">
+                            <span class="category-label category-ui">UI</span>
+                            Tabs have appropriate dark mode styling
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item47" data-section="9">
+                        <label for="item47">
+                            <span class="category-label category-ui">UI</span>
+                            Textarea has dark background and light text
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item48" data-section="9">
+                        <label for="item48">
+                            <span class="category-label category-ui">UI</span>
+                            Preview section has dark mode background
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item49" data-section="9">
+                        <label for="item49">
+                            <span class="category-label category-ui">UI</span>
+                            Validation messages maintain readability in dark mode
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Manual Implementation Tasks -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Manual Implementation Tasks</span>
+                <span class="section-badge">Tasks</span>
+            </div>
+            <div class="section-content">
+                <ul class="task-list">
+                    <li class="task-item">
+                        <div class="task-title">1. Integration with Empty Canvas</div>
+                        <div class="task-description">Add "Import JSON" button to the empty canvas state that opens this modal</div>
+                    </li>
+                    <li class="task-item">
+                        <div class="task-title">2. Integration with Toolbar/Menu</div>
+                        <div class="task-description">Add Import JSON option to the toolbar or File menu</div>
+                    </li>
+                    <li class="task-item">
+                        <div class="task-title">3. Implement Merge Logic</div>
+                        <div class="task-description">The modal provides Replace/Merge options, but the actual merge logic needs to be implemented in the parent component's callback handler</div>
+                    </li>
+                    <li class="task-item">
+                        <div class="task-title">4. Handle Import Result</div>
+                        <div class="task-description">Parent component must handle the ImportResult&lt;T&gt; and update the editor state accordingly</div>
+                    </li>
+                    <li class="task-item">
+                        <div class="task-title">5. Test with Real Schema Files</div>
+                        <div class="task-description">Export existing modules/workflows to JSON and test importing them back</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 32px;">
+            <button class="btn-reset" onclick="resetProgress()">Reset All Progress</button>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'importJsonModal-testing-progress';
+
+        function loadProgress() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                const checked = JSON.parse(saved);
+                checked.forEach(id => {
+                    const checkbox = document.getElementById(id);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        checkbox.closest('.checklist-item')?.classList.add('checked');
+                    }
+                });
+            }
+            updateProgress();
+        }
+
+        function saveProgress() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            const checked = Array.from(checkboxes).map(cb => cb.id);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(checked));
+        }
+
+        function updateProgress() {
+            const total = document.querySelectorAll('.checklist-item input[type="checkbox"]').length;
+            const completed = document.querySelectorAll('.checklist-item input[type="checkbox"]:checked').length;
+            const percentage = total > 0 ? (completed / total) * 100 : 0;
+
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('progressFill').style.width = percentage + '%';
+        }
+
+        function resetProgress() {
+            if (confirm('Are you sure you want to reset all testing progress?')) {
+                localStorage.removeItem(STORAGE_KEY);
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                    cb.checked = false;
+                    cb.closest('.checklist-item')?.classList.remove('checked');
+                });
+                updateProgress();
+            }
+        }
+
+        // Event listeners
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                this.closest('.checklist-item')?.classList.toggle('checked', this.checked);
+                saveProgress();
+                updateProgress();
+            });
+        });
+
+        // Initialize
+        loadProgress();
+    </script>
+</body>
+</html>

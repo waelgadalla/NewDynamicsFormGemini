@@ -1,0 +1,149 @@
+@* Editor for FileUploadConfig *@
+@using VisualEditorOpus.Models
+
+<div class="config-editor">
+    @* Allowed Extensions *@
+    <div class="form-group">
+        <label class="form-label">Allowed File Extensions</label>
+        <div class="tag-input-wrapper">
+            @foreach (var ext in Config.AllowedExtensions)
+            {
+                <span class="tag">
+                    @ext
+                    <button type="button" @onclick="() => RemoveExtension(ext)">&times;</button>
+                </span>
+            }
+            <input type="text"
+                   class="tag-input"
+                   placeholder="Type extension and press Enter"
+                   @bind="newExtension"
+                   @onkeydown="HandleExtensionKeyDown" />
+        </div>
+        <p class="form-hint">Press Enter to add each extension (e.g., .pdf, .jpg)</p>
+    </div>
+
+    @* Extension Presets *@
+    <div class="preset-buttons">
+        <button class="btn btn-sm btn-outline" type="button" @onclick="AddDocumentPreset">
+            <i class="bi bi-file-earmark-text"></i> Documents
+        </button>
+        <button class="btn btn-sm btn-outline" type="button" @onclick="AddImagePreset">
+            <i class="bi bi-image"></i> Images
+        </button>
+        <button class="btn btn-sm btn-outline" type="button" @onclick="AddAllCommonPreset">
+            <i class="bi bi-files"></i> All Common
+        </button>
+    </div>
+
+    @* File Size *@
+    <div class="form-group">
+        <label class="form-label">Maximum File Size</label>
+        <div class="size-input-group">
+            <input type="number"
+                   class="form-input size-value"
+                   @bind="Config.FileSizeValue"
+                   @bind:after="NotifyChanged"
+                   min="1"
+                   step="1" />
+            <select class="form-select size-unit" @bind="Config.FileSizeUnit" @bind:after="NotifyChanged">
+                <option value="KB">KB</option>
+                <option value="MB">MB</option>
+                <option value="GB">GB</option>
+            </select>
+        </div>
+        <p class="form-hint">Maximum size per file (@FormatBytes(Config.MaxFileSizeBytes))</p>
+    </div>
+
+    @* Toggles *@
+    <div class="toggle-group">
+        <div class="toggle-info">
+            <div class="toggle-label">Allow Multiple Files</div>
+            <div class="toggle-desc">Users can upload more than one file</div>
+        </div>
+        <div class="toggle @(Config.AllowMultiple ? "active" : "")"
+             @onclick="ToggleAllowMultiple">
+        </div>
+    </div>
+
+    <div class="toggle-group">
+        <div class="toggle-info">
+            <div class="toggle-label">Virus Scan Required</div>
+            <div class="toggle-desc">Files must pass virus scan before accepting</div>
+        </div>
+        <div class="toggle @(Config.ScanRequired ? "active" : "")"
+             @onclick="ToggleScanRequired">
+        </div>
+    </div>
+</div>
+
+@code {
+    private string newExtension = "";
+
+    [Parameter]
+    public FileUploadConfigModel Config { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<FileUploadConfigModel> ConfigChanged { get; set; }
+
+    private async Task NotifyChanged()
+    {
+        await ConfigChanged.InvokeAsync(Config);
+    }
+
+    private async Task HandleExtensionKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(newExtension))
+        {
+            Config.AddExtension(newExtension);
+            newExtension = "";
+            await NotifyChanged();
+        }
+    }
+
+    private async Task RemoveExtension(string ext)
+    {
+        Config.RemoveExtension(ext);
+        await NotifyChanged();
+    }
+
+    private async Task AddDocumentPreset()
+    {
+        Config.AddDocumentPreset();
+        await NotifyChanged();
+    }
+
+    private async Task AddImagePreset()
+    {
+        Config.AddImagePreset();
+        await NotifyChanged();
+    }
+
+    private async Task AddAllCommonPreset()
+    {
+        Config.AddAllCommonPreset();
+        await NotifyChanged();
+    }
+
+    private async Task ToggleAllowMultiple()
+    {
+        Config.AllowMultiple = !Config.AllowMultiple;
+        await NotifyChanged();
+    }
+
+    private async Task ToggleScanRequired()
+    {
+        Config.ScanRequired = !Config.ScanRequired;
+        await NotifyChanged();
+    }
+
+    private static string FormatBytes(long bytes)
+    {
+        if (bytes >= 1024 * 1024 * 1024)
+            return $"{bytes / (1024.0 * 1024.0 * 1024.0):F2} GB";
+        if (bytes >= 1024 * 1024)
+            return $"{bytes / (1024.0 * 1024.0):F2} MB";
+        if (bytes >= 1024)
+            return $"{bytes / 1024.0:F2} KB";
+        return $"{bytes} bytes";
+    }
+}

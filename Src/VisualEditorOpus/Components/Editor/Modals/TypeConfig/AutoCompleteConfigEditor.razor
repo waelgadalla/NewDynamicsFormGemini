@@ -1,0 +1,123 @@
+@* Editor for AutoCompleteConfig *@
+@using VisualEditorOpus.Models
+
+<div class="config-editor">
+    @* Data Source URL *@
+    <div class="form-group">
+        <label class="form-label">
+            Data Source URL
+            <span class="required-indicator">*</span>
+        </label>
+        <input type="text"
+               class="form-input @(string.IsNullOrWhiteSpace(Config.DataSourceUrl) ? "is-invalid" : "")"
+               @bind="Config.DataSourceUrl"
+               @bind:after="NotifyChanged"
+               placeholder="/api/v1/endpoint/search" />
+        <p class="form-hint">API endpoint that returns search results (must start with / or http)</p>
+        @if (string.IsNullOrWhiteSpace(Config.DataSourceUrl))
+        {
+            <p class="validation-error">Data Source URL is required</p>
+        }
+    </div>
+
+    @* Query Parameter & Min Characters *@
+    <div class="form-grid">
+        <div class="form-group">
+            <label class="form-label">Query Parameter</label>
+            <input type="text"
+                   class="form-input"
+                   @bind="Config.QueryParameter"
+                   @bind:after="NotifyChanged"
+                   placeholder="q" />
+            <p class="form-hint">URL parameter for search term (e.g., ?q=search)</p>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Minimum Characters</label>
+            <input type="number"
+                   class="form-input"
+                   @bind="Config.MinCharacters"
+                   @bind:after="NotifyChanged"
+                   min="1"
+                   max="10" />
+            <p class="form-hint">Characters before search triggers (1-10)</p>
+        </div>
+    </div>
+
+    @* Field Mapping Section *@
+    <div class="section-divider">
+        <span>Field Mapping</span>
+    </div>
+
+    <div class="form-grid">
+        <div class="form-group">
+            <label class="form-label">
+                Value Field
+                <span class="required-indicator">*</span>
+            </label>
+            <input type="text"
+                   class="form-input @(string.IsNullOrWhiteSpace(Config.ValueField) ? "is-invalid" : "")"
+                   @bind="Config.ValueField"
+                   @bind:after="NotifyChanged"
+                   placeholder="Id" />
+            <p class="form-hint">Property to save as the field value</p>
+            @if (string.IsNullOrWhiteSpace(Config.ValueField))
+            {
+                <p class="validation-error">Value Field is required</p>
+            }
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">
+                Display Field
+                <span class="required-indicator">*</span>
+            </label>
+            <input type="text"
+                   class="form-input @(string.IsNullOrWhiteSpace(Config.DisplayField) ? "is-invalid" : "")"
+                   @bind="Config.DisplayField"
+                   @bind:after="NotifyChanged"
+                   placeholder="Name" />
+            <p class="form-hint">Property to display in the dropdown</p>
+            @if (string.IsNullOrWhiteSpace(Config.DisplayField))
+            {
+                <p class="validation-error">Display Field is required</p>
+            }
+        </div>
+    </div>
+
+    @* Item Template *@
+    <div class="form-group">
+        <label class="form-label">Item Template (Optional)</label>
+        <input type="text"
+               class="form-input font-mono"
+               @bind="Config.ItemTemplate"
+               @bind:after="NotifyChanged"
+               placeholder="{{Name}} ({{Code}})" />
+        <p class="form-hint">Handlebars template for dropdown items (e.g., @("{{Name}} <span class='text-muted'>({{Code}})</span>"))</p>
+    </div>
+
+    @* Example API Response *@
+    <div class="info-box">
+        <div class="info-box-title">
+            <i class="bi bi-info-circle"></i>
+            Expected API Response Format
+        </div>
+        <pre class="info-box-code">[
+  { "@Config.ValueField": "123", "@Config.DisplayField": "Item Name" },
+  { "@Config.ValueField": "456", "@Config.DisplayField": "Another Item" }
+]</pre>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public AutoCompleteConfigModel Config { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<AutoCompleteConfigModel> ConfigChanged { get; set; }
+
+    private async Task NotifyChanged()
+    {
+        await ConfigChanged.InvokeAsync(Config);
+    }
+}

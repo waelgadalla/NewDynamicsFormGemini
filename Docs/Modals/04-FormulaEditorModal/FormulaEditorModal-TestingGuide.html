@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FormulaEditorModal - Testing Guide</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: #EEF2FF;
+            --success: #10B981;
+            --success-light: #D1FAE5;
+            --danger: #EF4444;
+            --danger-light: #FEE2E2;
+            --warning: #F59E0B;
+            --warning-light: #FEF3C7;
+            --info: #3B82F6;
+            --info-light: #DBEAFE;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8FAFC;
+            --bg-tertiary: #F1F5F9;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --text-muted: #94A3B8;
+            --border-color: #E2E8F0;
+            --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .header h1 i { color: var(--primary); }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        .section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .section-header i {
+            font-size: 20px;
+            color: var(--primary);
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-primary { background: var(--primary-light); color: var(--primary); }
+        .badge-success { background: var(--success-light); color: var(--success); }
+        .badge-warning { background: var(--warning-light); color: var(--warning); }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            cursor: pointer;
+            accent-color: var(--success);
+        }
+
+        .checklist-item label {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .checklist-item.checked label {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .checklist-item .description {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .subsection {
+            margin-top: 20px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+        }
+
+        .subsection h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .subsection h3 i {
+            color: var(--text-secondary);
+        }
+
+        .code-block {
+            background: #1E293B;
+            color: #E2E8F0;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+
+        .file-path {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            background: var(--bg-tertiary);
+            padding: 4px 8px;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+        }
+
+        .task-list {
+            list-style: none;
+        }
+
+        .task-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--bg-tertiary);
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .task-list li:last-child {
+            border-bottom: none;
+        }
+
+        .task-list li i {
+            color: var(--warning);
+            margin-top: 3px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--success);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .note {
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            margin: 16px 0;
+        }
+
+        .note-info {
+            background: var(--info-light);
+            color: var(--info);
+            border-left: 4px solid var(--info);
+        }
+
+        .note-warning {
+            background: var(--warning-light);
+            color: #92400E;
+            border-left: 4px solid var(--warning);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        td {
+            font-size: 14px;
+        }
+
+        .status-created {
+            color: var(--success);
+            font-weight: 500;
+        }
+
+        .status-manual {
+            color: var(--warning);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="bi bi-calculator"></i> FormulaEditorModal Testing Guide</h1>
+            <p>Manual testing steps and verification checklist for the formula editor modal component</p>
+        </div>
+
+        <!-- Files Created -->
+        <div class="section">
+            <div class="section-header">
+                <i class="bi bi-files"></i>
+                <h2>Files Created</h2>
+                <span class="badge badge-success">Complete</span>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>File</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>FormulaEditorModal.razor</td>
+                        <td><span class="file-path">Components/Editor/Modals/</span></td>
+                        <td class="status-created"><i class="bi bi-check-circle"></i> Created</td>
+                    </tr>
+                    <tr>
+                        <td>FormulaEditorModal.razor.cs</td>
+                        <td><span class="file-path">Components/Editor/Modals/</span></td>
+                        <td class="status-created"><i class="bi bi-check-circle"></i> Created</td>
+                    </tr>
+                    <tr>
+                        <td>FormulaEditorModal.razor.css</td>
+                        <td><span class="file-path">Components/Editor/Modals/</span></td>
+                        <td class="status-created"><i class="bi bi-check-circle"></i> Created</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Section 1: Manual Testing Steps -->
+        <div class="section">
+            <div class="section-header">
+                <i class="bi bi-list-check"></i>
+                <h2>Section 1: Manual Testing Steps</h2>
+            </div>
+
+            <div class="subsection">
+                <h3><i class="bi bi-1-circle"></i> Basic Formula Creation</h3>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test1" onchange="updateProgress()">
+                        <label for="test1">
+                            Create a simple formula (a + b)
+                            <div class="description">Type "Quantity + UnitPrice" in the editor and verify it's accepted</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test2" onchange="updateProgress()">
+                        <label for="test2">
+                            Create formula with parentheses
+                            <div class="description">Type "Quantity * (UnitPrice - Discount)" to test order of operations</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test3" onchange="updateProgress()">
+                        <label for="test3">
+                            Create a complex formula
+                            <div class="description">Type "Quantity * UnitPrice * (1 - DiscountPercent / 100)"</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <h3><i class="bi bi-2-circle"></i> Field Picker Testing</h3>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test4" onchange="updateProgress()">
+                        <label for="test4">
+                            Click a field to insert it
+                            <div class="description">Click on "Quantity" in the field list and verify it's inserted into the editor</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test5" onchange="updateProgress()">
+                        <label for="test5">
+                            Search for fields
+                            <div class="description">Type "price" in the search box and verify only matching fields are shown</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test6" onchange="updateProgress()">
+                        <label for="test6">
+                            Verify field type icons
+                            <div class="description">Check that Number, Currency, Date fields show appropriate icons</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <h3><i class="bi bi-3-circle"></i> Operator Bar Testing</h3>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test7" onchange="updateProgress()">
+                        <label for="test7">
+                            Test arithmetic operators
+                            <div class="description">Click +, -, *, /, % buttons and verify they're inserted into the formula</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test8" onchange="updateProgress()">
+                        <label for="test8">
+                            Test parentheses buttons
+                            <div class="description">Click ( and ) buttons to insert parentheses</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test9" onchange="updateProgress()">
+                        <label for="test9">
+                            Test function buttons (IF, SUM, AVG, ROUND)
+                            <div class="description">Click each function button and verify function syntax is inserted</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <h3><i class="bi bi-4-circle"></i> Function Library Testing</h3>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test10" onchange="updateProgress()">
+                        <label for="test10">
+                            Insert function from sidebar
+                            <div class="description">Click on SUM() in the function list and verify "SUM(a, b)" is inserted</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test11" onchange="updateProgress()">
+                        <label for="test11">
+                            Verify all functions are listed
+                            <div class="description">Check for: SUM, AVG, MIN, MAX, ROUND, FLOOR, CEIL, ABS, IF, CONCAT, DATEDIFF, NOW, COALESCE, ISNULL</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <h3><i class="bi bi-5-circle"></i> Validation Testing</h3>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test12" onchange="updateProgress()">
+                        <label for="test12">
+                            Test empty formula validation
+                            <div class="description">Clear the editor and verify "Formula cannot be empty" error appears</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test13" onchange="updateProgress()">
+                        <label for="test13">
+                            Test unbalanced parentheses
+                            <div class="description">Type "Quantity * (UnitPrice" and verify parenthesis error appears</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test14" onchange="updateProgress()">
+                        <label for="test14">
+                            Test unknown field reference
+                            <div class="description">Type "UnknownField * 2" and verify unknown field error appears</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test15" onchange="updateProgress()">
+                        <label for="test15">
+                            Test unknown function
+                            <div class="description">Type "UNKNOWN(Quantity)" and verify unknown function error appears</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test16" onchange="updateProgress()">
+                        <label for="test16">
+                            Verify valid formula shows green checkmark
+                            <div class="description">Enter a valid formula and verify "Formula is valid" with green checkmark</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <h3><i class="bi bi-6-circle"></i> Preview and Dependencies</h3>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test17" onchange="updateProgress()">
+                        <label for="test17">
+                            Verify preview with sample data
+                            <div class="description">When sample data is provided, verify computed result displays correctly</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test18" onchange="updateProgress()">
+                        <label for="test18">
+                            Verify dependencies extraction
+                            <div class="description">Type "Quantity * UnitPrice" and verify both fields appear as dependency tags</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test19" onchange="updateProgress()">
+                        <label for="test19">
+                            Test preview placeholder
+                            <div class="description">When no sample data is provided, verify "Preview requires sample data" message</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <h3><i class="bi bi-7-circle"></i> Save and Edit</h3>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test20" onchange="updateProgress()">
+                        <label for="test20">
+                            Save button disabled when invalid
+                            <div class="description">Verify Save button is disabled when formula has validation errors</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test21" onchange="updateProgress()">
+                        <label for="test21">
+                            Save produces valid ComputedFormula
+                            <div class="description">Save a formula and verify OnSave callback receives correct ComputedFormula object</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test22" onchange="updateProgress()">
+                        <label for="test22">
+                            Edit existing formula loads correctly
+                            <div class="description">Pass ExistingFormula parameter and verify expression is pre-filled</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <h3><i class="bi bi-8-circle"></i> UI/UX Testing</h3>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test23" onchange="updateProgress()">
+                        <label for="test23">
+                            Modal opens at Large size
+                            <div class="description">Verify modal opens with ModalSize.Large (800px max-width)</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test24" onchange="updateProgress()">
+                        <label for="test24">
+                            Two-column layout displays correctly
+                            <div class="description">Verify editor on left, sidebar on right</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test25" onchange="updateProgress()">
+                        <label for="test25">
+                            Code editor has monospace font
+                            <div class="description">Verify textarea uses JetBrains Mono or similar monospace font</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test26" onchange="updateProgress()">
+                        <label for="test26">
+                            Dark mode styling correct
+                            <div class="description">Toggle dark mode and verify all elements remain readable</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test27" onchange="updateProgress()">
+                        <label for="test27">
+                            Responsive layout on mobile
+                            <div class="description">Resize window to mobile width and verify layout adjusts properly</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 2: Manual Implementation Tasks -->
+        <div class="section">
+            <div class="section-header">
+                <i class="bi bi-tools"></i>
+                <h2>Section 2: Manual Implementation Tasks</h2>
+                <span class="badge badge-warning">Action Required</span>
+            </div>
+
+            <div class="note note-warning">
+                <i class="bi bi-exclamation-triangle"></i>
+                The following tasks require manual implementation by you to fully integrate the component.
+            </div>
+
+            <ul class="task-list">
+                <li>
+                    <i class="bi bi-arrow-right-circle"></i>
+                    <div>
+                        <strong>Integration with ComputedSection</strong>
+                        <div class="description">Add FormulaEditorModal to the properties panel's ComputedSection component. Example:</div>
+                        <div class="code-block">&lt;FormulaEditorModal @bind-IsOpen="showFormulaEditor"
+                    ExistingFormula="@SelectedField?.ComputedValue"
+                    CurrentModule="@CurrentModule"
+                    SampleData="@GetSampleData()"
+                    OnSave="HandleFormulaSave" /&gt;</div>
+                    </div>
+                </li>
+                <li>
+                    <i class="bi bi-arrow-right-circle"></i>
+                    <div>
+                        <strong>Sample Data Provider</strong>
+                        <div class="description">Implement a method to provide sample data for preview evaluation:</div>
+                        <div class="code-block">private Dictionary&lt;string, object?&gt; GetSampleData()
+{
+    return new Dictionary&lt;string, object?&gt;
+    {
+        ["Quantity"] = 10,
+        ["UnitPrice"] = 50.00m,
+        ["DiscountPercent"] = 15
+    };
+}</div>
+                    </div>
+                </li>
+                <li>
+                    <i class="bi bi-arrow-right-circle"></i>
+                    <div>
+                        <strong>Advanced Expression Evaluator (Optional)</strong>
+                        <div class="description">The current implementation uses DataTable.Compute which only handles basic math. For full function support (SUM, AVG, IF, etc.), consider integrating NCalc or similar library:</div>
+                        <div class="code-block">// Install NuGet package: NCalc
+// Update EvaluatePreview method to use NCalc for full function support</div>
+                    </div>
+                </li>
+                <li>
+                    <i class="bi bi-arrow-right-circle"></i>
+                    <div>
+                        <strong>JS Interop for Cursor Position (Optional)</strong>
+                        <div class="description">Current implementation appends text. For proper cursor-position insertion, add JS interop:</div>
+                        <div class="code-block">// Create wwwroot/js/formulaEditor.js with insertAtCursor function
+// Add IJSRuntime injection and call for InsertText method</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Section 3: Verification Checklist -->
+        <div class="section">
+            <div class="section-header">
+                <i class="bi bi-check2-square"></i>
+                <h2>Section 3: Verification Checklist</h2>
+            </div>
+
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify1" onchange="updateProgress()">
+                    <label for="verify1">Modal opens with ModalBase (Large size)</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify2" onchange="updateProgress()">
+                    <label for="verify2">Two-column layout displays correctly (editor left, sidebar right)</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify3" onchange="updateProgress()">
+                    <label for="verify3">Code editor textarea has monospace font</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify4" onchange="updateProgress()">
+                    <label for="verify4">Operator bar shows all buttons (+, -, *, /, %, (, ))</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify5" onchange="updateProgress()">
+                    <label for="verify5">Function buttons work (IF, SUM, AVG, ROUND)</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify6" onchange="updateProgress()">
+                    <label for="verify6">Field picker shows all module fields with icons</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify7" onchange="updateProgress()">
+                    <label for="verify7">Field picker search filters correctly</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify8" onchange="updateProgress()">
+                    <label for="verify8">Function library displays with syntax and description</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify9" onchange="updateProgress()">
+                    <label for="verify9">Click on field inserts it into editor</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify10" onchange="updateProgress()">
+                    <label for="verify10">Click on function inserts syntax</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify11" onchange="updateProgress()">
+                    <label for="verify11">Validation shows green checkmark for valid formula</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify12" onchange="updateProgress()">
+                    <label for="verify12">Validation shows red X with error message for invalid</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify13" onchange="updateProgress()">
+                    <label for="verify13">Dependencies extracted and displayed as tags</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify14" onchange="updateProgress()">
+                    <label for="verify14">Preview shows computed result (when sample data provided)</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify15" onchange="updateProgress()">
+                    <label for="verify15">Save button disabled when invalid</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify16" onchange="updateProgress()">
+                    <label for="verify16">Save produces valid ComputedFormula object</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify17" onchange="updateProgress()">
+                    <label for="verify17">Edit existing formula loads correctly</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify18" onchange="updateProgress()">
+                    <label for="verify18">Dark mode styling correct</label>
+                </li>
+            </ul>
+
+            <!-- Progress Bar -->
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div class="progress-text" id="progressText">0 of 45 tests completed (0%)</div>
+        </div>
+
+        <!-- Component Usage Example -->
+        <div class="section">
+            <div class="section-header">
+                <i class="bi bi-code-slash"></i>
+                <h2>Component Usage Example</h2>
+            </div>
+
+            <div class="code-block">&lt;!-- In your parent component --&gt;
+@code {
+    private bool showFormulaEditor;
+    private FormModuleSchema currentModule = /* your module */;
+
+    private Dictionary&lt;string, object?&gt; GetSampleData() =&gt; new()
+    {
+        ["Quantity"] = 10,
+        ["UnitPrice"] = 50.00m,
+        ["DiscountPercent"] = 15
+    };
+
+    private async Task HandleFormulaSave(ComputedFormula formula)
+    {
+        // Save the formula to your field
+        SelectedField.ComputedValue = formula;
+    }
+}
+
+&lt;button @onclick="() =&gt; showFormulaEditor = true"&gt;
+    Edit Formula
+&lt;/button&gt;
+
+&lt;FormulaEditorModal @bind-IsOpen="showFormulaEditor"
+                    ExistingFormula="@SelectedField?.ComputedValue"
+                    CurrentModule="@currentModule"
+                    SampleData="@GetSampleData()"
+                    OnSave="HandleFormulaSave"
+                    OnCancel="() =&gt; showFormulaEditor = false" /&gt;</div>
+        </div>
+    </div>
+
+    <script>
+        function updateProgress() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const checked = document.querySelectorAll('input[type="checkbox"]:checked').length;
+            const total = checkboxes.length;
+            const percent = Math.round((checked / total) * 100);
+
+            document.getElementById('progressFill').style.width = percent + '%';
+            document.getElementById('progressText').textContent =
+                `${checked} of ${total} tests completed (${percent}%)`;
+
+            // Update item styling
+            checkboxes.forEach(checkbox => {
+                const item = checkbox.closest('.checklist-item');
+                if (checkbox.checked) {
+                    item.classList.add('checked');
+                } else {
+                    item.classList.remove('checked');
+                }
+            });
+
+            // Save to localStorage
+            const state = {};
+            checkboxes.forEach(cb => {
+                state[cb.id] = cb.checked;
+            });
+            localStorage.setItem('formulaEditorTestingProgress', JSON.stringify(state));
+        }
+
+        // Load saved state
+        document.addEventListener('DOMContentLoaded', function() {
+            const saved = localStorage.getItem('formulaEditorTestingProgress');
+            if (saved) {
+                const state = JSON.parse(saved);
+                Object.entries(state).forEach(([id, checked]) => {
+                    const checkbox = document.getElementById(id);
+                    if (checkbox) {
+                        checkbox.checked = checked;
+                    }
+                });
+                updateProgress();
+            }
+        });
+    </script>
+</body>
+</html>

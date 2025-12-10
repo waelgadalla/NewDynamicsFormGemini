@@ -1,0 +1,154 @@
+@* Modal for importing module or workflow schemas from JSON *@
+@using VisualEditorOpus.Models
+@using VisualEditorOpus.Components.Shared
+@using DynamicForms.Core.V4.Schemas
+
+<ModalBase @bind-IsOpen="IsOpen"
+           Title="Import JSON"
+           Icon="bi-box-arrow-in-down"
+           Size="ModalSize.Medium"
+           OnClose="HandleCancel">
+    <ChildContent>
+    <div class="import-container">
+        @* Tab Navigation *@
+        <div class="import-tabs">
+            <button class="import-tab @(activeTab == "file" ? "active" : "")"
+                    @onclick="@(() => SetActiveTab("file"))"
+                    type="button">
+                <i class="bi bi-file-earmark"></i> Upload File
+            </button>
+            <button class="import-tab @(activeTab == "paste" ? "active" : "")"
+                    @onclick="@(() => SetActiveTab("paste"))"
+                    type="button">
+                <i class="bi bi-clipboard"></i> Paste JSON
+            </button>
+        </div>
+
+        @* File Upload Tab *@
+        @if (activeTab == "file")
+        {
+            <div class="drop-zone @(isDragOver ? "drag-over" : "") @(hasFile ? "has-file" : "")"
+                 @ondragenter="HandleDragEnter"
+                 @ondragover="HandleDragOver"
+                 @ondragleave="HandleDragLeave"
+                 @ondrop="HandleDrop"
+                 @onclick="TriggerFileInput">
+                <InputFile @ref="fileInput"
+                           OnChange="HandleFileSelected"
+                           accept=".json"
+                           class="file-input-hidden" />
+
+                @if (hasFile)
+                {
+                    <div class="drop-zone-icon"><i class="bi bi-file-earmark-check"></i></div>
+                    <div class="drop-zone-text">@fileName</div>
+                    <div class="drop-zone-hint">Click or drop another file to replace</div>
+                }
+                else
+                {
+                    <div class="drop-zone-icon"><i class="bi bi-cloud-arrow-up"></i></div>
+                    <div class="drop-zone-text">Drop JSON file here or click to browse</div>
+                    <div class="drop-zone-hint">Supports .json files up to 5MB</div>
+                }
+            </div>
+        }
+
+        @* Paste JSON Tab *@
+        @if (activeTab == "paste")
+        {
+            <div class="paste-container">
+                <textarea class="json-input"
+                          @bind="jsonContent"
+                          @bind:event="oninput"
+                          placeholder="Paste your JSON here..."></textarea>
+                <button class="btn btn-outline validate-btn"
+                        @onclick="ValidateJson"
+                        type="button">
+                    <i class="bi bi-check-circle"></i> Validate JSON
+                </button>
+            </div>
+        }
+
+        @* Validation Result *@
+        @if (!string.IsNullOrEmpty(validationMessage))
+        {
+            <div class="validation-result @(isValid ? "success" : "error")">
+                <i class="bi @(isValid ? "bi-check-circle-fill" : "bi-x-circle-fill")"></i>
+                <div>
+                    <div class="validation-result-text">
+                        @(isValid ? "JSON is valid and ready to import" : "Validation failed")
+                    </div>
+                    <div class="validation-details">@validationMessage</div>
+                </div>
+            </div>
+        }
+
+        @* Import Preview *@
+        @if (isValid)
+        {
+            <div class="import-preview">
+                <div class="preview-title">Import Preview</div>
+                <div class="preview-item">
+                    <span>Type</span>
+                    <span><strong>@(detectedType == "module" ? "Form Module" : "Form Workflow")</strong></span>
+                </div>
+                <div class="preview-item">
+                    <span>Title</span>
+                    <span>@(detectedType == "module" ? parsedModule?.TitleEn : parsedWorkflow?.TitleEn)</span>
+                </div>
+                @if (detectedType == "module" && parsedModule != null)
+                {
+                    <div class="preview-item">
+                        <span>Fields</span>
+                        <span>@(parsedModule.Fields?.Length ?? 0) fields</span>
+                    </div>
+                    <div class="preview-item">
+                        <span>Version</span>
+                        <span>@parsedModule.Version.ToString("F1")</span>
+                    </div>
+                }
+                else if (detectedType == "workflow" && parsedWorkflow != null)
+                {
+                    <div class="preview-item">
+                        <span>Modules</span>
+                        <span>@(parsedWorkflow.ModuleIds?.Length ?? 0) modules</span>
+                    </div>
+                    <div class="preview-item">
+                        <span>Version</span>
+                        <span>@parsedWorkflow.Version.ToString("F1")</span>
+                    </div>
+                }
+            </div>
+
+            @* Import Options *@
+            <div class="import-options">
+                <div class="preview-title">Import Options</div>
+                <label class="option-item">
+                    <input type="radio"
+                           name="importMode"
+                           checked="@(importMode == ImportMode.Replace)"
+                           @onchange="@(() => importMode = ImportMode.Replace)" />
+                    <span>Replace current @(detectedType == "module" ? "module" : "workflow") (overwrite all)</span>
+                </label>
+                <label class="option-item">
+                    <input type="radio"
+                           name="importMode"
+                           checked="@(importMode == ImportMode.Merge)"
+                           @onchange="@(() => importMode = ImportMode.Merge)" />
+                    <span>Merge with current @(detectedType == "module" ? "module (add new fields only)" : "workflow (add new modules only)")</span>
+                </label>
+            </div>
+        }
+    </div>
+    </ChildContent>
+    <FooterContent>
+        <button class="btn btn-ghost" @onclick="HandleCancel" type="button">Cancel</button>
+        <button class="btn btn-primary"
+                @onclick="HandleImport"
+                disabled="@(!isValid)"
+                type="button">
+            <i class="bi bi-box-arrow-in-down"></i> Import
+        </button>
+    </FooterContent>
+
+</ModalBase>

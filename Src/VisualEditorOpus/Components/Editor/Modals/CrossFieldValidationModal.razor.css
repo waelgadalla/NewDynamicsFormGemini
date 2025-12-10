@@ -1,0 +1,295 @@
+/* ===== CROSS-FIELD VALIDATION MODAL SCOPED STYLES ===== */
+
+.validation-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* ===== FORM ELEMENTS ===== */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.form-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: inherit;
+    min-height: 70px;
+    resize: vertical;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.form-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    margin-bottom: 0;
+}
+
+/* ===== VALIDATION TYPE CARDS ===== */
+.type-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.type-card {
+    padding: 16px 12px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    background: var(--bg-primary);
+}
+
+.type-card:hover {
+    border-color: var(--primary);
+}
+
+.type-card.selected {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.type-card-icon {
+    font-size: 24px;
+    color: var(--primary);
+    margin-bottom: 8px;
+}
+
+.type-card-name {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.type-card-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+/* ===== SELECTED FIELDS TAGS ===== */
+.selected-fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.field-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: var(--radius-md);
+    font-size: 12px;
+    font-weight: 500;
+    font-family: var(--font-mono);
+}
+
+.field-tag button {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
+    opacity: 0.7;
+    transition: opacity var(--transition-fast);
+}
+
+.field-tag button:hover {
+    opacity: 1;
+}
+
+/* ===== FIELD SELECTOR ===== */
+.field-selector {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    max-height: 200px;
+    overflow-y: auto;
+    background: var(--bg-primary);
+}
+
+.field-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+}
+
+.field-option:last-child {
+    border-bottom: none;
+}
+
+.field-option:hover {
+    background: var(--bg-tertiary);
+}
+
+.field-option.selected {
+    background: var(--primary-light);
+}
+
+.field-option input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.field-option-name {
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+}
+
+.field-option-type {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.empty-message {
+    padding: 24px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+/* ===== VALIDATION PREVIEW ===== */
+.validation-preview {
+    padding: 16px;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-lg);
+    margin-top: 8px;
+}
+
+.validation-preview.warning {
+    background: var(--warning-light);
+}
+
+.preview-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+
+.validation-preview.warning .preview-title {
+    color: var(--warning);
+}
+
+.preview-rule {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-primary);
+}
+
+.preview-rule :deep(.field) {
+    color: var(--primary);
+    font-weight: 500;
+    font-family: var(--font-mono);
+    font-size: 13px;
+}
+
+.preview-rule :deep(.type) {
+    color: var(--warning);
+    font-weight: 600;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 640px) {
+    .type-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .type-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-align: left;
+        padding: 12px;
+    }
+
+    .type-card-icon {
+        font-size: 20px;
+        margin-bottom: 0;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .field-selector {
+        max-height: 150px;
+    }
+}
+
+/* ===== DARK MODE ===== */
+::deep [data-theme="dark"] .type-card {
+    background: var(--bg-secondary);
+}
+
+::deep [data-theme="dark"] .type-card.selected {
+    background: rgba(99, 102, 241, 0.15);
+}
+
+::deep [data-theme="dark"] .field-tag {
+    background: rgba(99, 102, 241, 0.2);
+}
+
+::deep [data-theme="dark"] .field-option.selected {
+    background: rgba(99, 102, 241, 0.15);
+}
+
+::deep [data-theme="dark"] .validation-preview {
+    background: rgba(30, 41, 59, 0.5);
+}
+
+::deep [data-theme="dark"] .validation-preview.warning {
+    background: rgba(245, 158, 11, 0.15);
+}

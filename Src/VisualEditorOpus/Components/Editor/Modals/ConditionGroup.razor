@@ -1,0 +1,181 @@
+@* Condition group component with nested groups support *@
+@using VisualEditorOpus.Models
+@using DynamicForms.Core.V4.Enums
+
+<div class="condition-group @(Depth > 0 ? "nested" : "")" style="@GetIndentStyle()">
+    @* Group Header *@
+    <div class="condition-group-header">
+        <button class="logical-operator @GetOperatorClass()"
+                @onclick="ToggleOperator"
+                type="button"
+                title="Click to toggle operator">
+            <i class="bi bi-link-45deg"></i>
+            @Model.LogicalOp.ToString().ToUpper()
+        </button>
+        <span class="logical-operator-hint">@GetOperatorHint()</span>
+        <div class="condition-group-actions">
+            <button class="btn btn-xs btn-ghost"
+                    title="Add nested group"
+                    @onclick="AddNestedGroup"
+                    type="button">
+                <i class="bi bi-folder-plus"></i>
+            </button>
+            @if (Depth > 0)
+            {
+                <button class="btn btn-xs btn-ghost"
+                        title="Delete group"
+                        @onclick="HandleDelete"
+                        type="button">
+                    <i class="bi bi-trash"></i>
+                </button>
+            }
+        </div>
+    </div>
+
+    @* Group Body *@
+    <div class="condition-group-body">
+        @* Condition Rows *@
+        @foreach (var condition in Model.Conditions)
+        {
+            <ConditionRow @key="condition.Id"
+                          Model="condition"
+                          AvailableFields="AvailableFields"
+                          OnDelete="() => RemoveCondition(condition)"
+                          OnChanged="HandleChanged" />
+        }
+
+        @* Nested Groups (Recursive) *@
+        @foreach (var nestedGroup in Model.NestedGroups)
+        {
+            <ConditionGroup @key="nestedGroup.Id"
+                            Model="nestedGroup"
+                            AvailableFields="AvailableFields"
+                            Depth="Depth + 1"
+                            OnDelete="() => RemoveNestedGroup(nestedGroup)"
+                            OnChanged="HandleChanged" />
+        }
+
+        @* Add Condition Button *@
+        <button class="add-condition-btn"
+                @onclick="AddCondition"
+                type="button">
+            <i class="bi bi-plus"></i> Add Condition
+        </button>
+    </div>
+</div>
+
+@code {
+    /// <summary>
+    /// The condition group model to edit.
+    /// </summary>
+    [Parameter]
+    public ConditionGroupModel Model { get; set; } = default!;
+
+    /// <summary>
+    /// Callback when the delete button is clicked.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnDelete { get; set; }
+
+    /// <summary>
+    /// Callback when any value in the group changes.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnChanged { get; set; }
+
+    /// <summary>
+    /// Available fields for condition rows.
+    /// </summary>
+    [Parameter]
+    public List<FieldReference> AvailableFields { get; set; } = new();
+
+    /// <summary>
+    /// Nesting depth for indentation and styling.
+    /// </summary>
+    [Parameter]
+    public int Depth { get; set; } = 0;
+
+    private const int MaxDepth = 3;
+
+    private string GetIndentStyle()
+    {
+        if (Depth > 0)
+        {
+            return $"margin-left: {Depth * 16}px;";
+        }
+        return "";
+    }
+
+    private string GetOperatorClass()
+    {
+        return Model.LogicalOp switch
+        {
+            LogicalOperator.And => "and",
+            LogicalOperator.Or => "or",
+            LogicalOperator.Not => "not",
+            _ => "and"
+        };
+    }
+
+    private string GetOperatorHint()
+    {
+        return Model.LogicalOp switch
+        {
+            LogicalOperator.And => "All conditions must be true",
+            LogicalOperator.Or => "At least one condition must be true",
+            LogicalOperator.Not => "Condition must be false",
+            _ => ""
+        };
+    }
+
+    private async Task ToggleOperator()
+    {
+        Model.LogicalOp = Model.LogicalOp switch
+        {
+            LogicalOperator.And => LogicalOperator.Or,
+            LogicalOperator.Or => LogicalOperator.Not,
+            LogicalOperator.Not => LogicalOperator.And,
+            _ => LogicalOperator.And
+        };
+        await OnChanged.InvokeAsync();
+    }
+
+    private async Task AddCondition()
+    {
+        Model.Conditions.Add(new ConditionRowModel());
+        await OnChanged.InvokeAsync();
+    }
+
+    private async Task RemoveCondition(ConditionRowModel condition)
+    {
+        Model.Conditions.Remove(condition);
+        await OnChanged.InvokeAsync();
+    }
+
+    private async Task AddNestedGroup()
+    {
+        if (Depth < MaxDepth)
+        {
+            var newGroup = new ConditionGroupModel();
+            newGroup.Conditions.Add(new ConditionRowModel());
+            Model.NestedGroups.Add(newGroup);
+            await OnChanged.InvokeAsync();
+        }
+    }
+
+    private async Task RemoveNestedGroup(ConditionGroupModel group)
+    {
+        Model.NestedGroups.Remove(group);
+        await OnChanged.InvokeAsync();
+    }
+
+    private async Task HandleDelete()
+    {
+        await OnDelete.InvokeAsync();
+    }
+
+    private async Task HandleChanged()
+    {
+        await OnChanged.InvokeAsync();
+    }
+}

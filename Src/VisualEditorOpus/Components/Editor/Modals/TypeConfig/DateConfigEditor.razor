@@ -1,0 +1,96 @@
+@* Editor for DateConfig - handles DatePicker, TimePicker, DateTimePicker *@
+@using VisualEditorOpus.Models
+
+<div class="config-editor">
+    @* Toggles Section *@
+    <div class="toggle-group">
+        <div class="toggle-info">
+            <div class="toggle-label">Allow Future Dates</div>
+            <div class="toggle-desc">Users can select dates after today</div>
+        </div>
+        <div class="toggle @(Config.AllowFuture ? "active" : "")"
+             @onclick="() => { Config.AllowFuture = !Config.AllowFuture; NotifyChanged(); }">
+        </div>
+    </div>
+
+    <div class="toggle-group">
+        <div class="toggle-info">
+            <div class="toggle-label">Allow Past Dates</div>
+            <div class="toggle-desc">Users can select dates before today</div>
+        </div>
+        <div class="toggle @(Config.AllowPast ? "active" : "")"
+             @onclick="() => { Config.AllowPast = !Config.AllowPast; NotifyChanged(); }">
+        </div>
+    </div>
+
+    @* Date Constraints Section *@
+    <div class="section-divider">
+        <span>Date Constraints</span>
+    </div>
+
+    <div class="form-grid">
+        <div class="form-group">
+            <label class="form-label">Minimum Date</label>
+            <select class="form-select" @bind="Config.MinDatePreset" @bind:after="NotifyChanged">
+                <option value="">No minimum</option>
+                <option value="Now">Today</option>
+                <option value="Now-30d">30 days ago</option>
+                <option value="Now-1y">1 year ago</option>
+                <option value="custom">Custom date...</option>
+            </select>
+            <p class="form-hint">Earliest date that can be selected</p>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Maximum Date</label>
+            <select class="form-select" @bind="Config.MaxDatePreset" @bind:after="NotifyChanged">
+                <option value="">No maximum</option>
+                <option value="Now">Today</option>
+                <option value="Now+30d">30 days from now</option>
+                <option value="Now+1y">1 year from now</option>
+                <option value="custom">Custom date...</option>
+            </select>
+            <p class="form-hint">Latest date that can be selected</p>
+        </div>
+    </div>
+
+    @* Custom Date Inputs *@
+    @if (Config.MinDatePreset == "custom")
+    {
+        <div class="form-group">
+            <label class="form-label">Custom Minimum Date</label>
+            <input type="text"
+                   class="form-input"
+                   @bind="Config.CustomMinDate"
+                   @bind:after="NotifyChanged"
+                   placeholder="e.g., 2024-01-01 or Now-60d" />
+            <p class="form-hint">ISO 8601 date or relative format (Now, Now+Nd, Now-Nm)</p>
+        </div>
+    }
+
+    @if (Config.MaxDatePreset == "custom")
+    {
+        <div class="form-group">
+            <label class="form-label">Custom Maximum Date</label>
+            <input type="text"
+                   class="form-input"
+                   @bind="Config.CustomMaxDate"
+                   @bind:after="NotifyChanged"
+                   placeholder="e.g., 2025-12-31 or Now+90d" />
+            <p class="form-hint">ISO 8601 date or relative format (Now, Now+Nd, Now+Nm)</p>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public DateConfigModel Config { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<DateConfigModel> ConfigChanged { get; set; }
+
+    private async Task NotifyChanged()
+    {
+        await ConfigChanged.InvokeAsync(Config);
+    }
+}

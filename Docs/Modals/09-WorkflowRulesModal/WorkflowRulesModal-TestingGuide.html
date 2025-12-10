@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WorkflowRulesModal - Testing Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: #EEF2FF;
+            --success: #10B981;
+            --success-light: #D1FAE5;
+            --warning: #F59E0B;
+            --warning-light: #FEF3C7;
+            --info: #3B82F6;
+            --info-light: #DBEAFE;
+            --danger: #EF4444;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8FAFC;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --border-color: #E2E8F0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h1::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 32px;
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin-bottom: 32px;
+        }
+
+        .progress-bar {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 32px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .progress-title {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .progress-count {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .progress-track {
+            height: 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), #818CF8);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: var(--bg-secondary);
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title {
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-badge {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .section-content {
+            padding: 20px;
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            accent-color: var(--primary);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .checklist-item label {
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .checklist-item.checked label {
+            color: var(--text-secondary);
+            text-decoration: line-through;
+        }
+
+        .item-description {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .category-label {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-right: 8px;
+        }
+
+        .category-action { background: #FEF3C7; color: #B45309; }
+        .category-form { background: #DBEAFE; color: #1D4ED8; }
+        .category-list { background: #E0E7FF; color: #4338CA; }
+        .category-toggle { background: #D1FAE5; color: #059669; }
+        .category-condition { background: #FCE7F3; color: #BE185D; }
+        .category-ui { background: #F3E8FF; color: #7C3AED; }
+        .category-save { background: #FEE2E2; color: #DC2626; }
+
+        .info-box {
+            background: var(--info-light);
+            border-left: 4px solid var(--info);
+            padding: 16px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+        }
+
+        .info-box strong {
+            color: var(--info);
+        }
+
+        .note-box {
+            background: var(--warning-light);
+            border-left: 4px solid var(--warning);
+            padding: 16px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+        }
+
+        .note-box strong {
+            color: var(--warning);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--bg-secondary);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+        }
+
+        code {
+            background: var(--bg-secondary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+        }
+
+        .task-list {
+            list-style: none;
+        }
+
+        .task-item {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .task-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .btn-reset {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn-reset:hover {
+            background: #DC2626;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>WorkflowRulesModal Testing Guide</h1>
+        <p class="subtitle">Comprehensive testing checklist for the WorkflowRulesModal component</p>
+
+        <div class="progress-bar">
+            <div class="progress-header">
+                <span class="progress-title">Testing Progress</span>
+                <span class="progress-count"><span id="completedCount">0</span> / <span id="totalCount">0</span> items</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Action Types Reference -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Workflow Action Types Reference</span>
+                <span class="section-badge">Info</span>
+            </div>
+            <div class="section-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Action</th>
+                            <th>Description</th>
+                            <th>Target</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>skipStep</code></td>
+                            <td>Skip a specific step when condition is true</td>
+                            <td>TargetStepNumber (required)</td>
+                        </tr>
+                        <tr>
+                            <td><code>goToStep</code></td>
+                            <td>Navigate to a specific step</td>
+                            <td>TargetStepNumber (required)</td>
+                        </tr>
+                        <tr>
+                            <td><code>completeWorkflow</code></td>
+                            <td>Complete the workflow immediately</td>
+                            <td>None</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Section 1: Modal Opening and Header -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Section 1: Modal Opening and Header</span>
+                <span class="section-badge">5 items</span>
+            </div>
+            <div class="section-content">
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item1" data-section="1">
+                        <label for="item1">
+                            <span class="category-label category-ui">UI</span>
+                            Modal opens with ModalBase (Large size)
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item2" data-section="1">
+                        <label for="item2">
+                            <span class="category-label category-ui">UI</span>
+                            Modal title shows "Workflow Rules" with signpost icon
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item3" data-section="1">
+                        <label for="item3">
+                            <span class="category-label category-ui">UI</span>
+                            Header shows badge with active rule count (e.g., "3 Active")
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item4" data-section="1">
+                        <label for="item4">
+                            <span class="category-label category-ui">UI</span>
+                            Rules header shows "Conditional Rules" with list icon
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item5" data-section="1">
+                        <label for="item5">
+                            <span class="category-label category-ui">UI</span>
+                            "Add Rule" button is visible in rules header
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 2: Rules List Display -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Section 2: Rules List Display</span>
+                <span class="section-badge">8 items</span>
+            </div>
+            <div class="section-content">
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item6" data-section="2">
+                        <label for="item6">
+                            <span class="category-label category-list">LIST</span>
+                            Rules list displays all existing workflow rules
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item7" data-section="2">
+                        <label for="item7">
+                            <span class="category-label category-list">LIST</span>
+                            "Skip Step" rules show warning-colored icon (yellow/orange)
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item8" data-section="2">
+                        <label for="item8">
+                            <span class="category-label category-list">LIST</span>
+                            "Go To Step" rules show info-colored icon (blue)
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item9" data-section="2">
+                        <label for="item9">
+                            <span class="category-label category-list">LIST</span>
+                            "Complete Workflow" rules show success-colored icon (green)
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item10" data-section="2">
+                        <label for="item10">
+                            <span class="category-label category-list">LIST</span>
+                            Each rule shows title/description
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item11" data-section="2">
+                        <label for="item11">
+                            <span class="category-label category-list">LIST</span>
+                            Each rule shows target step description
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item12" data-section="2">
+                        <label for="item12">
+                            <span class="category-label category-list">LIST</span>
+                            Condition displayed in monospace font
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item13" data-section="2">
+                        <label for="item13">
+                            <span class="category-label category-list">LIST</span>
+                            Edit/Delete buttons appear on hover
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 3: Action Type Selection -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Section 3: Action Type Selection</span>
+                <span class="section-badge">6 items</span>
+            </div>
+            <div class="section-content">
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item14" data-section="3">
+                        <label for="item14">
+                            <span class="category-label category-action">ACTION</span>
+                            Three action type cards displayed in grid
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item15" data-section="3">
+                        <label for="item15">
+                            <span class="category-label category-action">ACTION</span>
+                            "Skip Step" card shows skip-forward icon with warning color
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item16" data-section="3">
+                        <label for="item16">
+                            <span class="category-label category-action">ACTION</span>
+                            "Go To Step" card shows arrow-right-circle icon with info color
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item17" data-section="3">
+                        <label for="item17">
+                            <span class="category-label category-action">ACTION</span>
+                            "Complete" card shows check-circle icon with success color
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item18" data-section="3">
+                        <label for="item18">
+                            <span class="category-label category-action">ACTION</span>
+                            Clicking a card selects it (highlighted border and background)
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item19" data-section="3">
+                        <label for="item19">
+                            <span class="category-label category-action">ACTION</span>
+                            Only one action type can be selected at a time
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 4: Add/Edit Form -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Section 4: Add/Edit Rule Form</span>
+                <span class="section-badge">8 items</span>
+            </div>
+            <div class="section-content">
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item20" data-section="4">
+                        <label for="item20">
+                            <span class="category-label category-form">FORM</span>
+                            Clicking "Add Rule" shows the add form section
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item21" data-section="4">
+                        <label for="item21">
+                            <span class="category-label category-form">FORM</span>
+                            Description input field is displayed and required
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item22" data-section="4">
+                        <label for="item22">
+                            <span class="category-label category-form">FORM</span>
+                            Target step dropdown shows all workflow steps
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item23" data-section="4">
+                        <label for="item23">
+                            <span class="category-label category-form">FORM</span>
+                            Target step dropdown is hidden when "Complete Workflow" selected
+                            <div class="item-description">Shows "Not required" message instead</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item24" data-section="4">
+                        <label for="item24">
+                            <span class="category-label category-form">FORM</span>
+                            Target step dropdown reappears when switching back to skipStep/goToStep
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item25" data-section="4">
+                        <label for="item25">
+                            <span class="category-label category-form">FORM</span>
+                            Priority input accepts numeric values (1-1000)
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item26" data-section="4">
+                        <label for="item26">
+                            <span class="category-label category-form">FORM</span>
+                            Cancel button closes the add/edit form
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item27" data-section="4">
+                        <label for="item27">
+                            <span class="category-label category-form">FORM</span>
+                            Form title changes to "Edit Rule" when editing existing rule
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 5: Condition Builder Integration -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Section 5: Condition Builder Integration</span>
+                <span class="section-badge">5 items</span>
+            </div>
+            <div class="section-content">
+                <div class="note-box">
+                    <strong>Note:</strong> This requires ConditionBuilderModal to be implemented. If not available, the Builder button may not function.
+                </div>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item28" data-section="5">
+                        <label for="item28">
+                            <span class="category-label category-condition">CONDITION</span>
+                            Condition input is read-only (click Builder to edit)
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item29" data-section="5">
+                        <label for="item29">
+                            <span class="category-label category-condition">CONDITION</span>
+                            "Builder" button is displayed next to condition input
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item30" data-section="5">
+                        <label for="item30">
+                            <span class="category-label category-condition">CONDITION</span>
+                            Clicking "Builder" opens ConditionBuilderModal
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item31" data-section="5">
+                        <label for="item31">
+                            <span class="category-label category-condition">CONDITION</span>
+                            Condition from Builder is saved and displayed
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item32" data-section="5">
+                        <label for="item32">
+                            <span class="category-label category-condition">CONDITION</span>
+                            Condition displays in monospace font with operator symbols
+                            <div class="item-description">e.g., "Step1.age < 18" or compound conditions with AND/OR</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 6: Active Toggle -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Section 6: Active Toggle</span>
+                <span class="section-badge">4 items</span>
+            </div>
+            <div class="section-content">
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item33" data-section="6">
+                        <label for="item33">
+                            <span class="category-label category-toggle">TOGGLE</span>
+                            Each rule shows active toggle switch
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item34" data-section="6">
+                        <label for="item34">
+                            <span class="category-label category-toggle">TOGGLE</span>
+                            Active rules show toggle in "on" position (primary color)
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item35" data-section="6">
+                        <label for="item35">
+                            <span class="category-label category-toggle">TOGGLE</span>
+                            Clicking toggle switches rule active state
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item36" data-section="6">
+                        <label for="item36">
+                            <span class="category-label category-toggle">TOGGLE</span>
+                            Active count badge updates when toggle is clicked
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 7: Edit and Delete -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Section 7: Edit and Delete Rules</span>
+                <span class="section-badge">5 items</span>
+            </div>
+            <div class="section-content">
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item37" data-section="7">
+                        <label for="item37">
+                            <span class="category-label category-form">FORM</span>
+                            Edit button loads rule values into the form
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item38" data-section="7">
+                        <label for="item38">
+                            <span class="category-label category-form">FORM</span>
+                            Action type is pre-selected when editing
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item39" data-section="7">
+                        <label for="item39">
+                            <span class="category-label category-form">FORM</span>
+                            Existing condition is displayed when editing
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item40" data-section="7">
+                        <label for="item40">
+                            <span class="category-label category-list">LIST</span>
+                            Delete button removes rule from list
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item41" data-section="7">
+                        <label for="item41">
+                            <span class="category-label category-save">SAVE</span>
+                            "Update Rule" button saves edited rule
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 8: Validation and Save -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Section 8: Validation and Save</span>
+                <span class="section-badge">6 items</span>
+            </div>
+            <div class="section-content">
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item42" data-section="8">
+                        <label for="item42">
+                            <span class="category-label category-save">SAVE</span>
+                            Add/Update button disabled when description is empty
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item43" data-section="8">
+                        <label for="item43">
+                            <span class="category-label category-save">SAVE</span>
+                            Add/Update button disabled when target step missing (for skipStep/goToStep)
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item44" data-section="8">
+                        <label for="item44">
+                            <span class="category-label category-save">SAVE</span>
+                            Add/Update button disabled when condition is missing
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item45" data-section="8">
+                        <label for="item45">
+                            <span class="category-label category-save">SAVE</span>
+                            "Save Changes" creates valid ConditionalRule records
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item46" data-section="8">
+                        <label for="item46">
+                            <span class="category-label category-save">SAVE</span>
+                            OnSave callback receives list of updated rules
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item47" data-section="8">
+                        <label for="item47">
+                            <span class="category-label category-save">SAVE</span>
+                            Modal closes after saving changes
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 9: Empty State and Modal Behavior -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Section 9: Empty State and Modal Behavior</span>
+                <span class="section-badge">5 items</span>
+            </div>
+            <div class="section-content">
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item48" data-section="9">
+                        <label for="item48">
+                            <span class="category-label category-ui">UI</span>
+                            Empty state shows when no rules exist
+                            <div class="item-description">Displays signpost icon, message, and "Add First Rule" button</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item49" data-section="9">
+                        <label for="item49">
+                            <span class="category-label category-ui">UI</span>
+                            Close button closes the modal
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item50" data-section="9">
+                        <label for="item50">
+                            <span class="category-label category-ui">UI</span>
+                            X button in header closes the modal
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item51" data-section="9">
+                        <label for="item51">
+                            <span class="category-label category-ui">UI</span>
+                            Escape key closes the modal
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item52" data-section="9">
+                        <label for="item52">
+                            <span class="category-label category-ui">UI</span>
+                            Dark mode styling is correct for all elements
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Manual Implementation Tasks -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Manual Implementation Tasks</span>
+                <span class="section-badge">Tasks</span>
+            </div>
+            <div class="section-content">
+                <ul class="task-list">
+                    <li class="task-item">
+                        <div class="task-title">1. Integration with Workflow Designer Toolbar</div>
+                        <div class="task-description">Add a "Workflow Rules" button to the workflow designer toolbar to open this modal</div>
+                    </li>
+                    <li class="task-item">
+                        <div class="task-title">2. ConditionBuilderModal Integration</div>
+                        <div class="task-description">Ensure ConditionBuilderModal is implemented and accepts AvailableFields with cross-module references</div>
+                    </li>
+                    <li class="task-item">
+                        <div class="task-title">3. WorkflowModules Parameter</div>
+                        <div class="task-description">Parent component must pass the list of FormModuleSchema objects for step titles and field references</div>
+                    </li>
+                    <li class="task-item">
+                        <div class="task-title">4. Rule Execution in Workflow Engine</div>
+                        <div class="task-description">Implement the actual rule evaluation and execution logic in the workflow runtime engine</div>
+                    </li>
+                    <li class="task-item">
+                        <div class="task-title">5. Cross-Module Field References</div>
+                        <div class="task-description">Ensure field references use correct format: "Step1.fieldId" or "ModuleName.fieldId"</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 32px;">
+            <button class="btn-reset" onclick="resetProgress()">Reset All Progress</button>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'workflowRulesModal-testing-progress';
+
+        function loadProgress() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                const checked = JSON.parse(saved);
+                checked.forEach(id => {
+                    const checkbox = document.getElementById(id);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        checkbox.closest('.checklist-item')?.classList.add('checked');
+                    }
+                });
+            }
+            updateProgress();
+        }
+
+        function saveProgress() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            const checked = Array.from(checkboxes).map(cb => cb.id);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(checked));
+        }
+
+        function updateProgress() {
+            const total = document.querySelectorAll('.checklist-item input[type="checkbox"]').length;
+            const completed = document.querySelectorAll('.checklist-item input[type="checkbox"]:checked').length;
+            const percentage = total > 0 ? (completed / total) * 100 : 0;
+
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('progressFill').style.width = percentage + '%';
+        }
+
+        function resetProgress() {
+            if (confirm('Are you sure you want to reset all testing progress?')) {
+                localStorage.removeItem(STORAGE_KEY);
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                    cb.checked = false;
+                    cb.closest('.checklist-item')?.classList.remove('checked');
+                });
+                updateProgress();
+            }
+        }
+
+        // Event listeners
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                this.closest('.checklist-item')?.classList.toggle('checked', this.checked);
+                saveProgress();
+                updateProgress();
+            });
+        });
+
+        // Initialize
+        loadProgress();
+    </script>
+</body>
+</html>

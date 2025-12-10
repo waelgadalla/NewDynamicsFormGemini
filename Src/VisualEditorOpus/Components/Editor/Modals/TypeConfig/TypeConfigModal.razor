@@ -1,0 +1,70 @@
+@* Dynamic modal that shows different configuration editors based on field type *@
+@using VisualEditorOpus.Models
+@using VisualEditorOpus.Components.Shared
+@using DynamicForms.Core.V4.Schemas
+
+<ModalBase @bind-IsOpen="IsOpen"
+           Title="@GetTitle()"
+           Icon="@GetIcon()"
+           Size="@GetModalSize()"
+           OnClose="HandleCancel">
+    <ChildContent>
+    <div class="type-config-editor">
+        @* Type Badge *@
+        <div class="type-badge">
+            <i class="bi @GetIcon()"></i>
+            @GetTypeBadgeText()
+        </div>
+
+        @* Dynamic Editor Based on Field Type *@
+        @switch (FieldType)
+        {
+            case "DatePicker":
+            case "TimePicker":
+            case "DateTimePicker":
+                <DateConfigEditor @bind-Config="dateConfig" />
+                break;
+
+            case "FileUpload":
+                <FileUploadConfigEditor @bind-Config="fileUploadConfig" />
+                break;
+
+            case "AutoComplete":
+                <AutoCompleteConfigEditor @bind-Config="autoCompleteConfig" />
+                break;
+
+            case "DataGrid":
+                <DataGridConfigEditor @bind-Config="dataGridConfig" />
+                break;
+
+            default:
+                <div class="no-config-message">
+                    <i class="bi bi-info-circle"></i>
+                    <p>No configuration available for this field type.</p>
+                </div>
+                break;
+        }
+
+        @* Configuration Preview *@
+        @if (HasValidEditor)
+        {
+            <div class="config-preview">
+                <div class="config-preview-title">
+                    <i class="bi bi-code-slash"></i> Configuration Preview
+                </div>
+                <pre class="config-preview-code">@GetConfigPreview()</pre>
+            </div>
+        }
+    </div>
+    </ChildContent>
+    <FooterContent>
+        <button class="btn btn-ghost" @onclick="HandleCancel" type="button">Cancel</button>
+        <button class="btn btn-primary"
+                @onclick="HandleSave"
+                disabled="@(!CanSave)"
+                type="button">
+            <i class="bi bi-check-lg"></i> Save Configuration
+        </button>
+    </FooterContent>
+
+</ModalBase>

@@ -1,0 +1,241 @@
+@* Single condition row component for the condition builder *@
+@using VisualEditorOpus.Models
+@using DynamicForms.Core.V4.Enums
+
+<div class="condition-row">
+    @* Field Selector *@
+    <div class="condition-field">
+        <select class="form-select"
+                value="@Model.FieldId"
+                @onchange="HandleFieldChange">
+            <option value="">Select field...</option>
+            @foreach (var group in FieldsByModule)
+            {
+                <optgroup label="@group.Key">
+                    @foreach (var field in group.Value)
+                    {
+                        <option value="@field.FieldId">@field.DisplayName</option>
+                    }
+                </optgroup>
+            }
+        </select>
+    </div>
+
+    @* Operator Selector *@
+    <div class="condition-operator">
+        <select class="form-select"
+                value="@Model.Operator.ToString()"
+                @onchange="HandleOperatorChange">
+            @foreach (var op in GetAvailableOperators())
+            {
+                <option value="@op.ToString()">@GetOperatorDisplayName(op)</option>
+            }
+        </select>
+    </div>
+
+    @* Value Input *@
+    <div class="condition-value">
+        @if (Model.RequiresValue)
+        {
+            @if (SelectedField?.Options?.Any() == true)
+            {
+                @* Dropdown for fields with options *@
+                <select class="form-select"
+                        value="@Model.Value"
+                        @onchange="HandleValueChange">
+                    <option value="">Select value...</option>
+                    @foreach (var opt in SelectedField.Options)
+                    {
+                        <option value="@opt.Value">@opt.Label</option>
+                    }
+                </select>
+            }
+            else if (SelectedField?.FieldType == "Number" || SelectedField?.FieldType == "Currency")
+            {
+                <input type="number"
+                       class="form-input"
+                       value="@Model.Value"
+                       placeholder="Enter number..."
+                       @onchange="HandleValueChange" />
+            }
+            else if (SelectedField?.FieldType == "DatePicker")
+            {
+                <input type="date"
+                       class="form-input"
+                       value="@Model.Value"
+                       @onchange="HandleValueChange" />
+            }
+            else if (SelectedField?.FieldType == "Checkbox")
+            {
+                <select class="form-select"
+                        value="@Model.Value"
+                        @onchange="HandleValueChange">
+                    <option value="">Select...</option>
+                    <option value="true">True</option>
+                    <option value="false">False</option>
+                </select>
+            }
+            else
+            {
+                <input type="text"
+                       class="form-input"
+                       value="@Model.Value"
+                       placeholder="Enter value..."
+                       @onchange="HandleValueChange" />
+            }
+        }
+        else
+        {
+            <span class="no-value-hint">No value needed</span>
+        }
+    </div>
+
+    @* Row Actions *@
+    <div class="condition-row-actions">
+        <button class="btn btn-icon btn-xs btn-ghost"
+                title="Delete condition"
+                @onclick="HandleDelete"
+                type="button">
+            <i class="bi bi-x"></i>
+        </button>
+    </div>
+</div>
+
+@code {
+    /// <summary>
+    /// The condition row model to edit.
+    /// </summary>
+    [Parameter]
+    public ConditionRowModel Model { get; set; } = default!;
+
+    /// <summary>
+    /// Callback when the delete button is clicked.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnDelete { get; set; }
+
+    /// <summary>
+    /// Callback when any value in the row changes.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnChanged { get; set; }
+
+    /// <summary>
+    /// Available fields for the field picker.
+    /// </summary>
+    [Parameter]
+    public List<FieldReference> AvailableFields { get; set; } = new();
+
+    private FieldReference? SelectedField => AvailableFields.FirstOrDefault(f => f.FieldId == Model.FieldId);
+
+    private Dictionary<string, List<FieldReference>> FieldsByModule =>
+        AvailableFields
+            .GroupBy(f => f.ModuleName ?? "Current Module")
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+    private async Task HandleFieldChange(ChangeEventArgs e)
+    {
+        Model.FieldId = e.Value?.ToString();
+        var field = AvailableFields.FirstOrDefault(f => f.FieldId == Model.FieldId);
+        Model.FieldType = field?.FieldType;
+        Model.Value = null; // Reset value when field changes
+        await OnChanged.InvokeAsync();
+    }
+
+    private async Task HandleOperatorChange(ChangeEventArgs e)
+    {
+        if (Enum.TryParse<ConditionOperator>(e.Value?.ToString(), out var op))
+        {
+            Model.Operator = op;
+            if (!Model.RequiresValue)
+            {
+                Model.Value = null;
+            }
+            await OnChanged.InvokeAsync();
+        }
+    }
+
+    private async Task HandleValueChange(ChangeEventArgs e)
+    {
+        Model.Value = e.Value?.ToString();
+        await OnChanged.InvokeAsync();
+    }
+
+    private async Task HandleDelete()
+    {
+        await OnDelete.InvokeAsync();
+    }
+
+    private IEnumerable<ConditionOperator> GetAvailableOperators()
+    {
+        var fieldType = SelectedField?.FieldType ?? "TextBox";
+
+        return fieldType switch
+        {
+            "Number" or "Currency" => new[]
+            {
+                ConditionOperator.Equals, ConditionOperator.NotEquals,
+                ConditionOperator.GreaterThan, ConditionOperator.GreaterThanOrEqual,
+                ConditionOperator.LessThan, ConditionOperator.LessThanOrEqual,
+                ConditionOperator.In, ConditionOperator.NotIn,
+                ConditionOperator.IsNull, ConditionOperator.IsNotNull
+            },
+            "DatePicker" => new[]
+            {
+                ConditionOperator.Equals, ConditionOperator.NotEquals,
+                ConditionOperator.GreaterThan, ConditionOperator.GreaterThanOrEqual,
+                ConditionOperator.LessThan, ConditionOperator.LessThanOrEqual,
+                ConditionOperator.IsNull, ConditionOperator.IsNotNull
+            },
+            "DropDown" or "RadioButton" => new[]
+            {
+                ConditionOperator.Equals, ConditionOperator.NotEquals,
+                ConditionOperator.In, ConditionOperator.NotIn,
+                ConditionOperator.IsNull, ConditionOperator.IsNotNull
+            },
+            "Checkbox" => new[]
+            {
+                ConditionOperator.Equals, ConditionOperator.NotEquals
+            },
+            "CheckboxGroup" or "MultiSelect" => new[]
+            {
+                ConditionOperator.Contains, ConditionOperator.NotContains,
+                ConditionOperator.In, ConditionOperator.NotIn,
+                ConditionOperator.IsEmpty, ConditionOperator.IsNotEmpty
+            },
+            _ => new[] // TextBox and other text types
+            {
+                ConditionOperator.Equals, ConditionOperator.NotEquals,
+                ConditionOperator.Contains, ConditionOperator.NotContains,
+                ConditionOperator.StartsWith, ConditionOperator.EndsWith,
+                ConditionOperator.In, ConditionOperator.NotIn,
+                ConditionOperator.IsNull, ConditionOperator.IsNotNull,
+                ConditionOperator.IsEmpty, ConditionOperator.IsNotEmpty
+            }
+        };
+    }
+
+    private string GetOperatorDisplayName(ConditionOperator op)
+    {
+        return op switch
+        {
+            ConditionOperator.Equals => "equals",
+            ConditionOperator.NotEquals => "does not equal",
+            ConditionOperator.GreaterThan => "is greater than",
+            ConditionOperator.GreaterThanOrEqual => "is greater than or equal to",
+            ConditionOperator.LessThan => "is less than",
+            ConditionOperator.LessThanOrEqual => "is less than or equal to",
+            ConditionOperator.Contains => "contains",
+            ConditionOperator.NotContains => "does not contain",
+            ConditionOperator.StartsWith => "starts with",
+            ConditionOperator.EndsWith => "ends with",
+            ConditionOperator.In => "is one of",
+            ConditionOperator.NotIn => "is not one of",
+            ConditionOperator.IsNull => "is null",
+            ConditionOperator.IsNotNull => "is not null",
+            ConditionOperator.IsEmpty => "is empty",
+            ConditionOperator.IsNotEmpty => "is not empty",
+            _ => op.ToString()
+        };
+    }
+}

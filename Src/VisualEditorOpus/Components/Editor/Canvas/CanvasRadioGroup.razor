@@ -24,8 +24,8 @@
 @code {
     [Parameter] public required FormFieldNode FieldNode { get; set; }
 
-    private IEnumerable<FieldOption> GetOptions()
+    private IEnumerable<DynamicForms.Core.V4.Schemas.FieldOption> GetOptions()
     {
-        return FieldNode.Schema.Options ?? Enumerable.Empty<FieldOption>();
+        return FieldNode.Schema.Options ?? Enumerable.Empty<DynamicForms.Core.V4.Schemas.FieldOption>();
     }
 }

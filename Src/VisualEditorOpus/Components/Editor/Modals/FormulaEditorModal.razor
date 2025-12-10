@@ -1,0 +1,187 @@
+@* Formula editor modal for creating computed field expressions *@
+@using VisualEditorOpus.Models
+@using VisualEditorOpus.Components.Shared
+@using DynamicForms.Core.V4.Schemas
+
+<ModalBase @bind-IsOpen="IsOpen"
+           Title="Formula Editor"
+           Icon="bi-calculator"
+           Size="ModalSize.Large"
+           OnClose="HandleCancel">
+    <ChildContent>
+    <div class="formula-editor-container">
+        @* Main Editor Column *@
+        <div class="editor-main">
+            @* Code Editor *@
+            <div class="code-editor-wrapper">
+                <div class="code-editor-header">
+                    <span class="code-editor-title">
+                        <i class="bi bi-code-slash"></i> Formula Expression
+                    </span>
+                    <div class="code-editor-actions">
+                        <button class="btn btn-xs btn-ghost"
+                                @onclick="ClearFormula"
+                                type="button"
+                                title="Clear formula">
+                            <i class="bi bi-eraser"></i>
+                        </button>
+                    </div>
+                </div>
+                <textarea class="code-editor"
+                          @bind="formulaText"
+                          @bind:event="oninput"
+                          @ref="editorRef"
+                          placeholder="Enter your formula... e.g., Quantity * UnitPrice"></textarea>
+            </div>
+
+            @* Operator Bar *@
+            <div class="operator-bar">
+                <div class="operator-group">
+                    @foreach (var op in Operators)
+                    {
+                        <button class="operator-btn"
+                                @onclick="() => InsertText(op)"
+                                type="button"
+                                title="Insert @op">
+                            @op
+                        </button>
+                    }
+                </div>
+                <div class="operator-group">
+                    @foreach (var func in QuickFunctions)
+                    {
+                        <button class="operator-btn wide"
+                                    @onclick='() => InsertText(func + "()")'
+                                type="button"
+                                title="Insert @func function">
+                            @func
+                        </button>
+                    }
+                </div>
+            </div>
+
+            @* Validation Status *@
+            <div class="validation-status @(isValid ? "valid" : "invalid")">
+                @if (isValid)
+                {
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>Formula is valid</span>
+                }
+                else
+                {
+                    <i class="bi bi-exclamation-circle-fill"></i>
+                    <span>@validationError</span>
+                }
+            </div>
+
+            @* Result Preview *@
+            <div class="result-preview">
+                <div class="result-preview-label">
+                    <i class="bi bi-play-circle"></i> Preview Result
+                </div>
+                @if (previewResult != null)
+                {
+                    <div class="result-value">@previewResult</div>
+                    <div class="result-type">Type: @previewType</div>
+                }
+                else if (SampleData == null || !SampleData.Any())
+                {
+                    <div class="result-placeholder">
+                        <i class="bi bi-info-circle"></i>
+                        Preview requires sample data
+                    </div>
+                }
+                else
+                {
+                    <div class="result-placeholder">
+                        <i class="bi bi-dash"></i>
+                        Unable to compute preview
+                    </div>
+                }
+            </div>
+
+            @* Dependencies *@
+            @if (dependencies.Any())
+            {
+                <div class="dependencies-section">
+                    <div class="dependencies-label">
+                        <i class="bi bi-diagram-2"></i> Field Dependencies
+                    </div>
+                    <div class="dependencies-list">
+                        @foreach (var dep in dependencies)
+                        {
+                            <span class="dependency-tag">@dep</span>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        @* Sidebar *@
+        <div class="editor-sidebar">
+            @* Fields Section *@
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">
+                    <i class="bi bi-ui-checks"></i> Fields
+                </div>
+                <div class="sidebar-search">
+                    <input type="text"
+                           placeholder="Search fields..."
+                           @bind="fieldSearchQuery"
+                           @bind:event="oninput" />
+                </div>
+                <div class="sidebar-section-body">
+                    @foreach (var field in FilteredFields)
+                    {
+                        <div class="field-item" @onclick="() => InsertField(field.Id)">
+                            <i class="bi @GetFieldTypeIcon(field.FieldType)"></i>
+                            <span class="field-item-name">@field.Id</span>
+                            <span class="field-item-type">@field.FieldType</span>
+                        </div>
+                    }
+                    @if (!FilteredFields.Any())
+                    {
+                        <div class="sidebar-empty">
+                            No fields found
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @* Functions Section *@
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">
+                    <i class="bi bi-braces"></i> Functions
+                </div>
+                <div class="sidebar-section-body">
+                    @foreach (var func in Functions)
+                    {
+                        <div class="function-item" @onclick="() => InsertText(func.Syntax)">
+                            <div class="function-name">@func.Name</div>
+                            <div class="function-desc">@func.Description</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    </ChildContent>
+    <FooterContent>
+        <button class="btn btn-ghost" @onclick="HandleCancel" type="button">Cancel</button>
+        <div class="footer-actions">
+            <button class="btn btn-outline"
+                    @onclick="TestFormula"
+                    disabled="@(!isValid)"
+                    type="button">
+                <i class="bi bi-play"></i> Test
+            </button>
+            <button class="btn btn-primary"
+                    @onclick="HandleSave"
+                    disabled="@(!CanSave)"
+                    type="button">
+                <i class="bi bi-check-lg"></i> Save Formula
+            </button>
+        </div>
+    </FooterContent>
+
+</ModalBase>

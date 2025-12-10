@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrossFieldValidationModal - Testing Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: #EEF2FF;
+            --success: #10B981;
+            --success-light: #D1FAE5;
+            --warning: #F59E0B;
+            --warning-light: #FEF3C7;
+            --danger: #EF4444;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8FAFC;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --border-color: #E2E8F0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h1::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 32px;
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin-bottom: 32px;
+        }
+
+        .progress-bar {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 32px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .progress-title {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .progress-count {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .progress-track {
+            height: 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), #818CF8);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: var(--bg-secondary);
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title {
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-badge {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .section-content {
+            padding: 20px;
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            accent-color: var(--primary);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .checklist-item label {
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .checklist-item.checked label {
+            color: var(--text-secondary);
+            text-decoration: line-through;
+        }
+
+        .item-description {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .category-label {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-right: 8px;
+        }
+
+        .category-type { background: #DBEAFE; color: #1D4ED8; }
+        .category-field { background: #E0E7FF; color: #4338CA; }
+        .category-tag { background: #D1FAE5; color: #059669; }
+        .category-error { background: #FEE2E2; color: #DC2626; }
+        .category-preview { background: #FEF3C7; color: #B45309; }
+        .category-ui { background: #F3E8FF; color: #7C3AED; }
+        .category-save { background: #FCE7F3; color: #BE185D; }
+
+        .code-block {
+            background: #1E293B;
+            color: #E2E8F0;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+
+        .note-box {
+            background: var(--warning-light);
+            border-left: 4px solid var(--warning);
+            padding: 16px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+        }
+
+        .note-box strong {
+            color: var(--warning);
+        }
+
+        .info-box {
+            background: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 16px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+        }
+
+        .info-box strong {
+            color: var(--primary);
+        }
+
+        .task-list {
+            list-style: none;
+        }
+
+        .task-item {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .task-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .btn-reset {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn-reset:hover {
+            background: #DC2626;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--bg-secondary);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+        }
+
+        code {
+            background: var(--bg-secondary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CrossFieldValidationModal Testing Guide</h1>
+        <p class="subtitle">Comprehensive testing checklist for the CrossFieldValidationModal component</p>
+
+        <div class="progress-bar">
+            <div class="progress-header">
+                <span class="progress-title">Testing Progress</span>
+                <span class="progress-count"><span id="completedCount">0</span> / <span id="totalCount">0</span> items</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Validation Types Reference -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Validation Types Reference</span>
+                <span class="section-badge">Info</span>
+            </div>
+            <div class="section-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th>Logic</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>AtLeastOne</code></td>
+                            <td>At least one field must have a value</td>
+                            <td>fields.Any(f => !IsEmpty(f))</td>
+                        </tr>
+                        <tr>
+                            <td><code>AllOrNone</code></td>
+                            <td>Either all fields filled or all empty</td>
+                            <td>fields.All(filled) OR fields.All(empty)</td>
+                        </tr>
+                        <tr>
+                            <td><code>MutuallyExclusive</code></td>
+                            <td>Only one field can have a value</td>
+                            <td>fields.Count(f => !IsEmpty(f)) <= 1</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Section 1: Validation Type Selection -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Section 1: Validation Type Selection</span>
+                <span class="section-badge">6 items</span>
+            </div>
+            <div class="section-content">
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item1" data-section="1">
+                        <label for="item1">
+                            <span class="category-label category-type">TYPE</span>
+                            Three type cards are displayed in a grid
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item2" data-section="1">
+                        <label for="item2">
+                            <span class="category-label category-type">TYPE</span>
+                            "At Least One" card shows icon, name, and description
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item3" data-section="1">
+                        <label for="item3">
+                            <span class="category-label category-type">TYPE</span>
+                            "All or None" card shows icon, name, and description
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item4" data-section="1">
+                        <label for="item4">
+                            <span class="category-label category-type">TYPE</span>
+                            "Mutually Exclusive" card shows icon, name, and description
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item5" data-section="1">
+                        <label for="item5">
+                            <span class="category-label category-type">TYPE</span>
+                            Clicking a type card selects it (highlighted border and background)
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item6" data-section="1">
+                        <label for="item6">
+                            <span class="category-label category-type">TYPE</span>
+                            Only one type can be selected at a time (radio behavior)
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 2: Field Selection -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Section 2: Field Selection</span>
+                <span class="section-badge">7 items</span>
+            </div>
+            <div class="section-content">
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item7" data-section="2">
+                        <label for="item7">
+                            <span class="category-label category-field">FIELD</span>
+                            Field selector shows all fields from CurrentModule.Fields
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item8" data-section="2">
+                        <label for="item8">
+                            <span class="category-label category-field">FIELD</span>
+                            Each field shows checkbox, field ID, and field type
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item9" data-section="2">
+                        <label for="item9">
+                            <span class="category-label category-field">FIELD</span>
+                            Field selector is scrollable when many fields exist
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item10" data-section="2">
+                        <label for="item10">
+                            <span class="category-label category-field">FIELD</span>
+                            Clicking a field row toggles its checkbox
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item11" data-section="2">
+                        <label for="item11">
+                            <span class="category-label category-field">FIELD</span>
+                            Multiple fields can be selected simultaneously
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item12" data-section="2">
+                        <label for="item12">
+                            <span class="category-label category-field">FIELD</span>
+                            Selected fields have highlighted background
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item13" data-section="2">
+                        <label for="item13">
+                            <span class="category-label category-field">FIELD</span>
+                            Empty module shows "No fields available" message
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 3: Selected Fields Tags -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Section 3: Selected Fields Tags</span>
+                <span class="section-badge">5 items</span>
+            </div>
+            <div class="section-content">
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item14" data-section="3">
+                        <label for="item14">
+                            <span class="category-label category-tag">TAG</span>
+                            Selected fields appear as tags above the field selector
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item15" data-section="3">
+                        <label for="item15">
+                            <span class="category-label category-tag">TAG</span>
+                            Tags display field ID with monospace font
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item16" data-section="3">
+                        <label for="item16">
+                            <span class="category-label category-tag">TAG</span>
+                            Each tag has an X button to remove it
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item17" data-section="3">
+                        <label for="item17">
+                            <span class="category-label category-tag">TAG</span>
+                            Clicking X removes the field from selection
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item18" data-section="3">
+                        <label for="item18">
+                            <span class="category-label category-tag">TAG</span>
+                            Removing tag also unchecks the corresponding checkbox
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 4: Error Messages -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Section 4: Error Messages</span>
+                <span class="section-badge">4 items</span>
+            </div>
+            <div class="section-content">
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item19" data-section="4">
+                        <label for="item19">
+                            <span class="category-label category-error">ERROR</span>
+                            English error message textarea is displayed
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item20" data-section="4">
+                        <label for="item20">
+                            <span class="category-label category-error">ERROR</span>
+                            French error message textarea is displayed
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item21" data-section="4">
+                        <label for="item21">
+                            <span class="category-label category-error">ERROR</span>
+                            Error messages are optional (can be left empty)
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item22" data-section="4">
+                        <label for="item22">
+                            <span class="category-label category-error">ERROR</span>
+                            Textareas are resizable vertically
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 5: Rule Preview -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Section 5: Rule Preview</span>
+                <span class="section-badge">7 items</span>
+            </div>
+            <div class="section-content">
+                <div class="info-box">
+                    <strong>Preview Format:</strong> The preview should show the validation type in bold/colored text followed by the list of selected fields.
+                </div>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item23" data-section="5">
+                        <label for="item23">
+                            <span class="category-label category-preview">PREVIEW</span>
+                            Preview section appears when 2+ fields are selected
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item24" data-section="5">
+                        <label for="item24">
+                            <span class="category-label category-preview">PREVIEW</span>
+                            Warning message appears when only 1 field is selected
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item25" data-section="5">
+                        <label for="item25">
+                            <span class="category-label category-preview">PREVIEW</span>
+                            "At Least One" shows: "AT LEAST ONE of [fields] must have a value"
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item26" data-section="5">
+                        <label for="item26">
+                            <span class="category-label category-preview">PREVIEW</span>
+                            "All or None" shows: "EITHER ALL OR NONE of [fields] must have values"
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item27" data-section="5">
+                        <label for="item27">
+                            <span class="category-label category-preview">PREVIEW</span>
+                            "Mutually Exclusive" shows: "ONLY ONE of [fields] can have a value"
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item28" data-section="5">
+                        <label for="item28">
+                            <span class="category-label category-preview">PREVIEW</span>
+                            Preview updates dynamically when type changes
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item29" data-section="5">
+                        <label for="item29">
+                            <span class="category-label category-preview">PREVIEW</span>
+                            Preview updates dynamically when fields change
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 6: Save and Validation -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Section 6: Save and Validation</span>
+                <span class="section-badge">5 items</span>
+            </div>
+            <div class="section-content">
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item30" data-section="6">
+                        <label for="item30">
+                            <span class="category-label category-save">SAVE</span>
+                            Save button is disabled when fewer than 2 fields selected
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item31" data-section="6">
+                        <label for="item31">
+                            <span class="category-label category-save">SAVE</span>
+                            Save button is enabled when 2+ fields selected
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item32" data-section="6">
+                        <label for="item32">
+                            <span class="category-label category-save">SAVE</span>
+                            Save invokes OnSave with valid FieldSetValidation
+                            <div class="item-description">Check that Type, FieldIds, ErrorMessageEn, and ErrorMessageFr are populated</div>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item33" data-section="6">
+                        <label for="item33">
+                            <span class="category-label category-save">SAVE</span>
+                            Modal closes after successful save
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item34" data-section="6">
+                        <label for="item34">
+                            <span class="category-label category-save">SAVE</span>
+                            Empty error messages are saved as null (not empty string)
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 7: Edit Mode -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Section 7: Edit Mode</span>
+                <span class="section-badge">5 items</span>
+            </div>
+            <div class="section-content">
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item35" data-section="7">
+                        <label for="item35">
+                            <span class="category-label category-ui">UI</span>
+                            When ExistingValidation is provided, type is pre-selected
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item36" data-section="7">
+                        <label for="item36">
+                            <span class="category-label category-ui">UI</span>
+                            When ExistingValidation is provided, fields are pre-selected
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item37" data-section="7">
+                        <label for="item37">
+                            <span class="category-label category-ui">UI</span>
+                            When ExistingValidation is provided, error messages are populated
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item38" data-section="7">
+                        <label for="item38">
+                            <span class="category-label category-ui">UI</span>
+                            Edited validation can be saved with changes
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item39" data-section="7">
+                        <label for="item39">
+                            <span class="category-label category-ui">UI</span>
+                            New validation (no ExistingValidation) starts with defaults
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 8: Modal Behavior -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Section 8: Modal Behavior</span>
+                <span class="section-badge">4 items</span>
+            </div>
+            <div class="section-content">
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item40" data-section="8">
+                        <label for="item40">
+                            <span class="category-label category-ui">UI</span>
+                            Cancel button closes the modal
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item41" data-section="8">
+                        <label for="item41">
+                            <span class="category-label category-ui">UI</span>
+                            X button in header closes the modal
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item42" data-section="8">
+                        <label for="item42">
+                            <span class="category-label category-ui">UI</span>
+                            Escape key closes the modal
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item43" data-section="8">
+                        <label for="item43">
+                            <span class="category-label category-ui">UI</span>
+                            Modal displays with ModalBase (correct title and icon)
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 9: Dark Mode -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Section 9: Dark Mode</span>
+                <span class="section-badge">5 items</span>
+            </div>
+            <div class="section-content">
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item44" data-section="9">
+                        <label for="item44">
+                            <span class="category-label category-ui">UI</span>
+                            Type cards have appropriate dark mode styling
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item45" data-section="9">
+                        <label for="item45">
+                            <span class="category-label category-ui">UI</span>
+                            Field tags have appropriate dark mode styling
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item46" data-section="9">
+                        <label for="item46">
+                            <span class="category-label category-ui">UI</span>
+                            Field selector has dark mode background
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item47" data-section="9">
+                        <label for="item47">
+                            <span class="category-label category-ui">UI</span>
+                            Preview section has dark mode styling
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="item48" data-section="9">
+                        <label for="item48">
+                            <span class="category-label category-ui">UI</span>
+                            All text remains readable in dark mode
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Manual Implementation Tasks -->
+        <div class="section">
+            <div class="section-header">
+                <span class="section-title">Manual Implementation Tasks</span>
+                <span class="section-badge">Tasks</span>
+            </div>
+            <div class="section-content">
+                <ul class="task-list">
+                    <li class="task-item">
+                        <div class="task-title">1. Integration with Module Validation Section</div>
+                        <div class="task-description">Add a button to open CrossFieldValidationModal from the module's validation settings section</div>
+                    </li>
+                    <li class="task-item">
+                        <div class="task-title">2. FieldSetValidation Array Management</div>
+                        <div class="task-description">Parent component must manage the array of FieldSetValidation rules on the FormModuleSchema</div>
+                    </li>
+                    <li class="task-item">
+                        <div class="task-title">3. Edit/Delete Existing Validations</div>
+                        <div class="task-description">Create a list view of existing cross-field validations with edit/delete actions</div>
+                    </li>
+                    <li class="task-item">
+                        <div class="task-title">4. Validation Display in Form Preview</div>
+                        <div class="task-description">Show cross-field validation errors in the form preview/runtime when rules are violated</div>
+                    </li>
+                    <li class="task-item">
+                        <div class="task-title">5. Test with Various Field Types</div>
+                        <div class="task-description">Test cross-field validation with different field types (TextBox, DatePicker, Checkbox, etc.)</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 32px;">
+            <button class="btn-reset" onclick="resetProgress()">Reset All Progress</button>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'crossFieldValidationModal-testing-progress';
+
+        function loadProgress() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                const checked = JSON.parse(saved);
+                checked.forEach(id => {
+                    const checkbox = document.getElementById(id);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        checkbox.closest('.checklist-item')?.classList.add('checked');
+                    }
+                });
+            }
+            updateProgress();
+        }
+
+        function saveProgress() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            const checked = Array.from(checkboxes).map(cb => cb.id);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(checked));
+        }
+
+        function updateProgress() {
+            const total = document.querySelectorAll('.checklist-item input[type="checkbox"]').length;
+            const completed = document.querySelectorAll('.checklist-item input[type="checkbox"]:checked').length;
+            const percentage = total > 0 ? (completed / total) * 100 : 0;
+
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('progressFill').style.width = percentage + '%';
+        }
+
+        function resetProgress() {
+            if (confirm('Are you sure you want to reset all testing progress?')) {
+                localStorage.removeItem(STORAGE_KEY);
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                    cb.checked = false;
+                    cb.closest('.checklist-item')?.classList.remove('checked');
+                });
+                updateProgress();
+            }
+        }
+
+        // Event listeners
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                this.closest('.checklist-item')?.classList.toggle('checked', this.checked);
+                saveProgress();
+                updateProgress();
+            });
+        });
+
+        // Initialize
+        loadProgress();
+    </script>
+</body>
+</html>
