@@ -1,0 +1,423 @@
+@* Hierarchy section - Parent/child field relationships *@
+@implements IDisposable
+@using DynamicForms.Core.V4.Enums
+
+<PropertySection Title="Hierarchy" Icon="bi-diagram-3">
+    @if (Field is not null)
+    {
+        @* Status Badge *@
+        <div class="hierarchy-status @(HasParent ? "has-parent" : "")">
+            <i class="bi bi-@(HasParent ? "diagram-3" : "house")"></i>
+            <span class="hierarchy-status-text">
+                @if (HasParent)
+                {
+                    @($"Nested under \"{ParentFieldLabel}\"")
+                }
+                else
+                {
+                    @("This field is at the root level")
+                }
+            </span>
+        </div>
+
+        @* Breadcrumb Path (when has parent) *@
+        @if (HasParent)
+        {
+            <div class="hierarchy-breadcrumb">
+                @foreach (var (item, index) in BreadcrumbPath.Select((x, i) => (x, i)))
+                {
+                    @if (index > 0)
+                    {
+                        <i class="bi bi-chevron-right breadcrumb-separator"></i>
+                    }
+                    <div class="breadcrumb-item @(item.IsRoot ? "root" : "") @(item.IsCurrent ? "current" : "")">
+                        <i class="bi bi-@item.Icon"></i>
+                        @item.Label
+                    </div>
+                }
+            </div>
+        }
+
+        @* Parent Field Selector *@
+        <div class="prop-group">
+            <label class="prop-label">
+                <i class="bi bi-arrow-up-square"></i>
+                Parent Field
+            </label>
+            <div class="tree-selector">
+                @* Root Option *@
+                <div class="tree-node root-option @(Field.ParentId == null ? "selected" : "")"
+                     @onclick="() => SelectParent(null)">
+                    <div class="tree-node-icon">
+                        <i class="bi bi-house"></i>
+                    </div>
+                    <div class="tree-node-content">
+                        <div class="tree-node-label">Root (No Parent)</div>
+                        <div class="tree-node-type">Top-level field</div>
+                    </div>
+                    @if (Field.ParentId == null)
+                    {
+                        <i class="bi bi-check-lg tree-node-check"></i>
+                    }
+                </div>
+
+                @* Available Parent Fields *@
+                @foreach (var node in AvailableParents)
+                {
+                    <div class="tree-node @(node.IsSelected ? "selected" : "") @(node.IsDisabled ? "disabled" : "")"
+                         @onclick="() => SelectParent(node.FieldId)">
+                        @if (node.Depth > 0)
+                        {
+                            <div class="tree-node-indent">
+                                @for (int i = 0; i < node.Depth; i++)
+                                {
+                                    <div class="tree-indent-line"></div>
+                                }
+                            </div>
+                        }
+                        <div class="tree-node-icon">
+                            <i class="bi bi-@node.Icon"></i>
+                        </div>
+                        <div class="tree-node-content">
+                            <div class="tree-node-label">@node.Label</div>
+                            <div class="tree-node-type">@node.TypeLabel</div>
+                        </div>
+                        @if (node.IsSelected)
+                        {
+                            <i class="bi bi-check-lg tree-node-check"></i>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        @* Relationship Type (only when has parent) *@
+        @if (HasParent)
+        {
+            <div class="prop-group">
+                <label class="prop-label">
+                    <i class="bi bi-link-45deg"></i>
+                    Relationship Type
+                </label>
+                <div class="relationship-selector">
+                    @foreach (var rel in RelationshipOptions)
+                    {
+                        <div class="relationship-option @(Field.Relationship == rel.Value ? "selected" : "")"
+                             @onclick="() => SelectRelationship(rel.Value)">
+                            <div class="relationship-option-icon">
+                                <i class="bi bi-@rel.Icon"></i>
+                            </div>
+                            <div class="relationship-option-content">
+                                <div class="relationship-option-label">@rel.Label</div>
+                                <div class="relationship-option-desc">@rel.Description</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        @* Children List (for parent fields) *@
+        @if (ChildFields.Any())
+        {
+            <div class="children-list">
+                <div class="children-header">
+                    <span class="children-header-title">Child Fields</span>
+                    <span class="children-count">@ChildFields.Count() fields</span>
+                </div>
+                @foreach (var child in ChildFields)
+                {
+                    <div class="child-item">
+                        <div class="child-icon">
+                            <i class="bi bi-@child.Icon"></i>
+                        </div>
+                        <span class="child-name">@child.Label</span>
+                        <span class="child-relationship @child.Relationship.ToString().ToLower()">
+                            @child.Relationship
+                        </span>
+                    </div>
+                }
+            </div>
+        }
+
+        @* Quick Actions *@
+        @if (HasParent)
+        {
+            <div class="hierarchy-actions">
+                <button class="action-btn" @onclick="MoveUp" disabled="@(!CanMoveUp)" type="button">
+                    <i class="bi bi-arrow-up"></i>
+                    Move Up
+                </button>
+                <button class="action-btn danger" @onclick="Unparent" type="button">
+                    <i class="bi bi-box-arrow-up"></i>
+                    Unparent
+                </button>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="empty-state">
+            <p>Select a field to view hierarchy</p>
+        </div>
+    }
+</PropertySection>
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private FormFieldSchema? Field => EditorState.SelectedField;
+    private IEnumerable<FormFieldSchema> AllFields => EditorState.CurrentModule?.Fields ?? Array.Empty<FormFieldSchema>();
+
+    private bool HasParent => !string.IsNullOrEmpty(Field?.ParentId);
+    private string ParentFieldLabel => AllFields.FirstOrDefault(f => f.Id == Field?.ParentId)?.LabelEn ?? "Unknown";
+
+    private IEnumerable<TreeNode> AvailableParents { get; set; } = [];
+    private IEnumerable<ChildFieldInfo> ChildFields { get; set; } = [];
+    private IEnumerable<BreadcrumbItem> BreadcrumbPath { get; set; } = [];
+    private bool CanMoveUp => HasParent && AllFields.FirstOrDefault(f => f.Id == Field?.ParentId)?.ParentId != null;
+
+    private static readonly RelationshipOption[] RelationshipOptions = new[]
+    {
+        new RelationshipOption(RelationshipType.Container, "box", "Container", "Grouped within parent"),
+        new RelationshipOption(RelationshipType.Conditional, "question-circle", "Conditional", "Shown based on parent"),
+        new RelationshipOption(RelationshipType.Cascade, "arrow-down-circle", "Cascade", "Value depends on parent"),
+        new RelationshipOption(RelationshipType.Validation, "shield-check", "Validation", "Validates with parent")
+    };
+
+    protected override void OnInitialized()
+    {
+        EditorState.OnFieldSelected += OnFieldSelected;
+        EditorState.OnModuleChanged += OnModuleChanged;
+        RefreshData();
+    }
+
+    private void OnFieldSelected(string? fieldId)
+    {
+        RefreshData();
+        StateHasChanged();
+    }
+
+    private void OnModuleChanged()
+    {
+        RefreshData();
+        StateHasChanged();
+    }
+
+    private void RefreshData()
+    {
+        if (Field is null) return;
+        BuildAvailableParents();
+        BuildChildFields();
+        BuildBreadcrumbPath();
+    }
+
+    private void BuildAvailableParents()
+    {
+        if (Field is null) return;
+
+        var descendants = GetDescendants(Field.Id).ToHashSet();
+
+        AvailableParents = AllFields
+            .Where(f => f.Id != Field.Id && !descendants.Contains(f.Id))
+            .Select(f => new TreeNode
+            {
+                FieldId = f.Id,
+                Label = f.LabelEn ?? f.Id,
+                TypeLabel = f.FieldType,
+                Icon = GetFieldIcon(f.FieldType),
+                Depth = GetFieldDepth(f),
+                IsSelected = f.Id == Field.ParentId,
+                IsDisabled = f.Id == Field.Id
+            })
+            .OrderBy(n => GetFieldPath(n.FieldId))
+            .ToList();
+    }
+
+    private void BuildChildFields()
+    {
+        if (Field is null) return;
+
+        ChildFields = AllFields
+            .Where(f => f.ParentId == Field.Id)
+            .Select(f => new ChildFieldInfo
+            {
+                Label = f.LabelEn ?? f.Id,
+                Icon = GetFieldIcon(f.FieldType),
+                Relationship = f.Relationship
+            })
+            .ToList();
+    }
+
+    private void BuildBreadcrumbPath()
+    {
+        if (Field is null) return;
+
+        var path = new List<BreadcrumbItem>();
+        path.Add(new BreadcrumbItem { Label = "Root", Icon = "house", IsRoot = true });
+
+        var current = Field;
+        var ancestors = new List<FormFieldSchema>();
+
+        while (!string.IsNullOrEmpty(current.ParentId))
+        {
+            var parent = AllFields.FirstOrDefault(f => f.Id == current.ParentId);
+            if (parent == null) break;
+            ancestors.Insert(0, parent);
+            current = parent;
+        }
+
+        foreach (var ancestor in ancestors)
+        {
+            path.Add(new BreadcrumbItem
+            {
+                Label = ancestor.LabelEn ?? ancestor.Id,
+                Icon = GetFieldIcon(ancestor.FieldType)
+            });
+        }
+
+        path.Add(new BreadcrumbItem
+        {
+            Label = Field.LabelEn ?? Field.Id,
+            Icon = GetFieldIcon(Field.FieldType),
+            IsCurrent = true
+        });
+
+        BreadcrumbPath = path;
+    }
+
+    private void SelectParent(string? parentId)
+    {
+        if (Field is null || parentId == Field.Id) return;
+
+        EditorState.ChangeFieldParent(Field.Id, parentId);
+        RefreshData();
+    }
+
+    private void SelectRelationship(RelationshipType relationship)
+    {
+        if (Field is null) return;
+
+        var updated = Field with { Relationship = relationship };
+        EditorState.UpdateField(updated);
+    }
+
+    private void Unparent()
+    {
+        if (Field is null) return;
+
+        var updated = Field with { ParentId = null, Relationship = RelationshipType.Container };
+        EditorState.UpdateField(updated);
+        RefreshData();
+    }
+
+    private void MoveUp()
+    {
+        if (Field is null || string.IsNullOrEmpty(Field.ParentId)) return;
+
+        var parent = AllFields.FirstOrDefault(f => f.Id == Field.ParentId);
+        if (parent is null) return;
+
+        EditorState.ChangeFieldParent(Field.Id, parent.ParentId);
+        RefreshData();
+    }
+
+    private IEnumerable<string> GetDescendants(string fieldId)
+    {
+        var children = AllFields.Where(f => f.ParentId == fieldId);
+        foreach (var child in children)
+        {
+            yield return child.Id;
+            foreach (var grandchild in GetDescendants(child.Id))
+            {
+                yield return grandchild;
+            }
+        }
+    }
+
+    private int GetFieldDepth(FormFieldSchema field)
+    {
+        int depth = 0;
+        var current = field;
+        while (!string.IsNullOrEmpty(current.ParentId))
+        {
+            depth++;
+            current = AllFields.FirstOrDefault(f => f.Id == current.ParentId);
+            if (current == null) break;
+        }
+        return depth;
+    }
+
+    private string GetFieldPath(string fieldId)
+    {
+        var path = new List<string>();
+        var field = AllFields.FirstOrDefault(f => f.Id == fieldId);
+        while (field != null)
+        {
+            path.Insert(0, field.Id);
+            field = AllFields.FirstOrDefault(f => f.Id == field.ParentId);
+        }
+        return string.Join("/", path);
+    }
+
+    private static string GetFieldIcon(string fieldType) => fieldType switch
+    {
+        "TextBox" or "Text" => "input-cursor-text",
+        "Number" => "123",
+        "Email" => "envelope",
+        "Phone" => "telephone",
+        "Date" or "DatePicker" => "calendar",
+        "Time" => "clock",
+        "DateTime" => "calendar-event",
+        "DropDown" or "Select" => "menu-down",
+        "MultiSelect" => "list-check",
+        "Radio" => "record-circle",
+        "Checkbox" => "check-square",
+        "Toggle" => "toggle-on",
+        "TextArea" => "textarea-resize",
+        "RichText" => "text-paragraph",
+        "File" or "FileUpload" => "paperclip",
+        "Image" => "image",
+        "Signature" => "pen",
+        "Section" => "card-list",
+        "Repeater" => "collection",
+        "Calculated" => "calculator",
+        "Hidden" => "eye-slash",
+        _ => "square"
+    };
+
+    public void Dispose()
+    {
+        EditorState.OnFieldSelected -= OnFieldSelected;
+        EditorState.OnModuleChanged -= OnModuleChanged;
+    }
+
+    // Helper Records
+    private record TreeNode
+    {
+        public string FieldId { get; init; } = "";
+        public string Label { get; init; } = "";
+        public string TypeLabel { get; init; } = "";
+        public string Icon { get; init; } = "";
+        public int Depth { get; init; }
+        public bool IsSelected { get; init; }
+        public bool IsDisabled { get; init; }
+    }
+
+    private record ChildFieldInfo
+    {
+        public string Label { get; init; } = "";
+        public string Icon { get; init; } = "";
+        public RelationshipType Relationship { get; init; }
+    }
+
+    private record BreadcrumbItem
+    {
+        public string Label { get; init; } = "";
+        public string Icon { get; init; } = "";
+        public bool IsRoot { get; init; }
+        public bool IsCurrent { get; init; }
+    }
+
+    private record RelationshipOption(RelationshipType Value, string Icon, string Label, string Description);
+}

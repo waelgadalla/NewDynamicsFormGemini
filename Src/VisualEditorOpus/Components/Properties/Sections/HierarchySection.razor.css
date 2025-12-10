@@ -1,0 +1,378 @@
+/* ===== HIERARCHY SECTION ===== */
+
+/* Status Badge */
+.hierarchy-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    margin-bottom: 16px;
+}
+
+.hierarchy-status.has-parent {
+    background: var(--primary-light);
+}
+
+.hierarchy-status i {
+    font-size: 16px;
+    color: var(--text-muted);
+}
+
+.hierarchy-status.has-parent i {
+    color: var(--primary);
+}
+
+.hierarchy-status-text {
+    flex: 1;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.hierarchy-status.has-parent .hierarchy-status-text {
+    color: var(--primary);
+    font-weight: 500;
+}
+
+/* Breadcrumb Path */
+.hierarchy-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 14px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    margin-bottom: 16px;
+    overflow-x: auto;
+}
+
+.breadcrumb-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.breadcrumb-item i {
+    font-size: 12px;
+}
+
+.breadcrumb-separator {
+    color: var(--text-muted);
+    font-size: 10px;
+}
+
+.breadcrumb-item.current {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.breadcrumb-item.root i {
+    color: var(--warning);
+}
+
+/* Tree Selector */
+.tree-selector {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.tree-node {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tree-node:last-child {
+    border-bottom: none;
+}
+
+.tree-node:hover {
+    background: var(--bg-secondary);
+}
+
+.tree-node.selected {
+    background: var(--primary-light);
+}
+
+.tree-node.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.tree-node-indent {
+    display: flex;
+    align-items: center;
+}
+
+.tree-indent-line {
+    width: 20px;
+    height: 100%;
+    border-left: 1px solid var(--border-color);
+    margin-left: 8px;
+}
+
+.tree-node-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.tree-node.selected .tree-node-icon {
+    background: var(--primary);
+    color: white;
+}
+
+.tree-node-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.tree-node-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tree-node-type {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.tree-node-check {
+    color: var(--primary);
+    font-size: 14px;
+}
+
+.tree-node.root-option {
+    background: var(--bg-secondary);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.tree-node.root-option .tree-node-icon {
+    background: var(--warning-light);
+    color: var(--warning);
+}
+
+/* Relationship Type Selector */
+.relationship-selector {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.relationship-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.relationship-option:hover {
+    border-color: var(--primary);
+    background: var(--bg-secondary);
+}
+
+.relationship-option.selected {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.relationship-option-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: var(--text-muted);
+}
+
+.relationship-option.selected .relationship-option-icon {
+    background: var(--primary);
+    color: white;
+}
+
+.relationship-option-content {
+    flex: 1;
+}
+
+.relationship-option-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.relationship-option-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/* Children List */
+.children-list {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-top: 16px;
+}
+
+.children-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.children-header-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.children-count {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--bg-tertiary);
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.child-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.child-item:last-child {
+    border-bottom: none;
+}
+
+.child-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.child-name {
+    flex: 1;
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+.child-relationship {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+}
+
+.child-relationship.container {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.child-relationship.conditional {
+    background: var(--warning-light);
+    color: var(--warning);
+}
+
+.child-relationship.cascade {
+    background: var(--success-light);
+    color: var(--success);
+}
+
+.child-relationship.validation {
+    background: var(--danger-light);
+    color: var(--danger);
+}
+
+/* Quick Actions */
+.hierarchy-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+.action-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.action-btn:hover:not(:disabled) {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-light);
+}
+
+.action-btn.danger:hover:not(:disabled) {
+    border-color: var(--danger);
+    color: var(--danger);
+    background: var(--danger-light);
+}
+
+.action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Empty State */
+.empty-state {
+    padding: 24px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+}

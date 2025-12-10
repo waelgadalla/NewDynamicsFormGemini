@@ -424,6 +424,10 @@ build_metadata.AdditionalFiles.CssScope = b-mhlhda5j51
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xMYXlvdXQuYmFrXE5hdk1lbnUucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = b-rq7wda8t5w
 
+[C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Properties/Sections/HierarchySection.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQcm9wZXJ0aWVzXFNlY3Rpb25zXEhpZXJhcmNoeVNlY3Rpb24ucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-i4anzcv1it
+
 [C:/Users/waelm/source/repos/waelgadalla/NewDynamicsFormGemini/Src/VisualEditorOpus/Components/Shared/ConfirmDeleteModal.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTaGFyZWRcQ29uZmlybURlbGV0ZU1vZGFsLnJhem9y
 build_metadata.AdditionalFiles.CssScope = b-96u2xmqtbe

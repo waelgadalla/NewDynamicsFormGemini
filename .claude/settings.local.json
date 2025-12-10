@@ -5,7 +5,8 @@
       "Bash(tree:*)",
       "Bash(find:*)",
       "Bash(mkdir -p:*)",
-      "Bash(dir \"C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormGemini\\Src\\VisualEditorOpus\\Components\\Editor\")"
+      "Bash(dir \"C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormGemini\\Src\\VisualEditorOpus\\Components\\Editor\")",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []

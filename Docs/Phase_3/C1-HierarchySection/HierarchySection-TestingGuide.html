@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HierarchySection - Testing Guide</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: rgba(99, 102, 241, 0.1);
+            --success: #10B981;
+            --success-light: rgba(16, 185, 129, 0.1);
+            --warning: #F59E0B;
+            --warning-light: rgba(245, 158, 11, 0.1);
+            --danger: #EF4444;
+            --danger-light: rgba(239, 68, 68, 0.1);
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --bg-tertiary: #F3F4F6;
+            --border-color: #E5E7EB;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .header h1 i {
+            color: var(--primary);
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        .progress-bar {
+            background: var(--bg-tertiary);
+            border-radius: 20px;
+            height: 8px;
+            margin-top: 16px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), #818CF8);
+            border-radius: 20px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-header i {
+            font-size: 24px;
+            color: var(--primary);
+        }
+
+        .section-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .section-header .badge {
+            margin-left: auto;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-info {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .badge-warning {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .checklist-item label {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .checklist-item.completed label {
+            color: var(--text-muted);
+            text-decoration: line-through;
+        }
+
+        .checklist-item .hint {
+            display: block;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .subsection {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .subsection-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .subsection-title i {
+            font-size: 14px;
+        }
+
+        .code-block {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+
+        .task-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .task-card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .task-card-header i {
+            color: var(--warning);
+        }
+
+        .task-card-header strong {
+            font-size: 14px;
+        }
+
+        .task-card p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .reset-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 24px;
+        }
+
+        .reset-btn:hover {
+            background: var(--danger-light);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            margin-right: 8px;
+        }
+
+        .category-ui {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .category-logic {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .category-integration {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .category-style {
+            background: #F3E8FF;
+            color: #9333EA;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="bi bi-diagram-3"></i> HierarchySection Testing Guide</h1>
+            <p>Manual testing checklist for the Hierarchy Section component</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div class="progress-text"><span id="completedCount">0</span> of <span id="totalCount">0</span> tests completed</div>
+        </div>
+
+        <!-- Section 1: Manual Testing Steps -->
+        <div class="section">
+            <div class="section-header">
+                <i class="bi bi-clipboard-check"></i>
+                <h2>Manual Testing Steps</h2>
+                <span class="badge badge-info">42 tests</span>
+            </div>
+
+            <div class="subsection">
+                <div class="subsection-title"><i class="bi bi-house"></i> Root Level Field Display</div>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-1">
+                        <label for="test-1">
+                            <span class="category-badge category-ui">UI</span>
+                            Select a root-level field (no parent)
+                            <span class="hint">Status badge should show "This field is at the root level"</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-2">
+                        <label for="test-2">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify house icon appears in status badge
+                            <span class="hint">Icon should be bi-house for root fields</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-3">
+                        <label for="test-3">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify status badge has neutral gray styling
+                            <span class="hint">Should use bg-tertiary background, not primary-light</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-4">
+                        <label for="test-4">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify breadcrumb path is NOT displayed
+                            <span class="hint">Breadcrumbs only appear for nested fields</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-5">
+                        <label for="test-5">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify "Root (No Parent)" option is selected in tree
+                            <span class="hint">Should have checkmark and highlighted styling</span>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <div class="subsection-title"><i class="bi bi-diagram-3"></i> Nested Field Status Badge</div>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-6">
+                        <label for="test-6">
+                            <span class="category-badge category-ui">UI</span>
+                            Select a field that has a parent
+                            <span class="hint">Status badge should show 'Nested under "[ParentName]"'</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-7">
+                        <label for="test-7">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify diagram-3 icon appears for nested fields
+                            <span class="hint">Icon changes from house to diagram-3</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-8">
+                        <label for="test-8">
+                            <span class="category-badge category-style">Style</span>
+                            Verify status badge has primary styling
+                            <span class="hint">Should have primary-light background and primary text color</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-9">
+                        <label for="test-9">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify parent field label displays correctly
+                            <span class="hint">Uses LabelEn or field ID if no label</span>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <div class="subsection-title"><i class="bi bi-signpost"></i> Breadcrumb Path Navigation</div>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-10">
+                        <label for="test-10">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify breadcrumb shows Root at beginning
+                            <span class="hint">First item should be "Root" with house icon in warning color</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-11">
+                        <label for="test-11">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify ancestor fields appear in order
+                            <span class="hint">Root > Parent1 > Parent2 > Current</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-12">
+                        <label for="test-12">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify current field is highlighted
+                            <span class="hint">Last breadcrumb item should have primary color and bold text</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-13">
+                        <label for="test-13">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify chevron separators between items
+                            <span class="hint">bi-chevron-right icons between each breadcrumb item</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-14">
+                        <label for="test-14">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify field type icons display correctly
+                            <span class="hint">Each breadcrumb shows appropriate field type icon</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-15">
+                        <label for="test-15">
+                            <span class="category-badge category-ui">UI</span>
+                            Test with deeply nested field (3+ levels)
+                            <span class="hint">Breadcrumb should scroll horizontally if needed</span>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <div class="subsection-title"><i class="bi bi-list-nested"></i> Parent Field Tree Selector</div>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-16">
+                        <label for="test-16">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify "Root (No Parent)" option at top
+                            <span class="hint">Should have distinct styling with warning-colored house icon</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-17">
+                        <label for="test-17">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify all available fields are listed
+                            <span class="hint">All fields except current and its descendants</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-18">
+                        <label for="test-18">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify nested fields show indent lines
+                            <span class="hint">Depth indicated by vertical lines on left</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-19">
+                        <label for="test-19">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify field type icons display correctly
+                            <span class="hint">TextBox, Section, DropDown etc. have unique icons</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-20">
+                        <label for="test-20">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify field type labels display
+                            <span class="hint">Shows "Text", "Section", etc. below field name</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-21">
+                        <label for="test-21">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify selected parent has checkmark
+                            <span class="hint">bi-check-lg icon on right side of selected item</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-22">
+                        <label for="test-22">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify tree scrolls when many fields
+                            <span class="hint">max-height: 200px with overflow-y: auto</span>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <div class="subsection-title"><i class="bi bi-ban"></i> Circular Reference Prevention</div>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-23">
+                        <label for="test-23">
+                            <span class="category-badge category-logic">Logic</span>
+                            Verify current field is NOT in parent list
+                            <span class="hint">Cannot set a field as its own parent</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-24">
+                        <label for="test-24">
+                            <span class="category-badge category-logic">Logic</span>
+                            Verify child fields are disabled in parent list
+                            <span class="hint">Direct children should be disabled/grayed out</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-25">
+                        <label for="test-25">
+                            <span class="category-badge category-logic">Logic</span>
+                            Verify grandchildren are disabled
+                            <span class="hint">All descendants recursively disabled</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-26">
+                        <label for="test-26">
+                            <span class="category-badge category-logic">Logic</span>
+                            Click on disabled descendant - nothing happens
+                            <span class="hint">pointer-events: none should prevent selection</span>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <div class="subsection-title"><i class="bi bi-arrow-up-square"></i> Parent Selection</div>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-27">
+                        <label for="test-27">
+                            <span class="category-badge category-logic">Logic</span>
+                            Click on a valid parent field
+                            <span class="hint">Field's ParentId should update via EditorState</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-28">
+                        <label for="test-28">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify tree updates to show new selection
+                            <span class="hint">Checkmark moves to newly selected parent</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-29">
+                        <label for="test-29">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify breadcrumb updates immediately
+                            <span class="hint">Path should reflect new parent hierarchy</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-30">
+                        <label for="test-30">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify status badge updates
+                            <span class="hint">Shows new parent name</span>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <div class="subsection-title"><i class="bi bi-link-45deg"></i> Relationship Type Selection</div>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-31">
+                        <label for="test-31">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify relationship selector appears when field has parent
+                            <span class="hint">2x2 grid of relationship options</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-32">
+                        <label for="test-32">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify all 4 relationship types displayed
+                            <span class="hint">Container, Conditional, Cascade, Validation</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-33">
+                        <label for="test-33">
+                            <span class="category-badge category-logic">Logic</span>
+                            Click each relationship type - selection updates
+                            <span class="hint">Selected option gets highlighted styling</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-34">
+                        <label for="test-34">
+                            <span class="category-badge category-logic">Logic</span>
+                            Verify field.Relationship updates in EditorState
+                            <span class="hint">Check via console or by re-selecting field</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-35">
+                        <label for="test-35">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify relationship selector hidden for root fields
+                            <span class="hint">Only shown when HasParent is true</span>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <div class="subsection-title"><i class="bi bi-collection"></i> Children List Display</div>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-36">
+                        <label for="test-36">
+                            <span class="category-badge category-ui">UI</span>
+                            Select a field that has children
+                            <span class="hint">Children list should appear at bottom</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-37">
+                        <label for="test-37">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify header shows "Child Fields" with count
+                            <span class="hint">e.g., "Child Fields" and "3 fields"</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-38">
+                        <label for="test-38">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify each child shows icon, name, relationship badge
+                            <span class="hint">Icon matches field type, badge shows relationship type</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-39">
+                        <label for="test-39">
+                            <span class="category-badge category-style">Style</span>
+                            Verify relationship badges are color-coded
+                            <span class="hint">Container=primary, Conditional=warning, Cascade=success, Validation=danger</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-40">
+                        <label for="test-40">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify children list hidden when no children
+                            <span class="hint">Section completely hidden, not empty state</span>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <div class="subsection-title"><i class="bi bi-arrow-up"></i> Move Up Action</div>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-41">
+                        <label for="test-41">
+                            <span class="category-badge category-logic">Logic</span>
+                            Click "Move Up" on nested field
+                            <span class="hint">Field moves to parent's parent (grandparent)</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-42">
+                        <label for="test-42">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify "Move Up" disabled when parent is root
+                            <span class="hint">Cannot move up if already at first level</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-43">
+                        <label for="test-43">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify breadcrumb updates after move
+                            <span class="hint">One less level in hierarchy</span>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <div class="subsection-title"><i class="bi bi-box-arrow-up"></i> Unparent Action</div>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-44">
+                        <label for="test-44">
+                            <span class="category-badge category-logic">Logic</span>
+                            Click "Unparent" on nested field
+                            <span class="hint">Field moves to root level (ParentId = null)</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-45">
+                        <label for="test-45">
+                            <span class="category-badge category-logic">Logic</span>
+                            Verify Relationship resets to Container
+                            <span class="hint">Default relationship type when unparented</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-46">
+                        <label for="test-46">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify status badge changes to root level
+                            <span class="hint">"This field is at the root level" message</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-47">
+                        <label for="test-47">
+                            <span class="category-badge category-ui">UI</span>
+                            Verify quick actions section hidden
+                            <span class="hint">No "Move Up" or "Unparent" buttons for root fields</span>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <div class="subsection-title"><i class="bi bi-moon"></i> Dark Mode Verification</div>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-48">
+                        <label for="test-48">
+                            <span class="category-badge category-style">Style</span>
+                            Verify status badge colors in dark mode
+                            <span class="hint">Should use CSS variables that adapt to theme</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-49">
+                        <label for="test-49">
+                            <span class="category-badge category-style">Style</span>
+                            Verify tree selector readable in dark mode
+                            <span class="hint">Borders, text, and icons should be visible</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-50">
+                        <label for="test-50">
+                            <span class="category-badge category-style">Style</span>
+                            Verify relationship badges visible in dark mode
+                            <span class="hint">Colors should provide sufficient contrast</span>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <div class="subsection-title"><i class="bi bi-arrows-collapse"></i> Section Collapse/Expand</div>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-51">
+                        <label for="test-51">
+                            <span class="category-badge category-ui">UI</span>
+                            Click section header to collapse
+                            <span class="hint">Content should hide, chevron rotates</span>
+                        </label>
+                    </li>
+                    <li class="checklist-item">
+                        <input type="checkbox" id="test-52">
+                        <label for="test-52">
+                            <span class="category-badge category-ui">UI</span>
+                            Click again to expand
+                            <span class="hint">Content reappears with animation</span>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 2: Manual Implementation Tasks -->
+        <div class="section">
+            <div class="section-header">
+                <i class="bi bi-tools"></i>
+                <h2>Manual Implementation Tasks</h2>
+                <span class="badge badge-warning">Developer Tasks</span>
+            </div>
+
+            <div class="task-card">
+                <div class="task-card-header">
+                    <i class="bi bi-plug"></i>
+                    <strong>Integration with Property Panel</strong>
+                </div>
+                <p>Add HierarchySection to the RightSidebar property panel alongside other sections (GeneralSection, LabelsSection, etc.)</p>
+                <div class="code-block">&lt;HierarchySection /&gt;</div>
+            </div>
+
+            <div class="task-card">
+                <div class="task-card-header">
+                    <i class="bi bi-database"></i>
+                    <strong>EditorStateService Integration</strong>
+                </div>
+                <p>Ensure EditorStateService provides CurrentModule with all fields for hierarchy building. Verify ChangeFieldParent method is implemented.</p>
+            </div>
+
+            <div class="task-card">
+                <div class="task-card-header">
+                    <i class="bi bi-palette"></i>
+                    <strong>CSS Variables</strong>
+                </div>
+                <p>Verify variables.css defines all required CSS variables:</p>
+                <div class="code-block">--primary-light, --warning-light, --success-light, --danger-light
+--bg-tertiary, --border-color, --radius-md, --radius-sm</div>
+            </div>
+
+            <div class="task-card">
+                <div class="task-card-header">
+                    <i class="bi bi-file-code"></i>
+                    <strong>Namespace Import</strong>
+                </div>
+                <p>Add to _Imports.razor if not present:</p>
+                <div class="code-block">@using DynamicForms.Core.V4.Enums</div>
+            </div>
+
+            <div class="task-card">
+                <div class="task-card-header">
+                    <i class="bi bi-diagram-3"></i>
+                    <strong>Test Data Setup</strong>
+                </div>
+                <p>Create test module with hierarchical fields to test all scenarios (root, nested, multi-level, with children)</p>
+            </div>
+        </div>
+
+        <!-- Section 3: Quick Verification Checklist -->
+        <div class="section">
+            <div class="section-header">
+                <i class="bi bi-check2-square"></i>
+                <h2>Quick Verification Checklist</h2>
+                <span class="badge badge-info">Summary</span>
+            </div>
+
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify-1">
+                    <label for="verify-1">Root level field shows "at root level" status with house icon</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify-2">
+                    <label for="verify-2">Nested field shows parent name in status with diagram icon</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify-3">
+                    <label for="verify-3">Breadcrumb displays Root > Parent > Current path correctly</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify-4">
+                    <label for="verify-4">Tree selector shows all available fields with proper indentation</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify-5">
+                    <label for="verify-5">Current field and descendants are disabled in parent selector</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify-6">
+                    <label for="verify-6">Selecting parent updates field.ParentId correctly</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify-7">
+                    <label for="verify-7">Relationship selector appears when field has parent</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify-8">
+                    <label for="verify-8">All 4 relationship types are selectable and update field</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify-9">
+                    <label for="verify-9">Children list shows child fields with color-coded badges</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify-10">
+                    <label for="verify-10">Move Up moves field to grandparent level</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify-11">
+                    <label for="verify-11">Unparent moves field to root level</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify-12">
+                    <label for="verify-12">Section collapses and expands correctly</label>
+                </li>
+                <li class="checklist-item">
+                    <input type="checkbox" id="verify-13">
+                    <label for="verify-13">Dark mode styling displays correctly</label>
+                </li>
+            </ul>
+        </div>
+
+        <button class="reset-btn" onclick="resetProgress()">
+            <i class="bi bi-arrow-counterclockwise"></i> Reset All Progress
+        </button>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'hierarchy-section-testing-progress';
+
+        function loadProgress() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                const checked = JSON.parse(saved);
+                checked.forEach(id => {
+                    const checkbox = document.getElementById(id);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        checkbox.closest('.checklist-item')?.classList.add('completed');
+                    }
+                });
+            }
+            updateProgress();
+        }
+
+        function saveProgress() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const checked = [];
+            checkboxes.forEach(cb => {
+                if (cb.checked) checked.push(cb.id);
+            });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(checked));
+        }
+
+        function updateProgress() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const total = checkboxes.length;
+            const completed = document.querySelectorAll('input[type="checkbox"]:checked').length;
+            const percentage = total > 0 ? (completed / total) * 100 : 0;
+
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('totalCount').textContent = total;
+        }
+
+        function resetProgress() {
+            if (confirm('Are you sure you want to reset all progress?')) {
+                localStorage.removeItem(STORAGE_KEY);
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                    cb.checked = false;
+                    cb.closest('.checklist-item')?.classList.remove('completed');
+                });
+                updateProgress();
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProgress();
+
+            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', (e) => {
+                    const item = e.target.closest('.checklist-item');
+                    if (e.target.checked) {
+                        item?.classList.add('completed');
+                    } else {
+                        item?.classList.remove('completed');
+                    }
+                    saveProgress();
+                    updateProgress();
+                });
+            });
+        });
+    </script>
+</body>
+</html>
