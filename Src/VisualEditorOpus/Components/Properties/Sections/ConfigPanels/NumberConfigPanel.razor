@@ -1,0 +1,68 @@
+@* Number configuration panel *@
+
+<div class="config-panel">
+    <div class="config-row">
+        <div class="config-group">
+            <label class="config-label">
+                <i class="bi bi-arrow-down-short"></i>
+                Minimum
+            </label>
+            <input type="number" class="config-input"
+                   value="@Config.Min"
+                   @oninput="e => UpdateConfig(c => c.Min = decimal.TryParse(e.Value?.ToString(), out var v) ? v : null)"
+                   placeholder="e.g., 0" />
+        </div>
+
+        <div class="config-group">
+            <label class="config-label">
+                <i class="bi bi-arrow-up-short"></i>
+                Maximum
+            </label>
+            <input type="number" class="config-input"
+                   value="@Config.Max"
+                   @oninput="e => UpdateConfig(c => c.Max = decimal.TryParse(e.Value?.ToString(), out var v) ? v : null)"
+                   placeholder="e.g., 100" />
+        </div>
+    </div>
+
+    <div class="config-group">
+        <label class="config-label">
+            <i class="bi bi-plus-slash-minus"></i>
+            Step
+        </label>
+        <input type="number" class="config-input"
+               value="@Config.Step"
+               step="any"
+               @oninput="e => UpdateConfig(c => c.Step = decimal.TryParse(e.Value?.ToString(), out var v) ? v : null)"
+               placeholder="e.g., 0.01" />
+        <div class="config-help">Increment/decrement step value</div>
+    </div>
+
+    <div class="config-group">
+        <label class="config-label">
+            <i class="bi bi-currency-dollar"></i>
+            Format
+        </label>
+        <select class="config-select"
+                value="@Config.Format"
+                @onchange="e => UpdateConfig(c => c.Format = e.Value?.ToString())">
+            <option value="">Default</option>
+            <option value="decimal">Decimal (1,234.56)</option>
+            <option value="integer">Integer (1,234)</option>
+            <option value="currency">Currency ($1,234.56)</option>
+            <option value="percent">Percent (12.34%)</option>
+        </select>
+        <div class="config-help">Display format for the number</div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public TypeConfigButton.NumberConfigModel Config { get; set; } = new();
+    [Parameter] public EventCallback<TypeConfigButton.NumberConfigModel> OnChange { get; set; }
+
+    private async Task UpdateConfig(Action<TypeConfigButton.NumberConfigModel> update)
+    {
+        update(Config);
+        await OnChange.InvokeAsync(Config);
+    }
+}

@@ -1,0 +1,437 @@
+@* Database mapping section for SQL column configuration *@
+@implements IDisposable
+@inject IJSRuntime JS
+
+<PropertySection Title="Database Mapping" Icon="bi-database">
+    @* Status Badge *@
+    <div class="db-status @(IsConfigured ? "configured" : "not-configured")">
+        <div class="db-status-icon">
+            <i class="bi bi-@(IsConfigured ? "check-lg" : "database-dash")"></i>
+        </div>
+        <div class="db-status-content">
+            <div class="db-status-title">@(IsConfigured ? "Column Configured" : "No Column Mapping")</div>
+            <div class="db-status-desc">@StatusDescription</div>
+        </div>
+    </div>
+
+    @* Column Name *@
+    <div class="prop-group">
+        <label class="prop-label">
+            <i class="bi bi-type"></i>
+            Column Name
+        </label>
+        <input type="text"
+               class="prop-input text-mono"
+               value="@Field?.ColumnName"
+               @oninput="HandleColumnNameChange"
+               placeholder="e.g., FirstName" />
+        <div class="db-help-text">
+            <i class="bi bi-info-circle"></i>
+            <span>@(IsConfigured ? "Name of the column in the database table" : "Leave empty if field shouldn't be stored")</span>
+        </div>
+    </div>
+
+    @if (IsConfigured)
+    {
+        @* Column Type Grid *@
+        <div class="prop-group">
+            <label class="prop-label">
+                <i class="bi bi-braces"></i>
+                Column Type
+            </label>
+            <div class="column-type-grid">
+                @foreach (var type in ColumnTypes)
+                {
+                    <div class="column-type-option @(SelectedColumnType == type.Value ? "selected" : "")"
+                         @onclick="() => SelectColumnType(type.Value)">
+                        <div class="column-type-option-icon">@type.Icon</div>
+                        <div class="column-type-option-label">@type.Label</div>
+                        <div class="column-type-option-type">@type.SqlType</div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        @* Max Length (for text types) *@
+        @if (ShowMaxLength)
+        {
+            <div class="prop-group">
+                <label class="prop-label">
+                    <i class="bi bi-rulers"></i>
+                    Max Length
+                </label>
+                <div class="input-with-suffix">
+                    <input type="number"
+                           class="prop-input has-suffix"
+                           value="@MaxLength"
+                           @oninput="HandleMaxLengthChange"
+                           placeholder="255" />
+                    <span class="input-suffix">characters</span>
+                </div>
+            </div>
+        }
+
+        @* Precision and Scale (for decimal types) *@
+        @if (ShowPrecision)
+        {
+            <div class="prop-group">
+                <label class="prop-label">
+                    <i class="bi bi-rulers"></i>
+                    Precision & Scale
+                </label>
+                <div class="prop-row">
+                    <input type="number"
+                           class="prop-input"
+                           value="@Precision"
+                           @oninput="HandlePrecisionChange"
+                           placeholder="18" />
+                    <input type="number"
+                           class="prop-input"
+                           value="@Scale"
+                           @oninput="HandleScaleChange"
+                           placeholder="2" />
+                </div>
+                <div class="db-help-text">
+                    <i class="bi bi-info-circle"></i>
+                    <span>Precision (total digits) and Scale (decimal places)</span>
+                </div>
+            </div>
+        }
+
+        @* Constraints *@
+        <div class="prop-group">
+            <label class="prop-label">
+                <i class="bi bi-sliders"></i>
+                Constraints
+            </label>
+            <div class="toggle-row" @onclick="ToggleNullable">
+                <div class="toggle-label">
+                    <div class="toggle-icon">
+                        <i class="bi bi-asterisk"></i>
+                    </div>
+                    <div>
+                        <div class="toggle-text">Nullable</div>
+                        <div class="toggle-desc">Allow NULL values in column</div>
+                    </div>
+                </div>
+                <div class="toggle-switch @(IsNullable ? "active" : "")"></div>
+            </div>
+            <div class="toggle-row" @onclick="TogglePrimaryKey">
+                <div class="toggle-label">
+                    <div class="toggle-icon">
+                        <i class="bi bi-key"></i>
+                    </div>
+                    <div>
+                        <div class="toggle-text">Primary Key</div>
+                        <div class="toggle-desc">Column is part of primary key</div>
+                    </div>
+                </div>
+                <div class="toggle-switch @(IsPrimaryKey ? "active" : "")"></div>
+            </div>
+        </div>
+
+        @* Default Value *@
+        <div class="prop-group">
+            <label class="prop-label">
+                <i class="bi bi-input-cursor"></i>
+                Default Value
+            </label>
+            <input type="text"
+                   class="prop-input text-mono"
+                   value="@DefaultValue"
+                   @oninput="HandleDefaultValueChange"
+                   placeholder="e.g., GETDATE() or 'Unknown'" />
+        </div>
+
+        @* SQL Preview *@
+        <div class="sql-preview">
+            <div class="sql-preview-title">
+                <i class="bi bi-code-slash"></i>
+                Generated DDL
+            </div>
+            <div class="sql-preview-code">@((MarkupString)GeneratedDdl)</div>
+        </div>
+    }
+
+    @* Quick Actions *@
+    <div class="quick-actions">
+        @if (IsConfigured)
+        {
+            <button class="quick-action-btn" @onclick="AutoDetect">
+                <i class="bi bi-magic"></i>
+                Auto-Detect
+            </button>
+            <button class="quick-action-btn" @onclick="CopyDdl">
+                <i class="bi bi-clipboard"></i>
+                Copy DDL
+            </button>
+        }
+        else
+        {
+            <button class="quick-action-btn" @onclick="GenerateFromFieldName">
+                <i class="bi bi-magic"></i>
+                Generate from Field Name
+            </button>
+        }
+    </div>
+</PropertySection>
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private FormFieldSchema? Field => EditorState.SelectedField;
+    private FormModuleSchema? Module => EditorState.CurrentModule;
+
+    private bool IsConfigured => !string.IsNullOrWhiteSpace(Field?.ColumnName);
+
+    // Parsed from ColumnType
+    private string SelectedColumnType { get; set; } = "NVARCHAR";
+    private int MaxLength { get; set; } = 255;
+    private int Precision { get; set; } = 18;
+    private int Scale { get; set; } = 2;
+    private bool IsNullable { get; set; } = true;
+    private bool IsPrimaryKey { get; set; }
+    private string? DefaultValue { get; set; }
+
+    private bool ShowMaxLength => SelectedColumnType is "NVARCHAR" or "VARCHAR" or "CHAR";
+    private bool ShowPrecision => SelectedColumnType is "DECIMAL" or "NUMERIC";
+
+    private string StatusDescription => IsConfigured
+        ? $"Maps to {Module?.SchemaName ?? "dbo"}.{Module?.TableName ?? "Table"}.{Field?.ColumnName}"
+        : "Field won't be persisted to database";
+
+    private static readonly ColumnTypeOption[] ColumnTypes = new[]
+    {
+        new ColumnTypeOption("Aa", "Text", "NVARCHAR", "NVARCHAR"),
+        new ColumnTypeOption("123", "Number", "INT", "INT"),
+        new ColumnTypeOption("1.5", "Decimal", "DECIMAL", "DECIMAL"),
+        new ColumnTypeOption("Date", "Date", "DATETIME2", "DATETIME2"),
+        new ColumnTypeOption("Bool", "Boolean", "BIT", "BIT"),
+        new ColumnTypeOption("Text", "Long Text", "NVARCHAR(MAX)", "NVARCHAR(MAX)")
+    };
+
+    protected override void OnInitialized()
+    {
+        EditorState.OnFieldSelected += OnFieldSelected;
+    }
+
+    protected override void OnParametersSet()
+    {
+        ParseColumnType();
+    }
+
+    private void OnFieldSelected(string? fieldId)
+    {
+        ParseColumnType();
+        StateHasChanged();
+    }
+
+    private void ParseColumnType()
+    {
+        if (Field is null || string.IsNullOrWhiteSpace(Field.ColumnType))
+        {
+            SelectedColumnType = GetDefaultType(Field?.FieldType);
+            return;
+        }
+
+        var type = Field.ColumnType.ToUpper();
+
+        // Parse NVARCHAR(255) or DECIMAL(18,2)
+        if (type.Contains('('))
+        {
+            var baseType = type.Substring(0, type.IndexOf('('));
+            var args = type.Substring(type.IndexOf('(') + 1).TrimEnd(')');
+
+            SelectedColumnType = baseType;
+
+            if (args.Contains(','))
+            {
+                var parts = args.Split(',');
+                Precision = int.TryParse(parts[0], out var p) ? p : 18;
+                Scale = int.TryParse(parts[1], out var s) ? s : 2;
+            }
+            else if (args.ToUpper() != "MAX")
+            {
+                MaxLength = int.TryParse(args, out var l) ? l : 255;
+            }
+            else
+            {
+                SelectedColumnType = "NVARCHAR(MAX)";
+            }
+        }
+        else
+        {
+            SelectedColumnType = type;
+        }
+
+        // Parse constraints from extended properties if stored
+        // For now, default values
+        IsNullable = true;
+        IsPrimaryKey = false;
+    }
+
+    private string GetDefaultType(string? fieldType) => fieldType switch
+    {
+        "TextBox" or "Email" or "Phone" => "NVARCHAR",
+        "Number" or "Currency" => "INT",
+        "Date" or "DateTime" or "DatePicker" => "DATETIME2",
+        "Time" => "TIME",
+        "Checkbox" or "Toggle" => "BIT",
+        "TextArea" or "RichText" => "NVARCHAR(MAX)",
+        "DropDown" or "RadioGroup" => "NVARCHAR",
+        "CheckboxList" or "MultiSelect" => "NVARCHAR(MAX)",
+        "FileUpload" or "Image" or "Signature" => "VARBINARY(MAX)",
+        "Calculated" => "NVARCHAR",
+        _ => "NVARCHAR"
+    };
+
+    private string GeneratedDdl
+    {
+        get
+        {
+            var columnName = Field?.ColumnName ?? "ColumnName";
+            var typeSpec = BuildTypeSpec();
+            var nullable = IsNullable ? "NULL" : "NOT NULL";
+            var pk = IsPrimaryKey ? " PRIMARY KEY" : "";
+            var defaultSpec = !string.IsNullOrEmpty(DefaultValue) ? $" DEFAULT {DefaultValue}" : "";
+
+            return $"[<span class=\"ddl-value\">{columnName}</span>] <span class=\"ddl-type\">{typeSpec}</span> <span class=\"ddl-constraint\">{nullable}</span>{pk}{defaultSpec}";
+        }
+    }
+
+    private string BuildTypeSpec()
+    {
+        return SelectedColumnType switch
+        {
+            "NVARCHAR" => MaxLength > 0 ? $"NVARCHAR({MaxLength})" : "NVARCHAR(255)",
+            "VARCHAR" => MaxLength > 0 ? $"VARCHAR({MaxLength})" : "VARCHAR(255)",
+            "NVARCHAR(MAX)" => "NVARCHAR(MAX)",
+            "DECIMAL" or "NUMERIC" => $"DECIMAL({Precision},{Scale})",
+            _ => SelectedColumnType
+        };
+    }
+
+    private void HandleColumnNameChange(ChangeEventArgs e)
+    {
+        if (Field is null) return;
+        var updated = Field with { ColumnName = e.Value?.ToString() };
+        EditorState.UpdateField(updated);
+        ParseColumnType();
+    }
+
+    private void SelectColumnType(string type)
+    {
+        SelectedColumnType = type;
+        UpdateColumnType();
+    }
+
+    private void HandleMaxLengthChange(ChangeEventArgs e)
+    {
+        MaxLength = int.TryParse(e.Value?.ToString(), out var l) ? l : 255;
+        UpdateColumnType();
+    }
+
+    private void HandlePrecisionChange(ChangeEventArgs e)
+    {
+        Precision = int.TryParse(e.Value?.ToString(), out var p) ? p : 18;
+        UpdateColumnType();
+    }
+
+    private void HandleScaleChange(ChangeEventArgs e)
+    {
+        Scale = int.TryParse(e.Value?.ToString(), out var s) ? s : 2;
+        UpdateColumnType();
+    }
+
+    private void UpdateColumnType()
+    {
+        if (Field is null) return;
+        var typeSpec = BuildTypeSpec();
+        var updated = Field with { ColumnType = typeSpec };
+        EditorState.UpdateField(updated);
+    }
+
+    private void ToggleNullable()
+    {
+        IsNullable = !IsNullable;
+        StateHasChanged();
+    }
+
+    private void TogglePrimaryKey()
+    {
+        IsPrimaryKey = !IsPrimaryKey;
+        if (IsPrimaryKey) IsNullable = false;
+        StateHasChanged();
+    }
+
+    private void HandleDefaultValueChange(ChangeEventArgs e)
+    {
+        DefaultValue = e.Value?.ToString();
+        StateHasChanged();
+    }
+
+    private void AutoDetect()
+    {
+        if (Field is null) return;
+
+        // Auto-detect type based on field type
+        SelectedColumnType = GetDefaultType(Field.FieldType);
+
+        // Set sensible defaults
+        MaxLength = Field.FieldType switch
+        {
+            "Email" => 320,
+            "Phone" => 20,
+            _ => 255
+        };
+
+        UpdateColumnType();
+    }
+
+    private void GenerateFromFieldName()
+    {
+        if (Field is null) return;
+
+        // Generate column name from field label/ID
+        var name = Field.LabelEn ?? Field.Id;
+
+        // Convert to PascalCase column name
+        var columnName = ToPascalCase(name);
+
+        var updated = Field with
+        {
+            ColumnName = columnName,
+            ColumnType = GetDefaultType(Field.FieldType)
+        };
+
+        EditorState.UpdateField(updated);
+        ParseColumnType();
+    }
+
+    private async Task CopyDdl()
+    {
+        var ddl = $"[{Field?.ColumnName}] {BuildTypeSpec()} {(IsNullable ? "NULL" : "NOT NULL")}";
+        if (IsPrimaryKey) ddl += " PRIMARY KEY";
+        if (!string.IsNullOrEmpty(DefaultValue)) ddl += $" DEFAULT {DefaultValue}";
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", ddl);
+    }
+
+    private static string ToPascalCase(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return text;
+
+        // Remove special characters and split
+        var words = System.Text.RegularExpressions.Regex.Split(text, @"[\s_\-]+");
+
+        return string.Concat(words
+            .Where(w => !string.IsNullOrEmpty(w))
+            .Select(w => char.ToUpperInvariant(w[0]) + (w.Length > 1 ? w.Substring(1).ToLowerInvariant() : "")));
+    }
+
+    public void Dispose()
+    {
+        EditorState.OnFieldSelected -= OnFieldSelected;
+    }
+
+    private record ColumnTypeOption(string Icon, string Label, string SqlType, string Value);
+}

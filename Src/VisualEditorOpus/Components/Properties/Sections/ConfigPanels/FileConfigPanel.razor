@@ -1,0 +1,88 @@
+@* File upload configuration panel *@
+
+<div class="config-panel">
+    <div class="config-group">
+        <label class="config-label">
+            <i class="bi bi-file-earmark"></i>
+            Allowed File Types
+        </label>
+        <input type="text" class="config-input"
+               value="@Config.AllowedExtensions"
+               @oninput="e => UpdateConfig(c => c.AllowedExtensions = e.Value?.ToString())"
+               placeholder="e.g., .pdf, .doc, .docx" />
+        <div class="config-help">Comma-separated list of file extensions</div>
+    </div>
+
+    <div class="config-group">
+        <label class="config-label">
+            <i class="bi bi-hdd"></i>
+            Max File Size
+        </label>
+        <div class="input-with-suffix">
+            <input type="number" class="config-input has-suffix"
+                   value="@Config.MaxFileSizeMB"
+                   min="1"
+                   max="100"
+                   @oninput="e => UpdateConfig(c => c.MaxFileSizeMB = int.TryParse(e.Value?.ToString(), out var v) ? v : 10)" />
+            <span class="input-suffix">MB</span>
+        </div>
+    </div>
+
+    <div class="config-group">
+        <label class="config-label">Upload Options</label>
+        <div class="config-toggles">
+            <label class="toggle-option">
+                <input type="checkbox"
+                       checked="@Config.AllowMultiple"
+                       @onchange="e => UpdateConfig(c => c.AllowMultiple = (bool)(e.Value ?? false))" />
+                <span>Allow multiple files</span>
+            </label>
+            <label class="toggle-option">
+                <input type="checkbox"
+                       checked="@Config.ScanRequired"
+                       @onchange="e => UpdateConfig(c => c.ScanRequired = (bool)(e.Value ?? true))" />
+                <span>Require virus scan</span>
+            </label>
+        </div>
+    </div>
+
+    <div class="config-presets">
+        <label class="config-label">Quick Presets</label>
+        <div class="preset-buttons">
+            <button class="preset-btn" @onclick="() => ApplyPreset(documents)">
+                <i class="bi bi-file-text"></i>
+                Documents
+            </button>
+            <button class="preset-btn" @onclick="() => ApplyPreset(images)">
+                <i class="bi bi-image"></i>
+                Images
+            </button>
+            <button class="preset-btn" @onclick="() => ApplyPreset(spreadsheets)">
+                <i class="bi bi-file-spreadsheet"></i>
+                Spreadsheets
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public TypeConfigButton.FileConfigModel Config { get; set; } = new();
+    [Parameter] public EventCallback<TypeConfigButton.FileConfigModel> OnChange { get; set; }
+
+    private readonly (string extensions, int maxSize) documents = (".pdf, .doc, .docx, .txt", 10);
+    private readonly (string extensions, int maxSize) images = (".jpg, .jpeg, .png, .gif, .webp", 5);
+    private readonly (string extensions, int maxSize) spreadsheets = (".xlsx, .xls, .csv", 10);
+
+    private async Task UpdateConfig(Action<TypeConfigButton.FileConfigModel> update)
+    {
+        update(Config);
+        await OnChange.InvokeAsync(Config);
+    }
+
+    private async Task ApplyPreset((string extensions, int maxSize) preset)
+    {
+        Config.AllowedExtensions = preset.extensions;
+        Config.MaxFileSizeMB = preset.maxSize;
+        await OnChange.InvokeAsync(Config);
+    }
+}

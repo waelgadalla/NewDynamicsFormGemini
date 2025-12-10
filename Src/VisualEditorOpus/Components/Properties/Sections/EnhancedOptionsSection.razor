@@ -1,0 +1,684 @@
+@* Enhanced options section with drag-to-reorder and CodeSet support *@
+@implements IDisposable
+@inject IJSRuntime JS
+
+<PropertySection Title="Options" Icon="bi-list-check">
+    @* Mode Switcher *@
+    <div class="mode-switcher">
+        <button class="mode-btn @(Mode == OptionsMode.Inline ? "active" : "")"
+                @onclick="() => SetMode(OptionsMode.Inline)">
+            <i class="bi bi-list-ul"></i>
+            Inline
+        </button>
+        <button class="mode-btn @(Mode == OptionsMode.CodeSet ? "active" : "")"
+                @onclick="() => SetMode(OptionsMode.CodeSet)">
+            <i class="bi bi-database"></i>
+            CodeSet
+        </button>
+    </div>
+
+    @if (Mode == OptionsMode.Inline)
+    {
+        @* Inline Options List *@
+        <div class="options-list">
+            <div class="options-list-header">
+                <div class="options-header-left">
+                    <span class="options-count">@Options.Count Options</span>
+                    <span class="options-badge">Inline</span>
+                </div>
+                <button class="add-option-btn" @onclick="AddOption">
+                    <i class="bi bi-plus"></i>
+                    Add
+                </button>
+            </div>
+
+            @if (Options.Any())
+            {
+                <div class="options-items">
+                    @foreach (var option in Options.OrderBy(o => o.Order))
+                    {
+                        <div class="option-item @(DraggedOption?.Value == option.Value ? "dragging" : "")"
+                             draggable="true"
+                             @ondragstart="() => StartDrag(option)"
+                             @ondragover:preventDefault
+                             @ondrop="() => DropOn(option)">
+                            <i class="bi bi-grip-vertical option-drag-handle"></i>
+                            <span class="option-value-badge">@option.Value</span>
+                            <div class="option-labels">
+                                <div class="option-label-en">@option.LabelEn</div>
+                                @if (!string.IsNullOrEmpty(option.LabelFr))
+                                {
+                                    <div class="option-label-fr">@option.LabelFr</div>
+                                }
+                            </div>
+                            @if (option.IsDefault)
+                            {
+                                <span class="option-default-badge">Default</span>
+                            }
+                            <div class="option-actions">
+                                <button class="option-action-btn" @onclick="() => EditOption(option)" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="option-action-btn danger" @onclick="() => DeleteOption(option)" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="options-empty">
+                    <i class="bi bi-list"></i>
+                    <span>No options defined</span>
+                </div>
+            }
+
+            @* Quick Add *@
+            <div class="quick-add-row">
+                <input type="text"
+                       class="quick-add-input"
+                       placeholder="Add new option..."
+                       @bind="QuickAddValue"
+                       @bind:event="oninput"
+                       @onkeypress="HandleQuickAddKeyPress" />
+                <button class="quick-add-btn" @onclick="QuickAdd" disabled="@string.IsNullOrWhiteSpace(QuickAddValue)">Add</button>
+            </div>
+        </div>
+
+        @* Bulk Actions for Inline *@
+        <div class="bulk-actions">
+            <button class="bulk-btn" @onclick="SortAlphabetically">
+                <i class="bi bi-sort-alpha-down"></i>
+                Sort A-Z
+            </button>
+            <button class="bulk-btn" @onclick="RenumberOptions">
+                <i class="bi bi-123"></i>
+                Re-number
+            </button>
+            <button class="bulk-btn" @onclick="ClearDefaultOption" disabled="@(!Options.Any(o => o.IsDefault))">
+                <i class="bi bi-x-circle"></i>
+                Clear Default
+            </button>
+        </div>
+    }
+    else
+    {
+        @* CodeSet Mode *@
+        <div class="codeset-selector">
+            @if (SelectedCodeSet != null)
+            {
+                <div class="codeset-current">
+                    <div class="codeset-icon">
+                        <i class="bi bi-collection"></i>
+                    </div>
+                    <div class="codeset-info">
+                        <div class="codeset-name">@SelectedCodeSet.NameEn</div>
+                        <div class="codeset-meta">@SelectedCodeSet.Items.Length items</div>
+                    </div>
+                    <button class="codeset-change-btn" @onclick="OpenCodeSetSelector">
+                        Change
+                    </button>
+                </div>
+
+                <div class="codeset-preview">
+                    @foreach (var item in SelectedCodeSet.Items.OrderBy(i => i.Order).Take(6))
+                    {
+                        <div class="codeset-preview-item">
+                            <span class="codeset-preview-value">@item.Value</span>
+                            <span>@item.TextEn</span>
+                        </div>
+                    }
+                    @if (SelectedCodeSet.Items.Length > 6)
+                    {
+                        <div class="codeset-preview-item codeset-more">
+                            +@(SelectedCodeSet.Items.Length - 6) more items
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="codeset-empty">
+                    <i class="bi bi-database-add"></i>
+                    <span>No CodeSet selected</span>
+                    <button class="codeset-select-btn" @onclick="OpenCodeSetSelector">
+                        Select CodeSet
+                    </button>
+                </div>
+            }
+        </div>
+
+        @* Bulk Actions for CodeSet *@
+        <div class="bulk-actions">
+            <button class="bulk-btn" @onclick="NavigateToCodeSetEditor" disabled="@(SelectedCodeSet == null)">
+                <i class="bi bi-pencil-square"></i>
+                Edit CodeSet
+            </button>
+            <button class="bulk-btn" @onclick="RefreshCodeSet" disabled="@(SelectedCodeSet == null)">
+                <i class="bi bi-arrow-repeat"></i>
+                Refresh
+            </button>
+        </div>
+    }
+</PropertySection>
+
+@* Option Editor Modal *@
+@if (IsEditingOption)
+{
+    <div class="modal-overlay" @onclick="CloseOptionEditor">
+        <div class="modal-dialog" @onclick:stopPropagation>
+            <div class="modal-header">
+                <h3>@(IsNewOption ? "Add Option" : "Edit Option")</h3>
+                <button class="modal-close" @onclick="CloseOptionEditor">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Value</label>
+                    <input type="text" class="form-input text-mono"
+                           @bind="EditingOption.Value"
+                           placeholder="e.g., option_1" />
+                    <div class="form-help">Unique identifier for this option</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Label (English)</label>
+                    <input type="text" class="form-input"
+                           @bind="EditingOption.LabelEn"
+                           placeholder="Option label in English" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Label (French)</label>
+                    <input type="text" class="form-input"
+                           @bind="EditingOption.LabelFr"
+                           placeholder="Option label in French" />
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" @bind="EditingOption.IsDefault" />
+                        <span>Set as default option</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @onclick="CloseOptionEditor">Cancel</button>
+                <button class="btn btn-primary" @onclick="SaveEditingOption">
+                    @(IsNewOption ? "Add" : "Save")
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@* CodeSet Selector Modal *@
+@if (IsSelectingCodeSet)
+{
+    <div class="modal-overlay" @onclick="CloseCodeSetSelector">
+        <div class="modal-dialog modal-lg" @onclick:stopPropagation>
+            <div class="modal-header">
+                <h3>Select CodeSet</h3>
+                <button class="modal-close" @onclick="CloseCodeSetSelector">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="codeset-search">
+                    <i class="bi bi-search"></i>
+                    <input type="text" placeholder="Search code sets..."
+                           @bind="CodeSetSearchQuery"
+                           @bind:event="oninput" />
+                </div>
+                <div class="codeset-grid">
+                    @foreach (var codeSet in FilteredCodeSets)
+                    {
+                        <div class="codeset-card @(Field?.CodeSetId == codeSet.Id ? "selected" : "")"
+                             @onclick="() => SelectCodeSet(codeSet)">
+                            <div class="codeset-card-icon">
+                                <i class="bi bi-collection"></i>
+                            </div>
+                            <div class="codeset-card-info">
+                                <div class="codeset-card-name">@codeSet.NameEn</div>
+                                <div class="codeset-card-meta">
+                                    <span>@codeSet.Items.Length items</span>
+                                    @if (!string.IsNullOrEmpty(codeSet.Category))
+                                    {
+                                        <span>@codeSet.Category</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @if (!FilteredCodeSets.Any())
+                    {
+                        <div class="codeset-no-results">
+                            <i class="bi bi-search"></i>
+                            <span>No code sets found</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+
+    // Available CodeSets - in real implementation, this would come from a service
+    private List<CodeSetSchema> AvailableCodeSets { get; set; } = new();
+
+    private FormFieldSchema? Field => EditorState.SelectedField;
+
+    private OptionsMode Mode { get; set; } = OptionsMode.Inline;
+    private string QuickAddValue { get; set; } = "";
+    private FieldOption? DraggedOption { get; set; }
+
+    private List<FieldOption> Options => Field?.Options?.ToList() ?? new();
+    private CodeSetSchema? SelectedCodeSet { get; set; }
+
+    // Option Editor Modal State
+    private bool IsEditingOption { get; set; }
+    private bool IsNewOption { get; set; }
+    private EditableOption EditingOption { get; set; } = new();
+    private string? OriginalOptionValue { get; set; }
+
+    // CodeSet Selector Modal State
+    private bool IsSelectingCodeSet { get; set; }
+    private string CodeSetSearchQuery { get; set; } = "";
+
+    private IEnumerable<CodeSetSchema> FilteredCodeSets =>
+        string.IsNullOrWhiteSpace(CodeSetSearchQuery)
+            ? AvailableCodeSets
+            : AvailableCodeSets.Where(c =>
+                c.NameEn.Contains(CodeSetSearchQuery, StringComparison.OrdinalIgnoreCase) ||
+                c.Code.Contains(CodeSetSearchQuery, StringComparison.OrdinalIgnoreCase) ||
+                (c.Category?.Contains(CodeSetSearchQuery, StringComparison.OrdinalIgnoreCase) ?? false));
+
+    protected override void OnInitialized()
+    {
+        EditorState.OnFieldSelected += OnFieldSelected;
+
+        // Initialize sample code sets for demo
+        InitializeSampleCodeSets();
+    }
+
+    protected override void OnParametersSet()
+    {
+        DetermineMode();
+        LoadSelectedCodeSet();
+    }
+
+    private void OnFieldSelected(string? fieldId)
+    {
+        DetermineMode();
+        LoadSelectedCodeSet();
+        StateHasChanged();
+    }
+
+    private void DetermineMode()
+    {
+        Mode = Field?.CodeSetId.HasValue == true
+            ? OptionsMode.CodeSet
+            : OptionsMode.Inline;
+    }
+
+    private void LoadSelectedCodeSet()
+    {
+        if (Field?.CodeSetId.HasValue == true)
+        {
+            SelectedCodeSet = AvailableCodeSets.FirstOrDefault(c => c.Id == Field.CodeSetId.Value);
+        }
+        else
+        {
+            SelectedCodeSet = null;
+        }
+    }
+
+    private void SetMode(OptionsMode mode)
+    {
+        if (Field is null) return;
+
+        Mode = mode;
+
+        if (mode == OptionsMode.Inline)
+        {
+            // Clear CodeSet reference
+            var updated = Field with { CodeSetId = null };
+            EditorState.UpdateField(updated);
+            SelectedCodeSet = null;
+        }
+        else
+        {
+            // Clear inline options when switching to CodeSet
+            var updated = Field with { Options = null };
+            EditorState.UpdateField(updated);
+        }
+    }
+
+    #region Inline Options
+
+    private void AddOption()
+    {
+        var nextOrder = Options.Any() ? Options.Max(o => o.Order) + 1 : 0;
+        var nextValue = (Options.Count + 1).ToString();
+
+        EditingOption = new EditableOption
+        {
+            Value = nextValue,
+            LabelEn = $"Option {Options.Count + 1}",
+            LabelFr = "",
+            IsDefault = false,
+            Order = nextOrder
+        };
+        OriginalOptionValue = null;
+        IsNewOption = true;
+        IsEditingOption = true;
+    }
+
+    private void EditOption(FieldOption option)
+    {
+        EditingOption = new EditableOption
+        {
+            Value = option.Value,
+            LabelEn = option.LabelEn,
+            LabelFr = option.LabelFr ?? "",
+            IsDefault = option.IsDefault,
+            Order = option.Order
+        };
+        OriginalOptionValue = option.Value;
+        IsNewOption = false;
+        IsEditingOption = true;
+    }
+
+    private void SaveEditingOption()
+    {
+        if (Field is null || string.IsNullOrWhiteSpace(EditingOption.Value)) return;
+
+        var newOption = new FieldOption(
+            Value: EditingOption.Value.Trim(),
+            LabelEn: EditingOption.LabelEn?.Trim() ?? "",
+            LabelFr: string.IsNullOrWhiteSpace(EditingOption.LabelFr) ? null : EditingOption.LabelFr.Trim(),
+            IsDefault: EditingOption.IsDefault,
+            Order: EditingOption.Order
+        );
+
+        var newOptions = Options.ToList();
+
+        // If setting as default, clear other defaults
+        if (newOption.IsDefault)
+        {
+            newOptions = newOptions.Select(o => o with { IsDefault = false }).ToList();
+        }
+
+        if (IsNewOption)
+        {
+            newOptions.Add(newOption);
+        }
+        else
+        {
+            var existingIndex = newOptions.FindIndex(o => o.Value == OriginalOptionValue);
+            if (existingIndex >= 0)
+            {
+                newOptions[existingIndex] = newOption;
+            }
+        }
+
+        var updated = Field with { Options = newOptions.ToArray() };
+        EditorState.UpdateField(updated);
+        CloseOptionEditor();
+    }
+
+    private void CloseOptionEditor()
+    {
+        IsEditingOption = false;
+        EditingOption = new EditableOption();
+        OriginalOptionValue = null;
+    }
+
+    private void DeleteOption(FieldOption option)
+    {
+        if (Field is null) return;
+
+        var newOptions = Options.Where(o => o.Value != option.Value).ToArray();
+        var updated = Field with { Options = newOptions };
+        EditorState.UpdateField(updated);
+    }
+
+    private async Task HandleQuickAddKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(QuickAddValue))
+        {
+            await QuickAdd();
+        }
+    }
+
+    private Task QuickAdd()
+    {
+        if (Field is null || string.IsNullOrWhiteSpace(QuickAddValue)) return Task.CompletedTask;
+
+        var nextOrder = Options.Any() ? Options.Max(o => o.Order) + 1 : 0;
+        var nextValue = (Options.Count + 1).ToString();
+
+        var newOption = new FieldOption(
+            Value: nextValue,
+            LabelEn: QuickAddValue.Trim(),
+            LabelFr: null,
+            IsDefault: false,
+            Order: nextOrder
+        );
+
+        var newOptions = Options.ToList();
+        newOptions.Add(newOption);
+
+        var updated = Field with { Options = newOptions.ToArray() };
+        EditorState.UpdateField(updated);
+
+        QuickAddValue = "";
+        return Task.CompletedTask;
+    }
+
+    #endregion
+
+    #region Drag and Drop
+
+    private void StartDrag(FieldOption option)
+    {
+        DraggedOption = option;
+    }
+
+    private void DropOn(FieldOption target)
+    {
+        if (Field is null || DraggedOption == null || DraggedOption.Value == target.Value)
+        {
+            DraggedOption = null;
+            return;
+        }
+
+        var newOptions = Options.OrderBy(o => o.Order).ToList();
+        var draggedIndex = newOptions.FindIndex(o => o.Value == DraggedOption.Value);
+        var targetIndex = newOptions.FindIndex(o => o.Value == target.Value);
+
+        if (draggedIndex >= 0 && targetIndex >= 0)
+        {
+            var dragged = newOptions[draggedIndex];
+            newOptions.RemoveAt(draggedIndex);
+            newOptions.Insert(targetIndex, dragged);
+
+            // Update sort orders
+            for (int i = 0; i < newOptions.Count; i++)
+            {
+                newOptions[i] = newOptions[i] with { Order = i };
+            }
+
+            var updated = Field with { Options = newOptions.ToArray() };
+            EditorState.UpdateField(updated);
+        }
+
+        DraggedOption = null;
+    }
+
+    #endregion
+
+    #region Bulk Actions
+
+    private void SortAlphabetically()
+    {
+        if (Field is null || !Options.Any()) return;
+
+        var sorted = Options
+            .OrderBy(o => o.LabelEn, StringComparer.OrdinalIgnoreCase)
+            .Select((o, i) => o with { Order = i })
+            .ToArray();
+
+        var updated = Field with { Options = sorted };
+        EditorState.UpdateField(updated);
+    }
+
+    private void RenumberOptions()
+    {
+        if (Field is null || !Options.Any()) return;
+
+        var renumbered = Options
+            .OrderBy(o => o.Order)
+            .Select((o, i) => o with { Value = (i + 1).ToString() })
+            .ToArray();
+
+        var updated = Field with { Options = renumbered };
+        EditorState.UpdateField(updated);
+    }
+
+    private void ClearDefaultOption()
+    {
+        if (Field is null) return;
+
+        var updated = Field with
+        {
+            Options = Options.Select(o => o with { IsDefault = false }).ToArray()
+        };
+        EditorState.UpdateField(updated);
+    }
+
+    #endregion
+
+    #region CodeSet
+
+    private void OpenCodeSetSelector()
+    {
+        CodeSetSearchQuery = "";
+        IsSelectingCodeSet = true;
+    }
+
+    private void CloseCodeSetSelector()
+    {
+        IsSelectingCodeSet = false;
+        CodeSetSearchQuery = "";
+    }
+
+    private void SelectCodeSet(CodeSetSchema codeSet)
+    {
+        if (Field is null) return;
+
+        SelectedCodeSet = codeSet;
+        var updated = Field with { CodeSetId = codeSet.Id, Options = null };
+        EditorState.UpdateField(updated);
+        CloseCodeSetSelector();
+    }
+
+    private void NavigateToCodeSetEditor()
+    {
+        if (SelectedCodeSet != null)
+        {
+            Navigation.NavigateTo($"/codesets/{SelectedCodeSet.Id}");
+        }
+    }
+
+    private void RefreshCodeSet()
+    {
+        LoadSelectedCodeSet();
+        StateHasChanged();
+    }
+
+    private void InitializeSampleCodeSets()
+    {
+        // Sample code sets for demo purposes
+        AvailableCodeSets = new List<CodeSetSchema>
+        {
+            new CodeSetSchema
+            {
+                Id = 1,
+                Code = "PROVINCES_CA",
+                NameEn = "Canadian Provinces",
+                NameFr = "Provinces canadiennes",
+                Category = "Geography",
+                Items = new[]
+                {
+                    new CodeSetItem { Value = "AB", TextEn = "Alberta", TextFr = "Alberta", Order = 0, IsActive = true },
+                    new CodeSetItem { Value = "BC", TextEn = "British Columbia", TextFr = "Colombie-Britannique", Order = 1, IsActive = true },
+                    new CodeSetItem { Value = "MB", TextEn = "Manitoba", TextFr = "Manitoba", Order = 2, IsActive = true },
+                    new CodeSetItem { Value = "NB", TextEn = "New Brunswick", TextFr = "Nouveau-Brunswick", Order = 3, IsActive = true },
+                    new CodeSetItem { Value = "NL", TextEn = "Newfoundland and Labrador", TextFr = "Terre-Neuve-et-Labrador", Order = 4, IsActive = true },
+                    new CodeSetItem { Value = "NS", TextEn = "Nova Scotia", TextFr = "Nouvelle-Écosse", Order = 5, IsActive = true },
+                    new CodeSetItem { Value = "ON", TextEn = "Ontario", TextFr = "Ontario", Order = 6, IsActive = true },
+                    new CodeSetItem { Value = "PE", TextEn = "Prince Edward Island", TextFr = "Île-du-Prince-Édouard", Order = 7, IsActive = true },
+                    new CodeSetItem { Value = "QC", TextEn = "Quebec", TextFr = "Québec", Order = 8, IsActive = true },
+                    new CodeSetItem { Value = "SK", TextEn = "Saskatchewan", TextFr = "Saskatchewan", Order = 9, IsActive = true },
+                    new CodeSetItem { Value = "NT", TextEn = "Northwest Territories", TextFr = "Territoires du Nord-Ouest", Order = 10, IsActive = true },
+                    new CodeSetItem { Value = "NU", TextEn = "Nunavut", TextFr = "Nunavut", Order = 11, IsActive = true },
+                    new CodeSetItem { Value = "YT", TextEn = "Yukon", TextFr = "Yukon", Order = 12, IsActive = true }
+                }
+            },
+            new CodeSetSchema
+            {
+                Id = 2,
+                Code = "ORG_TYPES",
+                NameEn = "Organization Types",
+                NameFr = "Types d'organisation",
+                Category = "Organizations",
+                Items = new[]
+                {
+                    new CodeSetItem { Value = "nonprofit", TextEn = "Non-Profit", TextFr = "Sans but lucratif", Order = 0, IsActive = true },
+                    new CodeSetItem { Value = "forprofit", TextEn = "For-Profit", TextFr = "À but lucratif", Order = 1, IsActive = true },
+                    new CodeSetItem { Value = "govt", TextEn = "Government", TextFr = "Gouvernement", Order = 2, IsActive = true },
+                    new CodeSetItem { Value = "edu", TextEn = "Educational", TextFr = "Éducatif", Order = 3, IsActive = true }
+                }
+            },
+            new CodeSetSchema
+            {
+                Id = 3,
+                Code = "RATINGS",
+                NameEn = "Rating Scale",
+                NameFr = "Échelle de notation",
+                Category = "Common",
+                Items = new[]
+                {
+                    new CodeSetItem { Value = "5", TextEn = "Excellent", TextFr = "Excellent", Order = 0, IsActive = true },
+                    new CodeSetItem { Value = "4", TextEn = "Good", TextFr = "Bon", Order = 1, IsActive = true },
+                    new CodeSetItem { Value = "3", TextEn = "Average", TextFr = "Moyen", Order = 2, IsActive = true },
+                    new CodeSetItem { Value = "2", TextEn = "Poor", TextFr = "Faible", Order = 3, IsActive = true },
+                    new CodeSetItem { Value = "1", TextEn = "Very Poor", TextFr = "Très faible", Order = 4, IsActive = true }
+                }
+            }
+        };
+    }
+
+    #endregion
+
+    public void Dispose()
+    {
+        EditorState.OnFieldSelected -= OnFieldSelected;
+    }
+
+    private enum OptionsMode { Inline, CodeSet }
+
+    private class EditableOption
+    {
+        public string Value { get; set; } = "";
+        public string LabelEn { get; set; } = "";
+        public string LabelFr { get; set; } = "";
+        public bool IsDefault { get; set; }
+        public int Order { get; set; }
+    }
+}

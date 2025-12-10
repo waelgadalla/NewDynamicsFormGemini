@@ -1,0 +1,306 @@
+/* ===== DATABASE SECTION STYLES ===== */
+
+/* Database Status Badge */
+.db-status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    margin-bottom: 16px;
+}
+
+.db-status.configured {
+    background: var(--success-light);
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+.db-status.not-configured {
+    background: var(--bg-tertiary);
+}
+
+.db-status-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.db-status.configured .db-status-icon {
+    background: var(--success);
+    color: white;
+}
+
+.db-status.not-configured .db-status-icon {
+    background: var(--bg-tertiary);
+    color: var(--text-muted);
+}
+
+.db-status-content {
+    flex: 1;
+}
+
+.db-status-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.db-status-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* Column Type Grid */
+.column-type-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.column-type-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--bg-primary);
+}
+
+.column-type-option:hover {
+    border-color: var(--primary);
+    background: var(--bg-secondary);
+}
+
+.column-type-option.selected {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.column-type-option-icon {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.column-type-option.selected .column-type-option-icon {
+    color: var(--primary);
+}
+
+.column-type-option-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.column-type-option-type {
+    font-size: 9px;
+    font-family: 'Fira Code', 'Cascadia Code', monospace;
+    color: var(--text-muted);
+}
+
+/* Input with Suffix */
+.input-with-suffix {
+    position: relative;
+}
+
+.input-suffix {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: monospace;
+}
+
+::deep .prop-input.has-suffix {
+    padding-right: 80px;
+}
+
+/* Toggle Rows */
+.toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.toggle-row:last-child {
+    margin-bottom: 0;
+}
+
+.toggle-row:hover {
+    border-color: var(--primary-muted);
+}
+
+.toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.toggle-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.toggle-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.toggle-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.toggle-switch {
+    width: 44px;
+    height: 24px;
+    background: var(--border-color);
+    border-radius: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.toggle-switch::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-switch.active {
+    background: var(--primary);
+}
+
+.toggle-switch.active::after {
+    transform: translateX(20px);
+}
+
+/* SQL Preview */
+.sql-preview {
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    margin-top: 16px;
+}
+
+.sql-preview-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sql-preview-code {
+    font-family: 'Fira Code', 'Cascadia Code', monospace;
+    font-size: 12px;
+    color: var(--text-primary);
+    background: var(--bg-primary);
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    overflow-x: auto;
+    white-space: pre;
+}
+
+/* DDL Syntax Highlighting */
+::deep .ddl-value {
+    color: var(--success);
+}
+
+::deep .ddl-type {
+    color: var(--primary);
+}
+
+::deep .ddl-constraint {
+    color: var(--warning);
+}
+
+/* Help Text */
+.db-help-text {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+.db-help-text i {
+    font-size: 11px;
+    margin-top: 1px;
+}
+
+/* Quick Actions */
+.quick-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+.quick-action-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.quick-action-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-light);
+}
+
+/* Monospace inputs */
+::deep .text-mono {
+    font-family: 'Fira Code', 'Cascadia Code', monospace;
+}

@@ -1,0 +1,71 @@
+@* Date configuration panel *@
+
+<div class="config-panel">
+    <div class="config-group">
+        <label class="config-label">Date Restrictions</label>
+        <div class="config-toggles">
+            <label class="toggle-option">
+                <input type="checkbox"
+                       checked="@Config.AllowPast"
+                       @onchange="e => UpdateConfig(c => c.AllowPast = (bool)(e.Value ?? false))" />
+                <span>Allow past dates</span>
+            </label>
+            <label class="toggle-option">
+                <input type="checkbox"
+                       checked="@Config.AllowFuture"
+                       @onchange="e => UpdateConfig(c => c.AllowFuture = (bool)(e.Value ?? false))" />
+                <span>Allow future dates</span>
+            </label>
+        </div>
+    </div>
+
+    <div class="config-row">
+        <div class="config-group">
+            <label class="config-label">
+                <i class="bi bi-calendar-minus"></i>
+                Min Date
+            </label>
+            <select class="config-select"
+                    value="@Config.MinDate"
+                    @onchange="e => UpdateConfig(c => c.MinDate = e.Value?.ToString())">
+                <option value="">No minimum</option>
+                <option value="Now">Today</option>
+                <option value="Now-7d">7 days ago</option>
+                <option value="Now-30d">30 days ago</option>
+                <option value="Now-1y">1 year ago</option>
+            </select>
+        </div>
+
+        <div class="config-group">
+            <label class="config-label">
+                <i class="bi bi-calendar-plus"></i>
+                Max Date
+            </label>
+            <select class="config-select"
+                    value="@Config.MaxDate"
+                    @onchange="e => UpdateConfig(c => c.MaxDate = e.Value?.ToString())">
+                <option value="">No maximum</option>
+                <option value="Now">Today</option>
+                <option value="Now+7d">7 days from now</option>
+                <option value="Now+30d">30 days from now</option>
+                <option value="Now+1y">1 year from now</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="config-info">
+        <i class="bi bi-info-circle"></i>
+        <span>Use relative dates like "Now", "Now+30d", or specific dates in ISO format (YYYY-MM-DD)</span>
+    </div>
+</div>
+
+@code {
+    [Parameter] public TypeConfigButton.DateConfigModel Config { get; set; } = new();
+    [Parameter] public EventCallback<TypeConfigButton.DateConfigModel> OnChange { get; set; }
+
+    private async Task UpdateConfig(Action<TypeConfigButton.DateConfigModel> update)
+    {
+        update(Config);
+        await OnChange.InvokeAsync(Config);
+    }
+}

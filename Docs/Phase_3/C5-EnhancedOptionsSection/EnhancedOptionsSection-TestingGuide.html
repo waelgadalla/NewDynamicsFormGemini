@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C.5 Enhanced Options Section - Testing Guide</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: rgba(99, 102, 241, 0.1);
+            --success: #10B981;
+            --success-light: rgba(16, 185, 129, 0.1);
+            --warning: #F59E0B;
+            --warning-light: rgba(245, 158, 11, 0.1);
+            --danger: #EF4444;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --bg-tertiary: #F3F4F6;
+            --border-color: #E5E7EB;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .header h1 i {
+            color: var(--primary);
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        .section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .section-number {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .test-group {
+            margin-bottom: 20px;
+        }
+
+        .test-group h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .test-group h3 i {
+            color: var(--primary);
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .checklist li:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .checklist li.checked {
+            background: var(--success-light);
+        }
+
+        .checklist li input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--success);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .checklist li label {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .checklist li .step-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .checklist li .step-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .progress-bar {
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            height: 8px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            background: var(--success);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .task-card {
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            margin-bottom: 12px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .task-card h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .task-card p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .task-card code {
+            background: var(--bg-tertiary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+        }
+
+        .file-path {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .file-path i {
+            color: var(--primary);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-warning {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .badge-success {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .summary-card {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .summary-item {
+            text-align: center;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+        }
+
+        .summary-item .number {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .summary-item .label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .reset-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .reset-btn:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .note-box {
+            background: var(--primary-light);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+            margin-top: 16px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .note-box strong {
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="bi bi-list-check"></i> Enhanced Options Section - Testing Guide</h1>
+            <p>Manual testing steps and verification checklist for the EnhancedOptionsSection component</p>
+        </div>
+
+        <!-- Progress Overview -->
+        <div class="section">
+            <div class="progress-text">
+                <span>Testing Progress</span>
+                <span id="progressPercent">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-item">
+                    <div class="number" id="totalTests">24</div>
+                    <div class="label">Total Tests</div>
+                </div>
+                <div class="summary-item">
+                    <div class="number" id="passedTests">0</div>
+                    <div class="label">Passed</div>
+                </div>
+                <div class="summary-item">
+                    <div class="number" id="remainingTests">24</div>
+                    <div class="label">Remaining</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 1: Manual Testing Steps -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-number">1</div>
+                <h2>Manual Testing Steps</h2>
+            </div>
+
+            <div class="test-group">
+                <h3><i class="bi bi-toggle-on"></i> Mode Switcher Testing</h3>
+                <ul class="checklist" data-group="mode">
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Mode switcher displays Inline and CodeSet buttons</div>
+                            <div class="step-desc">Verify both mode buttons are visible with icons</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Clicking Inline sets mode to Inline</div>
+                            <div class="step-desc">Button should highlight with primary color</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Clicking CodeSet sets mode to CodeSet</div>
+                            <div class="step-desc">Button should highlight, inline options should be hidden</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Mode persists based on field data</div>
+                            <div class="step-desc">Field with CodeSetId should default to CodeSet mode</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="test-group">
+                <h3><i class="bi bi-list-ul"></i> Inline Options List Testing</h3>
+                <ul class="checklist" data-group="inline">
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Options list header shows count and "Inline" badge</div>
+                            <div class="step-desc">e.g., "5 Options" with purple Inline badge</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Add button in header opens Option Editor Modal</div>
+                            <div class="step-desc">Click Add button, modal should appear with empty fields</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Option items display: drag handle, value badge, labels, default badge</div>
+                            <div class="step-desc">Each option should show grip icon, monospace value, EN/FR labels</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Edit button (pencil) opens modal with existing option data</div>
+                            <div class="step-desc">Hover over option, click pencil, verify data loads in modal</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Delete button (trash) removes option from list</div>
+                            <div class="step-desc">Hover over option, click trash, verify option is removed</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="test-group">
+                <h3><i class="bi bi-arrows-move"></i> Drag-to-Reorder Testing</h3>
+                <ul class="checklist" data-group="drag">
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Drag handle shows grab cursor</div>
+                            <div class="step-desc">Hover over grip icon, cursor should change to grab</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Dragging option shows visual feedback</div>
+                            <div class="step-desc">Dragged item should have dashed border and reduced opacity</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Drop reorders options correctly</div>
+                            <div class="step-desc">Drag option A to position of option B, verify reorder</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">SortOrder updated after drag</div>
+                            <div class="step-desc">Verify Order property is updated sequentially (0, 1, 2...)</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="test-group">
+                <h3><i class="bi bi-lightning"></i> Quick Add Testing</h3>
+                <ul class="checklist" data-group="quickadd">
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Quick add input accepts text</div>
+                            <div class="step-desc">Type "New Option" in the quick add input</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Press Enter adds option</div>
+                            <div class="step-desc">Type text and press Enter, verify option is added</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Click Add button adds option</div>
+                            <div class="step-desc">Type text and click Add button, verify option is added</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Input clears after adding</div>
+                            <div class="step-desc">After adding, input should be empty</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="test-group">
+                <h3><i class="bi bi-gear"></i> Bulk Actions Testing</h3>
+                <ul class="checklist" data-group="bulk">
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Sort A-Z alphabetizes by LabelEn</div>
+                            <div class="step-desc">Click Sort A-Z, verify options are alphabetized</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Re-number updates Value sequentially</div>
+                            <div class="step-desc">Click Re-number, verify values become 1, 2, 3...</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Clear Default removes default flag from all options</div>
+                            <div class="step-desc">Click Clear Default, verify no option shows "Default" badge</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="test-group">
+                <h3><i class="bi bi-database"></i> CodeSet Mode Testing</h3>
+                <ul class="checklist" data-group="codeset">
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">CodeSet selector shows when no CodeSet selected</div>
+                            <div class="step-desc">Empty state with "No CodeSet selected" message</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Select CodeSet button opens selector modal</div>
+                            <div class="step-desc">Click button, modal should open with available code sets</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">CodeSet preview shows first 6 items</div>
+                            <div class="step-desc">After selection, verify preview displays up to 6 items</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">"+N more items" shows when > 6</div>
+                            <div class="step-desc">Select Canadian Provinces (13 items), verify "+7 more items" shows</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Change button opens selector modal</div>
+                            <div class="step-desc">Click Change, verify selector modal opens</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Search filters available code sets</div>
+                            <div class="step-desc">Type "Province" in search, verify filtering works</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 2: Manual Implementation Tasks -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-number">2</div>
+                <h2>Manual Implementation Tasks</h2>
+            </div>
+
+            <div class="task-card">
+                <h4><i class="bi bi-link-45deg"></i> Update RightSidebar.razor</h4>
+                <p>Replace <code>OptionsSection</code> with <code>EnhancedOptionsSection</code> in the property panel.</p>
+                <div class="file-path">
+                    <i class="bi bi-file-code"></i>
+                    Components/Editor/RightSidebar.razor
+                </div>
+                <p style="margin-top: 12px;">Change this line:</p>
+                <code>&lt;OptionsSection /&gt;</code>
+                <p style="margin-top: 8px;">To:</p>
+                <code>&lt;EnhancedOptionsSection /&gt;</code>
+            </div>
+
+            <div class="task-card">
+                <h4><i class="bi bi-database"></i> CodeSet Provider Integration</h4>
+                <p>The component currently uses sample code sets. For production, inject <code>ICodeSetProvider</code> service.</p>
+                <span class="badge badge-warning"><i class="bi bi-info-circle"></i> Sample data included for testing</span>
+            </div>
+
+            <div class="task-card">
+                <h4><i class="bi bi-arrow-right-square"></i> Navigation to CodeSet Editor</h4>
+                <p>The "Edit CodeSet" button navigates to <code>/codesets/{id}</code>. Ensure this route exists.</p>
+                <span class="badge badge-warning"><i class="bi bi-info-circle"></i> Requires CodeSet manager page</span>
+            </div>
+
+            <div class="task-card">
+                <h4><i class="bi bi-file-earmark-css"></i> CSS Scoped Styles</h4>
+                <p>Scoped CSS file created at <code>EnhancedOptionsSection.razor.css</code>. Blazor bundles automatically.</p>
+                <span class="badge badge-success"><i class="bi bi-check-circle"></i> Automatic with scoped CSS</span>
+            </div>
+
+            <div class="note-box">
+                <strong>Note:</strong> The Option Editor Modal and CodeSet Selector Modal are implemented inline within the component. For larger applications, consider extracting these into separate components.
+            </div>
+        </div>
+
+        <!-- Section 3: Verification Checklist -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-number">3</div>
+                <h2>Verification Checklist</h2>
+            </div>
+
+            <ul class="checklist" data-group="verification">
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Mode switcher toggles between Inline and CodeSet</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Mode persists based on field data (CodeSetId)</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Inline mode clears CodeSetId on field</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">CodeSet mode clears Options on field</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Options list shows count and "Inline" badge</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Add button opens Option Editor Modal</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Edit button loads option into modal</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Delete removes option from list</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Drag handle cursor is "grab"</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Dragging option shows visual feedback</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Drop reorders options correctly</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Order property updated after drag</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Quick add works with Enter key</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Quick add clears input after adding</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Sort A-Z alphabetizes by LabelEn</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Re-number updates Value sequentially</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">CodeSet mode shows selected set info</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">CodeSet preview shows first 6 items</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">"+N more items" shows when > 6</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Change button opens CodeSet selector modal</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Search in selector filters code sets</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Section expands/collapses correctly</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Default badge shows on default option</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Setting new default clears previous default</div>
+                    </label>
+                </li>
+            </ul>
+
+            <div style="margin-top: 24px; text-align: center;">
+                <button class="reset-btn" onclick="resetAll()">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                    Reset All Checkboxes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleCheck(li) {
+            const checkbox = li.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+            li.classList.toggle('checked', checkbox.checked);
+            updateProgress();
+            saveState();
+        }
+
+        function updateProgress() {
+            const allCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+            const checkedBoxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            const total = allCheckboxes.length;
+            const passed = checkedBoxes.length;
+            const remaining = total - passed;
+            const percent = Math.round((passed / total) * 100);
+
+            document.getElementById('totalTests').textContent = total;
+            document.getElementById('passedTests').textContent = passed;
+            document.getElementById('remainingTests').textContent = remaining;
+            document.getElementById('progressPercent').textContent = percent + '%';
+            document.getElementById('progressFill').style.width = percent + '%';
+        }
+
+        function resetAll() {
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+                cb.closest('li').classList.remove('checked');
+            });
+            updateProgress();
+            localStorage.removeItem('enhancedOptionsSectionTestState');
+        }
+
+        function saveState() {
+            const state = {};
+            document.querySelectorAll('input[type="checkbox"]').forEach((cb, index) => {
+                state[index] = cb.checked;
+            });
+            localStorage.setItem('enhancedOptionsSectionTestState', JSON.stringify(state));
+        }
+
+        function loadState() {
+            const savedState = localStorage.getItem('enhancedOptionsSectionTestState');
+            if (savedState) {
+                const state = JSON.parse(savedState);
+                document.querySelectorAll('input[type="checkbox"]').forEach((cb, index) => {
+                    if (state[index]) {
+                        cb.checked = true;
+                        cb.closest('li').classList.add('checked');
+                    }
+                });
+            }
+            updateProgress();
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', loadState);
+    </script>
+</body>
+</html>

@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C.4 Database Section - Testing Guide</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: rgba(99, 102, 241, 0.1);
+            --success: #10B981;
+            --success-light: rgba(16, 185, 129, 0.1);
+            --warning: #F59E0B;
+            --warning-light: rgba(245, 158, 11, 0.1);
+            --danger: #EF4444;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --bg-tertiary: #F3F4F6;
+            --border-color: #E5E7EB;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .header h1 i {
+            color: var(--primary);
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        .section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .section-number {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .test-group {
+            margin-bottom: 20px;
+        }
+
+        .test-group h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .test-group h3 i {
+            color: var(--primary);
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .checklist li:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .checklist li.checked {
+            background: var(--success-light);
+        }
+
+        .checklist li input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--success);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .checklist li label {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .checklist li .step-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .checklist li .step-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .progress-bar {
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            height: 8px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            background: var(--success);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .task-card {
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            margin-bottom: 12px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .task-card h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .task-card p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .task-card code {
+            background: var(--bg-tertiary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+        }
+
+        .file-path {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .file-path i {
+            color: var(--primary);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-warning {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .badge-success {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .summary-card {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .summary-item {
+            text-align: center;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+        }
+
+        .summary-item .number {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .summary-item .label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .reset-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .reset-btn:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="bi bi-database"></i> Database Section - Testing Guide</h1>
+            <p>Manual testing steps and verification checklist for the DatabaseSection component</p>
+        </div>
+
+        <!-- Progress Overview -->
+        <div class="section">
+            <div class="progress-text">
+                <span>Testing Progress</span>
+                <span id="progressPercent">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-item">
+                    <div class="number" id="totalTests">17</div>
+                    <div class="label">Total Tests</div>
+                </div>
+                <div class="summary-item">
+                    <div class="number" id="passedTests">0</div>
+                    <div class="label">Passed</div>
+                </div>
+                <div class="summary-item">
+                    <div class="number" id="remainingTests">17</div>
+                    <div class="label">Remaining</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 1: Manual Testing Steps -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-number">1</div>
+                <h2>Manual Testing Steps</h2>
+            </div>
+
+            <div class="test-group">
+                <h3><i class="bi bi-1-circle"></i> Unconfigured State Testing</h3>
+                <ul class="checklist" data-group="unconfigured">
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Status badge shows "No Column Mapping"</div>
+                            <div class="step-desc">Select a field without ColumnName set, verify gray badge with database-dash icon</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Description shows "Field won't be persisted"</div>
+                            <div class="step-desc">Verify the status description text for unconfigured fields</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Only Column Name input and "Generate from Field Name" button visible</div>
+                            <div class="step-desc">Type grid, constraints, and SQL preview should be hidden</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="test-group">
+                <h3><i class="bi bi-2-circle"></i> Column Name Testing</h3>
+                <ul class="checklist" data-group="columnname">
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Input uses monospace font</div>
+                            <div class="step-desc">Verify Fira Code or similar monospace font is applied</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Typing column name updates field state</div>
+                            <div class="step-desc">Enter a column name like "FirstName" and verify status badge changes to configured</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="test-group">
+                <h3><i class="bi bi-3-circle"></i> Column Type Grid Testing</h3>
+                <ul class="checklist" data-group="typegrid">
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">All 6 type options displayed in 3x2 grid</div>
+                            <div class="step-desc">Text (NVARCHAR), Number (INT), Decimal (DECIMAL), Date (DATETIME2), Boolean (BIT), Long Text (NVARCHAR(MAX))</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Clicking type option selects it with highlighted border</div>
+                            <div class="step-desc">Selected option should have primary color border and light background</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">ColumnType updates in field schema when type selected</div>
+                            <div class="step-desc">Verify the Field.ColumnType property is updated correctly</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="test-group">
+                <h3><i class="bi bi-4-circle"></i> Conditional Input Testing</h3>
+                <ul class="checklist" data-group="conditional">
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Max Length input appears for NVARCHAR/VARCHAR</div>
+                            <div class="step-desc">Select Text type and verify Max Length input with "characters" suffix appears</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Precision/Scale inputs appear for DECIMAL</div>
+                            <div class="step-desc">Select Decimal type and verify two side-by-side inputs appear</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Inputs hidden for INT, BIT, DATETIME2</div>
+                            <div class="step-desc">Select Number, Boolean, or Date and verify no additional inputs shown</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="test-group">
+                <h3><i class="bi bi-5-circle"></i> Constraints & SQL Preview Testing</h3>
+                <ul class="checklist" data-group="constraints">
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Nullable toggle works correctly</div>
+                            <div class="step-desc">Toggle switch should animate and SQL preview should update between NULL/NOT NULL</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Primary Key toggle disables Nullable</div>
+                            <div class="step-desc">When Primary Key is enabled, Nullable should automatically turn off</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">SQL Preview updates in real-time</div>
+                            <div class="step-desc">Any changes to column name, type, or constraints should immediately reflect in DDL</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">DDL syntax highlighting works</div>
+                            <div class="step-desc">Column name (green), type (purple), constraint (yellow) colors applied</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="test-group">
+                <h3><i class="bi bi-6-circle"></i> Quick Actions Testing</h3>
+                <ul class="checklist" data-group="actions">
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Auto-Detect sets appropriate type from FieldType</div>
+                            <div class="step-desc">Click Auto-Detect and verify type matches field type (e.g., TextBox -> NVARCHAR)</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Copy DDL copies to clipboard</div>
+                            <div class="step-desc">Click Copy DDL and paste somewhere to verify correct SQL statement</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Generate from Field Name creates PascalCase column</div>
+                            <div class="step-desc">For field with label "first name", should generate "FirstName" column</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 2: Manual Implementation Tasks -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-number">2</div>
+                <h2>Manual Implementation Tasks</h2>
+            </div>
+
+            <div class="task-card">
+                <h4><i class="bi bi-link-45deg"></i> Integration with RightSidebar</h4>
+                <p>Add the DatabaseSection component to the RightSidebar property panel.</p>
+                <div class="file-path">
+                    <i class="bi bi-file-code"></i>
+                    Components/Editor/RightSidebar.razor
+                </div>
+                <p style="margin-top: 12px;">Add this line after LayoutSection:</p>
+                <code>&lt;DatabaseSection /&gt;</code>
+            </div>
+
+            <div class="task-card">
+                <h4><i class="bi bi-box"></i> Module Context for Table/Schema Name</h4>
+                <p>The component uses <code>EditorState.CurrentModule</code> to display table/schema name. Ensure the module is loaded in editor state.</p>
+                <span class="badge badge-warning"><i class="bi bi-info-circle"></i> Already implemented via IEditorStateService</span>
+            </div>
+
+            <div class="task-card">
+                <h4><i class="bi bi-clipboard"></i> IJSRuntime for Clipboard Copy</h4>
+                <p>The CopyDdl function uses <code>navigator.clipboard.writeText</code> via JS interop.</p>
+                <span class="badge badge-success"><i class="bi bi-check-circle"></i> Already injected in component</span>
+            </div>
+
+            <div class="task-card">
+                <h4><i class="bi bi-file-earmark-css"></i> CSS Import Verification</h4>
+                <p>Scoped CSS file is created at <code>DatabaseSection.razor.css</code>. Blazor automatically bundles this.</p>
+                <span class="badge badge-success"><i class="bi bi-check-circle"></i> Automatic with scoped CSS</span>
+            </div>
+        </div>
+
+        <!-- Section 3: Verification Checklist -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-number">3</div>
+                <h2>Verification Checklist</h2>
+            </div>
+
+            <ul class="checklist" data-group="verification">
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Unconfigured state shows "No Column Mapping"</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Configured state shows green badge with table path</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Column name input uses monospace font</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Column type grid displays all 6 options</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Type selection updates SelectedColumnType</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Max Length input appears for NVARCHAR/VARCHAR</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Precision/Scale inputs appear for DECIMAL</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Inputs hidden for other types</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Nullable toggle works correctly</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Primary Key toggle works and disables nullable</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Default value accepts SQL expressions</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">SQL preview updates in real-time</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">DDL syntax highlighting works</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Auto-Detect sets appropriate type from FieldType</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Copy DDL copies correct string to clipboard</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Generate from Field Name creates PascalCase column</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Section expands/collapses correctly</div>
+                    </label>
+                </li>
+            </ul>
+
+            <div style="margin-top: 24px; text-align: center;">
+                <button class="reset-btn" onclick="resetAll()">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                    Reset All Checkboxes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleCheck(li) {
+            const checkbox = li.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+            li.classList.toggle('checked', checkbox.checked);
+            updateProgress();
+            saveState();
+        }
+
+        function updateProgress() {
+            const allCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+            const checkedBoxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            const total = allCheckboxes.length;
+            const passed = checkedBoxes.length;
+            const remaining = total - passed;
+            const percent = Math.round((passed / total) * 100);
+
+            document.getElementById('totalTests').textContent = total;
+            document.getElementById('passedTests').textContent = passed;
+            document.getElementById('remainingTests').textContent = remaining;
+            document.getElementById('progressPercent').textContent = percent + '%';
+            document.getElementById('progressFill').style.width = percent + '%';
+        }
+
+        function resetAll() {
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+                cb.closest('li').classList.remove('checked');
+            });
+            updateProgress();
+            localStorage.removeItem('databaseSectionTestState');
+        }
+
+        function saveState() {
+            const state = {};
+            document.querySelectorAll('input[type="checkbox"]').forEach((cb, index) => {
+                state[index] = cb.checked;
+            });
+            localStorage.setItem('databaseSectionTestState', JSON.stringify(state));
+        }
+
+        function loadState() {
+            const savedState = localStorage.getItem('databaseSectionTestState');
+            if (savedState) {
+                const state = JSON.parse(savedState);
+                document.querySelectorAll('input[type="checkbox"]').forEach((cb, index) => {
+                    if (state[index]) {
+                        cb.checked = true;
+                        cb.closest('li').classList.add('checked');
+                    }
+                });
+            }
+            updateProgress();
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', loadState);
+    </script>
+</body>
+</html>

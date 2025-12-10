@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C.6 TypeConfig Button - Testing Guide</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: rgba(99, 102, 241, 0.1);
+            --success: #10B981;
+            --success-light: rgba(16, 185, 129, 0.1);
+            --warning: #F59E0B;
+            --warning-light: rgba(245, 158, 11, 0.1);
+            --danger: #EF4444;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --bg-tertiary: #F3F4F6;
+            --border-color: #E5E7EB;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .header h1 i {
+            color: var(--primary);
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        .section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .section-number {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .test-group {
+            margin-bottom: 20px;
+        }
+
+        .test-group h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .test-group h3 i {
+            color: var(--primary);
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .checklist li:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .checklist li.checked {
+            background: var(--success-light);
+        }
+
+        .checklist li input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--success);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .checklist li label {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .checklist li .step-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .checklist li .step-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .progress-bar {
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            height: 8px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            background: var(--success);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .task-card {
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            margin-bottom: 12px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .task-card h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .task-card p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .task-card code {
+            background: var(--bg-tertiary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+        }
+
+        .file-path {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .file-path i {
+            color: var(--primary);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-warning {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .badge-success {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .summary-card {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .summary-item {
+            text-align: center;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+        }
+
+        .summary-item .number {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .summary-item .label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .reset-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .reset-btn:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .field-type-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+        .field-type-table th,
+        .field-type-table td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .field-type-table th {
+            background: var(--bg-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .field-type-table td {
+            font-size: 13px;
+        }
+
+        .field-type-table td i {
+            color: var(--primary);
+            margin-right: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="bi bi-gear"></i> TypeConfig Button - Testing Guide</h1>
+            <p>Manual testing steps and verification checklist for the TypeConfigButton component</p>
+        </div>
+
+        <!-- Progress Overview -->
+        <div class="section">
+            <div class="progress-text">
+                <span>Testing Progress</span>
+                <span id="progressPercent">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-item">
+                    <div class="number" id="totalTests">22</div>
+                    <div class="label">Total Tests</div>
+                </div>
+                <div class="summary-item">
+                    <div class="number" id="passedTests">0</div>
+                    <div class="label">Passed</div>
+                </div>
+                <div class="summary-item">
+                    <div class="number" id="remainingTests">22</div>
+                    <div class="label">Remaining</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 1: Manual Testing Steps -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-number">1</div>
+                <h2>Manual Testing Steps</h2>
+            </div>
+
+            <div class="test-group">
+                <h3><i class="bi bi-eye"></i> Button Display Testing</h3>
+                <ul class="checklist" data-group="display">
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Button displays full width</div>
+                            <div class="step-desc">TypeConfig button should span the entire width of the property panel</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Icon changes based on field type</div>
+                            <div class="step-desc">Select different field types and verify icon changes (sliders, 123, calendar, etc.)</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Title changes based on field type</div>
+                            <div class="step-desc">Title should show "Text Options", "Number Options", "Date Options", etc.</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Default description shows when unconfigured</div>
+                            <div class="step-desc">Shows "Set input mask, pattern, limits" or similar for each type</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="test-group">
+                <h3><i class="bi bi-check-circle"></i> Configured State Testing</h3>
+                <ul class="checklist" data-group="configured">
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Configured state shows green background</div>
+                            <div class="step-desc">Button background changes to success-light when TypeConfig is set</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Configured state shows checkmark icon</div>
+                            <div class="step-desc">Icon changes from type icon to checkmark (check-lg) when configured</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">"Configured" badge appears</div>
+                            <div class="step-desc">Green badge with "Configured" text visible when TypeConfig is set</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Config summary tags display (max 3)</div>
+                            <div class="step-desc">Summary tags like "Min: 0", "Max: 100" should appear below description</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Description shows setting count</div>
+                            <div class="step-desc">Description changes to "Configured with X settings" when configured</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="test-group">
+                <h3><i class="bi bi-cursor"></i> Hover and Interaction Testing</h3>
+                <ul class="checklist" data-group="hover">
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Hover state changes background and icon color</div>
+                            <div class="step-desc">Background turns primary-light, icon background turns primary on hover</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Chevron arrow shows on right</div>
+                            <div class="step-desc">Right-pointing chevron visible on the right side of the button</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Cursor changes to pointer on hover</div>
+                            <div class="step-desc">Mouse cursor should change to pointer when hovering over button</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="test-group">
+                <h3><i class="bi bi-window"></i> Modal Testing</h3>
+                <ul class="checklist" data-group="modal">
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Click opens correct modal for Text/Email/Phone</div>
+                            <div class="step-desc">TextConfigPanel with mask, pattern, maxLength, autocomplete options</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Click opens correct modal for Number/Currency</div>
+                            <div class="step-desc">NumberConfigPanel with min, max, step, format options</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Click opens correct modal for Date/DateTime</div>
+                            <div class="step-desc">DateConfigPanel with allowFuture, allowPast, minDate, maxDate options</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Click opens correct modal for FileUpload</div>
+                            <div class="step-desc">FileConfigPanel with extensions, maxSize, allowMultiple options</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Click opens correct modal for DataGrid/Repeater</div>
+                            <div class="step-desc">DataGridConfigPanel with add/edit/delete permissions, maxRows options</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Modal save updates field.TypeConfig</div>
+                            <div class="step-desc">Changes in modal should persist to the field schema</div>
+                        </label>
+                    </li>
+                    <li onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <label>
+                            <div class="step-title">Modal cancel discards changes</div>
+                            <div class="step-desc">Clicking Cancel should not save any changes</div>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 2: Field Type Reference -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-number">2</div>
+                <h2>Field Type Configuration Reference</h2>
+            </div>
+
+            <table class="field-type-table">
+                <thead>
+                    <tr>
+                        <th>Field Type</th>
+                        <th>Icon</th>
+                        <th>Config Panel</th>
+                        <th>Config Properties</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><i class="bi bi-input-cursor-text"></i> TextBox</td>
+                        <td>sliders</td>
+                        <td>TextConfigPanel</td>
+                        <td>inputMask, maxLength, pattern, autocomplete</td>
+                    </tr>
+                    <tr>
+                        <td><i class="bi bi-envelope"></i> Email</td>
+                        <td>sliders</td>
+                        <td>TextConfigPanel</td>
+                        <td>validation, autocomplete</td>
+                    </tr>
+                    <tr>
+                        <td><i class="bi bi-telephone"></i> Phone</td>
+                        <td>sliders</td>
+                        <td>TextConfigPanel</td>
+                        <td>format, countryCode</td>
+                    </tr>
+                    <tr>
+                        <td><i class="bi bi-123"></i> Number</td>
+                        <td>123</td>
+                        <td>NumberConfigPanel</td>
+                        <td>min, max, step, format</td>
+                    </tr>
+                    <tr>
+                        <td><i class="bi bi-currency-dollar"></i> Currency</td>
+                        <td>123</td>
+                        <td>NumberConfigPanel</td>
+                        <td>min, max, step, format</td>
+                    </tr>
+                    <tr>
+                        <td><i class="bi bi-calendar"></i> DatePicker</td>
+                        <td>calendar-event</td>
+                        <td>DateConfigPanel</td>
+                        <td>allowFuture, allowPast, minDate, maxDate</td>
+                    </tr>
+                    <tr>
+                        <td><i class="bi bi-calendar-event"></i> DateTime</td>
+                        <td>calendar-event</td>
+                        <td>DateConfigPanel</td>
+                        <td>allowFuture, allowPast, minDate, maxDate</td>
+                    </tr>
+                    <tr>
+                        <td><i class="bi bi-paperclip"></i> FileUpload</td>
+                        <td>upload</td>
+                        <td>FileConfigPanel</td>
+                        <td>allowedExtensions, maxSize, allowMultiple</td>
+                    </tr>
+                    <tr>
+                        <td><i class="bi bi-collection"></i> DataGrid</td>
+                        <td>collection</td>
+                        <td>DataGridConfigPanel</td>
+                        <td>allowAdd, allowEdit, allowDelete, maxRows</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Section 3: Manual Implementation Tasks -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-number">3</div>
+                <h2>Manual Implementation Tasks</h2>
+            </div>
+
+            <div class="task-card">
+                <h4><i class="bi bi-link-45deg"></i> Add to RightSidebar</h4>
+                <p>Add the TypeConfigButton component to the property panel for fields that support TypeConfig.</p>
+                <div class="file-path">
+                    <i class="bi bi-file-code"></i>
+                    Components/Editor/RightSidebar.razor
+                </div>
+                <p style="margin-top: 12px;">Add after GeneralSection:</p>
+                <code>@if (HasTypeConfig) { &lt;TypeConfigButton /&gt; }</code>
+            </div>
+
+            <div class="task-card">
+                <h4><i class="bi bi-folder"></i> Add Imports for ConfigPanels</h4>
+                <p>Ensure the ConfigPanels folder is imported in _Imports.razor</p>
+                <div class="file-path">
+                    <i class="bi bi-file-code"></i>
+                    Components/_Imports.razor
+                </div>
+                <p style="margin-top: 12px;">Add:</p>
+                <code>@using VisualEditorOpus.Components.Properties.Sections.ConfigPanels</code>
+            </div>
+
+            <div class="task-card">
+                <h4><i class="bi bi-file-earmark-css"></i> Include ConfigPanels CSS</h4>
+                <p>The ConfigPanels.razor.css file needs to be available. Consider adding to App.razor or using scoped CSS.</p>
+                <span class="badge badge-warning"><i class="bi bi-info-circle"></i> May need manual CSS import</span>
+            </div>
+
+            <div class="task-card">
+                <h4><i class="bi bi-code-square"></i> Additional Field Types</h4>
+                <p>Time, Image, Signature, and AutoComplete fields need their own config panels implemented.</p>
+                <span class="badge badge-warning"><i class="bi bi-info-circle"></i> Future enhancement</span>
+            </div>
+        </div>
+
+        <!-- Section 4: Verification Checklist -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-number">4</div>
+                <h2>Verification Checklist</h2>
+            </div>
+
+            <ul class="checklist" data-group="verification">
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Button displays full width</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Icon changes based on FieldType</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Title changes based on FieldType</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Description shows default text when unconfigured</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Description shows setting count when configured</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Hover state changes background and icon color</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Configured state shows green background</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Configured state shows checkmark icon</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">"Configured" badge appears when configured</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Config summary tags display (max 3)</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Chevron arrow shows on right</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Click opens TextConfigPanel for Text/Email/Phone</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Click opens NumberConfigPanel for Number/Currency</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Click opens DateConfigPanel for Date/DateTime</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Click opens FileConfigPanel for FileUpload</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Click opens DataGridConfigPanel for DataGrid/Repeater</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Modal save updates field.TypeConfig</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Modal cancel discards changes</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">FileConfigPanel presets work correctly</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">DataGridConfigPanel editor mode selection works</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">DateConfigPanel relative date options work</div>
+                    </label>
+                </li>
+                <li onclick="toggleCheck(this)">
+                    <input type="checkbox">
+                    <label>
+                        <div class="step-title">Dark mode styling correct</div>
+                    </label>
+                </li>
+            </ul>
+
+            <div style="margin-top: 24px; text-align: center;">
+                <button class="reset-btn" onclick="resetAll()">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                    Reset All Checkboxes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleCheck(li) {
+            const checkbox = li.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+            li.classList.toggle('checked', checkbox.checked);
+            updateProgress();
+            saveState();
+        }
+
+        function updateProgress() {
+            const allCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+            const checkedBoxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            const total = allCheckboxes.length;
+            const passed = checkedBoxes.length;
+            const remaining = total - passed;
+            const percent = Math.round((passed / total) * 100);
+
+            document.getElementById('totalTests').textContent = total;
+            document.getElementById('passedTests').textContent = passed;
+            document.getElementById('remainingTests').textContent = remaining;
+            document.getElementById('progressPercent').textContent = percent + '%';
+            document.getElementById('progressFill').style.width = percent + '%';
+        }
+
+        function resetAll() {
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+                cb.closest('li').classList.remove('checked');
+            });
+            updateProgress();
+            localStorage.removeItem('typeConfigButtonTestState');
+        }
+
+        function saveState() {
+            const state = {};
+            document.querySelectorAll('input[type="checkbox"]').forEach((cb, index) => {
+                state[index] = cb.checked;
+            });
+            localStorage.setItem('typeConfigButtonTestState', JSON.stringify(state));
+        }
+
+        function loadState() {
+            const savedState = localStorage.getItem('typeConfigButtonTestState');
+            if (savedState) {
+                const state = JSON.parse(savedState);
+                document.querySelectorAll('input[type="checkbox"]').forEach((cb, index) => {
+                    if (state[index]) {
+                        cb.checked = true;
+                        cb.closest('li').classList.add('checked');
+                    }
+                });
+            }
+            updateProgress();
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', loadState);
+    </script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+/* ===== CONFIG PANELS SHARED STYLES ===== */
+
+.config-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.config-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.config-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.config-label i {
+    color: var(--text-muted);
+}
+
+.config-input {
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    transition: border-color 0.15s;
+}
+
+.config-input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.config-input.text-mono {
+    font-family: 'Fira Code', 'Cascadia Code', monospace;
+}
+
+.config-select {
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.config-select:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.config-help {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.config-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+/* Input with suffix */
+.input-with-suffix {
+    position: relative;
+}
+
+.input-suffix {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.config-input.has-suffix {
+    padding-right: 50px;
+}
+
+/* Toggle options */
+.config-toggles {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.toggle-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.toggle-option:hover {
+    border-color: var(--primary-muted);
+}
+
+.toggle-option input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary);
+}
+
+.toggle-option span {
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+/* Config options row (radio-like) */
+.config-options-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.config-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 16px;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+}
+
+.config-option:hover {
+    border-color: var(--primary-muted);
+}
+
+.config-option.selected {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.config-option i {
+    font-size: 20px;
+    color: var(--text-muted);
+}
+
+.config-option.selected i {
+    color: var(--primary);
+}
+
+.config-option span {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.config-option small {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/* Preset buttons */
+.config-presets {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.preset-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.preset-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 12px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.preset-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-light);
+}
+
+.preset-btn i {
+    font-size: 14px;
+}
+
+/* Info box */
+.config-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    background: var(--primary-light);
+    border-radius: var(--radius-md);
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.config-info i {
+    color: var(--primary);
+    margin-top: 1px;
+}

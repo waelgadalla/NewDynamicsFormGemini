@@ -12,14 +12,19 @@
         </div>
         <div style="flex: 1; overflow-y: auto;">
             <GeneralSection />
+            @if (HasTypeConfig)
+            {
+                <TypeConfigButton />
+            }
             <LabelsSection />
             @if (IsChoiceField)
             {
-                <OptionsSection />
+                <EnhancedOptionsSection />
             }
             <ValidationSection />
             <ConditionalSection />
             <LayoutSection />
+            <DatabaseSection />
         </div>
     }
     else
@@ -40,6 +45,13 @@
     [Inject] private IEditorStateService EditorState { get; set; } = default!;
 
     private bool IsChoiceField => EditorState.SelectedField?.FieldType is "DropDown" or "RadioGroup" or "CheckboxList";
+
+    private bool HasTypeConfig => EditorState.SelectedField?.FieldType is
+        "TextBox" or "Email" or "Phone" or
+        "Number" or "Currency" or
+        "DatePicker" or "DateTime" or "Time" or
+        "FileUpload" or "Image" or "Signature" or
+        "DataGrid" or "Repeater" or "AutoComplete";
 
     protected override void OnInitialized()
     {

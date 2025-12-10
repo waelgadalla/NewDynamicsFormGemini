@@ -1,0 +1,433 @@
+@* TypeConfig button for accessing type-specific configuration *@
+@implements IDisposable
+
+<div class="type-config-section">
+    <button class="type-config-btn @(IsConfigured ? "configured" : "")"
+            @onclick="OpenConfigModal">
+        <div class="type-config-icon">
+            <i class="bi bi-@(IsConfigured ? "check-lg" : IconName)"></i>
+        </div>
+        <div class="type-config-content">
+            <div class="type-config-title">@Title</div>
+            <div class="type-config-desc">@Description</div>
+            @if (IsConfigured && ConfigSummary.Any())
+            {
+                <div class="config-summary">
+                    @foreach (var item in ConfigSummary.Take(3))
+                    {
+                        <span class="config-tag">@item</span>
+                    }
+                </div>
+            }
+        </div>
+        @if (IsConfigured)
+        {
+            <span class="type-config-badge">Configured</span>
+        }
+        <i class="bi bi-chevron-right type-config-arrow"></i>
+    </button>
+</div>
+
+@* Config Modal *@
+@if (IsModalOpen)
+{
+    <div class="modal-overlay" @onclick="CloseModal">
+        <div class="modal-dialog modal-lg" @onclick:stopPropagation>
+            <div class="modal-header">
+                <h3>@Title</h3>
+                <button class="modal-close" @onclick="CloseModal">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                @switch (Field?.FieldType)
+                {
+                    case "TextBox":
+                    case "Email":
+                    case "Phone":
+                        <TextConfigPanel Config="@TextConfig" OnChange="HandleTextConfigChange" />
+                        break;
+                    case "Number":
+                    case "Currency":
+                        <NumberConfigPanel Config="@NumberConfig" OnChange="HandleNumberConfigChange" />
+                        break;
+                    case "DatePicker":
+                    case "DateTime":
+                        <DateConfigPanel Config="@DateConfigValue" OnChange="HandleDateConfigChange" />
+                        break;
+                    case "FileUpload":
+                        <FileConfigPanel Config="@FileConfig" OnChange="HandleFileConfigChange" />
+                        break;
+                    case "DataGrid":
+                    case "Repeater":
+                        <DataGridConfigPanel Config="@DataGridConfig" OnChange="HandleDataGridConfigChange" />
+                        break;
+                    default:
+                        <div class="config-placeholder">
+                            <i class="bi bi-gear"></i>
+                            <span>No specific configuration available for this field type.</span>
+                        </div>
+                        break;
+                }
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                <button class="btn btn-primary" @onclick="SaveConfig">Save Configuration</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Inject] private IEditorStateService EditorState { get; set; } = default!;
+
+    private FormFieldSchema? Field => EditorState.SelectedField;
+    private bool IsModalOpen { get; set; }
+
+    // Typed configs for editing
+    private TextConfigModel TextConfig { get; set; } = new();
+    private NumberConfigModel NumberConfig { get; set; } = new();
+    private DateConfigModel DateConfigValue { get; set; } = new();
+    private FileConfigModel FileConfig { get; set; } = new();
+    private DataGridConfigModel DataGridConfig { get; set; } = new();
+
+    private bool IsConfigured => Field?.TypeConfig != null;
+
+    private string IconName => Field?.FieldType switch
+    {
+        "TextBox" or "Email" or "Phone" => "sliders",
+        "Number" or "Currency" => "123",
+        "DatePicker" or "DateTime" => "calendar-event",
+        "Time" => "clock",
+        "FileUpload" => "upload",
+        "Image" => "image",
+        "Signature" => "pen",
+        "DataGrid" or "Repeater" => "collection",
+        "AutoComplete" => "search",
+        _ => "gear"
+    };
+
+    private string Title => Field?.FieldType switch
+    {
+        "TextBox" => "Text Options",
+        "Email" => "Email Options",
+        "Phone" => "Phone Options",
+        "Number" => "Number Options",
+        "Currency" => "Currency Options",
+        "DatePicker" => "Date Options",
+        "DateTime" => "DateTime Options",
+        "Time" => "Time Options",
+        "FileUpload" => "File Upload Options",
+        "Image" => "Image Options",
+        "Signature" => "Signature Options",
+        "DataGrid" or "Repeater" => "Data Grid Options",
+        "AutoComplete" => "Autocomplete Options",
+        _ => "Type Configuration"
+    };
+
+    private string Description
+    {
+        get
+        {
+            if (IsConfigured)
+            {
+                var count = GetConfiguredSettingsCount();
+                return $"Configured with {count} setting{(count != 1 ? "s" : "")}";
+            }
+
+            return Field?.FieldType switch
+            {
+                "TextBox" => "Set input mask, pattern, limits",
+                "Email" => "Set validation, autocomplete",
+                "Phone" => "Set format, country code",
+                "Number" or "Currency" => "Set min, max, step, format",
+                "DatePicker" or "DateTime" => "Set range, format, disabled days",
+                "Time" => "Set 12h/24h, step, range",
+                "FileUpload" => "Set allowed types, size limits",
+                "Image" => "Set dimensions, format, crop",
+                "Signature" => "Set canvas size, stroke",
+                "DataGrid" or "Repeater" => "Set columns, min/max rows",
+                "AutoComplete" => "Set data source, templates",
+                _ => "Configure type-specific settings"
+            };
+        }
+    }
+
+    private IEnumerable<string> ConfigSummary
+    {
+        get
+        {
+            if (Field?.TypeConfig == null) return Enumerable.Empty<string>();
+
+            return Field.TypeConfig switch
+            {
+                DateConfig dc => GetDateConfigSummary(dc),
+                FileUploadConfig fc => GetFileConfigSummary(fc),
+                DataGridConfig dgc => GetDataGridConfigSummary(dgc),
+                AutoCompleteConfig ac => GetAutoCompleteConfigSummary(ac),
+                _ => Enumerable.Empty<string>()
+            };
+        }
+    }
+
+    private int GetConfiguredSettingsCount()
+    {
+        if (Field?.TypeConfig == null) return 0;
+
+        return Field.TypeConfig switch
+        {
+            DateConfig dc => CountDateConfigSettings(dc),
+            FileUploadConfig fc => CountFileConfigSettings(fc),
+            DataGridConfig dgc => CountDataGridConfigSettings(dgc),
+            AutoCompleteConfig ac => CountAutoCompleteConfigSettings(ac),
+            _ => 0
+        };
+    }
+
+    private IEnumerable<string> GetDateConfigSummary(DateConfig config)
+    {
+        if (!config.AllowFuture) yield return "No future dates";
+        if (!config.AllowPast) yield return "No past dates";
+        if (!string.IsNullOrEmpty(config.MinDate)) yield return $"Min: {config.MinDate}";
+        if (!string.IsNullOrEmpty(config.MaxDate)) yield return $"Max: {config.MaxDate}";
+    }
+
+    private IEnumerable<string> GetFileConfigSummary(FileUploadConfig config)
+    {
+        if (config.AllowedExtensions.Any())
+            yield return string.Join(", ", config.AllowedExtensions.Take(3));
+        yield return $"Max: {config.MaxFileSizeBytes / (1024 * 1024)}MB";
+        if (config.AllowMultiple) yield return "Multiple";
+    }
+
+    private IEnumerable<string> GetDataGridConfigSummary(DataGridConfig config)
+    {
+        yield return $"{config.Columns.Length} columns";
+        if (config.MaxRows.HasValue) yield return $"Max: {config.MaxRows} rows";
+        yield return config.EditorMode;
+    }
+
+    private IEnumerable<string> GetAutoCompleteConfigSummary(AutoCompleteConfig config)
+    {
+        yield return $"Min: {config.MinCharacters} chars";
+        yield return config.DisplayField;
+    }
+
+    private int CountDateConfigSettings(DateConfig config)
+    {
+        int count = 0;
+        if (!config.AllowFuture) count++;
+        if (!config.AllowPast) count++;
+        if (!string.IsNullOrEmpty(config.MinDate)) count++;
+        if (!string.IsNullOrEmpty(config.MaxDate)) count++;
+        return count;
+    }
+
+    private int CountFileConfigSettings(FileUploadConfig config)
+    {
+        int count = 0;
+        if (config.AllowedExtensions.Any()) count++;
+        count++; // MaxFileSizeBytes always counts
+        if (config.AllowMultiple) count++;
+        if (config.ScanRequired) count++;
+        return count;
+    }
+
+    private int CountDataGridConfigSettings(DataGridConfig config)
+    {
+        int count = config.Columns.Length > 0 ? 1 : 0;
+        if (config.MaxRows.HasValue) count++;
+        if (!config.AllowAdd) count++;
+        if (!config.AllowEdit) count++;
+        if (!config.AllowDelete) count++;
+        return count;
+    }
+
+    private int CountAutoCompleteConfigSettings(AutoCompleteConfig config)
+    {
+        int count = 2; // DataSourceUrl and ValueField are required
+        if (!string.IsNullOrEmpty(config.ItemTemplate)) count++;
+        return count;
+    }
+
+    protected override void OnInitialized()
+    {
+        EditorState.OnFieldSelected += OnFieldSelected;
+    }
+
+    private void OnFieldSelected(string? fieldId)
+    {
+        LoadConfigFromField();
+        StateHasChanged();
+    }
+
+    private void LoadConfigFromField()
+    {
+        if (Field?.TypeConfig == null)
+        {
+            // Reset all config models to defaults
+            TextConfig = new TextConfigModel();
+            NumberConfig = new NumberConfigModel();
+            DateConfigValue = new DateConfigModel();
+            FileConfig = new FileConfigModel();
+            DataGridConfig = new DataGridConfigModel();
+            return;
+        }
+
+        switch (Field.TypeConfig)
+        {
+            case DateConfig dc:
+                DateConfigValue = new DateConfigModel
+                {
+                    AllowFuture = dc.AllowFuture,
+                    AllowPast = dc.AllowPast,
+                    MinDate = dc.MinDate,
+                    MaxDate = dc.MaxDate
+                };
+                break;
+            case FileUploadConfig fc:
+                FileConfig = new FileConfigModel
+                {
+                    AllowedExtensions = string.Join(", ", fc.AllowedExtensions),
+                    MaxFileSizeMB = (int)(fc.MaxFileSizeBytes / (1024 * 1024)),
+                    AllowMultiple = fc.AllowMultiple,
+                    ScanRequired = fc.ScanRequired
+                };
+                break;
+            case DataGridConfig dgc:
+                DataGridConfig = new DataGridConfigModel
+                {
+                    AllowAdd = dgc.AllowAdd,
+                    AllowEdit = dgc.AllowEdit,
+                    AllowDelete = dgc.AllowDelete,
+                    MaxRows = dgc.MaxRows,
+                    EditorMode = dgc.EditorMode
+                };
+                break;
+        }
+    }
+
+    private void OpenConfigModal()
+    {
+        LoadConfigFromField();
+        IsModalOpen = true;
+    }
+
+    private void CloseModal()
+    {
+        IsModalOpen = false;
+    }
+
+    private void HandleTextConfigChange(TextConfigModel config)
+    {
+        TextConfig = config;
+    }
+
+    private void HandleNumberConfigChange(NumberConfigModel config)
+    {
+        NumberConfig = config;
+    }
+
+    private void HandleDateConfigChange(DateConfigModel config)
+    {
+        DateConfigValue = config;
+    }
+
+    private void HandleFileConfigChange(FileConfigModel config)
+    {
+        FileConfig = config;
+    }
+
+    private void HandleDataGridConfigChange(DataGridConfigModel config)
+    {
+        DataGridConfig = config;
+    }
+
+    private void SaveConfig()
+    {
+        if (Field == null) return;
+
+        FieldTypeConfig? typeConfig = Field.FieldType switch
+        {
+            "DatePicker" or "DateTime" => new DateConfig
+            {
+                AllowFuture = DateConfigValue.AllowFuture,
+                AllowPast = DateConfigValue.AllowPast,
+                MinDate = DateConfigValue.MinDate,
+                MaxDate = DateConfigValue.MaxDate
+            },
+            "FileUpload" => new FileUploadConfig
+            {
+                AllowedExtensions = FileConfig.AllowedExtensions?.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(e => e.Trim()).ToArray() ?? Array.Empty<string>(),
+                MaxFileSizeBytes = FileConfig.MaxFileSizeMB * 1024 * 1024,
+                AllowMultiple = FileConfig.AllowMultiple,
+                ScanRequired = FileConfig.ScanRequired
+            },
+            "DataGrid" or "Repeater" => new DataGridConfig
+            {
+                AllowAdd = DataGridConfig.AllowAdd,
+                AllowEdit = DataGridConfig.AllowEdit,
+                AllowDelete = DataGridConfig.AllowDelete,
+                MaxRows = DataGridConfig.MaxRows,
+                EditorMode = DataGridConfig.EditorMode
+            },
+            _ => null
+        };
+
+        if (typeConfig != null)
+        {
+            var updated = Field with { TypeConfig = typeConfig };
+            EditorState.UpdateField(updated);
+        }
+
+        CloseModal();
+    }
+
+    public void Dispose()
+    {
+        EditorState.OnFieldSelected -= OnFieldSelected;
+    }
+
+    // Config Models for editing
+    public class TextConfigModel
+    {
+        public string? InputMask { get; set; }
+        public int? MaxLength { get; set; }
+        public string? Pattern { get; set; }
+        public string? Autocomplete { get; set; }
+    }
+
+    public class NumberConfigModel
+    {
+        public decimal? Min { get; set; }
+        public decimal? Max { get; set; }
+        public decimal? Step { get; set; }
+        public string? Format { get; set; }
+    }
+
+    public class DateConfigModel
+    {
+        public bool AllowFuture { get; set; } = true;
+        public bool AllowPast { get; set; } = true;
+        public string? MinDate { get; set; }
+        public string? MaxDate { get; set; }
+    }
+
+    public class FileConfigModel
+    {
+        public string? AllowedExtensions { get; set; }
+        public int MaxFileSizeMB { get; set; } = 10;
+        public bool AllowMultiple { get; set; }
+        public bool ScanRequired { get; set; } = true;
+    }
+
+    public class DataGridConfigModel
+    {
+        public bool AllowAdd { get; set; } = true;
+        public bool AllowEdit { get; set; } = true;
+        public bool AllowDelete { get; set; } = true;
+        public int? MaxRows { get; set; }
+        public string EditorMode { get; set; } = "Modal";
+    }
+}

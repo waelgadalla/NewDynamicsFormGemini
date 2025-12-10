@@ -6,7 +6,8 @@
       "Bash(find:*)",
       "Bash(mkdir -p:*)",
       "Bash(dir \"C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormGemini\\Src\\VisualEditorOpus\\Components\\Editor\")",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(dotnet build:*)"
     ],
     "deny": [],
     "ask": []

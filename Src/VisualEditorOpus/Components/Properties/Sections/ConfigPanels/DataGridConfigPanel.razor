@@ -1,0 +1,78 @@
+@* Data grid / repeater configuration panel *@
+
+<div class="config-panel">
+    <div class="config-group">
+        <label class="config-label">Permissions</label>
+        <div class="config-toggles">
+            <label class="toggle-option">
+                <input type="checkbox"
+                       checked="@Config.AllowAdd"
+                       @onchange="e => UpdateConfig(c => c.AllowAdd = (bool)(e.Value ?? true))" />
+                <span>Allow adding rows</span>
+            </label>
+            <label class="toggle-option">
+                <input type="checkbox"
+                       checked="@Config.AllowEdit"
+                       @onchange="e => UpdateConfig(c => c.AllowEdit = (bool)(e.Value ?? true))" />
+                <span>Allow editing rows</span>
+            </label>
+            <label class="toggle-option">
+                <input type="checkbox"
+                       checked="@Config.AllowDelete"
+                       @onchange="e => UpdateConfig(c => c.AllowDelete = (bool)(e.Value ?? true))" />
+                <span>Allow deleting rows</span>
+            </label>
+        </div>
+    </div>
+
+    <div class="config-group">
+        <label class="config-label">
+            <i class="bi bi-collection"></i>
+            Max Rows
+        </label>
+        <input type="number" class="config-input"
+               value="@Config.MaxRows"
+               min="1"
+               @oninput="e => UpdateConfig(c => c.MaxRows = int.TryParse(e.Value?.ToString(), out var v) && v > 0 ? v : null)"
+               placeholder="Unlimited" />
+        <div class="config-help">Leave empty for unlimited rows</div>
+    </div>
+
+    <div class="config-group">
+        <label class="config-label">
+            <i class="bi bi-layout-text-window"></i>
+            Editor Mode
+        </label>
+        <div class="config-options-row">
+            <label class="config-option @(Config.EditorMode == "Modal" ? "selected" : "")"
+                   @onclick="() => SetEditorMode(\"Modal\")">
+                <i class="bi bi-window"></i>
+                <span>Modal</span>
+                <small>Edit in popup</small>
+            </label>
+            <label class="config-option @(Config.EditorMode == "Inline" ? "selected" : "")"
+                   @onclick="() => SetEditorMode(\"Inline\")">
+                <i class="bi bi-pencil-square"></i>
+                <span>Inline</span>
+                <small>Edit in row</small>
+            </label>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public TypeConfigButton.DataGridConfigModel Config { get; set; } = new();
+    [Parameter] public EventCallback<TypeConfigButton.DataGridConfigModel> OnChange { get; set; }
+
+    private async Task UpdateConfig(Action<TypeConfigButton.DataGridConfigModel> update)
+    {
+        update(Config);
+        await OnChange.InvokeAsync(Config);
+    }
+
+    private async Task SetEditorMode(string mode)
+    {
+        Config.EditorMode = mode;
+        await OnChange.InvokeAsync(Config);
+    }
+}

@@ -1,0 +1,71 @@
+@* Text configuration panel *@
+
+<div class="config-panel">
+    <div class="config-group">
+        <label class="config-label">
+            <i class="bi bi-text-paragraph"></i>
+            Input Mask
+        </label>
+        <input type="text" class="config-input text-mono"
+               value="@Config.InputMask"
+               @oninput="e => UpdateConfig(c => c.InputMask = e.Value?.ToString())"
+               placeholder="e.g., (###) ###-####" />
+        <div class="config-help">Pattern for formatting input (# = digit, A = letter)</div>
+    </div>
+
+    <div class="config-group">
+        <label class="config-label">
+            <i class="bi bi-rulers"></i>
+            Max Length
+        </label>
+        <input type="number" class="config-input"
+               value="@Config.MaxLength"
+               @oninput="e => UpdateConfig(c => c.MaxLength = int.TryParse(e.Value?.ToString(), out var v) ? v : null)"
+               placeholder="e.g., 100" />
+        <div class="config-help">Maximum number of characters allowed</div>
+    </div>
+
+    <div class="config-group">
+        <label class="config-label">
+            <i class="bi bi-regex"></i>
+            Validation Pattern
+        </label>
+        <input type="text" class="config-input text-mono"
+               value="@Config.Pattern"
+               @oninput="e => UpdateConfig(c => c.Pattern = e.Value?.ToString())"
+               placeholder="e.g., ^[A-Za-z]+$" />
+        <div class="config-help">Regular expression for validation</div>
+    </div>
+
+    <div class="config-group">
+        <label class="config-label">
+            <i class="bi bi-spellcheck"></i>
+            Autocomplete
+        </label>
+        <select class="config-select"
+                value="@Config.Autocomplete"
+                @onchange="e => UpdateConfig(c => c.Autocomplete = e.Value?.ToString())">
+            <option value="">None</option>
+            <option value="name">Name</option>
+            <option value="email">Email</option>
+            <option value="tel">Telephone</option>
+            <option value="address-line1">Address Line 1</option>
+            <option value="address-line2">Address Line 2</option>
+            <option value="city">City</option>
+            <option value="postal-code">Postal Code</option>
+            <option value="country">Country</option>
+        </select>
+        <div class="config-help">Browser autocomplete hint</div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public TypeConfigButton.TextConfigModel Config { get; set; } = new();
+    [Parameter] public EventCallback<TypeConfigButton.TextConfigModel> OnChange { get; set; }
+
+    private async Task UpdateConfig(Action<TypeConfigButton.TextConfigModel> update)
+    {
+        update(Config);
+        await OnChange.InvokeAsync(Config);
+    }
+}
