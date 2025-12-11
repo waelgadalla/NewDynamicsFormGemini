@@ -8,6 +8,10 @@
         {
             <span class="toolbar-badge">@FieldCount Fields</span>
         }
+        @if (_isSaving)
+        {
+            <span class="toolbar-badge saving">Saving...</span>
+        }
     </div>
 
     <ViewSwitcher CurrentView="@EditorState.CurrentView" OnViewChanged="HandleViewChanged" />
@@ -25,19 +29,99 @@
             <IconButton Icon="bi-trash" Title="Delete (Del)"
                         Disabled="@(EditorState.SelectedFieldId is null || EditorState.CurrentView != EditorView.Design)" OnClick="Delete" />
         </div>
-        <button class="toolbar-btn primary" @onclick="Save">
-            <i class="bi bi-save"></i>
-            <span>Save</span>
-        </button>
+        <div class="toolbar-group">
+            <button class="toolbar-btn" @onclick="OpenLoadModal" title="Open saved form (Ctrl+O)">
+                <i class="bi bi-folder-open"></i>
+                <span>Open</span>
+            </button>
+            <button class="toolbar-btn primary" @onclick="SaveAsync" disabled="@(_isSaving || EditorState.CurrentModule is null)" title="Save form (Ctrl+S)">
+                <i class="bi bi-save"></i>
+                <span>Save</span>
+            </button>
+        </div>
     </div>
 </div>
 
+@* Load Module Modal *@
+@if (_showLoadModal)
+{
+    <div class="modal-backdrop" @onclick="CloseLoadModal">
+        <div class="modal-content load-modal" @onclick:stopPropagation="true">
+            <div class="modal-header">
+                <h3>Open Saved Form</h3>
+                <button class="modal-close" @onclick="CloseLoadModal">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                @if (_isLoadingList)
+                {
+                    <div class="loading-state">
+                        <i class="bi bi-arrow-repeat spinning"></i>
+                        <span>Loading saved forms...</span>
+                    </div>
+                }
+                else if (_savedModules.Any())
+                {
+                    <div class="saved-modules-list">
+                        @foreach (var module in _savedModules)
+                        {
+                            <div class="saved-module-item @(_selectedModuleId == module.ModuleId ? "selected" : "")"
+                                 @onclick="() => SelectModule(module.ModuleId)">
+                                <div class="module-info">
+                                    <span class="module-title">@module.TitleEn</span>
+                                    <span class="module-meta">@module.FieldCount fields | v@module.Version</span>
+                                </div>
+                                <div class="module-date">
+                                    @module.DateUpdated.ToString("MMM dd, yyyy HH:mm")
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i class="bi bi-folder"></i>
+                        <p>No saved forms found</p>
+                        <span class="empty-hint">Save your first form to see it here</span>
+                    </div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" @onclick="CloseLoadModal">Cancel</button>
+                <button class="btn-primary" @onclick="LoadSelectedModule" disabled="@(_selectedModuleId is null || _isLoading)">
+                    @if (_isLoading)
+                    {
+                        <i class="bi bi-arrow-repeat spinning"></i>
+                        <span>Loading...</span>
+                    }
+                    else
+                    {
+                        <i class="bi bi-folder-open"></i>
+                        <span>Open</span>
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     [Inject] private IEditorStateService EditorState { get; set; } = default!;
+    [Inject] private IEditorPersistenceService PersistenceService { get; set; } = default!;
     [Inject] private IToastService ToastService { get; set; } = default!;
 
     private int FieldCount => EditorState.CurrentModule?.Fields.Length ?? 0;
     private string ModuleName => EditorState.CurrentModule?.TitleEn ?? "Untitled Form";
+
+    // Save/Load state
+    private bool _isSaving;
+    private bool _isLoading;
+    private bool _isLoadingList;
+    private bool _showLoadModal;
+    private int? _selectedModuleId;
+    private List<DynamicForms.SqlServer.Interfaces.ModuleSchemaSummary> _savedModules = new();
 
     protected override void OnInitialized()
     {
@@ -77,10 +161,103 @@
         }
     }
 
-    private void Save()
+    private async Task SaveAsync()
     {
-        // TODO: Implement actual save logic
-        ToastService.ShowSuccess("Form saved");
+        if (EditorState.CurrentModule is null) return;
+
+        _isSaving = true;
+        StateHasChanged();
+
+        try
+        {
+            var result = await PersistenceService.SaveModuleAsync(EditorState.CurrentModule);
+
+            if (result.Success)
+            {
+                ToastService.ShowSuccess($"Form saved successfully (ID: {result.SavedId})");
+            }
+            else
+            {
+                ToastService.ShowError($"Failed to save: {result.ErrorMessage}");
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error saving form: {ex.Message}");
+        }
+        finally
+        {
+            _isSaving = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OpenLoadModal()
+    {
+        _showLoadModal = true;
+        _selectedModuleId = null;
+        _isLoadingList = true;
+        StateHasChanged();
+
+        try
+        {
+            var modules = await PersistenceService.GetAllModulesAsync();
+            _savedModules = modules.ToList();
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error loading saved forms: {ex.Message}");
+            _savedModules = new();
+        }
+        finally
+        {
+            _isLoadingList = false;
+            StateHasChanged();
+        }
+    }
+
+    private void CloseLoadModal()
+    {
+        _showLoadModal = false;
+        _selectedModuleId = null;
+    }
+
+    private void SelectModule(int moduleId)
+    {
+        _selectedModuleId = moduleId;
+    }
+
+    private async Task LoadSelectedModule()
+    {
+        if (_selectedModuleId is null) return;
+
+        _isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            var module = await PersistenceService.LoadModuleAsync(_selectedModuleId.Value);
+
+            if (module is not null)
+            {
+                EditorState.LoadModule(module);
+                ToastService.ShowSuccess($"Loaded: {module.TitleEn}");
+                CloseLoadModal();
+            }
+            else
+            {
+                ToastService.ShowError("Module not found");
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error loading module: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
     }
 
     public void Dispose()

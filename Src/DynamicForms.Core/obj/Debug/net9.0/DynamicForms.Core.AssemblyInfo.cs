@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyDescriptionAttribute(("Core entities and interfaces for JSON-based dynamic form processing. Enables buil" +
     "ding flexible, multilingual forms for government and enterprise applications."))]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+28ec5430ee1bedb761fc0ddde3524fa4c1ef5607")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5b6885b4fc036df5fe56f805111e0c827579a335")]
 [assembly: System.Reflection.AssemblyProductAttribute("DynamicForms.Core")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DynamicForms.Core")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
