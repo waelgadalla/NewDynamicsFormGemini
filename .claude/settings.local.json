@@ -12,7 +12,8 @@
       "Bash(Get-Content \"C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormGemini\\Src\\VisualEditorOpus\\Components\\Properties\\Sections\\AccessibilitySection.razor\")",
       "Bash(Select-String -Pattern \"^\\s*\\}\" -AllMatches)",
       "Bash(Select-Object -Last 15)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []

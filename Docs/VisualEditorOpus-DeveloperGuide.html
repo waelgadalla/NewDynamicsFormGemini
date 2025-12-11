@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisualEditorOpus - Developer Guide</title>
+    <style>
+        /* Print-optimized styles */
+        @page {
+            size: A4;
+            margin: 1.5cm 1.5cm 2cm 1.5cm;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+            font-size: 9pt;
+            line-height: 1.4;
+            color: #000;
+            background: #fff;
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 10mm;
+        }
+
+        /* Headers */
+        h1 {
+            font-size: 18pt;
+            font-weight: 700;
+            border-bottom: 2px solid #000;
+            padding-bottom: 4pt;
+            margin-bottom: 8pt;
+            page-break-after: avoid;
+        }
+
+        h2 {
+            font-size: 13pt;
+            font-weight: 700;
+            border-bottom: 1px solid #000;
+            padding-bottom: 3pt;
+            margin-top: 14pt;
+            margin-bottom: 6pt;
+            page-break-after: avoid;
+        }
+
+        h3 {
+            font-size: 11pt;
+            font-weight: 600;
+            margin-top: 10pt;
+            margin-bottom: 4pt;
+            page-break-after: avoid;
+        }
+
+        h4 {
+            font-size: 10pt;
+            font-weight: 600;
+            margin-top: 8pt;
+            margin-bottom: 3pt;
+            page-break-after: avoid;
+        }
+
+        h5 {
+            font-size: 9pt;
+            font-weight: 600;
+            margin-top: 6pt;
+            margin-bottom: 2pt;
+        }
+
+        /* Paragraphs */
+        p {
+            margin-bottom: 6pt;
+            text-align: justify;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin-left: 14pt;
+            margin-bottom: 6pt;
+        }
+
+        li {
+            margin-bottom: 2pt;
+        }
+
+        li > ul, li > ol {
+            margin-top: 2pt;
+            margin-bottom: 2pt;
+        }
+
+        /* Code */
+        code {
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 8pt;
+            background: #f0f0f0;
+            padding: 1pt 3pt;
+            border: 1px solid #ccc;
+        }
+
+        pre {
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 7.5pt;
+            line-height: 1.3;
+            background: #f5f5f5;
+            border: 1px solid #999;
+            padding: 6pt;
+            margin: 6pt 0;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            page-break-inside: avoid;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8pt;
+            margin: 6pt 0;
+            page-break-inside: avoid;
+        }
+
+        th, td {
+            border: 1px solid #666;
+            padding: 3pt 5pt;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #e0e0e0;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        /* Special boxes */
+        .info-box {
+            border: 1px solid #666;
+            padding: 6pt;
+            margin: 6pt 0;
+            background: #f9f9f9;
+            page-break-inside: avoid;
+        }
+
+        .info-box-title {
+            font-weight: 700;
+            font-size: 9pt;
+            margin-bottom: 4pt;
+            border-bottom: 1px solid #999;
+            padding-bottom: 2pt;
+        }
+
+        .warning-box {
+            border: 2px solid #000;
+            padding: 6pt;
+            margin: 6pt 0;
+            background: #fff;
+        }
+
+        .warning-box::before {
+            content: "⚠ IMPORTANT: ";
+            font-weight: 700;
+        }
+
+        /* TOC */
+        .toc {
+            border: 1px solid #000;
+            padding: 8pt;
+            margin: 10pt 0;
+            background: #fafafa;
+            page-break-after: always;
+        }
+
+        .toc h2 {
+            margin-top: 0;
+            border-bottom: 1px solid #000;
+        }
+
+        .toc ul {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .toc li {
+            margin-bottom: 3pt;
+        }
+
+        .toc a {
+            color: #000;
+            text-decoration: none;
+        }
+
+        .toc .level-1 { font-weight: 600; }
+        .toc .level-2 { margin-left: 12pt; }
+        .toc .level-3 { margin-left: 24pt; font-size: 8pt; }
+
+        /* Page numbers for print */
+        .page-number {
+            position: running(pageNumber);
+        }
+
+        @page {
+            @bottom-center {
+                content: "Page " counter(page) " of " counter(pages);
+                font-size: 8pt;
+            }
+        }
+
+        /* Diagrams */
+        .diagram {
+            font-family: 'Consolas', monospace;
+            font-size: 7pt;
+            line-height: 1.2;
+            background: #fff;
+            border: 1px solid #000;
+            padding: 8pt;
+            margin: 6pt 0;
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        /* Two columns */
+        .two-col {
+            display: flex;
+            gap: 10pt;
+        }
+
+        .two-col > div {
+            flex: 1;
+        }
+
+        /* File tree */
+        .file-tree {
+            font-family: 'Consolas', monospace;
+            font-size: 7.5pt;
+            line-height: 1.35;
+            background: #f8f8f8;
+            border: 1px solid #999;
+            padding: 6pt;
+            margin: 6pt 0;
+        }
+
+        /* Compact list */
+        .compact-list {
+            column-count: 2;
+            column-gap: 15pt;
+        }
+
+        .compact-list li {
+            break-inside: avoid;
+        }
+
+        /* Section break */
+        .section-break {
+            page-break-before: always;
+        }
+
+        /* Header info */
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #000;
+            padding-bottom: 4pt;
+            margin-bottom: 8pt;
+            font-size: 8pt;
+        }
+
+        /* Print adjustments */
+        @media print {
+            body {
+                padding: 0;
+            }
+
+            .no-print {
+                display: none;
+            }
+
+            a {
+                color: #000;
+                text-decoration: none;
+            }
+
+            h2, h3, h4 {
+                page-break-after: avoid;
+            }
+
+            pre, table, .info-box, .diagram {
+                page-break-inside: avoid;
+            }
+        }
+
+        /* Inline definitions */
+        .def {
+            display: flex;
+            margin-bottom: 3pt;
+        }
+
+        .def-term {
+            font-weight: 600;
+            min-width: 120pt;
+            flex-shrink: 0;
+        }
+
+        .def-desc {
+            flex: 1;
+        }
+
+        /* Method signature */
+        .method-sig {
+            font-family: 'Consolas', monospace;
+            font-size: 8pt;
+            background: #f0f0f0;
+            padding: 2pt 4pt;
+            margin: 2pt 0;
+            border-left: 3px solid #666;
+        }
+
+        /* Quick ref */
+        .quick-ref {
+            background: #f0f0f0;
+            border: 1px solid #999;
+            padding: 6pt;
+            margin: 6pt 0;
+            font-size: 8pt;
+        }
+
+        .quick-ref h4 {
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Cover Page -->
+<div style="text-align: center; padding: 40pt 0; border: 2px solid #000; margin-bottom: 20pt;">
+    <h1 style="border: none; font-size: 24pt; margin-bottom: 20pt;">VisualEditorOpus</h1>
+    <p style="font-size: 14pt; font-weight: 600; margin-bottom: 10pt;">Developer Guide</p>
+    <p style="font-size: 11pt;">Architecture, Structure & Implementation Reference</p>
+    <div style="margin-top: 30pt; font-size: 9pt;">
+        <p>Version 1.0 | December 2025</p>
+        <p>Blazor Server | .NET 9.0</p>
+    </div>
+</div>
+
+<!-- Table of Contents -->
+<div class="toc">
+    <h2>Table of Contents</h2>
+    <ul>
+        <li class="level-1"><a href="#sec1">1. Overview &amp; Technology Stack</a></li>
+        <li class="level-1"><a href="#sec2">2. Project Structure</a></li>
+        <li class="level-2"><a href="#sec2-1">2.1 Directory Layout</a></li>
+        <li class="level-2"><a href="#sec2-2">2.2 Key Entry Points</a></li>
+        <li class="level-1"><a href="#sec3">3. Architecture</a></li>
+        <li class="level-2"><a href="#sec3-1">3.1 Layered Architecture</a></li>
+        <li class="level-2"><a href="#sec3-2">3.2 Data Flow Pattern</a></li>
+        <li class="level-2"><a href="#sec3-3">3.3 Component Hierarchy</a></li>
+        <li class="level-1"><a href="#sec4">4. Services Reference</a></li>
+        <li class="level-2"><a href="#sec4-1">4.1 State Management Services</a></li>
+        <li class="level-2"><a href="#sec4-2">4.2 CodeSet Services</a></li>
+        <li class="level-2"><a href="#sec4-3">4.3 Validation &amp; Import/Export</a></li>
+        <li class="level-1"><a href="#sec5">5. Components Reference</a></li>
+        <li class="level-2"><a href="#sec5-1">5.1 Page Components (Routes)</a></li>
+        <li class="level-2"><a href="#sec5-2">5.2 Layout Components</a></li>
+        <li class="level-2"><a href="#sec5-3">5.3 Editor Components</a></li>
+        <li class="level-2"><a href="#sec5-4">5.4 Workflow Components</a></li>
+        <li class="level-2"><a href="#sec5-5">5.5 Shared Components</a></li>
+        <li class="level-1"><a href="#sec6">6. Models Reference</a></li>
+        <li class="level-1"><a href="#sec7">7. CSS Architecture</a></li>
+        <li class="level-1"><a href="#sec8">8. JavaScript Interop</a></li>
+        <li class="level-1"><a href="#sec9">9. Dependency Injection</a></li>
+        <li class="level-1"><a href="#sec10">10. Common Patterns &amp; Best Practices</a></li>
+        <li class="level-1"><a href="#sec11">11. Quick Reference Cards</a></li>
+    </ul>
+</div>
+
+<!-- Section 1: Overview -->
+<h2 id="sec1">1. Overview &amp; Technology Stack</h2>
+
+<p><strong>VisualEditorOpus</strong> is a visual form editor and workflow designer built as a Blazor Server application. It enables users to design form schemas, configure field properties, manage code sets, and create workflow processes through an intuitive drag-and-drop interface.</p>
+
+<div class="info-box">
+    <div class="info-box-title">Technology Stack</div>
+    <div class="two-col">
+        <div>
+            <ul>
+                <li><strong>Framework:</strong> .NET 9.0</li>
+                <li><strong>UI:</strong> Blazor Server (Interactive)</li>
+                <li><strong>Rendering:</strong> InteractiveServerRenderMode</li>
+                <li><strong>Core Library:</strong> DynamicForms.Core.V4</li>
+            </ul>
+        </div>
+        <div>
+            <ul>
+                <li><strong>Icons:</strong> Bootstrap Icons 1.11+</li>
+                <li><strong>Fonts:</strong> DM Sans, JetBrains Mono</li>
+                <li><strong>CSS:</strong> Custom + Bootstrap Grid</li>
+                <li><strong>State:</strong> Immutable Records + Events</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<h3>Core Features</h3>
+<ul>
+    <li><strong>Form Designer</strong> – Visual canvas for designing form layouts with 15+ field types</li>
+    <li><strong>Properties Panel</strong> – 18+ configuration sections for field customization</li>
+    <li><strong>Workflow Designer</strong> – Node-based workflow builder with connections, minimap, and zoom</li>
+    <li><strong>CodeSet Manager</strong> – Hierarchical data management with caching and multi-source loading</li>
+    <li><strong>Undo/Redo</strong> – 50-level state history for all operations</li>
+    <li><strong>Import/Export</strong> – JSON, CSV, XML support for schemas and data</li>
+    <li><strong>Dark Mode</strong> – Full theme support via CSS variables</li>
+    <li><strong>Bilingual</strong> – English/French label support throughout</li>
+</ul>
+
+<!-- Section 2: Project Structure -->
+<h2 id="sec2" class="section-break">2. Project Structure</h2>
+
+<h3 id="sec2-1">2.1 Directory Layout</h3>
+
+<div class="file-tree">Src/VisualEditorOpus/
+├── Components/                    # Razor components (166 total)
+│   ├── App.razor                 # HTML root document
+│   ├── Routes.razor              # Client-side routing
+│   ├── _Imports.razor            # Global namespace imports
+│   ├── Pages/                    # Routable page components
+│   │   ├── Dashboard.razor       # Route: /
+│   │   ├── ModuleEditor.razor    # Route: /editor, /editor/{id}
+│   │   ├── WorkflowEditor.razor  # Route: /workflow
+│   │   └── CodeSetManager.razor  # Route: /codeset
+│   ├── Editor/                   # Form editor components
+│   │   ├── Canvas/              # Form canvas & field renderers
+│   │   ├── FieldPalette/        # Field type palette
+│   │   ├── Outline/             # Hierarchical tree view
+│   │   ├── Modals/              # Dialog components
+│   │   └── *.razor              # Container components
+│   ├── Properties/               # Properties panel
+│   │   ├── Sections/            # Property sections (18+)
+│   │   └── ConfigPanels/        # Type-specific configs
+│   ├── Workflow/                 # Workflow designer
+│   │   ├── Nodes/               # Node type components
+│   │   └── Settings/            # Workflow settings sections
+│   ├── CodeSet/                  # CodeSet management
+│   ├── Preview/                  # Form preview & JSON view
+│   ├── Shared/                   # Reusable UI components
+│   ├── Navigation/               # Navigation components
+│   └── Dashboard/                # Dashboard widgets
+├── Layouts/                      # Layout components
+│   ├── MainLayout.razor         # Default layout
+│   └── EditorLayout.razor       # Editor-specific layout
+├── Services/                     # Business logic (12 services)
+├── Models/                       # Data models & enums
+├── wwwroot/                      # Static assets
+│   ├── css/                     # Stylesheets (21 files)
+│   └── js/                      # JavaScript files (5 files)
+├── Program.cs                    # Entry point & DI config
+└── appsettings.json             # Configuration</div>
+
+<h3 id="sec2-2">2.2 Key Entry Points</h3>
+
+<h4>Program.cs – Service Registration</h4>
+<pre>// Core services from DynamicForms.Core.V4
+builder.Services.AddScoped&lt;IFormHierarchyService, FormHierarchyService&gt;();
+builder.Services.AddScoped&lt;ICodeSetProvider, InMemoryCodeSetProvider&gt;();
+
+// Editor state management
+builder.Services.AddScoped&lt;IEditorStateService, EditorStateService&gt;();
+builder.Services.AddScoped&lt;IThemeService, ThemeService&gt;();
+builder.Services.AddScoped&lt;IToastService, ToastService&gt;();
+builder.Services.AddScoped&lt;IUndoRedoService, UndoRedoService&gt;();
+builder.Services.AddScoped&lt;ISchemaValidationService, SchemaValidationService&gt;();
+
+// CodeSet management
+builder.Services.AddScoped&lt;ICodeSetService, CodeSetService&gt;();
+builder.Services.AddScoped&lt;ICodeSetCache, CodeSetCache&gt;();
+builder.Services.AddHttpClient&lt;ICodeSetLoader, CodeSetLoader&gt;();
+builder.Services.AddSingleton&lt;ITabStateService, TabStateService&gt;();
+
+// Import/Export
+builder.Services.AddScoped&lt;IJsonImportExportService, JsonImportExportService&gt;();
+builder.Services.AddScoped&lt;IImportExportService, ImportExportService&gt;();
+
+// Blazor configuration
+app.MapRazorComponents&lt;App&gt;().AddInteractiveServerRenderMode();</pre>
+
+<h4>App.razor – HTML Document Structure</h4>
+<pre>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;link href="css/app.css" rel="stylesheet" /&gt;
+    &lt;link href="css/components.css" rel="stylesheet" /&gt;
+    &lt;link href="VisualEditorOpus.styles.css" rel="stylesheet" /&gt;  &lt;!-- Scoped CSS --&gt;
+&lt;/head&gt;
+&lt;body data-theme="light"&gt;
+    &lt;Routes @rendermode="InteractiveServer" /&gt;
+    &lt;script src="js/editor.js"&gt;&lt;/script&gt;
+    &lt;script src="js/workflow-canvas.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+
+<!-- Section 3: Architecture -->
+<h2 id="sec3" class="section-break">3. Architecture</h2>
+
+<h3 id="sec3-1">3.1 Layered Architecture</h3>
+
+<div class="diagram">┌─────────────────────────────────────────────────────────────────────────┐
+│                           PRESENTATION LAYER                             │
+│  ┌─────────────┐  ┌──────────────┐  ┌─────────────┐  ┌──────────────┐  │
+│  │   Pages     │  │   Layouts    │  │  Components │  │    Shared    │  │
+│  │  Dashboard  │  │  MainLayout  │  │   Editor    │  │   Button     │  │
+│  │  ModuleEdit │  │  EditorLayout│  │   Workflow  │  │   Modal      │  │
+│  │  Workflow   │  │              │  │   CodeSet   │  │   Toast      │  │
+│  └─────────────┘  └──────────────┘  └─────────────┘  └──────────────┘  │
+└────────────────────────────────┬────────────────────────────────────────┘
+                                 │ Inject
+┌────────────────────────────────▼────────────────────────────────────────┐
+│                            SERVICE LAYER                                │
+│  ┌──────────────────┐  ┌─────────────────┐  ┌────────────────────────┐ │
+│  │  State Services  │  │  Data Services  │  │   Utility Services     │ │
+│  │  EditorState     │  │  CodeSetService │  │   ValidationService    │ │
+│  │  ThemeService    │  │  CodeSetLoader  │  │   UndoRedoService      │ │
+│  │  TabStateService │  │  CodeSetCache   │  │   ImportExportService  │ │
+│  │  ToastService    │  │                 │  │   JsonImportExport     │ │
+│  └──────────────────┘  └─────────────────┘  └────────────────────────┘ │
+└────────────────────────────────┬────────────────────────────────────────┘
+                                 │ Reference
+┌────────────────────────────────▼────────────────────────────────────────┐
+│                       DOMAIN/CORE LAYER                                 │
+│                    DynamicForms.Core.V4                                 │
+│  ┌───────────────────┐  ┌──────────────────┐  ┌─────────────────────┐  │
+│  │      Schemas      │  │     Runtime      │  │      Services       │  │
+│  │  FormModuleSchema │  │  FormModuleRun.  │  │  IFormHierarchy     │  │
+│  │  FormFieldSchema  │  │  FormFieldNode   │  │  ICodeSetProvider   │  │
+│  │  FormWorkflowSch. │  │                  │  │                     │  │
+│  └───────────────────┘  └──────────────────┘  └─────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────┘</div>
+
+<h3 id="sec3-2">3.2 Data Flow Pattern</h3>
+
+<p>The application uses a unidirectional data flow pattern with immutable state and event-driven updates:</p>
+
+<div class="diagram">┌──────────────────────────────────────────────────────────────────────┐
+│                         DATA FLOW SEQUENCE                            │
+└──────────────────────────────────────────────────────────────────────┘
+
+  User Action          Component              Service               State
+      │                    │                     │                    │
+      │  Click/Input       │                     │                    │
+      ├───────────────────►│                     │                    │
+      │                    │  Call Method        │                    │
+      │                    ├────────────────────►│                    │
+      │                    │                     │  Update State      │
+      │                    │                     ├───────────────────►│
+      │                    │                     │                    │
+      │                    │                     │  Fire Event        │
+      │                    │◄────────────────────┤  (OnStateChanged)  │
+      │                    │                     │                    │
+      │                    │  StateHasChanged()  │                    │
+      │  Re-render         │                     │                    │
+      │◄───────────────────┤                     │                    │
+      │                    │                     │                    │
+
+EXAMPLE: Selecting a Field
+1. User clicks field on canvas
+2. CanvasField calls EditorStateService.SelectField(fieldId)
+3. Service updates: _state = _state with { SelectedFieldId = fieldId }
+4. Service fires: OnFieldSelected?.Invoke(fieldId)
+5. PropertiesPanel receives event, calls StateHasChanged()
+6. Properties panel re-renders with selected field data</div>
+
+<h3 id="sec3-3">3.3 Component Hierarchy</h3>
+
+<div class="diagram">EditorLayout.razor
+├── GlobalNav.razor                      # Top navigation bar
+├── EditorHeader.razor                   # Editor title & actions
+├── EditorToolbar.razor                  # Quick action buttons
+├── [VIEW: Design]
+│   ├── LeftSidebar.razor
+│   │   ├── FieldPalette.razor          # Available field types
+│   │   │   └── FieldPaletteItem.razor
+│   │   ├── OutlineTree.razor           # Form hierarchy
+│   │   │   └── OutlineTreeNode.razor (recursive)
+│   │   └── ValidationIssuesList.razor
+│   ├── FormCanvas.razor                 # Main design area
+│   │   └── CanvasField.razor (recursive)
+│   │       ├── CanvasTextInput.razor
+│   │       ├── CanvasDropdown.razor
+│   │       ├── CanvasSection.razor
+│   │       └── ... (12 field types)
+│   └── RightSidebar.razor
+│       └── PropertySection.razor (×18)
+│           ├── GeneralSection.razor
+│           ├── ValidationSection.razor
+│           ├── LayoutSection.razor
+│           └── ... (15 more sections)
+├── [VIEW: Preview]
+│   └── FormPreview.razor
+│       └── RenderedField.razor
+├── [VIEW: JSON]
+│   └── JsonPreview.razor
+└── ToastContainer.razor
+    └── Toast.razor</div>
+
+<!-- Section 4: Services Reference -->
+<h2 id="sec4" class="section-break">4. Services Reference</h2>
+
+<h3 id="sec4-1">4.1 State Management Services</h3>
+
+<h4>IEditorStateService (Scoped)</h4>
+<p>Central state management for the form editor. Manages module, workflow, selection, clipboard, and validation state.</p>
+
+<table>
+    <tr><th>Property</th><th>Type</th><th>Description</th></tr>
+    <tr><td>CurrentModule</td><td>FormModuleSchema?</td><td>Currently loaded form module</td></tr>
+    <tr><td>CurrentWorkflow</td><td>FormWorkflowSchema?</td><td>Currently loaded workflow</td></tr>
+    <tr><td>CurrentModuleRuntime</td><td>FormModuleRuntime?</td><td>Hierarchical runtime representation</td></tr>
+    <tr><td>SelectedFieldId</td><td>string?</td><td>Currently selected field ID</td></tr>
+    <tr><td>SelectedField</td><td>FormFieldSchema?</td><td>Currently selected field schema</td></tr>
+    <tr><td>SelectedFieldNode</td><td>FormFieldNode?</td><td>Selected field's runtime node</td></tr>
+    <tr><td>ValidationIssues</td><td>IReadOnlyList&lt;ValidationIssue&gt;</td><td>Current validation issues</td></tr>
+    <tr><td>CanUndo / CanRedo</td><td>bool</td><td>Undo/redo availability</td></tr>
+    <tr><td>HasClipboard</td><td>bool</td><td>Clipboard has content</td></tr>
+    <tr><td>CurrentView</td><td>EditorView</td><td>Design, Preview, or Json</td></tr>
+</table>
+
+<h5>Key Methods</h5>
+<div class="method-sig">void LoadModule(FormModuleSchema module)</div>
+<div class="method-sig">void UpdateModule(FormModuleSchema module)</div>
+<div class="method-sig">void SelectField(string? fieldId)</div>
+<div class="method-sig">void AddField(string fieldType, string? parentId = null, int? insertAtOrder = null)</div>
+<div class="method-sig">void UpdateField(FormFieldSchema field)</div>
+<div class="method-sig">void DeleteField(string fieldId)</div>
+<div class="method-sig">void DuplicateField(string fieldId)</div>
+<div class="method-sig">void MoveField(string fieldId, MoveDirection direction)</div>
+<div class="method-sig">void ChangeFieldParent(string fieldId, string? newParentId)</div>
+<div class="method-sig">void CopyField(string fieldId) / void PasteField(string? parentId)</div>
+<div class="method-sig">void Undo() / void Redo()</div>
+<div class="method-sig">void SetView(EditorView view)</div>
+
+<h5>Events</h5>
+<div class="method-sig">event Action? OnStateChanged</div>
+<div class="method-sig">event Action&lt;string?&gt;? OnFieldSelected</div>
+<div class="method-sig">event Action? OnModuleChanged</div>
+<div class="method-sig">event Action? OnWorkflowChanged</div>
+<div class="method-sig">event Action&lt;EditorView&gt;? OnViewChanged</div>
+
+<h4>IThemeService (Scoped)</h4>
+<table>
+    <tr><th>Member</th><th>Description</th></tr>
+    <tr><td>bool IsDarkMode</td><td>Current theme state</td></tr>
+    <tr><td>void Toggle()</td><td>Toggle between light/dark</td></tr>
+    <tr><td>void SetDarkMode(bool)</td><td>Set specific theme</td></tr>
+    <tr><td>event Action? OnThemeChanged</td><td>Theme change notification</td></tr>
+</table>
+
+<h4>IToastService (Scoped)</h4>
+<table>
+    <tr><th>Method</th><th>Description</th></tr>
+    <tr><td>ShowSuccess(string message)</td><td>Green success toast</td></tr>
+    <tr><td>ShowError(string message)</td><td>Red error toast</td></tr>
+    <tr><td>ShowWarning(string message)</td><td>Yellow warning toast</td></tr>
+    <tr><td>ShowInfo(string message)</td><td>Blue info toast</td></tr>
+    <tr><td>event Action&lt;ToastMessage&gt;? OnToastAdded</td><td>Toast notification event</td></tr>
+</table>
+
+<h4>ITabStateService (Singleton)</h4>
+<p>Manages CodeSet editor tabs across the application. Singleton to preserve tab state during navigation.</p>
+<div class="method-sig">IReadOnlyList&lt;TabState&gt; OpenTabs</div>
+<div class="method-sig">TabState? ActiveTab</div>
+<div class="method-sig">void OpenTab(TabState tab) / void CloseTab(string tabId)</div>
+<div class="method-sig">void ActivateTab(string tabId)</div>
+<div class="method-sig">void PinTab(string tabId) / void UnpinTab(string tabId)</div>
+<div class="method-sig">void MarkDirty(string tabId) / void MarkClean(string tabId)</div>
+
+<h3 id="sec4-2">4.2 CodeSet Services</h3>
+
+<h4>ICodeSetService (Scoped)</h4>
+<p>Full CRUD operations for CodeSets with caching, multi-source loading, and binding management.</p>
+
+<table>
+    <tr><th>Category</th><th>Methods</th></tr>
+    <tr><td>CRUD</td><td>GetAllCodeSetsAsync, GetCodeSetByIdAsync, GetCodeSetByCodeAsync, CreateCodeSetAsync, UpdateCodeSetAsync, DeleteCodeSetAsync</td></tr>
+    <tr><td>Items</td><td>GetItemsAsync, AddItemAsync, UpdateItemAsync, DeleteItemAsync, ReorderItemsAsync</td></tr>
+    <tr><td>Loading</td><td>LoadFromSourceAsync, RefreshCodeSetAsync, RefreshAllAsync</td></tr>
+    <tr><td>Binding</td><td>GetBindingsAsync, BindFieldAsync, UnbindFieldAsync</td></tr>
+    <tr><td>Filter</td><td>GetFilteredItemsAsync, SearchCodeSetsAsync</td></tr>
+    <tr><td>Import/Export</td><td>ImportFromJsonAsync, ImportItemsFromCsvAsync, ExportToJsonAsync, ExportToCsvAsync</td></tr>
+</table>
+
+<h4>ICodeSetCache (Scoped)</h4>
+<div class="method-sig">Task&lt;List&lt;ManagedCodeSetItem&gt;?&gt; GetAsync(string codeSetId)</div>
+<div class="method-sig">Task SetAsync(string codeSetId, List&lt;ManagedCodeSetItem&gt; items, int durationSeconds)</div>
+<div class="method-sig">void Invalidate(string codeSetId) / void InvalidateAll()</div>
+<div class="method-sig">bool IsCached(string codeSetId)</div>
+
+<h4>ICodeSetLoader (Scoped, HttpClient)</h4>
+<p>Loads CodeSet items from various data sources (API endpoints, files, static data).</p>
+<div class="method-sig">Task&lt;CodeSetLoaderResult&gt; LoadAsync(CodeSetSource source)</div>
+<div class="method-sig">Task&lt;bool&gt; TestSourceAsync(CodeSetSource source)</div>
+
+<h3 id="sec4-3">4.3 Validation &amp; Import/Export Services</h3>
+
+<h4>ISchemaValidationService (Scoped)</h4>
+<div class="method-sig">IEnumerable&lt;ValidationIssue&gt; Validate(FormModuleSchema module)</div>
+<div class="method-sig">IEnumerable&lt;ValidationIssue&gt; ValidateField(FormFieldSchema field, FormModuleSchema module)</div>
+
+<h4>IUndoRedoService (Scoped)</h4>
+<div class="method-sig">bool CanUndo / bool CanRedo</div>
+<div class="method-sig">void SaveState(FormModuleSchema module)</div>
+<div class="method-sig">FormModuleSchema Undo(FormModuleSchema current)</div>
+<div class="method-sig">FormModuleSchema Redo(FormModuleSchema current)</div>
+<div class="method-sig">void Clear()</div>
+
+<h4>IJsonImportExportService (Scoped)</h4>
+<div class="method-sig">Task&lt;ExportResult&gt; ExportAsync(FormModuleSchema module, ExportOptions options)</div>
+<div class="method-sig">Task&lt;ImportResult&gt; ImportAsync(Stream stream, ImportOptions options)</div>
+<div class="method-sig">Task&lt;ImportValidationResult&gt; ValidateAsync(string jsonContent)</div>
+<div class="method-sig">IReadOnlyList&lt;ImportExportHistoryItem&gt; GetHistory()</div>
+
+<!-- Section 5: Components Reference -->
+<h2 id="sec5" class="section-break">5. Components Reference</h2>
+
+<h3 id="sec5-1">5.1 Page Components (Routes)</h3>
+
+<table>
+    <tr><th>Component</th><th>Route</th><th>Layout</th><th>Description</th></tr>
+    <tr><td>Dashboard.razor</td><td>/</td><td>MainLayout</td><td>Home page with templates &amp; recent items</td></tr>
+    <tr><td>ModuleEditor.razor</td><td>/editor<br>/editor/{ModuleId:int}</td><td>EditorLayout</td><td>Form design editor</td></tr>
+    <tr><td>WorkflowEditor.razor</td><td>/workflow</td><td>EditorLayout</td><td>Workflow designer</td></tr>
+    <tr><td>CodeSetManager.razor</td><td>/codeset</td><td>MainLayout</td><td>CodeSet data management</td></tr>
+</table>
+
+<h3 id="sec5-2">5.2 Layout Components</h3>
+
+<h4>MainLayout.razor</h4>
+<p>Default application layout with navigation and toast notifications.</p>
+<pre>@inherits LayoutComponentBase
+@inject IThemeService ThemeService
+
+&lt;div class="app-container" data-theme="@(ThemeService.IsDarkMode ? "dark" : "light")"&gt;
+    &lt;GlobalNav /&gt;
+    &lt;main class="main-content"&gt;@Body&lt;/main&gt;
+    &lt;ToastContainer /&gt;
+&lt;/div&gt;</pre>
+
+<h4>EditorLayout.razor</h4>
+<p>Editor-specific layout with keyboard shortcuts, sidebars, and view switching.</p>
+<ul>
+    <li>Registers keyboard shortcuts via JS interop on initialization</li>
+    <li>Handles Ctrl+1/2/3 for Design/Preview/JSON view switching</li>
+    <li>Contains GlobalNav, EditorHeader, EditorToolbar, LeftSidebar, RightSidebar</li>
+    <li>Implements IAsyncDisposable for cleanup</li>
+</ul>
+
+<h3 id="sec5-3">5.3 Editor Components</h3>
+
+<h4>Canvas Components (Editor/Canvas/)</h4>
+<table>
+    <tr><th>Component</th><th>Description</th></tr>
+    <tr><td>FormCanvas.razor</td><td>Main canvas container, renders RootFields from runtime</td></tr>
+    <tr><td>CanvasField.razor</td><td>Field wrapper with selection, actions, recursive children</td></tr>
+    <tr><td>CanvasTextInput.razor</td><td>TextBox field renderer</td></tr>
+    <tr><td>CanvasTextArea.razor</td><td>Multi-line text field</td></tr>
+    <tr><td>CanvasDropdown.razor</td><td>Select/dropdown field</td></tr>
+    <tr><td>CanvasCheckbox.razor</td><td>Single checkbox field</td></tr>
+    <tr><td>CanvasCheckboxList.razor</td><td>Multiple checkbox options</td></tr>
+    <tr><td>CanvasRadioGroup.razor</td><td>Radio button group</td></tr>
+    <tr><td>CanvasDatePicker.razor</td><td>Date selection field</td></tr>
+    <tr><td>CanvasFileUpload.razor</td><td>File upload field</td></tr>
+    <tr><td>CanvasSection.razor</td><td>Container/grouping section</td></tr>
+    <tr><td>CanvasLabel.razor</td><td>Static label/text display</td></tr>
+    <tr><td>CanvasGenericField.razor</td><td>Fallback for unknown types</td></tr>
+    <tr><td>FieldActions.razor</td><td>Context menu (edit, duplicate, delete)</td></tr>
+</table>
+
+<h4>Properties Sections (Properties/Sections/)</h4>
+<ul class="compact-list">
+    <li>GeneralSection – ID, Label, Required</li>
+    <li>LabelsSection – EN/FR labels</li>
+    <li>ValidationSection – Rules, patterns</li>
+    <li>ConditionalSection – Show/hide logic</li>
+    <li>LayoutSection – Width, alignment</li>
+    <li>DatabaseSection – Data binding</li>
+    <li>OptionsSection – Choice options</li>
+    <li>EnhancedOptionsSection – Advanced options</li>
+    <li>HierarchySection – Parent/child</li>
+    <li>AccessibilitySection – ARIA labels</li>
+    <li>ComputedSection – Formulas</li>
+    <li>TypeConfigButton – Type-specific</li>
+</ul>
+
+<h4>Modal Components (Editor/Modals/)</h4>
+<ul class="compact-list">
+    <li>MetadataModal – Form metadata</li>
+    <li>ConditionBuilderModal – Conditional logic</li>
+    <li>CrossFieldValidationModal – Multi-field rules</li>
+    <li>FormulaEditorModal – Expression editor</li>
+    <li>ImportJsonModal – JSON import</li>
+    <li>WorkflowRulesModal – Workflow rules</li>
+    <li>TypeConfigModal – Type configuration</li>
+    <li>ConfirmDeleteModal – Delete confirmation</li>
+</ul>
+
+<h3 id="sec5-4">5.4 Workflow Components</h3>
+
+<table>
+    <tr><th>Component</th><th>Description</th></tr>
+    <tr><td>WorkflowCanvas.razor</td><td>Main canvas with pan/zoom support</td></tr>
+    <tr><td>WorkflowNode.razor</td><td>Base node renderer</td></tr>
+    <tr><td>Nodes/WfNodeStart.razor</td><td>Start node (green, single output)</td></tr>
+    <tr><td>Nodes/WfNodeEnd.razor</td><td>End node (red, single input)</td></tr>
+    <tr><td>Nodes/WfNodeStep.razor</td><td>Process step (blue, in/out)</td></tr>
+    <tr><td>Nodes/WfNodeDecision.razor</td><td>Decision diamond (yellow, multi-out)</td></tr>
+    <tr><td>Nodes/WfNodeAction.razor</td><td>Action node (purple)</td></tr>
+    <tr><td>WorkflowConnectionLine.razor</td><td>SVG connection path</td></tr>
+    <tr><td>ConnectionLayer.razor</td><td>Connection management layer</td></tr>
+    <tr><td>WorkflowMinimap.razor</td><td>Minimap navigation</td></tr>
+    <tr><td>ZoomControls.razor</td><td>Zoom in/out/reset buttons</td></tr>
+    <tr><td>FitControls.razor</td><td>Fit to screen</td></tr>
+    <tr><td>KeyboardHints.razor</td><td>Shortcut hints overlay</td></tr>
+</table>
+
+<h3 id="sec5-5">5.5 Shared Components</h3>
+
+<table>
+    <tr><th>Category</th><th>Components</th></tr>
+    <tr><td>Buttons</td><td>Button, IconButton</td></tr>
+    <tr><td>Inputs</td><td>TextInput, SelectInput, BilingualInput, SearchBox</td></tr>
+    <tr><td>Feedback</td><td>Toast, ToastContainer, Alert, Badge</td></tr>
+    <tr><td>Loading</td><td>LoadingSpinner, PageLoader, SkeletonLoader, InlineLoader, ProgressBar</td></tr>
+    <tr><td>Errors</td><td>ErrorBoundary, ErrorPage, InlineError, ValidationSummary</td></tr>
+    <tr><td>Empty States</td><td>EmptyState, EmptyCanvas, EmptyCodeSet, EmptyDashboard, EmptyOutline, EmptyWorkflow, NoSearchResults</td></tr>
+    <tr><td>Modals</td><td>ModalBase, ConfirmDeleteModal</td></tr>
+    <tr><td>Other</td><td>NetworkStatus, RetryPanel, FirstTimeOnboarding, ValidationSuccess</td></tr>
+</table>
+
+<!-- Section 6: Models Reference -->
+<h2 id="sec6" class="section-break">6. Models Reference</h2>
+
+<h3>Core State Models</h3>
+
+<h4>EditorState (Record)</h4>
+<pre>public record EditorState
+{
+    public FormWorkflowSchema? Workflow { get; init; }
+    public FormModuleSchema? Module { get; init; }
+    public FormModuleRuntime? ModuleRuntime { get; init; }
+    public string? SelectedFieldId { get; init; }
+    public string? SelectedNodeId { get; init; }
+    public FormFieldSchema? ClipboardField { get; init; }
+    public ImmutableList&lt;ValidationIssue&gt; Issues { get; init; }
+    public bool IsLoading { get; init; }
+    public string? ErrorMessage { get; init; }
+
+    // Computed properties
+    public FormFieldSchema? SelectedField =&gt; ...;
+    public FormFieldNode? SelectedFieldNode =&gt; ...;
+}</pre>
+
+<h4>EditorView (Enum)</h4>
+<pre>public enum EditorView { Design = 0, Preview = 1, Json = 2 }</pre>
+
+<h3>CodeSet Models</h3>
+
+<h4>ManagedCodeSet (Record)</h4>
+<pre>public record ManagedCodeSet
+{
+    public string Id { get; init; }
+    public string Code { get; init; }
+    public string NameEn { get; init; }
+    public string? NameFr { get; init; }
+    public string? DescriptionEn { get; init; }
+    public string? Category { get; init; }
+    public bool IsActive { get; init; }
+    public int Version { get; init; }
+    public CodeSetSource? Source { get; init; }
+    public List&lt;ManagedCodeSetItem&gt; Items { get; init; }
+    public List&lt;CodeSetBinding&gt; Bindings { get; init; }
+    public bool IsDirty { get; init; }
+    public DateTime? LastRefreshed { get; init; }
+}</pre>
+
+<h4>CodeSetSource (Record)</h4>
+<pre>public record CodeSetSource
+{
+    public CodeSetSourceType Type { get; init; }  // Static, Api, File
+    public string? ApiEndpoint { get; init; }
+    public string? HttpMethod { get; init; }
+    public string? FilePath { get; init; }
+    public RefreshMode RefreshMode { get; init; }  // OnDemand, OnLoad, Periodic
+    public int CacheDurationSeconds { get; init; }
+    public bool EnableCaching { get; init; }
+}</pre>
+
+<h3>Validation Models</h3>
+<pre>public record ValidationIssue(
+    string? FieldId,
+    ValidationSeverity Severity,  // Error, Warning, Info
+    string Title,
+    string Description
+);</pre>
+
+<h3>Field Type Definitions</h3>
+<pre>public class FieldTypeDefinition
+{
+    public string Type { get; init; }       // "TextBox", "DropDown", etc.
+    public string DisplayName { get; init; }
+    public string Icon { get; init; }        // Bootstrap icon class
+    public string Category { get; init; }    // "Basic", "Selection", "Layout"
+
+    public static FieldTypeDefinition? GetByType(string type);
+    public static IEnumerable&lt;FieldTypeDefinition&gt; GetByCategory(string category);
+}</pre>
+
+<h4>Available Field Types (15)</h4>
+<table>
+    <tr><th>Type</th><th>Category</th><th>Icon</th></tr>
+    <tr><td>TextBox</td><td>Basic</td><td>bi-input-cursor-text</td></tr>
+    <tr><td>TextArea</td><td>Basic</td><td>bi-textarea-resize</td></tr>
+    <tr><td>Number</td><td>Basic</td><td>bi-123</td></tr>
+    <tr><td>Currency</td><td>Basic</td><td>bi-currency-dollar</td></tr>
+    <tr><td>DropDown</td><td>Selection</td><td>bi-chevron-down</td></tr>
+    <tr><td>RadioGroup</td><td>Selection</td><td>bi-ui-radios</td></tr>
+    <tr><td>CheckboxList</td><td>Selection</td><td>bi-ui-checks</td></tr>
+    <tr><td>Checkbox</td><td>Selection</td><td>bi-check-square</td></tr>
+    <tr><td>DatePicker</td><td>Date/Time</td><td>bi-calendar</td></tr>
+    <tr><td>TimePicker</td><td>Date/Time</td><td>bi-clock</td></tr>
+    <tr><td>DateTimePicker</td><td>Date/Time</td><td>bi-calendar-event</td></tr>
+    <tr><td>FileUpload</td><td>Advanced</td><td>bi-upload</td></tr>
+    <tr><td>DataGrid</td><td>Advanced</td><td>bi-table</td></tr>
+    <tr><td>AutoComplete</td><td>Advanced</td><td>bi-search</td></tr>
+    <tr><td>Section</td><td>Layout</td><td>bi-layout-split</td></tr>
+</table>
+
+<!-- Section 7: CSS Architecture -->
+<h2 id="sec7" class="section-break">7. CSS Architecture</h2>
+
+<h3>CSS Files Overview (21 files, ~200KB)</h3>
+
+<table>
+    <tr><th>File</th><th>Size</th><th>Purpose</th></tr>
+    <tr><td>variables.css</td><td>3.4KB</td><td>Design tokens (colors, spacing, shadows)</td></tr>
+    <tr><td>reset.css</td><td>0.9KB</td><td>Browser reset</td></tr>
+    <tr><td>typography.css</td><td>2.7KB</td><td>Font definitions</td></tr>
+    <tr><td>layouts.css</td><td>5.4KB</td><td>Page layouts</td></tr>
+    <tr><td>app.css</td><td>11KB</td><td>Global styles</td></tr>
+    <tr><td>components.css</td><td>33KB</td><td>UI components</td></tr>
+    <tr><td>modals.css</td><td>6.0KB</td><td>Modal dialogs</td></tr>
+    <tr><td>animations.css</td><td>14KB</td><td>Transitions</td></tr>
+    <tr><td>loading.css</td><td>7.4KB</td><td>Loading states</td></tr>
+    <tr><td>empty-states.css</td><td>9.0KB</td><td>Empty states</td></tr>
+    <tr><td>errors.css</td><td>9.7KB</td><td>Error displays</td></tr>
+    <tr><td>json-preview.css</td><td>11KB</td><td>JSON viewer</td></tr>
+    <tr><td>workflow-*.css</td><td>~23KB</td><td>Workflow designer (4 files)</td></tr>
+    <tr><td>codeset-*.css</td><td>~50KB</td><td>CodeSet manager (3 files)</td></tr>
+</table>
+
+<h3>Design Tokens (variables.css)</h3>
+
+<pre>:root {
+  /* Colors */
+  --color-primary: #6366F1;      /* Indigo */
+  --color-success: #10B981;      /* Green */
+  --color-danger: #EF4444;       /* Red */
+  --color-warning: #F59E0B;      /* Amber */
+  --color-info: #3B82F6;         /* Blue */
+
+  /* Spacing Scale */
+  --space-1: 4px;   --space-2: 8px;   --space-3: 12px;
+  --space-4: 16px;  --space-6: 24px;  --space-8: 32px;
+
+  /* Layout Sizes */
+  --sidebar-width: 320px;
+  --header-height: 56px;
+  --toolbar-height: 48px;
+  --global-nav-height: 64px;
+
+  /* Typography */
+  --font-sans: 'DM Sans', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --text-sm: 0.875rem;  --text-base: 1rem;  --text-lg: 1.125rem;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+}</pre>
+
+<h3>Theme Support</h3>
+<pre>/* Light theme (default) */
+[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --border-color: #e5e7eb;
+}
+
+/* Dark theme */
+[data-theme="dark"] {
+  --bg-primary: #1f2937;
+  --bg-secondary: #111827;
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+  --border-color: #374151;
+}</pre>
+
+<!-- Section 8: JavaScript Interop -->
+<h2 id="sec8" class="section-break">8. JavaScript Interop</h2>
+
+<h3>editor.js (~70 lines)</h3>
+<p>Handles keyboard shortcuts and clipboard operations.</p>
+
+<pre>// Register keyboard shortcuts with Blazor reference
+window.editorInterop = {
+    dotNetRef: null,
+
+    registerKeyboardShortcuts: function(objRef) {
+        this.dotNetRef = objRef;
+        document.addEventListener('keydown', this.handleGlobalKeyDown);
+    },
+
+    unregisterKeyboardShortcuts: function() {
+        document.removeEventListener('keydown', this.handleGlobalKeyDown);
+        this.dotNetRef = null;
+    },
+
+    handleGlobalKeyDown: function(e) {
+        if (e.ctrlKey) {
+            switch(e.key) {
+                case '1': dotNetRef.invokeMethodAsync('SwitchToView', 0); break;
+                case '2': dotNetRef.invokeMethodAsync('SwitchToView', 1); break;
+                case '3': dotNetRef.invokeMethodAsync('SwitchToView', 2); break;
+            }
+        }
+    },
+
+    copyToClipboard: async function(text) {
+        await navigator.clipboard.writeText(text);
+    },
+
+    focusElement: function(elementId) {
+        document.getElementById(elementId)?.focus();
+    }
+};</pre>
+
+<h3>workflow-canvas.js (~170 lines)</h3>
+<p>Manages workflow canvas interactions, zoom, and pan.</p>
+
+<pre>window.workflowCanvas = {
+    init: function(objRef, element) { /* Initialize canvas */ },
+    dispose: function() { /* Cleanup */ },
+    getBoundingClientRect: function(el) { return el.getBoundingClientRect(); },
+    getScrollPosition: function(el) { return { left: el.scrollLeft, top: el.scrollTop }; },
+    setScrollPosition: function(el, left, top) { el.scrollLeft = left; el.scrollTop = top; },
+    getMousePosition: function(event, element) { /* Get relative position */ },
+    scrollToCenter: function(container, target) { /* Smooth scroll */ }
+};</pre>
+
+<h3>Blazor Interop Usage</h3>
+<pre>// In Razor component
+@inject IJSRuntime JS
+
+protected override async Task OnAfterRenderAsync(bool firstRender)
+{
+    if (firstRender)
+    {
+        _dotNetRef = DotNetObjectReference.Create(this);
+        await JS.InvokeVoidAsync("editorInterop.registerKeyboardShortcuts", _dotNetRef);
+    }
+}
+
+[JSInvokable]
+public void SwitchToView(int viewIndex)
+{
+    _editorState.SetView((EditorView)viewIndex);
+}
+
+public async ValueTask DisposeAsync()
+{
+    await JS.InvokeVoidAsync("editorInterop.unregisterKeyboardShortcuts");
+    _dotNetRef?.Dispose();
+}</pre>
+
+<!-- Section 9: Dependency Injection -->
+<h2 id="sec9" class="section-break">9. Dependency Injection</h2>
+
+<h3>Service Lifetimes</h3>
+
+<table>
+    <tr><th>Lifetime</th><th>Services</th><th>Use Case</th></tr>
+    <tr>
+        <td><strong>Scoped</strong><br>(per request)</td>
+        <td>EditorStateService, ThemeService, ToastService, CodeSetService, CodeSetCache, CodeSetLoader, SchemaValidationService, UndoRedoService, JsonImportExportService, ImportExportService</td>
+        <td>State isolated per user session</td>
+    </tr>
+    <tr>
+        <td><strong>Singleton</strong><br>(app-wide)</td>
+        <td>TabStateService</td>
+        <td>Shared state across all requests (tab management)</td>
+    </tr>
+    <tr>
+        <td><strong>HttpClient</strong></td>
+        <td>ICodeSetLoader</td>
+        <td>HTTP client for API calls</td>
+    </tr>
+</table>
+
+<h3>Registration Pattern</h3>
+<pre>// Program.cs - Recommended order
+// 1. Framework services
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpClient&lt;ICodeSetLoader, CodeSetLoader&gt;();
+
+// 2. Core domain services
+builder.Services.AddScoped&lt;IFormHierarchyService, FormHierarchyService&gt;();
+builder.Services.AddScoped&lt;ICodeSetProvider, InMemoryCodeSetProvider&gt;();
+
+// 3. Application services
+builder.Services.AddScoped&lt;IEditorStateService, EditorStateService&gt;();
+builder.Services.AddScoped&lt;ICodeSetService, CodeSetService&gt;();
+// ... etc</pre>
+
+<h3>Injection in Components</h3>
+<pre>@* Razor component *@
+@inject IEditorStateService EditorState
+@inject IToastService Toast
+@inject IJSRuntime JS
+
+@code {
+    protected override void OnInitialized()
+    {
+        EditorState.OnStateChanged += StateHasChanged;
+        EditorState.OnFieldSelected += OnFieldSelected;
+    }
+
+    private void OnFieldSelected(string? fieldId)
+    {
+        // Handle selection
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        EditorState.OnStateChanged -= StateHasChanged;
+        EditorState.OnFieldSelected -= OnFieldSelected;
+    }
+}</pre>
+
+<!-- Section 10: Common Patterns -->
+<h2 id="sec10" class="section-break">10. Common Patterns &amp; Best Practices</h2>
+
+<h3>Pattern 1: Immutable State Updates</h3>
+<pre>// EditorStateService - Using record "with" expressions
+public void UpdateField(FormFieldSchema field)
+{
+    if (_state.Module is null) return;
+
+    var newFields = _state.Module.Fields
+        .Select(f => f.Id == field.Id ? field : f)
+        .ToArray();
+
+    var newModule = _state.Module with { Fields = newFields };
+    UpdateModule(newModule);  // Triggers state change
+}</pre>
+
+<h3>Pattern 2: Event Subscription in Components</h3>
+<pre>@implements IDisposable
+
+@code {
+    protected override void OnInitialized()
+    {
+        EditorState.OnStateChanged += HandleStateChanged;
+    }
+
+    private void HandleStateChanged()
+    {
+        InvokeAsync(StateHasChanged);  // Thread-safe re-render
+    }
+
+    public void Dispose()
+    {
+        EditorState.OnStateChanged -= HandleStateChanged;
+    }
+}</pre>
+
+<h3>Pattern 3: Cascade Field Deletion (BFS)</h3>
+<pre>private HashSet&lt;string&gt; GetFieldAndDescendantIds(string fieldId)
+{
+    var ids = new HashSet&lt;string&gt; { fieldId };
+    var queue = new Queue&lt;string&gt;();
+    queue.Enqueue(fieldId);
+
+    while (queue.Count > 0)
+    {
+        var currentId = queue.Dequeue();
+        var children = _state.Module?.Fields
+            .Where(f => f.ParentId == currentId)
+            .Select(f => f.Id) ?? Enumerable.Empty&lt;string&gt;();
+
+        foreach (var childId in children)
+        {
+            ids.Add(childId);
+            queue.Enqueue(childId);
+        }
+    }
+    return ids;
+}</pre>
+
+<h3>Pattern 4: Unique ID Generation</h3>
+<pre>private string GenerateFieldId(string fieldType)
+{
+    var baseName = fieldType.ToLowerInvariant();
+    var count = 1;
+    var id = $"{baseName}_{count}";
+
+    while (_state.Module?.Fields.Any(f => f.Id == id) == true)
+    {
+        count++;
+        id = $"{baseName}_{count}";
+    }
+    return id;
+}</pre>
+
+<h3>Pattern 5: Conditional Rendering</h3>
+<pre>@* Show properties only when field is selected *@
+@if (EditorState.SelectedField is not null)
+{
+    &lt;PropertySection Title="General"&gt;
+        &lt;GeneralSection Field="@EditorState.SelectedField" /&gt;
+    &lt;/PropertySection&gt;
+}
+else
+{
+    &lt;EmptyState Message="Select a field to view properties" /&gt;
+}</pre>
+
+<h3>Best Practices Summary</h3>
+<ol>
+    <li><strong>Always unsubscribe</strong> from events in Dispose()</li>
+    <li><strong>Use InvokeAsync</strong> for StateHasChanged() from event handlers</li>
+    <li><strong>Prefer records</strong> for immutable state objects</li>
+    <li><strong>Keep components small</strong> – extract reusable parts to Shared/</li>
+    <li><strong>Use IAsyncDisposable</strong> for components with JS interop</li>
+    <li><strong>Validate before operations</strong> – null checks, circular reference checks</li>
+    <li><strong>Show user feedback</strong> – use ToastService for all actions</li>
+    <li><strong>Support bilingual</strong> – always include NameEn/NameFr properties</li>
+</ol>
+
+<!-- Section 11: Quick Reference Cards -->
+<h2 id="sec11" class="section-break">11. Quick Reference Cards</h2>
+
+<div class="quick-ref">
+    <h4>Keyboard Shortcuts</h4>
+    <table>
+        <tr><td><strong>Ctrl+1</strong></td><td>Switch to Design view</td></tr>
+        <tr><td><strong>Ctrl+2</strong></td><td>Switch to Preview view</td></tr>
+        <tr><td><strong>Ctrl+3</strong></td><td>Switch to JSON view</td></tr>
+        <tr><td><strong>Ctrl+Z</strong></td><td>Undo (planned)</td></tr>
+        <tr><td><strong>Ctrl+Y</strong></td><td>Redo (planned)</td></tr>
+        <tr><td><strong>Ctrl+S</strong></td><td>Save (planned)</td></tr>
+        <tr><td><strong>Delete</strong></td><td>Delete selected (planned)</td></tr>
+        <tr><td><strong>Escape</strong></td><td>Deselect (planned)</td></tr>
+    </table>
+</div>
+
+<div class="quick-ref">
+    <h4>File Locations Quick Reference</h4>
+    <table>
+        <tr><td>Add new service</td><td>Services/*.cs + register in Program.cs</td></tr>
+        <tr><td>Add new model</td><td>Models/*.cs</td></tr>
+        <tr><td>Add page</td><td>Components/Pages/*.razor</td></tr>
+        <tr><td>Add shared component</td><td>Components/Shared/*.razor</td></tr>
+        <tr><td>Add editor component</td><td>Components/Editor/**/*.razor</td></tr>
+        <tr><td>Add workflow component</td><td>Components/Workflow/*.razor</td></tr>
+        <tr><td>Add styles</td><td>wwwroot/css/*.css + import in app.css</td></tr>
+        <tr><td>Add JavaScript</td><td>wwwroot/js/*.js + reference in App.razor</td></tr>
+    </table>
+</div>
+
+<div class="quick-ref">
+    <h4>Common Service Methods</h4>
+    <pre>// Field Operations
+EditorState.AddField("TextBox", parentId);
+EditorState.UpdateField(modifiedField);
+EditorState.DeleteField(fieldId);
+EditorState.SelectField(fieldId);
+EditorState.DuplicateField(fieldId);
+EditorState.CopyField(fieldId);
+EditorState.PasteField(parentId);
+
+// Module Operations
+EditorState.LoadModule(module);
+EditorState.UpdateModule(module);
+EditorState.CreateNewModule("Title");
+
+// Undo/Redo
+EditorState.Undo();
+EditorState.Redo();
+
+// Notifications
+Toast.ShowSuccess("Saved!");
+Toast.ShowError("Failed!");
+Toast.ShowWarning("Check input");
+Toast.ShowInfo("Processing...");</pre>
+</div>
+
+<div class="quick-ref">
+    <h4>CSS Class Naming Convention</h4>
+    <pre>/* Component classes */
+.editor-container, .editor-header, .editor-toolbar
+.canvas-field, .canvas-field--selected, .canvas-field--error
+.sidebar-left, .sidebar-right, .sidebar-section
+
+/* State modifiers (BEM-like) */
+.btn--primary, .btn--secondary, .btn--danger
+.field--selected, .field--disabled, .field--error
+
+/* Utility classes */
+.flex, .flex-col, .items-center, .justify-between
+.gap-1, .gap-2, .gap-4
+.p-2, .p-4, .m-2, .m-4
+.text-sm, .text-lg, .font-bold</pre>
+</div>
+
+<div style="margin-top: 20pt; padding: 10pt; border: 1px solid #000; background: #f9f9f9;">
+    <h4 style="margin-top: 0;">Document Information</h4>
+    <p><strong>VisualEditorOpus Developer Guide</strong></p>
+    <p>Version 1.0 | December 2025</p>
+    <p>166 Components | 12 Services | 15+ Models | 21 CSS Files | 5 JS Files</p>
+    <p style="margin-bottom: 0;">For updates and additional documentation, see the /Docs folder in the repository.</p>
+</div>
+
+</body>
+</html>

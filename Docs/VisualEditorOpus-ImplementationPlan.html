@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisualEditorOpus - Implementation Plan</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #eef2ff;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --info: #3b82f6;
+            --info-light: #dbeafe;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --bg-tertiary: #f3f4f6;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --border-color: #e5e7eb;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 3rem 2rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border-radius: 16px;
+        }
+
+        header h1 { font-size: 2.25rem; font-weight: 700; margin-bottom: 0.5rem; }
+        header .subtitle { font-size: 1.125rem; opacity: 0.9; }
+        header .date { font-size: 0.875rem; opacity: 0.7; margin-top: 1rem; }
+
+        .summary-box {
+            background: var(--bg-primary);
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-box h2 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .time-estimate {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .time-card {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+
+        .time-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .time-card .label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .time-card .sublabel {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: var(--bg-secondary);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-header h2 { font-size: 1.125rem; font-weight: 600; flex: 1; }
+
+        .section-header .icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 1.125rem;
+        }
+
+        .icon.purple { background: var(--primary-light); color: var(--primary); }
+        .icon.green { background: var(--success-light); color: var(--success); }
+        .icon.blue { background: var(--info-light); color: var(--info); }
+        .icon.orange { background: var(--warning-light); color: var(--warning); }
+        .icon.red { background: var(--danger-light); color: var(--danger); }
+
+        .section-content { padding: 1.5rem; }
+
+        .phase {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .phase:last-child { margin-bottom: 0; }
+
+        .phase-header {
+            background: var(--bg-secondary);
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .phase-number {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .phase-title { flex: 1; }
+        .phase-title h3 { font-size: 1rem; font-weight: 600; }
+        .phase-title .estimate { font-size: 0.875rem; color: var(--text-secondary); }
+
+        .phase-body { padding: 1.25rem; }
+
+        .task-list { list-style: none; }
+
+        .task-item {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .task-item:last-child { border-bottom: none; }
+
+        .task-checkbox {
+            width: 1.25rem;
+            height: 1.25rem;
+            margin-top: 0.125rem;
+            accent-color: var(--success);
+            cursor: pointer;
+        }
+
+        .task-content { flex: 1; }
+        .task-content strong { color: var(--text-primary); }
+        .task-content p { color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.25rem; }
+
+        .task-meta {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.625rem;
+            border-radius: 9999px;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-time { background: var(--info-light); color: var(--info); }
+        .badge-priority-high { background: var(--danger-light); color: var(--danger); }
+        .badge-priority-medium { background: var(--warning-light); color: var(--warning); }
+        .badge-priority-low { background: var(--success-light); color: var(--success); }
+        .badge-new { background: var(--primary-light); color: var(--primary); }
+        .badge-enhance { background: var(--info-light); color: var(--info); }
+        .badge-fix { background: var(--warning-light); color: var(--warning); }
+
+        .insights-box {
+            background: linear-gradient(135deg, var(--info-light) 0%, #f0f9ff 100%);
+            border: 1px solid var(--info);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .insights-box h4 {
+            color: var(--info);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .insights-box ul { padding-left: 1.5rem; }
+        .insights-box li { margin-bottom: 0.5rem; color: var(--text-secondary); }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9375rem;
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--bg-secondary);
+            font-weight: 600;
+            font-size: 0.8125rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background: var(--bg-secondary); }
+
+        .gantt-placeholder {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .progress-bar {
+            background: var(--bg-tertiary);
+            border-radius: 9999px;
+            height: 8px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .progress-fill {
+            background: var(--success);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .milestones {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .milestone {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 1.25rem;
+            border-left: 4px solid var(--primary);
+        }
+
+        .milestone h4 {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .milestone p {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        .milestone .date {
+            font-size: 0.75rem;
+            color: var(--primary);
+            margin-top: 0.5rem;
+            font-weight: 600;
+        }
+
+        .code-block {
+            background: #1f2937;
+            color: #f9fafb;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8125rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .code-block .comment { color: #9ca3af; }
+        .code-block .keyword { color: #818cf8; }
+        .code-block .string { color: #34d399; }
+        .code-block .method { color: #fbbf24; }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .toc {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .toc h3 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .toc ul {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 0.5rem;
+        }
+
+        .toc li a {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .toc li a:hover { text-decoration: underline; }
+        .toc li a i { font-size: 0.75rem; }
+
+        .ai-note {
+            background: linear-gradient(135deg, var(--success-light) 0%, #ecfdf5 100%);
+            border: 1px solid var(--success);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .ai-note h5 {
+            color: var(--success);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ai-note p {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>VisualEditorOpus - Implementation Plan</h1>
+            <p class="subtitle">Comprehensive roadmap to production-ready visual form editor</p>
+            <p class="date">Created: December 10, 2025</p>
+        </header>
+
+        <!-- Executive Summary -->
+        <div class="summary-box">
+            <h2><i class="bi bi-speedometer2"></i> Executive Summary & Time Estimates</h2>
+            <p>This implementation plan outlines the work required to complete VisualEditorOpus as the designated visual editor for form schemas. Time estimates factor in AI-assisted development (Claude Code).</p>
+
+            <div class="time-estimate">
+                <div class="time-card">
+                    <div class="value">3-4</div>
+                    <div class="label">Weeks Total</div>
+                    <div class="sublabel">With AI Assistance</div>
+                </div>
+                <div class="time-card">
+                    <div class="value">6-8</div>
+                    <div class="label">Weeks Total</div>
+                    <div class="sublabel">Manual Development</div>
+                </div>
+                <div class="time-card">
+                    <div class="value">7</div>
+                    <div class="label">Major Phases</div>
+                    <div class="sublabel">35+ Tasks</div>
+                </div>
+                <div class="time-card">
+                    <div class="value">~50%</div>
+                    <div class="label">Time Saved</div>
+                    <div class="sublabel">With AI Tools</div>
+                </div>
+            </div>
+
+            <div class="ai-note">
+                <h5><i class="bi bi-robot"></i> AI Acceleration Factor</h5>
+                <p>Using Claude Code for implementation can reduce development time by approximately 40-60%. AI excels at: boilerplate code generation, component scaffolding, CSS styling, documentation, and repetitive patterns. Human oversight is still required for: architecture decisions, complex business logic, testing, and integration debugging.</p>
+            </div>
+        </div>
+
+        <!-- Table of Contents -->
+        <div class="toc">
+            <h3>Table of Contents</h3>
+            <ul>
+                <li><a href="#patterns"><i class="bi bi-chevron-right"></i> Patterns from DynamicForms.Editor</a></li>
+                <li><a href="#phase1"><i class="bi bi-chevron-right"></i> Phase 1: Core Enhancements</a></li>
+                <li><a href="#phase2"><i class="bi bi-chevron-right"></i> Phase 2: Missing Features</a></li>
+                <li><a href="#phase3"><i class="bi bi-chevron-right"></i> Phase 3: Workflow Completion</a></li>
+                <li><a href="#phase4"><i class="bi bi-chevron-right"></i> Phase 4: Persistence Layer</a></li>
+                <li><a href="#phase5"><i class="bi bi-chevron-right"></i> Phase 5: Preview & Runtime</a></li>
+                <li><a href="#phase6"><i class="bi bi-chevron-right"></i> Phase 6: Polish & Testing</a></li>
+                <li><a href="#phase7"><i class="bi bi-chevron-right"></i> Phase 7: Documentation</a></li>
+                <li><a href="#timeline"><i class="bi bi-chevron-right"></i> Timeline & Milestones</a></li>
+            </ul>
+        </div>
+
+        <!-- Patterns from DynamicForms.Editor -->
+        <section id="patterns">
+            <div class="section-header">
+                <div class="icon blue"><i class="bi bi-lightbulb"></i></div>
+                <h2>Valuable Patterns from DynamicForms.Editor</h2>
+            </div>
+            <div class="section-content">
+                <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">
+                    The following patterns and features from DynamicForms.Editor's EditorStateService should be incorporated into VisualEditorOpus:
+                </p>
+
+                <div class="insights-box">
+                    <h4><i class="bi bi-check-circle"></i> Key Patterns to Adopt</h4>
+                    <ul>
+                        <li><strong>JS Interop Keyboard Shortcuts</strong> - [JSInvokable] methods for Ctrl+S, Ctrl+Z, Ctrl+Y, Del, Ctrl+C, Ctrl+V, Ctrl+D, Escape</li>
+                        <li><strong>Toast Feedback</strong> - Inject IToastService and provide user feedback for every action</li>
+                        <li><strong>Clipboard to System</strong> - Copy field JSON to system clipboard for cross-window paste</li>
+                        <li><strong>Import/Export Methods</strong> - ExportModuleJsonAsync, ExportWorkflowJsonAsync with file download</li>
+                        <li><strong>Workflow Layout Persistence</strong> - Save node positions in ExtendedProperties as JSON</li>
+                        <li><strong>Circular Reference Check</strong> - HasCircularReference() helper method</li>
+                        <li><strong>State Suppression</strong> - suppressStateChanged parameter to batch updates</li>
+                        <li><strong>Bilingual Labels</strong> - "Copy of" / "Copie de" pattern for duplication</li>
+                    </ul>
+                </div>
+
+                <h4 style="margin-top: 1.5rem; margin-bottom: 1rem;">Code Patterns to Implement</h4>
+
+                <div class="code-block">
+<span class="comment">// 1. JS Invokable Keyboard Shortcuts</span>
+<span class="keyword">[JSInvokable]</span> <span class="keyword">public void</span> <span class="method">OnSave</span>() => _toastService.ShowInfo(<span class="string">"Saving..."</span>);
+<span class="keyword">[JSInvokable]</span> <span class="keyword">public void</span> <span class="method">OnUndo</span>() => Undo();
+<span class="keyword">[JSInvokable]</span> <span class="keyword">public void</span> <span class="method">OnRedo</span>() => Redo();
+<span class="keyword">[JSInvokable]</span> <span class="keyword">public void</span> <span class="method">OnDelete</span>() { <span class="keyword">if</span> (SelectedFieldId != <span class="keyword">null</span>) DeleteField(SelectedFieldId); }
+<span class="keyword">[JSInvokable]</span> <span class="keyword">public void</span> <span class="method">OnCopy</span>() { <span class="keyword">if</span> (SelectedFieldId != <span class="keyword">null</span>) CopyField(SelectedFieldId); }
+<span class="keyword">[JSInvokable]</span> <span class="keyword">public void</span> <span class="method">OnPaste</span>() { <span class="keyword">if</span> (HasClipboard) PasteField(SelectedField?.ParentId); }
+<span class="keyword">[JSInvokable]</span> <span class="keyword">public void</span> <span class="method">OnDuplicate</span>() { <span class="keyword">if</span> (SelectedFieldId != <span class="keyword">null</span>) DuplicateField(SelectedFieldId); }
+<span class="keyword">[JSInvokable]</span> <span class="keyword">public void</span> <span class="method">OnEscape</span>() => SelectField(<span class="keyword">null</span>);
+                </div>
+
+                <div class="code-block">
+<span class="comment">// 2. State Change Suppression for Batching</span>
+<span class="keyword">private void</span> <span class="method">SetState</span>(EditorState newState, <span class="keyword">bool</span> suppressStateChanged = <span class="keyword">false</span>)
+{
+    _state = newState;
+    <span class="keyword">if</span> (!suppressStateChanged)
+        OnStateChanged?.Invoke();
+}
+
+<span class="comment">// Usage: Update multiple properties without triggering multiple renders</span>
+SetState(_state <span class="keyword">with</span> { SelectedNodeId = <span class="keyword">null</span> }, suppressStateChanged: <span class="keyword">true</span>);
+SaveWorkflowLayout(nodes, connections); <span class="comment">// This will trigger the state change</span>
+                </div>
+
+                <div class="code-block">
+<span class="comment">// 3. Circular Reference Detection</span>
+<span class="keyword">private bool</span> <span class="method">HasCircularReference</span>(FormFieldSchema field, FormModuleSchema module)
+{
+    <span class="keyword">var</span> visited = <span class="keyword">new</span> HashSet&lt;<span class="keyword">string</span>&gt;();
+    <span class="keyword">var</span> current = field;
+
+    <span class="keyword">while</span> (current?.ParentId <span class="keyword">is not null</span>)
+    {
+        <span class="keyword">if</span> (!visited.Add(current.Id))
+            <span class="keyword">return true</span>;
+        current = module.Fields.FirstOrDefault(f => f.Id == current.ParentId);
+    }
+    <span class="keyword">return false</span>;
+}
+                </div>
+
+                <table style="margin-top: 1.5rem;">
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>DynamicForms.Editor</th>
+                            <th>VisualEditorOpus</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>JS Keyboard Shortcuts</td>
+                            <td><i class="bi bi-check-circle-fill" style="color: var(--success);"></i></td>
+                            <td><i class="bi bi-x-circle-fill" style="color: var(--danger);"></i></td>
+                            <td><span class="badge badge-new">Add</span></td>
+                        </tr>
+                        <tr>
+                            <td>Toast Feedback</td>
+                            <td><i class="bi bi-check-circle-fill" style="color: var(--success);"></i></td>
+                            <td><i class="bi bi-x-circle-fill" style="color: var(--danger);"></i></td>
+                            <td><span class="badge badge-new">Add</span></td>
+                        </tr>
+                        <tr>
+                            <td>System Clipboard</td>
+                            <td><i class="bi bi-check-circle-fill" style="color: var(--success);"></i></td>
+                            <td><i class="bi bi-x-circle-fill" style="color: var(--danger);"></i></td>
+                            <td><span class="badge badge-new">Add</span></td>
+                        </tr>
+                        <tr>
+                            <td>JSON Export/Download</td>
+                            <td><i class="bi bi-check-circle-fill" style="color: var(--success);"></i></td>
+                            <td><i class="bi bi-exclamation-circle-fill" style="color: var(--warning);"></i></td>
+                            <td><span class="badge badge-enhance">Enhance</span></td>
+                        </tr>
+                        <tr>
+                            <td>Workflow Layout Save</td>
+                            <td><i class="bi bi-check-circle-fill" style="color: var(--success);"></i></td>
+                            <td><i class="bi bi-exclamation-circle-fill" style="color: var(--warning);"></i></td>
+                            <td><span class="badge badge-enhance">Enhance</span></td>
+                        </tr>
+                        <tr>
+                            <td>Circular Ref Check</td>
+                            <td><i class="bi bi-check-circle-fill" style="color: var(--success);"></i> (with error msg)</td>
+                            <td><i class="bi bi-check-circle-fill" style="color: var(--success);"></i> (silent)</td>
+                            <td><span class="badge badge-fix">Improve</span></td>
+                        </tr>
+                        <tr>
+                            <td>State Suppression</td>
+                            <td><i class="bi bi-check-circle-fill" style="color: var(--success);"></i></td>
+                            <td><i class="bi bi-x-circle-fill" style="color: var(--danger);"></i></td>
+                            <td><span class="badge badge-new">Add</span></td>
+                        </tr>
+                        <tr>
+                            <td>Bilingual Copy Labels</td>
+                            <td><i class="bi bi-check-circle-fill" style="color: var(--success);"></i></td>
+                            <td><i class="bi bi-exclamation-circle-fill" style="color: var(--warning);"></i></td>
+                            <td><span class="badge badge-fix">Fix</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Phase 1 -->
+        <section id="phase1">
+            <div class="section-header">
+                <div class="icon purple"><i class="bi bi-1-circle"></i></div>
+                <h2>Phase 1: Core Service Enhancements</h2>
+                <span class="badge badge-time">3-4 days</span>
+            </div>
+            <div class="section-content">
+                <div class="phase">
+                    <div class="phase-header">
+                        <div class="phase-number">1</div>
+                        <div class="phase-title">
+                            <h3>EditorStateService Improvements</h3>
+                            <span class="estimate">Estimated: 1.5 days (AI-assisted)</span>
+                        </div>
+                    </div>
+                    <div class="phase-body">
+                        <ul class="task-list">
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Add IToastService integration</strong>
+                                    <p>Inject toast service and add feedback for all operations (add, delete, duplicate, copy, paste, undo, redo)</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">2 hours</span>
+                                        <span class="badge badge-priority-high">High Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Add IClipboardService with system clipboard</strong>
+                                    <p>Create clipboard service that copies field JSON to system clipboard via JS interop</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">2 hours</span>
+                                        <span class="badge badge-priority-medium">Medium Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Add JS Invokable keyboard shortcuts</strong>
+                                    <p>Implement [JSInvokable] methods for OnSave, OnUndo, OnRedo, OnDelete, OnCopy, OnPaste, OnDuplicate, OnEscape</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">3 hours</span>
+                                        <span class="badge badge-priority-high">High Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Add SetState with suppressStateChanged</strong>
+                                    <p>Implement state batching to prevent multiple re-renders during complex operations</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">1 hour</span>
+                                        <span class="badge badge-priority-medium">Medium Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Enhance circular reference check with toast error</strong>
+                                    <p>Show user-friendly error message when circular reference would be created</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">30 min</span>
+                                        <span class="badge badge-priority-low">Low Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Add bilingual label support for copy/paste</strong>
+                                    <p>Use "Copy of" / "Copie de" and "Pasted" / "Collé" patterns</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">30 min</span>
+                                        <span class="badge badge-priority-low">Low Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="phase">
+                    <div class="phase-header">
+                        <div class="phase-number">2</div>
+                        <div class="phase-title">
+                            <h3>Import/Export Service</h3>
+                            <span class="estimate">Estimated: 1 day (AI-assisted)</span>
+                        </div>
+                    </div>
+                    <div class="phase-body">
+                        <ul class="task-list">
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Implement ExportModuleJsonAsync</strong>
+                                    <p>Serialize module to JSON and trigger browser file download</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">2 hours</span>
+                                        <span class="badge badge-priority-high">High Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Implement ExportWorkflowJsonAsync</strong>
+                                    <p>Serialize workflow with node positions and trigger browser file download</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">2 hours</span>
+                                        <span class="badge badge-priority-high">High Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Create download JS interop</strong>
+                                    <p>Add JavaScript function to create blob and trigger download</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">1 hour</span>
+                                        <span class="badge badge-priority-medium">Medium Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Phase 2 -->
+        <section id="phase2">
+            <div class="section-header">
+                <div class="icon green"><i class="bi bi-2-circle"></i></div>
+                <h2>Phase 2: Missing Field Types & Features</h2>
+                <span class="badge badge-time">2-3 days</span>
+            </div>
+            <div class="section-content">
+                <div class="phase">
+                    <div class="phase-header">
+                        <div class="phase-number">1</div>
+                        <div class="phase-title">
+                            <h3>Add Missing Field Types</h3>
+                            <span class="estimate">Estimated: 1.5 days (AI-assisted)</span>
+                        </div>
+                    </div>
+                    <div class="phase-body">
+                        <ul class="task-list">
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Add TimePicker field type</strong>
+                                    <p>Canvas component, palette entry, type config, validation</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">2 hours</span>
+                                        <span class="badge badge-priority-medium">Medium Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Add DateTimePicker field type</strong>
+                                    <p>Combined date + time picker with canvas and config</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">2 hours</span>
+                                        <span class="badge badge-priority-medium">Medium Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Add Html/RichText field type</strong>
+                                    <p>Static HTML content display field</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">2 hours</span>
+                                        <span class="badge badge-priority-low">Low Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Add Currency field type</strong>
+                                    <p>Number field with currency formatting options</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">2 hours</span>
+                                        <span class="badge badge-priority-medium">Medium Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="phase">
+                    <div class="phase-header">
+                        <div class="phase-number">2</div>
+                        <div class="phase-title">
+                            <h3>Field Palette Enhancements</h3>
+                            <span class="estimate">Estimated: 0.5 days (AI-assisted)</span>
+                        </div>
+                    </div>
+                    <div class="phase-body">
+                        <ul class="task-list">
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Add search/filter to field palette</strong>
+                                    <p>Quick search box to filter field types by name</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">2 hours</span>
+                                        <span class="badge badge-priority-medium">Medium Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Add collapsible categories</strong>
+                                    <p>Allow users to collapse/expand field type categories</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">1 hour</span>
+                                        <span class="badge badge-priority-low">Low Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Phase 3 -->
+        <section id="phase3">
+            <div class="section-header">
+                <div class="icon orange"><i class="bi bi-3-circle"></i></div>
+                <h2>Phase 3: Workflow Designer Completion</h2>
+                <span class="badge badge-time">3-4 days</span>
+            </div>
+            <div class="section-content">
+                <div class="phase">
+                    <div class="phase-header">
+                        <div class="phase-number">1</div>
+                        <div class="phase-title">
+                            <h3>Workflow State Management</h3>
+                            <span class="estimate">Estimated: 1.5 days (AI-assisted)</span>
+                        </div>
+                    </div>
+                    <div class="phase-body">
+                        <ul class="task-list">
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Implement workflow layout persistence</strong>
+                                    <p>Save/load node positions in ExtendedProperties as WorkflowLayoutData JSON</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">3 hours</span>
+                                        <span class="badge badge-priority-high">High Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Add workflow node CRUD operations</strong>
+                                    <p>UpdateWorkflowNode, UpdateWorkflowNodePosition, RemoveNode methods</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">2 hours</span>
+                                        <span class="badge badge-priority-high">High Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Add connection management</strong>
+                                    <p>AddConnection, RemoveConnection methods with duplicate prevention</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">2 hours</span>
+                                        <span class="badge badge-priority-high">High Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Workflow undo/redo integration</strong>
+                                    <p>Save workflow state to undo stack before modifications</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">2 hours</span>
+                                        <span class="badge badge-priority-medium">Medium Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="phase">
+                    <div class="phase-header">
+                        <div class="phase-number">2</div>
+                        <div class="phase-title">
+                            <h3>Workflow UI Enhancements</h3>
+                            <span class="estimate">Estimated: 2 days (AI-assisted)</span>
+                        </div>
+                    </div>
+                    <div class="phase-body">
+                        <ul class="task-list">
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Node drag functionality</strong>
+                                    <p>Draggable nodes on canvas with position persistence</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">4 hours</span>
+                                        <span class="badge badge-priority-high">High Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Connection drawing UI</strong>
+                                    <p>Click-and-drag to create connections between node handles</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">4 hours</span>
+                                        <span class="badge badge-priority-high">High Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Minimap interaction</strong>
+                                    <p>Click minimap to pan, drag viewport rectangle</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">3 hours</span>
+                                        <span class="badge badge-priority-medium">Medium Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Node properties panel</strong>
+                                    <p>Right sidebar properties for selected node (triggers, actions, conditions)</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">4 hours</span>
+                                        <span class="badge badge-priority-high">High Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Phase 4 -->
+        <section id="phase4">
+            <div class="section-header">
+                <div class="icon red"><i class="bi bi-4-circle"></i></div>
+                <h2>Phase 4: Persistence Layer</h2>
+                <span class="badge badge-time">4-5 days</span>
+            </div>
+            <div class="section-content">
+                <div class="phase">
+                    <div class="phase-header">
+                        <div class="phase-number">1</div>
+                        <div class="phase-title">
+                            <h3>Repository Pattern Implementation</h3>
+                            <span class="estimate">Estimated: 2 days (AI-assisted)</span>
+                        </div>
+                    </div>
+                    <div class="phase-body">
+                        <ul class="task-list">
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Create IModuleRepository interface</strong>
+                                    <p>GetAll, GetById, Create, Update, Delete for FormModuleSchema</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">2 hours</span>
+                                        <span class="badge badge-priority-high">High Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Create IWorkflowRepository interface</strong>
+                                    <p>GetAll, GetById, Create, Update, Delete for FormWorkflowSchema</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">2 hours</span>
+                                        <span class="badge badge-priority-high">High Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Create ICodeSetRepository interface</strong>
+                                    <p>CRUD operations for CodeSet with caching support</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">2 hours</span>
+                                        <span class="badge badge-priority-medium">Medium Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Implement in-memory repositories</strong>
+                                    <p>Default implementations for development/testing</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">3 hours</span>
+                                        <span class="badge badge-priority-high">High Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="phase">
+                    <div class="phase-header">
+                        <div class="phase-number">2</div>
+                        <div class="phase-title">
+                            <h3>Database Integration (Optional)</h3>
+                            <span class="estimate">Estimated: 2-3 days (AI-assisted)</span>
+                        </div>
+                    </div>
+                    <div class="phase-body">
+                        <ul class="task-list">
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Entity Framework DbContext setup</strong>
+                                    <p>Create FormsDbContext with Module, Workflow, CodeSet entities</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">4 hours</span>
+                                        <span class="badge badge-priority-medium">Medium Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Implement EF repository classes</strong>
+                                    <p>EfModuleRepository, EfWorkflowRepository, EfCodeSetRepository</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">4 hours</span>
+                                        <span class="badge badge-priority-medium">Medium Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Add migrations</strong>
+                                    <p>Initial migration for Module, Workflow, CodeSet tables</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">2 hours</span>
+                                        <span class="badge badge-priority-medium">Medium Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Auto-save implementation</strong>
+                                    <p>Debounced auto-save with conflict detection</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">4 hours</span>
+                                        <span class="badge badge-priority-low">Low Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Phase 5 -->
+        <section id="phase5">
+            <div class="section-header">
+                <div class="icon blue"><i class="bi bi-5-circle"></i></div>
+                <h2>Phase 5: Form Preview & Runtime</h2>
+                <span class="badge badge-time">3-4 days</span>
+            </div>
+            <div class="section-content">
+                <div class="phase">
+                    <div class="phase-header">
+                        <div class="phase-number">1</div>
+                        <div class="phase-title">
+                            <h3>Form Preview Implementation</h3>
+                            <span class="estimate">Estimated: 2.5 days (AI-assisted)</span>
+                        </div>
+                    </div>
+                    <div class="phase-body">
+                        <ul class="task-list">
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Create FormPreview component</strong>
+                                    <p>Render form using DynamicForms.Core runtime with live data binding</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">6 hours</span>
+                                        <span class="badge badge-priority-high">High Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Field renderers for preview</strong>
+                                    <p>Interactive renderers for each field type (TextBox, DropDown, etc.)</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">6 hours</span>
+                                        <span class="badge badge-priority-high">High Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Device preview modes</strong>
+                                    <p>Desktop, Tablet, Mobile preview frames</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">3 hours</span>
+                                        <span class="badge badge-priority-medium">Medium Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Validation preview</strong>
+                                    <p>Show validation errors in preview mode when fields are invalid</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">2 hours</span>
+                                        <span class="badge badge-priority-medium">Medium Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="phase">
+                    <div class="phase-header">
+                        <div class="phase-number">2</div>
+                        <div class="phase-title">
+                            <h3>JSON Schema View</h3>
+                            <span class="estimate">Estimated: 1 day (AI-assisted)</span>
+                        </div>
+                    </div>
+                    <div class="phase-body">
+                        <ul class="task-list">
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>JSON schema viewer with syntax highlighting</strong>
+                                    <p>Read-only JSON view with copy button and download option</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">3 hours</span>
+                                        <span class="badge badge-priority-medium">Medium Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>JSON diff view for changes</strong>
+                                    <p>Show what changed between saves (optional)</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">4 hours</span>
+                                        <span class="badge badge-priority-low">Low Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Phase 6 -->
+        <section id="phase6">
+            <div class="section-header">
+                <div class="icon green"><i class="bi bi-6-circle"></i></div>
+                <h2>Phase 6: Polish & Testing</h2>
+                <span class="badge badge-time">3-4 days</span>
+            </div>
+            <div class="section-content">
+                <div class="phase">
+                    <div class="phase-header">
+                        <div class="phase-number">1</div>
+                        <div class="phase-title">
+                            <h3>UI/UX Polish</h3>
+                            <span class="estimate">Estimated: 1.5 days (AI-assisted)</span>
+                        </div>
+                    </div>
+                    <div class="phase-body">
+                        <ul class="task-list">
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Loading states and skeletons</strong>
+                                    <p>Add loading indicators for async operations</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">3 hours</span>
+                                        <span class="badge badge-priority-medium">Medium Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Error boundaries and fallbacks</strong>
+                                    <p>Graceful error handling for component failures</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">2 hours</span>
+                                        <span class="badge badge-priority-medium">Medium Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Keyboard navigation improvements</strong>
+                                    <p>Arrow keys for field navigation, Enter for selection</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">3 hours</span>
+                                        <span class="badge badge-priority-low">Low Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Accessibility audit and fixes</strong>
+                                    <p>ARIA labels, focus management, screen reader support</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">4 hours</span>
+                                        <span class="badge badge-priority-medium">Medium Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="phase">
+                    <div class="phase-header">
+                        <div class="phase-number">2</div>
+                        <div class="phase-title">
+                            <h3>Testing</h3>
+                            <span class="estimate">Estimated: 2 days (AI-assisted)</span>
+                        </div>
+                    </div>
+                    <div class="phase-body">
+                        <ul class="task-list">
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Unit tests for services</strong>
+                                    <p>EditorStateService, ValidationService, UndoRedoService tests</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">4 hours</span>
+                                        <span class="badge badge-priority-high">High Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Component tests with bUnit</strong>
+                                    <p>Test key components: FormCanvas, PropertiesPanel, FieldPalette</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">4 hours</span>
+                                        <span class="badge badge-priority-medium">Medium Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Integration tests</strong>
+                                    <p>End-to-end flows: create module, add fields, save, export</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">4 hours</span>
+                                        <span class="badge badge-priority-medium">Medium Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Manual testing guide updates</strong>
+                                    <p>Update testing guides for all new features</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">2 hours</span>
+                                        <span class="badge badge-priority-low">Low Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Phase 7 -->
+        <section id="phase7">
+            <div class="section-header">
+                <div class="icon purple"><i class="bi bi-7-circle"></i></div>
+                <h2>Phase 7: Documentation & Cleanup</h2>
+                <span class="badge badge-time">1-2 days</span>
+            </div>
+            <div class="section-content">
+                <div class="phase">
+                    <div class="phase-header">
+                        <div class="phase-number">1</div>
+                        <div class="phase-title">
+                            <h3>Documentation</h3>
+                            <span class="estimate">Estimated: 1 day (AI-assisted)</span>
+                        </div>
+                    </div>
+                    <div class="phase-body">
+                        <ul class="task-list">
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>API documentation</strong>
+                                    <p>Document all public service methods and interfaces</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">3 hours</span>
+                                        <span class="badge badge-priority-medium">Medium Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>User guide</strong>
+                                    <p>How to use the editor: creating forms, workflows, CodeSets</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">3 hours</span>
+                                        <span class="badge badge-priority-medium">Medium Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Architecture overview</strong>
+                                    <p>Component hierarchy, service responsibilities, data flow</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">2 hours</span>
+                                        <span class="badge badge-priority-low">Low Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="phase">
+                    <div class="phase-header">
+                        <div class="phase-number">2</div>
+                        <div class="phase-title">
+                            <h3>Code Cleanup</h3>
+                            <span class="estimate">Estimated: 0.5 days (AI-assisted)</span>
+                        </div>
+                    </div>
+                    <div class="phase-body">
+                        <ul class="task-list">
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Remove TODO comments</strong>
+                                    <p>Address all remaining TODOs or convert to tracked issues</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">2 hours</span>
+                                        <span class="badge badge-priority-medium">Medium Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Code formatting and consistency</strong>
+                                    <p>Run code formatter, fix warnings, ensure consistent patterns</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">1 hour</span>
+                                        <span class="badge badge-priority-low">Low Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="task-item">
+                                <input type="checkbox" class="task-checkbox">
+                                <div class="task-content">
+                                    <strong>Remove DynamicForms.Editor project</strong>
+                                    <p>Archive or remove the deprecated editor project</p>
+                                    <div class="task-meta">
+                                        <span class="badge badge-time">30 min</span>
+                                        <span class="badge badge-priority-low">Low Priority</span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Timeline -->
+        <section id="timeline">
+            <div class="section-header">
+                <div class="icon blue"><i class="bi bi-calendar3"></i></div>
+                <h2>Timeline & Milestones</h2>
+            </div>
+            <div class="section-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Phase</th>
+                            <th>Duration (AI)</th>
+                            <th>Duration (Manual)</th>
+                            <th>Deliverables</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Phase 1:</strong> Core Enhancements</td>
+                            <td>3-4 days</td>
+                            <td>6-8 days</td>
+                            <td>Keyboard shortcuts, toast feedback, export/import</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Phase 2:</strong> Missing Features</td>
+                            <td>2-3 days</td>
+                            <td>5-6 days</td>
+                            <td>4 new field types, palette search</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Phase 3:</strong> Workflow Completion</td>
+                            <td>3-4 days</td>
+                            <td>7-8 days</td>
+                            <td>Full workflow designer functionality</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Phase 4:</strong> Persistence</td>
+                            <td>4-5 days</td>
+                            <td>8-10 days</td>
+                            <td>Repository pattern, database integration</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Phase 5:</strong> Preview & Runtime</td>
+                            <td>3-4 days</td>
+                            <td>6-8 days</td>
+                            <td>Form preview, JSON view</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Phase 6:</strong> Polish & Testing</td>
+                            <td>3-4 days</td>
+                            <td>6-8 days</td>
+                            <td>UI polish, unit tests, accessibility</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Phase 7:</strong> Documentation</td>
+                            <td>1-2 days</td>
+                            <td>3-4 days</td>
+                            <td>User guide, API docs, cleanup</td>
+                        </tr>
+                        <tr style="background: var(--success-light);">
+                            <td><strong>TOTAL</strong></td>
+                            <td><strong>19-26 days (3-4 weeks)</strong></td>
+                            <td><strong>41-52 days (6-8 weeks)</strong></td>
+                            <td>Production-ready editor</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Key Milestones</h3>
+                <div class="milestones">
+                    <div class="milestone">
+                        <h4>M1: Core Complete</h4>
+                        <p>Keyboard shortcuts, toast feedback, import/export working</p>
+                        <div class="date">Week 1</div>
+                    </div>
+                    <div class="milestone">
+                        <h4>M2: Feature Parity</h4>
+                        <p>All 18 field types, palette search, field operations complete</p>
+                        <div class="date">Week 1.5</div>
+                    </div>
+                    <div class="milestone">
+                        <h4>M3: Workflow Ready</h4>
+                        <p>Full workflow designer with drag-drop, connections, settings</p>
+                        <div class="date">Week 2.5</div>
+                    </div>
+                    <div class="milestone">
+                        <h4>M4: Persistence</h4>
+                        <p>Save/load forms and workflows from database</p>
+                        <div class="date">Week 3</div>
+                    </div>
+                    <div class="milestone">
+                        <h4>M5: Preview</h4>
+                        <p>Interactive form preview with validation</p>
+                        <div class="date">Week 3.5</div>
+                    </div>
+                    <div class="milestone">
+                        <h4>M6: Production Ready</h4>
+                        <p>Tests passing, docs complete, code cleaned up</p>
+                        <div class="date">Week 4</div>
+                    </div>
+                </div>
+
+                <div class="ai-note" style="margin-top: 2rem;">
+                    <h5><i class="bi bi-info-circle"></i> Time Estimate Assumptions</h5>
+                    <p>
+                        <strong>AI-Assisted (3-4 weeks):</strong> Assumes daily use of Claude Code for boilerplate, components, styling, and documentation. Human oversight for architecture, testing, and debugging.<br><br>
+                        <strong>Manual (6-8 weeks):</strong> Traditional development without AI assistance. Single developer working full-time.<br><br>
+                        <strong>Variables:</strong> Actual time may vary based on: existing codebase familiarity, database choice complexity, testing requirements, and feature scope changes.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>VisualEditorOpus Implementation Plan</p>
+            <p style="margin-top: 0.5rem;">Generated by Claude Code Analysis &bull; December 10, 2025</p>
+        </footer>
+    </div>
+
+    <script>
+        // Progress tracking
+        document.querySelectorAll('.task-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const total = document.querySelectorAll('.task-checkbox').length;
+                const checked = document.querySelectorAll('.task-checkbox:checked').length;
+                console.log(`Progress: ${checked}/${total} tasks completed`);
+            });
+        });
+    </script>
+</body>
+</html>
