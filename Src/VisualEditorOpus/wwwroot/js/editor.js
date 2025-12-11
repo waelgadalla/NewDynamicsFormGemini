@@ -68,3 +68,36 @@ window.copyToClipboard = async (text) => {
         return false;
     }
 };
+
+// === Unsaved Changes Warning ===
+
+let hasUnsavedChanges = false;
+
+/**
+ * Enable unsaved changes warning (browser will prompt on page close/refresh)
+ */
+window.enableUnsavedWarning = () => {
+    hasUnsavedChanges = true;
+    window.addEventListener('beforeunload', handleBeforeUnload);
+};
+
+/**
+ * Disable unsaved changes warning
+ */
+window.disableUnsavedWarning = () => {
+    hasUnsavedChanges = false;
+    window.removeEventListener('beforeunload', handleBeforeUnload);
+};
+
+/**
+ * Handle beforeunload event - prompts user if there are unsaved changes
+ * @param {BeforeUnloadEvent} e - The beforeunload event
+ */
+function handleBeforeUnload(e) {
+    if (hasUnsavedChanges) {
+        e.preventDefault();
+        // Modern browsers require returnValue to be set
+        e.returnValue = '';
+        return '';
+    }
+}

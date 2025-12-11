@@ -19,12 +19,18 @@ public interface IEditorStateService
     FormFieldNode? SelectedFieldNode { get; }
     EditorView CurrentView { get; }
 
+    // === Dirty State (for auto-save) ===
+    bool IsDirty { get; }
+    DateTime? LastModified { get; }
+    void MarkClean();
+
     // === Events ===
     event Action? OnStateChanged;
     event Action<string?>? OnFieldSelected;
     event Action? OnModuleChanged;
     event Action? OnWorkflowChanged;
     event Action<EditorView>? OnViewChanged;
+    event Action? OnDirtyStateChanged;
 
     // === Workflow Operations ===
     void LoadWorkflow(FormWorkflowSchema workflow);

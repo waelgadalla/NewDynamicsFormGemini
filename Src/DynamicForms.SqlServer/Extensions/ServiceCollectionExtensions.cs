@@ -154,7 +154,7 @@ public static class ServiceCollectionExtensions
 
     /// <summary>
     /// Add SQL Server repositories for the Visual Editor.
-    /// These repositories work with FormModuleSchema and FormWorkflowSchema (V4 immutable records).
+    /// These repositories work with FormModuleSchema, FormWorkflowSchema, and CodeSets (V4 immutable records).
     /// </summary>
     /// <param name="services">Service collection</param>
     /// <param name="connectionString">SQL Server connection string</param>
@@ -172,6 +172,11 @@ public static class ServiceCollectionExtensions
             new SqlServerWorkflowSchemaRepository(
                 connectionString,
                 provider.GetRequiredService<ILogger<SqlServerWorkflowSchemaRepository>>()));
+
+        services.AddScoped<ICodeSetRepository>(provider =>
+            new SqlServerCodeSetRepository(
+                connectionString,
+                provider.GetRequiredService<ILogger<SqlServerCodeSetRepository>>()));
 
         return services;
     }

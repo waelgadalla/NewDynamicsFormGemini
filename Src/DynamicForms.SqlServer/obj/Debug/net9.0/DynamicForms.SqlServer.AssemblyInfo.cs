@@ -16,7 +16,7 @@ using System.Reflection;
     "epository implementations for storing JSON form schemas and data in SQL Server d" +
     "atabases with advanced features like JSON columns and bulk operations."))]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5b6885b4fc036df5fe56f805111e0c827579a335")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+30e12733195995efc97c1fb4d69f9f4539f93555")]
 [assembly: System.Reflection.AssemblyProductAttribute("DynamicForms.SqlServer")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DynamicForms.SqlServer")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

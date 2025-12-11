@@ -1,33 +1,80 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using DynamicForms.SqlServer.Interfaces;
 using Microsoft.Extensions.Logging;
 using VisualEditorOpus.Models;
 
 namespace VisualEditorOpus.Services;
 
 /// <summary>
-/// Service for managing CodeSets with full CRUD operations, caching, and data loading
+/// Service for managing CodeSets with full CRUD operations, caching, and data loading.
+/// Supports SQL Server persistence via ICodeSetRepository.
 /// </summary>
 public class CodeSetService : ICodeSetService
 {
     private readonly ICodeSetCache _cache;
     private readonly ICodeSetLoader _loader;
+    private readonly ICodeSetRepository? _repository;
     private readonly ILogger<CodeSetService> _logger;
     private readonly Dictionary<int, ManagedCodeSet> _codeSets = new();
+    private readonly JsonSerializerOptions _jsonOptions;
     private int _nextId = 1;
+    private bool _isInitialized;
 
     public event EventHandler<CodeSetChangedEventArgs>? CodeSetChanged;
 
     public CodeSetService(
         ICodeSetCache cache,
         ICodeSetLoader loader,
-        ILogger<CodeSetService> logger)
+        ILogger<CodeSetService> logger,
+        ICodeSetRepository? repository = null)
     {
         _cache = cache;
         _loader = loader;
         _logger = logger;
+        _repository = repository;
+        _jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+        };
+    }
 
-        // Initialize with sample data
+    private async Task EnsureInitializedAsync()
+    {
+        if (_isInitialized) return;
+        _isInitialized = true;
+
+        if (_repository != null)
+        {
+            try
+            {
+                var summaries = await _repository.GetAllAsync();
+                if (summaries.Any())
+                {
+                    foreach (var summary in summaries)
+                    {
+                        var entity = await _repository.GetByIdAsync(summary.Id);
+                        if (entity != null)
+                        {
+                            var codeSet = DeserializeCodeSet(entity);
+                            _codeSets[codeSet.Id] = codeSet;
+                            if (codeSet.Id >= _nextId) _nextId = codeSet.Id + 1;
+                        }
+                    }
+                    _logger.LogInformation("Loaded {Count} CodeSets from database", _codeSets.Count);
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to load CodeSets from database, using sample data");
+            }
+        }
+
+        // Fall back to sample data if no database or no data
         InitializeSampleData();
     }
 
@@ -148,60 +195,114 @@ public class CodeSetService : ICodeSetService
 
     #region CRUD Operations
 
-    public Task<List<ManagedCodeSet>> GetAllCodeSetsAsync()
+    public async Task<List<ManagedCodeSet>> GetAllCodeSetsAsync()
     {
-        return Task.FromResult(_codeSets.Values.ToList());
+        await EnsureInitializedAsync();
+        return _codeSets.Values.ToList();
     }
 
-    public Task<ManagedCodeSet?> GetCodeSetByIdAsync(int id)
+    public async Task<ManagedCodeSet?> GetCodeSetByIdAsync(int id)
     {
+        await EnsureInitializedAsync();
         _codeSets.TryGetValue(id, out var codeSet);
-        return Task.FromResult(codeSet);
+        return codeSet;
     }
 
-    public Task<ManagedCodeSet?> GetCodeSetByCodeAsync(string code)
+    public async Task<ManagedCodeSet?> GetCodeSetByCodeAsync(string code)
     {
+        await EnsureInitializedAsync();
         var codeSet = _codeSets.Values.FirstOrDefault(cs =>
             cs.Code.Equals(code, StringComparison.OrdinalIgnoreCase));
-        return Task.FromResult(codeSet);
+        return codeSet;
     }
 
-    public Task<ManagedCodeSet> CreateCodeSetAsync(ManagedCodeSet codeSet)
+    public async Task<ManagedCodeSet> CreateCodeSetAsync(ManagedCodeSet codeSet)
     {
+        await EnsureInitializedAsync();
+
         var newCodeSet = codeSet with
         {
             Id = _nextId++,
             DateCreated = DateTime.UtcNow
         };
-        _codeSets[newCodeSet.Id] = newCodeSet;
 
+        // Persist to database if available
+        if (_repository != null)
+        {
+            try
+            {
+                var entity = SerializeCodeSet(newCodeSet);
+                var savedId = await _repository.SaveAsync(entity);
+                newCodeSet = newCodeSet with { Id = savedId };
+                _logger.LogInformation("Persisted CodeSet to database: {Id} - {Code}", savedId, newCodeSet.Code);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to persist CodeSet {Code} to database", newCodeSet.Code);
+            }
+        }
+
+        _codeSets[newCodeSet.Id] = newCodeSet;
         _logger.LogInformation("Created CodeSet: {Id} - {Code}", newCodeSet.Id, newCodeSet.Code);
         OnCodeSetChanged(newCodeSet.Id, CodeSetChangeType.Created);
 
-        return Task.FromResult(newCodeSet);
+        return newCodeSet;
     }
 
-    public Task<ManagedCodeSet> UpdateCodeSetAsync(ManagedCodeSet codeSet)
+    public async Task<ManagedCodeSet> UpdateCodeSetAsync(ManagedCodeSet codeSet)
     {
+        await EnsureInitializedAsync();
+
         var updated = codeSet with { DateUpdated = DateTime.UtcNow };
+
+        // Persist to database if available
+        if (_repository != null)
+        {
+            try
+            {
+                var entity = SerializeCodeSet(updated);
+                await _repository.SaveAsync(entity);
+                _logger.LogInformation("Persisted CodeSet update to database: {Id} - {Code}", updated.Id, updated.Code);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to persist CodeSet update {Id} to database", updated.Id);
+            }
+        }
+
         _codeSets[codeSet.Id] = updated;
         _cache.Invalidate(codeSet.Id);
 
         _logger.LogInformation("Updated CodeSet: {Id} - {Code}", codeSet.Id, codeSet.Code);
         OnCodeSetChanged(codeSet.Id, CodeSetChangeType.Updated);
 
-        return Task.FromResult(updated);
+        return updated;
     }
 
-    public Task DeleteCodeSetAsync(int id)
+    public async Task DeleteCodeSetAsync(int id)
     {
+        await EnsureInitializedAsync();
+
         if (_codeSets.Remove(id))
         {
+            // Delete from database if available
+            if (_repository != null)
+            {
+                try
+                {
+                    await _repository.DeleteAsync(id);
+                    _logger.LogInformation("Deleted CodeSet from database: {Id}", id);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to delete CodeSet {Id} from database", id);
+                }
+            }
+
             _cache.Invalidate(id);
             _logger.LogInformation("Deleted CodeSet: {Id}", id);
             OnCodeSetChanged(id, CodeSetChangeType.Deleted);
         }
-        return Task.CompletedTask;
     }
 
     #endregion
@@ -255,10 +356,11 @@ public class CodeSetService : ICodeSetService
         var items = codeSet.Items.ToList();
         items.Add(newItem);
 
-        var updated = codeSet with { Items = items, IsDirty = true };
+        var updated = codeSet with { Items = items, IsDirty = false, DateUpdated = DateTime.UtcNow };
         _codeSets[codeSetId] = updated;
         _cache.Invalidate(codeSetId);
 
+        await PersistCodeSetAsync(updated);
         OnCodeSetChanged(codeSetId, CodeSetChangeType.ItemsChanged);
         return newItem;
     }
@@ -274,9 +376,10 @@ public class CodeSetService : ICodeSetService
         if (index >= 0)
         {
             items[index] = item;
-            var updated = codeSet with { Items = items, IsDirty = true };
+            var updated = codeSet with { Items = items, IsDirty = false, DateUpdated = DateTime.UtcNow };
             _codeSets[codeSetId] = updated;
             _cache.Invalidate(codeSetId);
+            await PersistCodeSetAsync(updated);
             OnCodeSetChanged(codeSetId, CodeSetChangeType.ItemsChanged);
         }
 
@@ -289,10 +392,11 @@ public class CodeSetService : ICodeSetService
         if (codeSet == null) return;
 
         var items = codeSet.Items.Where(i => i.Id != itemId).ToList();
-        var updated = codeSet with { Items = items, IsDirty = true };
+        var updated = codeSet with { Items = items, IsDirty = false, DateUpdated = DateTime.UtcNow };
         _codeSets[codeSetId] = updated;
         _cache.Invalidate(codeSetId);
 
+        await PersistCodeSetAsync(updated);
         OnCodeSetChanged(codeSetId, CodeSetChangeType.ItemsChanged);
     }
 
@@ -312,11 +416,28 @@ public class CodeSetService : ICodeSetService
             }
         }
 
-        var updated = codeSet with { Items = reordered, IsDirty = true };
+        var updated = codeSet with { Items = reordered, IsDirty = false, DateUpdated = DateTime.UtcNow };
         _codeSets[codeSetId] = updated;
         _cache.Invalidate(codeSetId);
 
+        await PersistCodeSetAsync(updated);
         OnCodeSetChanged(codeSetId, CodeSetChangeType.ItemsChanged);
+    }
+
+    private async Task PersistCodeSetAsync(ManagedCodeSet codeSet)
+    {
+        if (_repository == null) return;
+
+        try
+        {
+            var entity = SerializeCodeSet(codeSet);
+            await _repository.SaveAsync(entity);
+            _logger.LogDebug("Persisted CodeSet {Id} items to database", codeSet.Id);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to persist CodeSet {Id} items to database", codeSet.Id);
+        }
     }
 
     #endregion
@@ -573,4 +694,61 @@ public class CodeSetService : ICodeSetService
     {
         CodeSetChanged?.Invoke(this, new CodeSetChangedEventArgs(codeSetId, changeType));
     }
+
+    #region Serialization Helpers
+
+    private CodeSetEntity SerializeCodeSet(ManagedCodeSet codeSet)
+    {
+        var schemaJson = JsonSerializer.Serialize(codeSet, _jsonOptions);
+        return new CodeSetEntity
+        {
+            Id = codeSet.Id,
+            Code = codeSet.Code,
+            NameEn = codeSet.NameEn,
+            NameFr = codeSet.NameFr,
+            DescriptionEn = codeSet.DescriptionEn,
+            DescriptionFr = codeSet.DescriptionFr,
+            Category = codeSet.Category,
+            SchemaJson = schemaJson,
+            IsActive = codeSet.IsActive,
+            Version = codeSet.Version,
+            DateCreated = codeSet.DateCreated,
+            DateUpdated = codeSet.DateUpdated ?? DateTime.UtcNow
+        };
+    }
+
+    private ManagedCodeSet DeserializeCodeSet(CodeSetEntity entity)
+    {
+        try
+        {
+            var codeSet = JsonSerializer.Deserialize<ManagedCodeSet>(entity.SchemaJson, _jsonOptions);
+            if (codeSet != null)
+            {
+                return codeSet;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to deserialize CodeSet {Id}, creating minimal instance", entity.Id);
+        }
+
+        // Fallback: create minimal CodeSet from entity metadata
+        return new ManagedCodeSet
+        {
+            Id = entity.Id,
+            Code = entity.Code,
+            NameEn = entity.NameEn,
+            NameFr = entity.NameFr,
+            DescriptionEn = entity.DescriptionEn,
+            DescriptionFr = entity.DescriptionFr,
+            Category = entity.Category,
+            IsActive = entity.IsActive,
+            Version = entity.Version,
+            DateCreated = entity.DateCreated,
+            DateUpdated = entity.DateUpdated,
+            Items = new List<ManagedCodeSetItem>()
+        };
+    }
+
+    #endregion
 }

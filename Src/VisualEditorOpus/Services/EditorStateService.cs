@@ -19,8 +19,11 @@ public class EditorStateService : IEditorStateService
     public event Action? OnModuleChanged;
     public event Action? OnWorkflowChanged;
     public event Action<EditorView>? OnViewChanged;
+    public event Action? OnDirtyStateChanged;
 
     private EditorView _currentView = EditorView.Design;
+    private bool _isDirty;
+    private DateTime? _lastModified;
 
     public EditorStateService(
         IFormHierarchyService hierarchyService,
@@ -44,6 +47,28 @@ public class EditorStateService : IEditorStateService
     public bool CanRedo => _undoRedo.CanRedo;
     public bool HasClipboard => _state.ClipboardField is not null;
     public EditorView CurrentView => _currentView;
+    public bool IsDirty => _isDirty;
+    public DateTime? LastModified => _lastModified;
+
+    // === Dirty State Management ===
+    public void MarkClean()
+    {
+        if (_isDirty)
+        {
+            _isDirty = false;
+            OnDirtyStateChanged?.Invoke();
+        }
+    }
+
+    private void MarkDirty()
+    {
+        _lastModified = DateTime.UtcNow;
+        if (!_isDirty)
+        {
+            _isDirty = true;
+            OnDirtyStateChanged?.Invoke();
+        }
+    }
 
     // === Workflow Operations ===
     public void LoadWorkflow(FormWorkflowSchema workflow)
@@ -56,6 +81,7 @@ public class EditorStateService : IEditorStateService
     public void UpdateWorkflow(FormWorkflowSchema workflow)
     {
         _state = _state with { Workflow = workflow };
+        MarkDirty();
         OnWorkflowChanged?.Invoke();
         OnStateChanged?.Invoke();
     }
@@ -96,6 +122,7 @@ public class EditorStateService : IEditorStateService
         {
             _undoRedo.SaveState(_state.Module);
         }
+        MarkDirty();
         LoadModule(module);
     }
 
@@ -323,6 +350,7 @@ public class EditorStateService : IEditorStateService
 
         var previousModule = _undoRedo.Undo(_state.Module);
         LoadModule(previousModule);
+        MarkDirty(); // State changed, needs to be saved
     }
 
     public void Redo()
@@ -331,6 +359,7 @@ public class EditorStateService : IEditorStateService
 
         var nextModule = _undoRedo.Redo(_state.Module);
         LoadModule(nextModule);
+        MarkDirty(); // State changed, needs to be saved
     }
 
     // === View ===

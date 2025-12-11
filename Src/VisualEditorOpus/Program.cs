@@ -36,6 +36,7 @@ builder.Services.AddScoped<IImportExportService, ImportExportService>();
 // Register SQL Server persistence for Visual Editor (FormModuleSchema, FormWorkflowSchema)
 builder.Services.AddVisualEditorSqlServer(builder.Configuration);
 builder.Services.AddScoped<IEditorPersistenceService, EditorPersistenceService>();
+builder.Services.AddScoped<IAutoSaveService, AutoSaveService>();
 
 var app = builder.Build();
 

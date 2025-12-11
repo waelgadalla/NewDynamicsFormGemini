@@ -3,14 +3,35 @@
 
 <div class="editor-toolbar">
     <div class="toolbar-left">
-        <span class="toolbar-title">@ModuleName</span>
+        <span class="toolbar-title">
+            @ModuleName
+            @if (EditorState.IsDirty)
+            {
+                <span class="dirty-indicator" title="Unsaved changes">*</span>
+            }
+        </span>
         @if (FieldCount > 0)
         {
             <span class="toolbar-badge">@FieldCount Fields</span>
         }
-        @if (_isSaving)
+        @if (_isSaving || AutoSaveService.IsSaving)
         {
-            <span class="toolbar-badge saving">Saving...</span>
+            <span class="toolbar-badge saving">
+                @if (AutoSaveService.IsSaving)
+                {
+                    <text>Auto-saving...</text>
+                }
+                else
+                {
+                    <text>Saving...</text>
+                }
+            </span>
+        }
+        else if (AutoSaveService.LastAutoSaveTime.HasValue && !EditorState.IsDirty)
+        {
+            <span class="toolbar-badge saved" title="Last auto-saved @AutoSaveService.LastAutoSaveTime.Value.ToLocalTime().ToString("HH:mm:ss")">
+                <i class="bi bi-check-circle"></i> Saved
+            </span>
         }
     </div>
 
@@ -107,9 +128,12 @@
     </div>
 }
 
+@inject Microsoft.JSInterop.IJSRuntime JS
+
 @code {
     [Inject] private IEditorStateService EditorState { get; set; } = default!;
     [Inject] private IEditorPersistenceService PersistenceService { get; set; } = default!;
+    [Inject] private IAutoSaveService AutoSaveService { get; set; } = default!;
     [Inject] private IToastService ToastService { get; set; } = default!;
 
     private int FieldCount => EditorState.CurrentModule?.Fields.Length ?? 0;
@@ -126,6 +150,29 @@
     protected override void OnInitialized()
     {
         EditorState.OnStateChanged += StateHasChanged;
+        EditorState.OnDirtyStateChanged += HandleDirtyStateChanged;
+        AutoSaveService.OnAutoSaveStateChanged += StateHasChanged;
+        AutoSaveService.Start();
+    }
+
+    private async void HandleDirtyStateChanged()
+    {
+        try
+        {
+            if (EditorState.IsDirty)
+            {
+                await JS.InvokeVoidAsync("enableUnsavedWarning");
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("disableUnsavedWarning");
+            }
+        }
+        catch (Exception)
+        {
+            // Ignore JS interop errors during disposal
+        }
+        await InvokeAsync(StateHasChanged);
     }
 
     private void HandleViewChanged(EditorView view)
@@ -174,6 +221,7 @@
 
             if (result.Success)
             {
+                EditorState.MarkClean();
                 ToastService.ShowSuccess($"Form saved successfully (ID: {result.SavedId})");
             }
             else
@@ -260,8 +308,21 @@
         }
     }
 
-    public void Dispose()
+    public async void Dispose()
     {
         EditorState.OnStateChanged -= StateHasChanged;
+        EditorState.OnDirtyStateChanged -= HandleDirtyStateChanged;
+        AutoSaveService.OnAutoSaveStateChanged -= StateHasChanged;
+        AutoSaveService.Stop();
+
+        // Disable unsaved warning on disposal
+        try
+        {
+            await JS.InvokeVoidAsync("disableUnsavedWarning");
+        }
+        catch
+        {
+            // Ignore errors during disposal
+        }
     }
 }
