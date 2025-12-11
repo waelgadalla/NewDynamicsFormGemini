@@ -13,6 +13,12 @@
 @import url('workflow-connections.css');
 @import url('workflow-minimap.css');
 @import url('workflow-settings.css');
+@import url('components.css');
+@import url('json-preview.css');
+@import url('import-export.css');
+@import url('codeset-manager.css');
+@import url('codeset-tabs.css');
+@import url('codeset-importexport.css');
 
 /* Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
@@ -158,6 +164,8 @@ html, body {
 .btn-outline:hover { border-color: var(--border-strong); background: var(--bg-tertiary); }
 .btn-primary { background: var(--primary); color: white; }
 .btn-primary:hover { background: var(--primary-dark); }
+.btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color); }
+.btn-secondary:hover { background: var(--bg-secondary); border-color: var(--border-strong); }
 .btn-success { background: var(--success); color: white; }
 .btn-danger { background: var(--danger); color: white; }
 .btn-sm { padding: 6px 12px; font-size: 12px; }
@@ -387,11 +395,3 @@ html, body {
 .toast-success { background: var(--success); color: white; border-color: var(--success); }
 .toast-error { background: var(--danger); color: white; border-color: var(--danger); }
 .toast-warning { background: var(--warning); color: white; border-color: var(--warning); }
-
-/* Import Components */
-@import url('components.css');
-@import url('json-preview.css');
-@import url('import-export.css');
-@import url('codeset-manager.css');
-@import url('codeset-tabs.css');
-@import url('codeset-importexport.css');

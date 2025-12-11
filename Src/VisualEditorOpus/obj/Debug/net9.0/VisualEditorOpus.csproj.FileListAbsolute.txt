@@ -120,7 +120,6 @@ C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOp
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\0810bnylss-xoan3rwqp4.gz
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\3hl2tq92qe-4yq7wy4jqa.gz
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\9o76wkhs5k-1s5zspudmr.gz
-C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\bax9tt0lot-4s6tz8md86.gz
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\6oazz4jjcx-mjtm8htlsx.gz
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\joma51gn3v-jvo0066fd1.gz
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\gylr7lkklq-1udn9zd8fb.gz
@@ -138,8 +137,9 @@ C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOp
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\scopedcss\Components\Workflow\Settings\TriggerSettingsSection.razor.rz.scp.css
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\scopedcss\Components\Workflow\Settings\ValidationSettingsSection.razor.rz.scp.css
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\scopedcss\Components\Workflow\Settings\WorkflowSettingsPanel.razor.rz.scp.css
-C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\t379d7n0fg-2e7h0rnv4w.gz
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\2ai7xrysdm-o82x8yzn36.gz
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\t9p6cl12i8-1mi974xoc6.gz
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\6tvrfg3a0z-1mi974xoc6.gz
+C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\bax9tt0lot-rqy6ntc1q5.gz
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt
+C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\t379d7n0fg-d3plnl19tq.gz
