@@ -190,3 +190,4 @@ C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOp
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\bin\Debug\net9.0\DynamicForms.Core.xml
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\t379d7n0fg-mmq7phdd82.gz
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\9sllqwngf0-0vtbnczuht.gz
+C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt

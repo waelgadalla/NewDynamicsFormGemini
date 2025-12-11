@@ -19,22 +19,38 @@
             <Badge Variant="@GetStatusVariant()" Text="@WorkflowStatus" />
         </div>
         <div class="header-actions">
+            @if (_isSaving)
+            {
+                <span class="saving-indicator"><i class="bi bi-arrow-repeat spinning"></i> Saving...</span>
+            }
             <Button Variant="outline" Icon="bi-play" Text="Preview" OnClick="Preview" />
             <Button Variant="outline" Icon="bi-gear" Text="Settings" OnClick="ShowSettings" />
-            <Button Variant="primary" Icon="bi-check" Text="Save Workflow" OnClick="Save" />
+            <Button Variant="primary" Icon="bi-check" Text="Save Workflow" OnClick="SaveAsync" Disabled="_isSaving" />
         </div>
     </div>
 
     <div class="workflow-body">
-        <div class="workflow-sidebar">
-            <WorkflowModuleList />
-        </div>
-        <div class="workflow-main">
-            <WorkflowCanvas />
-        </div>
-        <div class="workflow-properties">
-            <WorkflowProperties />
-        </div>
+        @if (_isLoading)
+        {
+            <div class="loading-overlay">
+                <div class="loading-spinner">
+                    <i class="bi bi-arrow-repeat spinning"></i>
+                    <span>Loading workflow...</span>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="workflow-sidebar">
+                <WorkflowModuleList />
+            </div>
+            <div class="workflow-main">
+                <WorkflowCanvas />
+            </div>
+            <div class="workflow-properties">
+                <WorkflowProperties />
+            </div>
+        }
     </div>
 </div>
 
@@ -42,40 +58,68 @@
     [Parameter] public int? WorkflowId { get; set; }
 
     [Inject] private IEditorStateService EditorState { get; set; } = default!;
+    [Inject] private IEditorPersistenceService PersistenceService { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
     [Inject] private IToastService ToastService { get; set; } = default!;
 
     private string WorkflowTitle => EditorState.CurrentWorkflow?.TitleEn ?? "New Workflow";
     private string WorkflowStatus => EditorState.CurrentWorkflow?.ModuleIds.Length > 0 ? "draft" : "empty";
+    private bool _isSaving;
+    private bool _isLoading;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         if (WorkflowId.HasValue)
         {
-            LoadWorkflow(WorkflowId.Value);
+            await LoadWorkflowAsync(WorkflowId.Value);
         }
         else
         {
-            CreateNewWorkflow();
+            await CreateNewWorkflowAsync();
         }
     }
 
-    private void LoadWorkflow(int id)
+    private async Task LoadWorkflowAsync(int id)
     {
-        // Mock data - in real app this would load from repository
-        var workflow = new FormWorkflowSchema
+        _isLoading = true;
+        StateHasChanged();
+
+        try
         {
-            Id = id,
-            TitleEn = "Employee Onboarding",
-            TitleFr = "Intégration des employés",
-            ModuleIds = new[] { 1, 2, 3 }
-        };
-        EditorState.LoadWorkflow(workflow);
+            var workflow = await PersistenceService.LoadWorkflowAsync(id);
+            if (workflow != null)
+            {
+                EditorState.LoadWorkflow(workflow);
+            }
+            else
+            {
+                ToastService.ShowWarning($"Workflow {id} not found, creating new workflow");
+                await CreateNewWorkflowAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error loading workflow: {ex.Message}");
+            await CreateNewWorkflowAsync();
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
     }
 
-    private void CreateNewWorkflow()
+    private async Task CreateNewWorkflowAsync()
     {
+        var nextId = await PersistenceService.GetNextWorkflowIdAsync();
         EditorState.CreateNewWorkflow("Untitled Workflow");
+
+        // Update the workflow with the next available ID
+        if (EditorState.CurrentWorkflow != null)
+        {
+            var updated = EditorState.CurrentWorkflow with { Id = nextId };
+            EditorState.LoadWorkflow(updated); // Use LoadWorkflow to avoid marking dirty
+        }
     }
 
     private void HandleTitleChange(ChangeEventArgs e)
@@ -96,8 +140,34 @@
     private void GoBack() => Navigation.NavigateTo("/");
     private void Preview() => ToastService.ShowInfo("Preview mode coming soon");
     private void ShowSettings() => ToastService.ShowInfo("Settings panel coming soon");
-    private void Save()
+
+    private async Task SaveAsync()
     {
-        ToastService.ShowSuccess("Workflow saved successfully");
+        if (EditorState.CurrentWorkflow is null) return;
+
+        _isSaving = true;
+        StateHasChanged();
+
+        try
+        {
+            var result = await PersistenceService.SaveWorkflowAsync(EditorState.CurrentWorkflow);
+            if (result.Success)
+            {
+                ToastService.ShowSuccess($"Workflow saved successfully (ID: {result.SavedId})");
+            }
+            else
+            {
+                ToastService.ShowError($"Failed to save: {result.ErrorMessage}");
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error saving workflow: {ex.Message}");
+        }
+        finally
+        {
+            _isSaving = false;
+            StateHasChanged();
+        }
     }
 }

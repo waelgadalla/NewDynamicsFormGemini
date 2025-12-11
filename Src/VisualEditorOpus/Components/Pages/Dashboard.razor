@@ -47,16 +47,33 @@
                 <div class="dashboard-section-title">Recent Workflows</div>
                 <SearchBox Placeholder="Search workflows..." Class="width: 240px;" />
             </div>
-            <div class="forms-grid">
-                @foreach (var workflow in RecentWorkflows)
-                {
-                    <WorkflowCard Workflow="@workflow" OnSelect="OpenWorkflow" />
-                }
-                <div class="form-card form-card-new" @onclick="CreateNewWorkflow">
-                    <i class="bi bi-plus-lg"></i>
-                    <span>New Workflow</span>
+            @if (_isLoading)
+            {
+                <div class="loading-state" style="padding: 40px; text-align: center;">
+                    <i class="bi bi-arrow-repeat spinning" style="font-size: 2rem;"></i>
+                    <p style="margin-top: 12px; color: var(--text-muted);">Loading workflows...</p>
                 </div>
-            </div>
+            }
+            else
+            {
+                <div class="forms-grid">
+                    @foreach (var workflow in RecentWorkflows)
+                    {
+                        <WorkflowCard Workflow="@workflow" OnSelect="OpenWorkflow" />
+                    }
+                    <div class="form-card form-card-new" @onclick="CreateNewWorkflow">
+                        <i class="bi bi-plus-lg"></i>
+                        <span>New Workflow</span>
+                    </div>
+                </div>
+                @if (RecentWorkflows.Count == 0)
+                {
+                    <div class="empty-state" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                        <i class="bi bi-inbox" style="font-size: 3rem; opacity: 0.5;"></i>
+                        <p style="margin-top: 12px;">No workflows yet. Create your first workflow to get started!</p>
+                    </div>
+                }
+            }
         </div>
     </div>
 </div>
@@ -64,31 +81,57 @@
 @code {
     [Inject] private NavigationManager Navigation { get; set; } = default!;
     [Inject] private IToastService ToastService { get; set; } = default!;
+    [Inject] private IEditorPersistenceService PersistenceService { get; set; } = default!;
 
     private List<WorkflowSummary> RecentWorkflows { get; set; } = new();
+    private bool _isLoading = true;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        // Mock data
-        RecentWorkflows = new List<WorkflowSummary>
+        await LoadWorkflowsAsync();
+    }
+
+    private async Task LoadWorkflowsAsync()
+    {
+        _isLoading = true;
+        StateHasChanged();
+
+        try
         {
-            new WorkflowSummary(1, "Employee Onboarding", "New hire onboarding process with personal info, tax forms, and benefits selection", 4, "draft", DateTime.Now.AddDays(-2)),
-            new WorkflowSummary(2, "Expense Claim", "Submit and approve expenses with receipt uploads and manager approval", 3, "published", DateTime.Now.AddDays(-5)),
-            new WorkflowSummary(3, "Vendor Registration", "New vendor setup with company details and banking information", 2, "draft", DateTime.Now.AddDays(-10)),
-            new WorkflowSummary(4, "Leave Request", "Employee time-off request with manager approval workflow", 2, "published", DateTime.Now.AddDays(-15)),
-        };
+            var workflows = await PersistenceService.GetAllWorkflowsAsync();
+            RecentWorkflows = workflows
+                .OrderByDescending(w => w.DateUpdated)
+                .Take(20) // Limit to 20 most recent
+                .Select(w => new WorkflowSummary(
+                    w.WorkflowId,
+                    w.TitleEn,
+                    w.DescriptionEn ?? "No description",
+                    w.ModuleCount,
+                    "draft", // Default status
+                    w.DateUpdated
+                ))
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error loading workflows: {ex.Message}");
+            RecentWorkflows = new List<WorkflowSummary>();
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
     }
 
     private void CreateNewWorkflow()
     {
         Navigation.NavigateTo("/workflow");
-        ToastService.ShowSuccess("New workflow created");
     }
 
     private void HandleTemplateSelect(string templateId)
     {
         Navigation.NavigateTo($"/workflow?template={templateId}");
-        ToastService.ShowSuccess($"Started from template: {templateId}");
     }
 
     private void OpenWorkflow(int workflowId)
