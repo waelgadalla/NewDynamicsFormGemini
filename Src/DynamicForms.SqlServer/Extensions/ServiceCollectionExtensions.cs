@@ -1,8 +1,10 @@
 using DynamicForms.Core.Interfaces;
+using DynamicForms.SqlServer.Interfaces;
 using DynamicForms.SqlServer.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Logging;
 
 namespace DynamicForms.SqlServer.Extensions;
 
@@ -141,10 +143,58 @@ public static class ServiceCollectionExtensions
         string healthCheckName = "dynamicforms-sqlserver")
     {
         var connectionString = configuration.GetConnectionString(connectionStringName);
-        
+
         if (string.IsNullOrEmpty(connectionString))
             throw new InvalidOperationException($"Connection string '{connectionStringName}' not found in configuration.");
-            
+
         return services.AddDynamicFormsSqlServerWithMonitoring(connectionString, healthCheckName);
     }
+
+    #region Visual Editor Repositories (FormModuleSchema / FormWorkflowSchema)
+
+    /// <summary>
+    /// Add SQL Server repositories for the Visual Editor.
+    /// These repositories work with FormModuleSchema and FormWorkflowSchema (V4 immutable records).
+    /// </summary>
+    /// <param name="services">Service collection</param>
+    /// <param name="connectionString">SQL Server connection string</param>
+    /// <returns>Service collection for chaining</returns>
+    public static IServiceCollection AddVisualEditorSqlServer(
+        this IServiceCollection services,
+        string connectionString)
+    {
+        services.AddScoped<IModuleSchemaRepository>(provider =>
+            new SqlServerModuleSchemaRepository(
+                connectionString,
+                provider.GetRequiredService<ILogger<SqlServerModuleSchemaRepository>>()));
+
+        services.AddScoped<IWorkflowSchemaRepository>(provider =>
+            new SqlServerWorkflowSchemaRepository(
+                connectionString,
+                provider.GetRequiredService<ILogger<SqlServerWorkflowSchemaRepository>>()));
+
+        return services;
+    }
+
+    /// <summary>
+    /// Add SQL Server repositories for the Visual Editor with connection string from configuration.
+    /// </summary>
+    /// <param name="services">Service collection</param>
+    /// <param name="configuration">Configuration instance</param>
+    /// <param name="connectionStringName">Name of the connection string in configuration</param>
+    /// <returns>Service collection for chaining</returns>
+    public static IServiceCollection AddVisualEditorSqlServer(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        string connectionStringName = "DefaultConnection")
+    {
+        var connectionString = configuration.GetConnectionString(connectionStringName);
+
+        if (string.IsNullOrEmpty(connectionString))
+            throw new InvalidOperationException($"Connection string '{connectionStringName}' not found in configuration.");
+
+        return services.AddVisualEditorSqlServer(connectionString);
+    }
+
+    #endregion
 }

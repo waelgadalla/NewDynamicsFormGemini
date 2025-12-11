@@ -1,6 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
     <PackageId>DynamicForms.SqlServer</PackageId>
     <Description>SQL Server optimized implementation for DynamicForms. Provides high-performance repository implementations for storing JSON form schemas and data in SQL Server databases with advanced features like JSON columns and bulk operations.</Description>
     <PackageTags>$(BasePackageTags);sqlserver;database;repository;performance</PackageTags>
@@ -18,7 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DynamicForms.Core\DynamicForms.Core.csproj" />
-    <ProjectReference Include="..\DynamicForms.EntityFramework\DynamicForms.EntityFramework.csproj" />
+    <ProjectReference Include="..\DynamicForms.Core.V4\DynamicForms.Core.V4.csproj" />
   </ItemGroup>
 
 </Project>

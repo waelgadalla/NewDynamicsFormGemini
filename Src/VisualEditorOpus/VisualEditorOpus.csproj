@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DynamicForms.Core.V4\DynamicForms.Core.V4.csproj" />
+    <ProjectReference Include="..\DynamicForms.SqlServer\DynamicForms.SqlServer.csproj" />
   </ItemGroup>
 
 </Project>

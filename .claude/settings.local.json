@@ -13,7 +13,10 @@
       "Bash(Select-String -Pattern \"^\\s*\\}\" -AllMatches)",
       "Bash(Select-Object -Last 15)",
       "Bash(mkdir:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(dotnet restore:*)",
+      "Bash(sqlcmd:*)"
     ],
     "deny": [],
     "ask": []

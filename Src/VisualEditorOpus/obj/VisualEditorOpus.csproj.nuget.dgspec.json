@@ -89,6 +89,219 @@
         }
       }
     },
+    "C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormGemini\\Src\\DynamicForms.Core\\DynamicForms.Core.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormGemini\\Src\\DynamicForms.Core\\DynamicForms.Core.csproj",
+        "projectName": "DynamicForms.Core",
+        "projectPath": "C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormGemini\\Src\\DynamicForms.Core\\DynamicForms.Core.csproj",
+        "packagesPath": "C:\\Users\\waelm\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormGemini\\Src\\DynamicForms.Core\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\waelm\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "C:\\Users\\waelm\\source\\repos\\waelgadalla\\DynamicForms\\packages": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "targetAlias": "net9.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "dependencies": {
+            "Microsoft.Extensions.Caching.Abstractions": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.Extensions.Caching.Memory": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.Extensions.Configuration.Abstractions": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.Extensions.Configuration.Binder": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.Extensions.DependencyInjection.Abstractions": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.Extensions.Logging.Abstractions": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.Extensions.Options": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.Extensions.Options.ConfigurationExtensions": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "System.ComponentModel.Annotations": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "System.Text.Json": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormGemini\\Src\\DynamicForms.SqlServer\\DynamicForms.SqlServer.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormGemini\\Src\\DynamicForms.SqlServer\\DynamicForms.SqlServer.csproj",
+        "projectName": "DynamicForms.SqlServer",
+        "projectPath": "C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormGemini\\Src\\DynamicForms.SqlServer\\DynamicForms.SqlServer.csproj",
+        "packagesPath": "C:\\Users\\waelm\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormGemini\\Src\\DynamicForms.SqlServer\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\waelm\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "C:\\Users\\waelm\\source\\repos\\waelgadalla\\DynamicForms\\packages": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "targetAlias": "net9.0",
+            "projectReferences": {
+              "C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormGemini\\Src\\DynamicForms.Core.V4\\DynamicForms.Core.V4.csproj": {
+                "projectPath": "C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormGemini\\Src\\DynamicForms.Core.V4\\DynamicForms.Core.V4.csproj"
+              },
+              "C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormGemini\\Src\\DynamicForms.Core\\DynamicForms.Core.csproj": {
+                "projectPath": "C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormGemini\\Src\\DynamicForms.Core\\DynamicForms.Core.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "dependencies": {
+            "AspNetCore.HealthChecks.SqlServer": {
+              "target": "Package",
+              "version": "[8.0.2, )"
+            },
+            "Dapper": {
+              "target": "Package",
+              "version": "[2.1.35, )"
+            },
+            "Microsoft.Data.SqlClient": {
+              "target": "Package",
+              "version": "[5.2.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.Extensions.Diagnostics.HealthChecks": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "System.Text.Json": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
     "C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormGemini\\Src\\VisualEditorOpus\\VisualEditorOpus.csproj": {
       "version": "1.0.0",
       "restore": {
@@ -121,6 +334,9 @@
             "projectReferences": {
               "C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormGemini\\Src\\DynamicForms.Core.V4\\DynamicForms.Core.V4.csproj": {
                 "projectPath": "C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormGemini\\Src\\DynamicForms.Core.V4\\DynamicForms.Core.V4.csproj"
+              },
+              "C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormGemini\\Src\\DynamicForms.SqlServer\\DynamicForms.SqlServer.csproj": {
+                "projectPath": "C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormGemini\\Src\\DynamicForms.SqlServer\\DynamicForms.SqlServer.csproj"
               }
             }
           }

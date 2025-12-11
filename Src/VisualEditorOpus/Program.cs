@@ -1,6 +1,7 @@
 using VisualEditorOpus.Components;
 using VisualEditorOpus.Services;
 using DynamicForms.Core.V4.Services;
+using DynamicForms.SqlServer.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +32,9 @@ builder.Services.AddScoped<ICodeSetCache, CodeSetCache>();
 builder.Services.AddScoped<ICodeSetService, CodeSetService>();
 builder.Services.AddSingleton<ITabStateService, TabStateService>();
 builder.Services.AddScoped<IImportExportService, ImportExportService>();
+
+// Register SQL Server persistence for Visual Editor (FormModuleSchema, FormWorkflowSchema)
+builder.Services.AddVisualEditorSqlServer(builder.Configuration);
 
 var app = builder.Build();
 
