@@ -10,20 +10,50 @@
     [Parameter] public int? ModuleId { get; set; }
 
     [Inject] private IEditorStateService EditorState { get; set; } = default!;
+    [Inject] private IEditorPersistenceService PersistenceService { get; set; } = default!;
     [Inject] private IToastService ToastService { get; set; } = default!;
 
-    protected override void OnInitialized()
+    private bool _isLoading;
+
+    protected override async Task OnInitializedAsync()
     {
         // Load or create module
         if (ModuleId.HasValue)
         {
-            // TODO: Load from repository
-            LoadSampleModule();
+            await LoadModuleFromRepositoryAsync(ModuleId.Value);
         }
         else
         {
-            // Create new module with sample fields
+            // Create new module with sample fields for new editor
             LoadSampleModule();
+        }
+    }
+
+    private async Task LoadModuleFromRepositoryAsync(int moduleId)
+    {
+        _isLoading = true;
+        try
+        {
+            var module = await PersistenceService.LoadModuleAsync(moduleId);
+            if (module != null)
+            {
+                EditorState.LoadModule(module);
+            }
+            else
+            {
+                // Module not found - create new with the specified ID
+                ToastService.ShowWarning($"Module {moduleId} not found. Creating new module.");
+                LoadSampleModule();
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Failed to load module: {ex.Message}");
+            LoadSampleModule();
+        }
+        finally
+        {
+            _isLoading = false;
         }
     }
 

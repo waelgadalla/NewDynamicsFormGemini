@@ -73,6 +73,24 @@
     <div class="context-menu-backdrop" @onclick="CloseContextMenu"></div>
 }
 
+@* Delete Confirmation Modal *@
+<VisualEditorOpus.Components.Shared.ConfirmDeleteModal @bind-IsOpen="_showDeleteConfirmation"
+                   Title="Close Tab with Unsaved Changes"
+                   Message="This CodeSet has unsaved changes. Are you sure you want to close it?"
+                   ItemName="@(_tabToClose?.CodeSetName ?? "")"
+                   WarningMessage="Any unsaved changes will be lost."
+                   ConfirmButtonText="Close Without Saving"
+                   CancelButtonText="Cancel"
+                   OnConfirm="ConfirmCloseTab"
+                   OnCancel="CancelCloseTab" />
+
+@* Import/Export Modal *@
+<ImportExportModal @bind-IsOpen="_showImportExportModal"
+                   CodeSet="ActiveCodeSet"
+                   CodeSets="_allCodeSets"
+                   @bind-Mode="_importExportMode"
+                   OnImportComplete="HandleImportComplete" />
+
 @code {
     private ManagedCodeSet? ActiveCodeSet { get; set; }
     private List<ManagedCodeSetItem> ActiveItems { get; set; } = new();
@@ -81,6 +99,15 @@
     private double _contextMenuX = 0;
     private double _contextMenuY = 0;
     private TabState? _contextMenuTab;
+
+    // Delete confirmation state
+    private bool _showDeleteConfirmation;
+    private TabState? _tabToClose;
+
+    // Import/Export modal state
+    private bool _showImportExportModal;
+    private CodeSetImportExportMode _importExportMode = CodeSetImportExportMode.Import;
+    private List<ManagedCodeSet> _allCodeSets = new();
 
     protected override void OnInitialized()
     {
@@ -161,9 +188,30 @@
         var tab = TabStateService.OpenTabs.FirstOrDefault(t => t.Id == tabId);
         if (tab?.IsDirty == true)
         {
-            // TODO: Show confirmation dialog
+            // Show confirmation dialog for unsaved changes
+            _tabToClose = tab;
+            _showDeleteConfirmation = true;
         }
-        TabStateService.CloseTab(tabId);
+        else
+        {
+            TabStateService.CloseTab(tabId);
+        }
+    }
+
+    private void ConfirmCloseTab()
+    {
+        if (_tabToClose != null)
+        {
+            TabStateService.CloseTab(_tabToClose.Id);
+        }
+        _showDeleteConfirmation = false;
+        _tabToClose = null;
+    }
+
+    private void CancelCloseTab()
+    {
+        _showDeleteConfirmation = false;
+        _tabToClose = null;
     }
 
     private async Task HandleTabAdd()
@@ -334,15 +382,42 @@
 
     private async Task HandleImport()
     {
-        // TODO: Show import dialog
-        await Task.CompletedTask;
+        // Load all code sets for the import dialog
+        _allCodeSets = await CodeSetService.GetAllCodeSetsAsync();
+        _importExportMode = CodeSetImportExportMode.Import;
+        _showImportExportModal = true;
     }
 
     private async Task HandleExport()
     {
         if (ActiveCodeSet == null) return;
-        var json = await CodeSetService.ExportToJsonAsync(ActiveCodeSet.Id);
-        // TODO: Download file
+
+        // Load all code sets for the export dialog
+        _allCodeSets = await CodeSetService.GetAllCodeSetsAsync();
+        _importExportMode = CodeSetImportExportMode.Export;
+        _showImportExportModal = true;
+    }
+
+    private async Task HandleImportComplete(CodeSetImportResult result)
+    {
+        if (result.Success && result.CodeSetId.HasValue)
+        {
+            // Refresh items if the imported codeset is currently active
+            if (ActiveCodeSet != null && result.CodeSetId == ActiveCodeSet.Id)
+            {
+                await LoadActiveCodeSet(ActiveCodeSet.Id);
+            }
+            else
+            {
+                // Load and open the imported CodeSet in a new tab
+                var importedCodeSet = await CodeSetService.GetCodeSetByIdAsync(result.CodeSetId.Value);
+                if (importedCodeSet != null)
+                {
+                    TabStateService.OpenTab(importedCodeSet);
+                }
+            }
+        }
+        _showImportExportModal = false;
     }
 
     private void MarkDirty()
