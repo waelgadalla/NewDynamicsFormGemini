@@ -54,6 +54,139 @@
     </div>
 </div>
 
+@* Preview Modal *@
+@if (_showPreviewModal)
+{
+    <div class="modal-backdrop" @onclick="ClosePreview">
+        <div class="workflow-preview-modal" @onclick:stopPropagation>
+            <div class="preview-modal-header">
+                <h3><i class="bi bi-play-circle"></i> Workflow Preview</h3>
+                <button class="btn btn-ghost btn-icon-sm" @onclick="ClosePreview">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="preview-modal-body">
+                @if (EditorState.CurrentWorkflow?.ModuleIds.Length > 0)
+                {
+                    <div class="preview-step-indicator">
+                        @for (int i = 1; i <= EditorState.CurrentWorkflow.ModuleIds.Length; i++)
+                        {
+                            var step = i;
+                            <div class="preview-step @(step == _previewCurrentStep ? "active" : "") @(step < _previewCurrentStep ? "completed" : "")">
+                                <div class="preview-step-number">@step</div>
+                                <div class="preview-step-label">Module @step</div>
+                            </div>
+                            @if (i < EditorState.CurrentWorkflow.ModuleIds.Length)
+                            {
+                                <div class="preview-step-connector @(step < _previewCurrentStep ? "completed" : "")"></div>
+                            }
+                        }
+                    </div>
+                    <div class="preview-content">
+                        <div class="preview-placeholder">
+                            <i class="bi bi-file-text"></i>
+                            <p>Module @_previewCurrentStep Preview</p>
+                            <span class="preview-hint">Form fields would render here</span>
+                        </div>
+                    </div>
+                    <div class="preview-navigation">
+                        <button class="btn btn-outline" @onclick="PreviousStep" disabled="@(_previewCurrentStep <= 1)">
+                            <i class="bi bi-chevron-left"></i> Previous
+                        </button>
+                        <span class="preview-step-text">Step @_previewCurrentStep of @EditorState.CurrentWorkflow.ModuleIds.Length</span>
+                        <button class="btn btn-primary" @onclick="NextStep" disabled="@(_previewCurrentStep >= EditorState.CurrentWorkflow.ModuleIds.Length)">
+                            Next <i class="bi bi-chevron-right"></i>
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <div class="preview-empty">
+                        <i class="bi bi-diagram-3"></i>
+                        <p>No modules in workflow</p>
+                        <span>Add modules to preview the workflow</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@* Settings Panel *@
+@if (_showSettingsPanel)
+{
+    <div class="settings-panel-backdrop" @onclick="CloseSettings">
+        <div class="settings-panel" @onclick:stopPropagation>
+            <div class="settings-panel-header">
+                <h3><i class="bi bi-gear"></i> Workflow Settings</h3>
+                <button class="btn btn-ghost btn-icon-sm" @onclick="CloseSettings">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="settings-panel-body">
+                <div class="settings-section">
+                    <h4>General</h4>
+                    <div class="form-group">
+                        <label class="form-label">Workflow Title (English)</label>
+                        <input type="text" class="form-input" value="@(EditorState.CurrentWorkflow?.TitleEn ?? "")"
+                               @onchange="@(e => UpdateWorkflowTitleEn(e.Value?.ToString()))" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Workflow Title (French)</label>
+                        <input type="text" class="form-input" value="@(EditorState.CurrentWorkflow?.TitleFr ?? "")"
+                               @onchange="@(e => UpdateWorkflowTitleFr(e.Value?.ToString()))" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description (English)</label>
+                        <textarea class="form-textarea" rows="3"
+                                  @onchange="@(e => UpdateWorkflowDescriptionEn(e.Value?.ToString()))">@(EditorState.CurrentWorkflow?.DescriptionEn ?? "")</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description (French)</label>
+                        <textarea class="form-textarea" rows="3"
+                                  @onchange="@(e => UpdateWorkflowDescriptionFr(e.Value?.ToString()))">@(EditorState.CurrentWorkflow?.DescriptionFr ?? "")</textarea>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h4>Navigation</h4>
+                    <div class="form-group">
+                        <label class="toggle-label">
+                            <input type="checkbox" checked="@(EditorState.CurrentWorkflow?.Navigation.AllowStepJumping ?? false)"
+                                   @onchange="@(e => UpdateAllowStepJumping((bool)(e.Value ?? false)))" />
+                            <span>Allow Step Jumping</span>
+                        </label>
+                        <p class="form-hint">Users can jump to non-sequential steps</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="toggle-label">
+                            <input type="checkbox" checked="@(EditorState.CurrentWorkflow?.Navigation.ShowProgress ?? true)"
+                                   @onchange="@(e => UpdateShowProgress((bool)(e.Value ?? true)))" />
+                            <span>Show Progress Indicator</span>
+                        </label>
+                        <p class="form-hint">Display progress indicator during workflow</p>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h4>Behavior</h4>
+                    <div class="form-group">
+                        <label class="toggle-label">
+                            <input type="checkbox" checked="@(EditorState.CurrentWorkflow?.Settings.AllowModuleSkipping ?? false)"
+                                   @onchange="@(e => UpdateAllowModuleSkipping((bool)(e.Value ?? false)))" />
+                            <span>Allow Module Skipping</span>
+                        </label>
+                        <p class="form-hint">Users can skip optional modules</p>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-panel-footer">
+                <button class="btn btn-primary" @onclick="CloseSettings">
+                    <i class="bi bi-check"></i> Done
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     [Parameter] public int? WorkflowId { get; set; }
 
@@ -66,6 +199,9 @@
     private string WorkflowStatus => EditorState.CurrentWorkflow?.ModuleIds.Length > 0 ? "draft" : "empty";
     private bool _isSaving;
     private bool _isLoading;
+    private bool _showPreviewModal;
+    private bool _showSettingsPanel;
+    private int _previewCurrentStep = 1;
 
     protected override async Task OnInitializedAsync()
     {
@@ -138,8 +274,97 @@
     };
 
     private void GoBack() => Navigation.NavigateTo("/");
-    private void Preview() => ToastService.ShowInfo("Preview mode coming soon");
-    private void ShowSettings() => ToastService.ShowInfo("Settings panel coming soon");
+
+    private void Preview()
+    {
+        _showPreviewModal = true;
+    }
+
+    private void ClosePreview()
+    {
+        _showPreviewModal = false;
+    }
+
+    private void ShowSettings()
+    {
+        _showSettingsPanel = true;
+    }
+
+    private void CloseSettings()
+    {
+        _showSettingsPanel = false;
+    }
+
+    // Preview navigation
+    private void NextStep()
+    {
+        var maxSteps = EditorState.CurrentWorkflow?.ModuleIds.Length ?? 0;
+        if (_previewCurrentStep < maxSteps)
+        {
+            _previewCurrentStep++;
+        }
+    }
+
+    private void PreviousStep()
+    {
+        if (_previewCurrentStep > 1)
+        {
+            _previewCurrentStep--;
+        }
+    }
+
+    // Settings update methods
+    private void UpdateWorkflowTitleEn(string? value)
+    {
+        if (EditorState.CurrentWorkflow is null) return;
+        var updated = EditorState.CurrentWorkflow with { TitleEn = value ?? "" };
+        EditorState.UpdateWorkflow(updated);
+    }
+
+    private void UpdateWorkflowTitleFr(string? value)
+    {
+        if (EditorState.CurrentWorkflow is null) return;
+        var updated = EditorState.CurrentWorkflow with { TitleFr = value };
+        EditorState.UpdateWorkflow(updated);
+    }
+
+    private void UpdateWorkflowDescriptionEn(string? value)
+    {
+        if (EditorState.CurrentWorkflow is null) return;
+        var updated = EditorState.CurrentWorkflow with { DescriptionEn = value };
+        EditorState.UpdateWorkflow(updated);
+    }
+
+    private void UpdateWorkflowDescriptionFr(string? value)
+    {
+        if (EditorState.CurrentWorkflow is null) return;
+        var updated = EditorState.CurrentWorkflow with { DescriptionFr = value };
+        EditorState.UpdateWorkflow(updated);
+    }
+
+    private void UpdateAllowStepJumping(bool value)
+    {
+        if (EditorState.CurrentWorkflow is null) return;
+        var newNavigation = EditorState.CurrentWorkflow.Navigation with { AllowStepJumping = value };
+        var updated = EditorState.CurrentWorkflow with { Navigation = newNavigation };
+        EditorState.UpdateWorkflow(updated);
+    }
+
+    private void UpdateShowProgress(bool value)
+    {
+        if (EditorState.CurrentWorkflow is null) return;
+        var newNavigation = EditorState.CurrentWorkflow.Navigation with { ShowProgress = value };
+        var updated = EditorState.CurrentWorkflow with { Navigation = newNavigation };
+        EditorState.UpdateWorkflow(updated);
+    }
+
+    private void UpdateAllowModuleSkipping(bool value)
+    {
+        if (EditorState.CurrentWorkflow is null) return;
+        var newSettings = EditorState.CurrentWorkflow.Settings with { AllowModuleSkipping = value };
+        var updated = EditorState.CurrentWorkflow with { Settings = newSettings };
+        EditorState.UpdateWorkflow(updated);
+    }
 
     private async Task SaveAsync()
     {

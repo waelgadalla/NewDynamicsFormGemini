@@ -51,7 +51,6 @@ C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOp
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\scopedcss\projectbundle\VisualEditorOpus.bundle.scp.css
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\77qt3z1qa8-khy4lop6wu.gz
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\gwgaane6aq-hilhbb4ehj.gz
-C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\57vpsgixxw-q0pvdyifc2.gz
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\wagyuzj3kn-6kwwi37hk8.gz
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\xtlhv547bj-ulqw1ye5bp.gz
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\6r39viyeq6-3qgynt3ore.gz
@@ -190,4 +189,4 @@ C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOp
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\9sllqwngf0-0vtbnczuht.gz
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\t9p6cl12i8-0u69m8ryd7.gz
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\6tvrfg3a0z-0u69m8ryd7.gz
-C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt
+C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\57vpsgixxw-lbv8lrow6o.gz

@@ -20,6 +20,7 @@
                               IsSelected="@(SelectedNodeId == moduleId)"
                               OnSelect="SelectNode"
                               OnRemove="RemoveNode"
+                              OnDuplicate="DuplicateNode"
                               OnPositionChanged="HandlePositionChanged" />
             }
         }
@@ -91,6 +92,30 @@
             .ToArray();
         var updated = EditorState.CurrentWorkflow with { ModuleIds = newModuleIds };
         EditorState.UpdateWorkflow(updated);
+    }
+
+    private async Task DuplicateNode(int moduleId)
+    {
+        if (EditorState.CurrentWorkflow is null) return;
+
+        // Find the position of the original module in the workflow
+        var moduleIds = EditorState.CurrentWorkflow.ModuleIds.ToList();
+        var originalIndex = moduleIds.IndexOf(moduleId);
+
+        if (originalIndex < 0) return;
+
+        // Generate a new module ID (simple approach: max existing + 1)
+        var newModuleId = moduleIds.Max() + 1;
+
+        // Insert the duplicate after the original
+        moduleIds.Insert(originalIndex + 1, newModuleId);
+
+        var updated = EditorState.CurrentWorkflow with { ModuleIds = moduleIds.ToArray() };
+        EditorState.UpdateWorkflow(updated);
+
+        // Select the new node
+        SelectedNodeId = newModuleId;
+        await Task.CompletedTask; // For async signature compatibility
     }
 
     private void HandlePositionChanged((int ModuleId, (double X, double Y) Position) args)

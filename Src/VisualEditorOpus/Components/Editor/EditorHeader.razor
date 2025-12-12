@@ -43,8 +43,30 @@
     [Inject] private IToastService ToastService { get; set; } = default!;
 
     private string ActiveView { get; set; } = "design";
-    private string StepBadge => "Step 1 of 4"; // TODO: Get from workflow context
+    private string StepBadge => GetStepBadge();
     private bool _showMetadataModal;
+
+    private string GetStepBadge()
+    {
+        var workflow = EditorState.CurrentWorkflow;
+        var module = EditorState.CurrentModule;
+
+        if (workflow == null || module == null || workflow.ModuleIds.Length == 0)
+        {
+            return "Module";
+        }
+
+        var moduleIndex = Array.IndexOf(workflow.ModuleIds, module.Id);
+        if (moduleIndex < 0)
+        {
+            return "Module";
+        }
+
+        var stepNumber = moduleIndex + 1;
+        var totalSteps = workflow.ModuleIds.Length;
+
+        return $"Step {stepNumber} of {totalSteps}";
+    }
 
     private void GoBack() => Navigation.NavigateTo("/workflow");
     private void SwitchToDesign() => ActiveView = "design";
