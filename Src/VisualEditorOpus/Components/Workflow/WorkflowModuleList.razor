@@ -1,23 +1,32 @@
 @* Sidebar module list for workflow designer *@
 @implements IDisposable
+@using DynamicForms.SqlServer.Interfaces
 
 <div class="workflow-module-list">
     <div class="workflow-module-list-header">
         <span>Modules</span>
-        <Button Variant="ghost" Size="xs" Icon="bi-plus" OnClick="AddModule" />
+        <Button Variant="ghost" Size="xs" Icon="bi-plus" OnClick="AddModuleAsync" />
     </div>
 
     <div class="workflow-module-items">
-        @if (EditorState.CurrentWorkflow is not null)
+        @if (_isLoading)
+        {
+            <div class="workflow-loading">
+                <i class="bi bi-arrow-repeat spin"></i>
+                <p>Loading modules...</p>
+            </div>
+        }
+        else if (EditorState.CurrentWorkflow is not null && EditorState.CurrentWorkflow.ModuleIds.Length > 0)
         {
             @foreach (var (moduleId, index) in EditorState.CurrentWorkflow.ModuleIds.Select((id, i) => (id, i)))
             {
+                var moduleInfo = GetModuleInfo(moduleId);
                 <div class="workflow-module-item @(SelectedModuleId == moduleId ? "selected" : "")"
                      @onclick="() => SelectModule(moduleId)">
                     <div class="workflow-module-item-order">@(index + 1)</div>
                     <div class="workflow-module-item-content">
-                        <div class="workflow-module-item-title">Module @moduleId</div>
-                        <div class="workflow-module-item-meta">5 fields</div>
+                        <div class="workflow-module-item-title">@moduleInfo.Title</div>
+                        <div class="workflow-module-item-meta">@moduleInfo.FieldCount field@(moduleInfo.FieldCount != 1 ? "s" : "")</div>
                     </div>
                     <div class="workflow-module-item-actions">
                         <button type="button" class="action-btn" @onclick="() => MoveUp(index)" @onclick:stopPropagation="true"
@@ -37,7 +46,7 @@
             <div class="workflow-empty">
                 <i class="bi bi-collection"></i>
                 <p>No modules yet</p>
-                <Button Variant="outline" Size="sm" Text="Add First Module" OnClick="AddModule" />
+                <Button Variant="outline" Size="sm" Text="Add First Module" OnClick="AddModuleAsync" />
             </div>
         }
     </div>
@@ -45,13 +54,70 @@
 
 @code {
     [Inject] private IEditorStateService EditorState { get; set; } = default!;
+    [Inject] private IEditorPersistenceService PersistenceService { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
 
     private int? SelectedModuleId { get; set; }
+    private bool _isLoading = false;
+    private Dictionary<int, ModuleDisplayInfo> _moduleCache = new();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        EditorState.OnWorkflowChanged += HandleWorkflowChanged;
+        EditorState.OnWorkflowChanged += HandleWorkflowChangedAsync;
+        await LoadModuleDataAsync();
+    }
+
+    private async Task LoadModuleDataAsync()
+    {
+        if (EditorState.CurrentWorkflow is null || EditorState.CurrentWorkflow.ModuleIds.Length == 0)
+            return;
+
+        _isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            // Load all modules to get their metadata
+            var allModules = await PersistenceService.GetAllModulesAsync();
+            var moduleLookup = allModules.ToDictionary(m => m.ModuleId);
+
+            _moduleCache.Clear();
+            foreach (var moduleId in EditorState.CurrentWorkflow.ModuleIds)
+            {
+                if (moduleLookup.TryGetValue(moduleId, out var summary))
+                {
+                    _moduleCache[moduleId] = new ModuleDisplayInfo(summary.TitleEn, summary.FieldCount);
+                }
+                else
+                {
+                    // Module not in DB yet - show placeholder
+                    _moduleCache[moduleId] = new ModuleDisplayInfo($"Module {moduleId}", 0);
+                }
+            }
+        }
+        catch
+        {
+            // On error, show fallback data
+            foreach (var moduleId in EditorState.CurrentWorkflow.ModuleIds)
+            {
+                if (!_moduleCache.ContainsKey(moduleId))
+                {
+                    _moduleCache[moduleId] = new ModuleDisplayInfo($"Module {moduleId}", 0);
+                }
+            }
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private ModuleDisplayInfo GetModuleInfo(int moduleId)
+    {
+        return _moduleCache.TryGetValue(moduleId, out var info)
+            ? info
+            : new ModuleDisplayInfo($"Module {moduleId}", 0);
     }
 
     private void SelectModule(int moduleId)
@@ -60,14 +126,18 @@
         Navigation.NavigateTo($"/editor/{moduleId}");
     }
 
-    private void AddModule()
+    private async Task AddModuleAsync()
     {
         if (EditorState.CurrentWorkflow is null) return;
 
-        var newModuleId = Random.Shared.Next(1, 10000);
+        // Get next available module ID from DB
+        var newModuleId = await PersistenceService.GetNextModuleIdAsync();
         var newModuleIds = EditorState.CurrentWorkflow.ModuleIds.Append(newModuleId).ToArray();
         var updated = EditorState.CurrentWorkflow with { ModuleIds = newModuleIds };
         EditorState.UpdateWorkflow(updated);
+
+        // Add placeholder to cache until module is created
+        _moduleCache[newModuleId] = new ModuleDisplayInfo($"New Module {newModuleId}", 0);
     }
 
     private void MoveUp(int index)
@@ -97,10 +167,15 @@
         EditorState.UpdateWorkflow(updated);
     }
 
-    private void HandleWorkflowChanged() => StateHasChanged();
+    private async void HandleWorkflowChangedAsync()
+    {
+        await LoadModuleDataAsync();
+    }
 
     public void Dispose()
     {
-        EditorState.OnWorkflowChanged -= HandleWorkflowChanged;
+        EditorState.OnWorkflowChanged -= HandleWorkflowChangedAsync;
     }
+
+    private record ModuleDisplayInfo(string Title, int FieldCount);
 }

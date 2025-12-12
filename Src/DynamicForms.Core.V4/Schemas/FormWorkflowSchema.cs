@@ -95,8 +95,12 @@ public record WorkflowNavigation(
 /// <param name="RequireAllModulesComplete">Whether all modules must be completed (default: true)</param>
 /// <param name="AllowModuleSkipping">Whether users can skip optional modules (default: false)</param>
 /// <param name="AutoSaveIntervalSeconds">Interval for automatic save in seconds (default: 300 = 5 minutes)</param>
+/// <param name="SubmitButtonTextEn">English text for the submit button (default: "Submit")</param>
+/// <param name="SubmitButtonTextFr">French text for the submit button (default: "Soumettre")</param>
 public record WorkflowSettings(
     bool RequireAllModulesComplete = true,
     bool AllowModuleSkipping = false,
-    int AutoSaveIntervalSeconds = 300
+    int AutoSaveIntervalSeconds = 300,
+    string SubmitButtonTextEn = "Submit",
+    string SubmitButtonTextFr = "Soumettre"
 );

@@ -51,11 +51,17 @@
         <PropertySection Title="Submission" Icon="bi-send">
             <div class="prop-group">
                 <label class="prop-label">Submit Button Text (EN)</label>
-                <input type="text" class="prop-input" placeholder="Submit" />
+                <input type="text" class="prop-input"
+                       value="@Settings.SubmitButtonTextEn"
+                       @onchange="HandleSubmitTextEnChange"
+                       placeholder="Submit" />
             </div>
             <div class="prop-group">
                 <label class="prop-label">Submit Button Text (FR)</label>
-                <input type="text" class="prop-input" placeholder="Soumettre" />
+                <input type="text" class="prop-input"
+                       value="@Settings.SubmitButtonTextFr"
+                       @onchange="HandleSubmitTextFrChange"
+                       placeholder="Soumettre" />
             </div>
         </PropertySection>
     </div>
@@ -122,6 +128,22 @@
     {
         if (EditorState.CurrentWorkflow is null) return;
         var updatedSettings = Settings with { AllowModuleSkipping = !Settings.AllowModuleSkipping };
+        var updated = EditorState.CurrentWorkflow with { Settings = updatedSettings };
+        EditorState.UpdateWorkflow(updated);
+    }
+
+    private void HandleSubmitTextEnChange(ChangeEventArgs e)
+    {
+        if (EditorState.CurrentWorkflow is null) return;
+        var updatedSettings = Settings with { SubmitButtonTextEn = e.Value?.ToString() ?? "Submit" };
+        var updated = EditorState.CurrentWorkflow with { Settings = updatedSettings };
+        EditorState.UpdateWorkflow(updated);
+    }
+
+    private void HandleSubmitTextFrChange(ChangeEventArgs e)
+    {
+        if (EditorState.CurrentWorkflow is null) return;
+        var updatedSettings = Settings with { SubmitButtonTextFr = e.Value?.ToString() ?? "Soumettre" };
         var updated = EditorState.CurrentWorkflow with { Settings = updatedSettings };
         EditorState.UpdateWorkflow(updated);
     }
