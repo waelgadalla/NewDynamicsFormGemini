@@ -1,5 +1,6 @@
 @* Workflow designer canvas with module nodes *@
 @implements IDisposable
+@using DynamicForms.Core.V4.Schemas
 
 <div class="workflow-canvas" @ref="canvasRef">
     <svg class="workflow-connections">
@@ -41,6 +42,7 @@
 
 @code {
     [Inject] private IEditorStateService EditorState { get; set; } = default!;
+    [Inject] private IEditorPersistenceService PersistenceService { get; set; } = default!;
 
     private ElementReference canvasRef;
     private int? SelectedNodeId { get; set; }
@@ -104,10 +106,27 @@
 
         if (originalIndex < 0) return;
 
-        // Generate a new module ID (simple approach: max existing + 1)
-        var newModuleId = moduleIds.Max() + 1;
+        // Load the original module from the database
+        var originalModule = await PersistenceService.LoadModuleAsync(moduleId);
+        if (originalModule is null) return;
 
-        // Insert the duplicate after the original
+        // Get next available module ID from DB
+        var newModuleId = await PersistenceService.GetNextModuleIdAsync();
+
+        // Create a copy of the module with a new ID and updated titles
+        var duplicatedModule = originalModule with
+        {
+            Id = newModuleId,
+            TitleEn = $"{originalModule.TitleEn} (Copy)",
+            TitleFr = originalModule.TitleFr != null ? $"{originalModule.TitleFr} (Copie)" : null,
+            DateCreated = DateTime.UtcNow
+        };
+
+        // Save the duplicated module to the database
+        var saveResult = await PersistenceService.SaveModuleAsync(duplicatedModule);
+        if (!saveResult.Success) return;
+
+        // Insert the duplicate after the original in the workflow
         moduleIds.Insert(originalIndex + 1, newModuleId);
 
         var updated = EditorState.CurrentWorkflow with { ModuleIds = moduleIds.ToArray() };
@@ -115,7 +134,6 @@
 
         // Select the new node
         SelectedNodeId = newModuleId;
-        await Task.CompletedTask; // For async signature compatibility
     }
 
     private void HandlePositionChanged((int ModuleId, (double X, double Y) Position) args)

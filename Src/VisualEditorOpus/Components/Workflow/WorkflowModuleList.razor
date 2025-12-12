@@ -1,6 +1,7 @@
 @* Sidebar module list for workflow designer *@
 @implements IDisposable
 @using DynamicForms.SqlServer.Interfaces
+@using DynamicForms.Core.V4.Schemas
 
 <div class="workflow-module-list">
     <div class="workflow-module-list-header">
@@ -132,12 +133,32 @@
 
         // Get next available module ID from DB
         var newModuleId = await PersistenceService.GetNextModuleIdAsync();
+
+        // Create a new module schema and save it to the database
+        var newModule = new FormModuleSchema
+        {
+            Id = newModuleId,
+            TitleEn = $"New Module {newModuleId}",
+            TitleFr = $"Nouveau module {newModuleId}",
+            DescriptionEn = "A new form module",
+            Fields = Array.Empty<FormFieldSchema>()
+        };
+
+        // Save the new module to the database
+        var saveResult = await PersistenceService.SaveModuleAsync(newModule);
+        if (!saveResult.Success)
+        {
+            // Failed to save - don't add to workflow
+            return;
+        }
+
+        // Add to workflow
         var newModuleIds = EditorState.CurrentWorkflow.ModuleIds.Append(newModuleId).ToArray();
         var updated = EditorState.CurrentWorkflow with { ModuleIds = newModuleIds };
         EditorState.UpdateWorkflow(updated);
 
-        // Add placeholder to cache until module is created
-        _moduleCache[newModuleId] = new ModuleDisplayInfo($"New Module {newModuleId}", 0);
+        // Add to cache
+        _moduleCache[newModuleId] = new ModuleDisplayInfo(newModule.TitleEn, 0);
     }
 
     private void MoveUp(int index)

@@ -165,7 +165,7 @@ public partial class ImportJsonModal : ComponentBase
         isDragOver = false;
     }
 
-    private async Task HandleDrop()
+    private void HandleDrop()
     {
         isDragOver = false;
         // The actual file handling will be done by HandleFileSelected

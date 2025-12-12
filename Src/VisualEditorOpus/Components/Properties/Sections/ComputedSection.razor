@@ -133,7 +133,6 @@
     private IEnumerable<FormFieldSchema> AllFields => CurrentModule?.Fields ?? Array.Empty<FormFieldSchema>();
 
     private bool showFormulaEditor;
-    private string? templateToApply;
 
     private bool HasFormula => Field?.ComputedValue != null && !string.IsNullOrEmpty(Field.ComputedValue.Expression);
     private bool HasError => ValidationError != null;
@@ -375,7 +374,7 @@
         showFormulaEditor = true;
     }
 
-    private async Task SaveFormula(ComputedFormula formula)
+    private void SaveFormula(ComputedFormula formula)
     {
         if (Field is null) return;
 

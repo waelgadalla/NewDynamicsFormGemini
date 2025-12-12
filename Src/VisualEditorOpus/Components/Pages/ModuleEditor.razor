@@ -4,7 +4,17 @@
 
 <PageTitle>Module Editor - DynamicForms Editor</PageTitle>
 
-<FormCanvas />
+@if (_isLoading)
+{
+    <div class="editor-loading">
+        <i class="bi bi-arrow-repeat spin"></i>
+        <p>Loading module...</p>
+    </div>
+}
+else
+{
+    <FormCanvas />
+}
 
 @code {
     [Parameter] public int? ModuleId { get; set; }

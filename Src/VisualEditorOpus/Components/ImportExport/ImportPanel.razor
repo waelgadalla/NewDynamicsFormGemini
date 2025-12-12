@@ -170,7 +170,7 @@
         IsDragOver = false;
     }
 
-    private async Task HandleDrop()
+    private void HandleDrop()
     {
         IsDragOver = false;
         // File will be handled by InputFile component
@@ -294,8 +294,9 @@
         _ => ""
     };
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
         objRef?.Dispose();
+        return ValueTask.CompletedTask;
     }
 }

@@ -9,7 +9,7 @@
             <div class="toggle-desc">Users can add new rows to the grid</div>
         </div>
         <div class="toggle @(Config.AllowAdd ? "active" : "")"
-             @onclick="() => { Config.AllowAdd = !Config.AllowAdd; NotifyChanged(); }">
+             @onclick="async () => { Config.AllowAdd = !Config.AllowAdd; await NotifyChanged(); }">
         </div>
     </div>
 
@@ -19,7 +19,7 @@
             <div class="toggle-desc">Users can edit existing rows</div>
         </div>
         <div class="toggle @(Config.AllowEdit ? "active" : "")"
-             @onclick="() => { Config.AllowEdit = !Config.AllowEdit; NotifyChanged(); }">
+             @onclick="async () => { Config.AllowEdit = !Config.AllowEdit; await NotifyChanged(); }">
         </div>
     </div>
 
@@ -29,7 +29,7 @@
             <div class="toggle-desc">Users can delete rows from the grid</div>
         </div>
         <div class="toggle @(Config.AllowDelete ? "active" : "")"
-             @onclick="() => { Config.AllowDelete = !Config.AllowDelete; NotifyChanged(); }">
+             @onclick="async () => { Config.AllowDelete = !Config.AllowDelete; await NotifyChanged(); }">
         </div>
     </div>
 

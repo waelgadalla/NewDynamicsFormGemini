@@ -9,7 +9,7 @@
             <div class="toggle-desc">Users can select dates after today</div>
         </div>
         <div class="toggle @(Config.AllowFuture ? "active" : "")"
-             @onclick="() => { Config.AllowFuture = !Config.AllowFuture; NotifyChanged(); }">
+             @onclick="async () => { Config.AllowFuture = !Config.AllowFuture; await NotifyChanged(); }">
         </div>
     </div>
 
@@ -19,7 +19,7 @@
             <div class="toggle-desc">Users can select dates before today</div>
         </div>
         <div class="toggle @(Config.AllowPast ? "active" : "")"
-             @onclick="() => { Config.AllowPast = !Config.AllowPast; NotifyChanged(); }">
+             @onclick="async () => { Config.AllowPast = !Config.AllowPast; await NotifyChanged(); }">
         </div>
     </div>
 

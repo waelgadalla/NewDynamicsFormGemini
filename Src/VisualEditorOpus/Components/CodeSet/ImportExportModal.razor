@@ -77,10 +77,9 @@
     [Parameter] public EventCallback<CodeSetImportResult> OnImportComplete { get; set; }
 
     private ImportPanel? _importPanel;
-    private ExportPanel? _exportPanel;
     private bool CanImport => _importPanel?.HasFile == true;
 
-    private void HandleBackdropClick() => Close();
+    private async Task HandleBackdropClick() => await Close();
 
     private async Task Close()
     {

@@ -65,7 +65,7 @@
         _isDragOver = false;
     }
 
-    private async Task HandleDrop(DragEventArgs e)
+    private void HandleDrop(DragEventArgs e)
     {
         _isDragOver = false;
         // Note: Blazor doesn't support direct file access from drag events
