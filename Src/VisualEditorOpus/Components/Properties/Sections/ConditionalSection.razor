@@ -1,5 +1,6 @@
 @* Conditional logic section *@
 @implements IDisposable
+@using VisualEditorOpus.Components.Editor.Modals
 
 <PropertySection Title="Conditional Logic" Icon="bi-diagram-2">
     @if (Field?.ConditionalRules?.Length > 0)
@@ -10,9 +11,14 @@
                 <div style="padding: 8px; background: var(--bg-secondary); border-radius: 4px; margin-bottom: 6px; font-size: 11px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span style="font-weight: 600;">@(rule.Description ?? rule.Id)</span>
-                        <button type="button" class="action-btn" title="Edit rule">
-                            <i class="bi bi-pencil"></i>
-                        </button>
+                        <div style="display: flex; gap: 4px;">
+                            <button type="button" class="action-btn" title="Edit rule" @onclick="() => EditRule(rule)">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button type="button" class="action-btn" title="Delete rule" @onclick="() => DeleteRule(rule)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
                     </div>
                     <div style="color: var(--text-muted); margin-top: 4px;">
                         @GetRuleDescription(rule)
@@ -31,10 +37,20 @@
     <Button Variant="outline" Size="sm" Icon="bi-plus-lg" Text="Add Condition" OnClick="OpenConditionBuilder" />
 </PropertySection>
 
+<ConditionBuilderModal @bind-IsOpen="_isModalOpen"
+                       ExistingRule="_editingRule"
+                       CurrentModule="EditorState.CurrentModule"
+                       Workflow="EditorState.CurrentWorkflow"
+                       DefaultTargetFieldId="@Field?.Id"
+                       OnSave="HandleRuleSaved"
+                       OnCancel="HandleModalCancelled" />
+
 @code {
     [Inject] private IEditorStateService EditorState { get; set; } = default!;
 
     private FormFieldSchema? Field => EditorState.SelectedField;
+    private bool _isModalOpen;
+    private ConditionalRule? _editingRule;
 
     protected override void OnInitialized()
     {
@@ -43,13 +59,68 @@
 
     private string GetRuleDescription(ConditionalRule rule)
     {
-        // Simplified description
-        return $"Action: {rule.Action}";
+        var parts = new List<string>();
+        if (!string.IsNullOrEmpty(rule.Action))
+            parts.Add($"Action: {rule.Action}");
+        if (!string.IsNullOrEmpty(rule.TargetFieldId))
+            parts.Add($"Target: {rule.TargetFieldId}");
+        return string.Join(" | ", parts);
     }
 
     private void OpenConditionBuilder()
     {
-        // TODO: Open condition builder modal
+        _editingRule = null; // New rule
+        _isModalOpen = true;
+    }
+
+    private void EditRule(ConditionalRule rule)
+    {
+        _editingRule = rule;
+        _isModalOpen = true;
+    }
+
+    private void DeleteRule(ConditionalRule rule)
+    {
+        if (Field == null || EditorState.CurrentModule == null) return;
+
+        var updatedRules = Field.ConditionalRules?
+            .Where(r => r.Id != rule.Id)
+            .ToArray() ?? Array.Empty<ConditionalRule>();
+
+        var updatedField = Field with { ConditionalRules = updatedRules };
+        EditorState.UpdateField(updatedField);
+    }
+
+    private void HandleRuleSaved(ConditionalRule rule)
+    {
+        if (Field == null || EditorState.CurrentModule == null) return;
+
+        var existingRules = Field.ConditionalRules?.ToList() ?? new List<ConditionalRule>();
+
+        // Check if we're editing or adding
+        var existingIndex = existingRules.FindIndex(r => r.Id == rule.Id);
+        if (existingIndex >= 0)
+        {
+            // Update existing
+            existingRules[existingIndex] = rule;
+        }
+        else
+        {
+            // Add new
+            existingRules.Add(rule);
+        }
+
+        var updatedField = Field with { ConditionalRules = existingRules.ToArray() };
+        EditorState.UpdateField(updatedField);
+
+        _isModalOpen = false;
+        _editingRule = null;
+    }
+
+    private void HandleModalCancelled()
+    {
+        _isModalOpen = false;
+        _editingRule = null;
     }
 
     private void OnFieldSelected(string? fieldId) => StateHasChanged();

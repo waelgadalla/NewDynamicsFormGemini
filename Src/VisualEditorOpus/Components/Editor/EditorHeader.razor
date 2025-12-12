@@ -1,4 +1,6 @@
 @* Editor header with title input and actions *@
+@using VisualEditorOpus.Components.Editor.Modals
+@using DynamicForms.Core.V4.Schemas
 
 <div class="app-header">
     <div class="header-left">
@@ -27,6 +29,14 @@
     </div>
 </div>
 
+@if (EditorState.CurrentModule is not null)
+{
+    <MetadataModal @bind-IsOpen="_showMetadataModal"
+                   Module="EditorState.CurrentModule"
+                   OnSave="HandleMetadataSave"
+                   OnCancel="HandleMetadataCancel" />
+}
+
 @code {
     [Inject] private IEditorStateService EditorState { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
@@ -34,6 +44,7 @@
 
     private string ActiveView { get; set; } = "design";
     private string StepBadge => "Step 1 of 4"; // TODO: Get from workflow context
+    private bool _showMetadataModal;
 
     private void GoBack() => Navigation.NavigateTo("/workflow");
     private void SwitchToDesign() => ActiveView = "design";
@@ -50,7 +61,19 @@
 
     private void ShowMetadata()
     {
-        // TODO: Open metadata modal
+        _showMetadataModal = true;
+    }
+
+    private void HandleMetadataSave(FormModuleSchema updatedModule)
+    {
+        EditorState.UpdateModule(updatedModule);
+        _showMetadataModal = false;
+        ToastService.ShowSuccess("Module metadata updated");
+    }
+
+    private void HandleMetadataCancel()
+    {
+        _showMetadataModal = false;
     }
 
     private void SaveModule()

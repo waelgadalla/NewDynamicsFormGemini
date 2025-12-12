@@ -67,11 +67,42 @@
                        class="field-reference-input"
                        value="@Config.AriaDescribedBy"
                        @oninput="e => UpdateAriaDescribedBy(e.Value?.ToString())"
+                       @onfocus="() => _showFieldSelector = true"
                        placeholder="Reference another field's ID" />
-                <button class="field-reference-btn" @onclick="OpenFieldSelector" type="button">
-                    <i class="bi bi-search"></i>
+                <button class="field-reference-btn" @onclick="ToggleFieldSelector" type="button">
+                    <i class="bi @(_showFieldSelector ? "bi-x" : "bi-search")"></i>
                 </button>
             </div>
+            @if (_showFieldSelector)
+            {
+                <div class="field-selector-dropdown">
+                    <div class="field-selector-search">
+                        <i class="bi bi-search"></i>
+                        <input type="text"
+                               class="field-selector-search-input"
+                               placeholder="Search fields..."
+                               @bind="_fieldSearchTerm"
+                               @bind:event="oninput" />
+                    </div>
+                    <div class="field-selector-list">
+                        @foreach (var field in FilteredFields)
+                        {
+                            <div class="field-selector-item @(field.Id == Config.AriaDescribedBy ? "selected" : "")"
+                                 @onclick="() => SelectField(field.Id)">
+                                <i class="bi bi-input-cursor-text"></i>
+                                <div class="field-selector-item-info">
+                                    <span class="field-selector-item-id">@field.Id</span>
+                                    <span class="field-selector-item-label">@(field.LabelEn ?? field.FieldType)</span>
+                                </div>
+                            </div>
+                        }
+                        @if (!FilteredFields.Any())
+                        {
+                            <div class="field-selector-empty">No fields found</div>
+                        }
+                    </div>
+                </div>
+            }
             <div class="help-text">
                 <i class="bi bi-info-circle"></i>
                 <span>Link to a field that provides additional description</span>
@@ -154,8 +185,19 @@
     private IEnumerable<FormFieldSchema> AllFields => EditorState.CurrentModule?.Fields ?? Array.Empty<FormFieldSchema>();
 
     private string activeLanguage = "en";
+    private bool _showFieldSelector;
+    private string _fieldSearchTerm = "";
 
     private AccessibilityConfig Config => Field?.Accessibility ?? new AccessibilityConfig();
+
+    private IEnumerable<FormFieldSchema> FilteredFields =>
+        AllFields
+            .Where(f => f.Id != Field?.Id) // Exclude current field
+            .Where(f => string.IsNullOrEmpty(_fieldSearchTerm) ||
+                        f.Id.Contains(_fieldSearchTerm, StringComparison.OrdinalIgnoreCase) ||
+                        (f.LabelEn?.Contains(_fieldSearchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                        f.FieldType.Contains(_fieldSearchTerm, StringComparison.OrdinalIgnoreCase))
+            .Take(10); // Limit results
 
     // Accessibility Score
     private int Score => CalculateScore();
@@ -333,9 +375,20 @@
         }
     }
 
-    private void OpenFieldSelector()
+    private void ToggleFieldSelector()
     {
-        // TODO: Open field selector modal
+        _showFieldSelector = !_showFieldSelector;
+        if (!_showFieldSelector)
+        {
+            _fieldSearchTerm = "";
+        }
+    }
+
+    private void SelectField(string fieldId)
+    {
+        UpdateAriaDescribedBy(fieldId);
+        _showFieldSelector = false;
+        _fieldSearchTerm = "";
     }
 
     private static string GenerateDefaultLabel(FormFieldSchema field, string language)

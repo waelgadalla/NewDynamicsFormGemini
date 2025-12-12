@@ -47,13 +47,81 @@
     [Parameter] public EventCallback<int> OnSelect { get; set; }
     [Parameter] public EventCallback<int> OnRemove { get; set; }
     [Parameter] public EventCallback<(int, (double, double))> OnPositionChanged { get; set; }
+    [Parameter] public EventCallback<int> OnDuplicate { get; set; }
+
+    /// <summary>
+    /// Optional: Pre-loaded module schema for displaying title and field count.
+    /// If not provided, will attempt to load from repository.
+    /// </summary>
+    [Parameter] public FormModuleSchema? ModuleSchema { get; set; }
 
     [Inject] private NavigationManager Navigation { get; set; } = default!;
+    [Inject] private IEditorPersistenceService PersistenceService { get; set; } = default!;
 
     private bool ShowMenu { get; set; }
-    private string ModuleTitle => $"Module {ModuleId}"; // TODO: Get from repository
-    private int FieldCount => 5; // TODO: Get from repository
-    private int ValidationCount => 2; // TODO: Get from repository
+    private FormModuleSchema? _loadedModule;
+    private bool _isLoading;
+
+    private string ModuleTitle => GetModuleTitle();
+    private int FieldCount => GetFieldCount();
+    private int ValidationCount => GetValidationCount();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // If ModuleSchema is provided via parameter, use it
+        if (ModuleSchema != null)
+        {
+            _loadedModule = ModuleSchema;
+            return;
+        }
+
+        // Otherwise, try to load from repository if we don't have it yet
+        if (_loadedModule == null || _loadedModule.Id != ModuleId)
+        {
+            await LoadModuleAsync();
+        }
+    }
+
+    private async Task LoadModuleAsync()
+    {
+        _isLoading = true;
+        try
+        {
+            _loadedModule = await PersistenceService.LoadModuleAsync(ModuleId);
+        }
+        catch
+        {
+            // Silently fail - will show default values
+            _loadedModule = null;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private string GetModuleTitle()
+    {
+        if (_isLoading) return "Loading...";
+        return _loadedModule?.TitleEn ?? $"Module {ModuleId}";
+    }
+
+    private int GetFieldCount()
+    {
+        return _loadedModule?.Fields?.Length ?? 0;
+    }
+
+    private int GetValidationCount()
+    {
+        if (_loadedModule?.Fields == null) return 0;
+        return _loadedModule.Fields.Count(f =>
+            f.Validation != null && (
+                f.Validation.IsRequired ||
+                f.Validation.MinLength.HasValue ||
+                f.Validation.MaxLength.HasValue ||
+                !string.IsNullOrEmpty(f.Validation.Pattern)
+            ));
+    }
 
     private async Task HandleClick()
     {
@@ -72,10 +140,10 @@
         Navigation.NavigateTo($"/editor/{ModuleId}");
     }
 
-    private void DuplicateModule()
+    private async Task DuplicateModule()
     {
         ShowMenu = false;
-        // TODO: Implement module duplication
+        await OnDuplicate.InvokeAsync(ModuleId);
     }
 
     private async Task HandleRemove()
