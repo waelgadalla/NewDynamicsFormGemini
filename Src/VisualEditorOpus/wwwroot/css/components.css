@@ -553,6 +553,18 @@
 }
 .field-item:hover { border-color: var(--border-color); background: var(--bg-secondary); }
 .field-item.selected { border-color: var(--primary); background: var(--primary-light); }
+.field-item.drag-over {
+    border-color: var(--success);
+    border-style: dashed;
+    background: rgba(34, 197, 94, 0.1);
+}
+.field-item[draggable="true"] { cursor: grab; }
+.field-item[draggable="true"]:active { cursor: grabbing; }
+
+.field-section.drag-over {
+    border-color: var(--success);
+    border-style: dashed;
+}
 
 .field-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
 .field-required { color: var(--danger); }

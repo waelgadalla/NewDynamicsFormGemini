@@ -2,7 +2,14 @@
 @implements IDisposable
 
 <div class="@GetFieldClasses()" @onclick="HandleClick" @onclick:stopPropagation="true"
-     @onmouseenter="() => IsHovered = true" @onmouseleave="() => IsHovered = false">
+     @onmouseenter="() => IsHovered = true" @onmouseleave="() => IsHovered = false"
+     draggable="true"
+     @ondragstart="HandleDragStart"
+     @ondragend="HandleDragEnd"
+     @ondragover="HandleDragOver"
+     @ondragover:preventDefault
+     @ondrop="HandleDrop"
+     @ondragleave="HandleDragLeave">
 
     @switch (FieldNode.Schema.FieldType)
     {
@@ -60,7 +67,11 @@
 
     [Inject] private IEditorStateService EditorState { get; set; } = default!;
 
+    // Static field to track dragged field ID across components
+    private static string? DraggedFieldId { get; set; }
+
     private bool IsHovered { get; set; }
+    private bool IsDragOver { get; set; }
     private bool IsSelected => EditorState.SelectedFieldId == FieldNode.Schema.Id;
 
     protected override void OnInitialized()
@@ -82,6 +93,7 @@
         }
 
         if (IsSelected) classes.Add("selected");
+        if (IsDragOver && DraggedFieldId != FieldNode.Schema.Id) classes.Add("drag-over");
 
         // Width class
         if (FieldNode.Schema.WidthClass.HasValue)
@@ -98,6 +110,79 @@
     private void HandleClick()
     {
         EditorState.SelectField(FieldNode.Schema.Id);
+    }
+
+    private void HandleDragStart(DragEventArgs e)
+    {
+        DraggedFieldId = FieldNode.Schema.Id;
+        EditorState.SelectField(FieldNode.Schema.Id);
+    }
+
+    private void HandleDragEnd(DragEventArgs e)
+    {
+        DraggedFieldId = null;
+        IsDragOver = false;
+    }
+
+    private void HandleDragOver(DragEventArgs e)
+    {
+        if (DraggedFieldId != null && DraggedFieldId != FieldNode.Schema.Id)
+        {
+            IsDragOver = true;
+        }
+    }
+
+    private void HandleDragLeave(DragEventArgs e)
+    {
+        IsDragOver = false;
+    }
+
+    private void HandleDrop(DragEventArgs e)
+    {
+        IsDragOver = false;
+
+        if (DraggedFieldId == null || DraggedFieldId == FieldNode.Schema.Id)
+            return;
+
+        // Reorder: move dragged field to this field's position
+        ReorderField(DraggedFieldId, FieldNode.Schema.Id);
+        DraggedFieldId = null;
+    }
+
+    private void ReorderField(string sourceFieldId, string targetFieldId)
+    {
+        if (EditorState.CurrentModule == null) return;
+
+        var fields = EditorState.CurrentModule.Fields.ToList();
+        var sourceField = fields.FirstOrDefault(f => f.Id == sourceFieldId);
+        var targetField = fields.FirstOrDefault(f => f.Id == targetFieldId);
+
+        if (sourceField == null || targetField == null) return;
+
+        // Get the target's order
+        var targetOrder = targetField.Order;
+
+        // Update orders: shift fields to make room
+        foreach (var field in fields.Where(f => f.Order >= targetOrder && f.Id != sourceFieldId))
+        {
+            var index = fields.IndexOf(field);
+            fields[index] = field with { Order = field.Order + 1 };
+        }
+
+        // Set source field to target position
+        var sourceIndex = fields.FindIndex(f => f.Id == sourceFieldId);
+        fields[sourceIndex] = sourceField with { Order = targetOrder };
+
+        // Normalize orders (1, 2, 3, ...)
+        var ordered = fields.OrderBy(f => f.Order).ToList();
+        for (int i = 0; i < ordered.Count; i++)
+        {
+            var idx = fields.FindIndex(f => f.Id == ordered[i].Id);
+            fields[idx] = fields[idx] with { Order = i + 1 };
+        }
+
+        var updatedModule = EditorState.CurrentModule with { Fields = fields.ToArray() };
+        EditorState.UpdateModule(updatedModule);
     }
 
     private void OnFieldSelected(string? fieldId)

@@ -1,5 +1,7 @@
 @* Validation settings section *@
 @implements IDisposable
+@using VisualEditorOpus.Components.Editor.Modals
+@using DynamicForms.Core.V4.Schemas
 
 <PropertySection Title="Validation" Icon="bi-shield-check">
     <div class="checkbox-group" @onclick="ToggleRequired">
@@ -63,7 +65,32 @@
             </div>
         </div>
     }
+
+    @* Cross-Field Validation Section *@
+    <div class="prop-group" style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border-color);">
+        <label class="prop-label">Cross-Field Validation</label>
+        <button class="btn btn-outline btn-sm" style="width: 100%;" @onclick="ShowCrossFieldValidation" type="button">
+            <i class="bi bi-link-45deg"></i>
+            Add Cross-Field Rule
+        </button>
+        @if (CrossFieldValidationCount > 0)
+        {
+            <p class="form-hint" style="margin-top: 8px;">
+                @CrossFieldValidationCount cross-field rule(s) configured at module level
+            </p>
+        }
+    </div>
 </PropertySection>
+
+@* Cross-Field Validation Modal *@
+@if (EditorState.CurrentModule is not null)
+{
+    <CrossFieldValidationModal @bind-IsOpen="_showCrossFieldModal"
+                                ExistingValidation="_editingValidation"
+                                CurrentModule="EditorState.CurrentModule"
+                                OnSave="HandleCrossFieldSaved"
+                                OnCancel="CloseCrossFieldModal" />
+}
 
 @code {
     [Inject] private IEditorStateService EditorState { get; set; } = default!;
@@ -71,6 +98,11 @@
     private FormFieldSchema? Field => EditorState.SelectedField;
     private bool IsTextField => Field?.FieldType is "TextBox" or "TextArea";
     private bool IsNumericField => Field?.FieldType is "Number" or "Currency";
+
+    // Cross-field validation state
+    private bool _showCrossFieldModal;
+    private FieldSetValidation? _editingValidation;
+    private int CrossFieldValidationCount => EditorState.CurrentModule?.CrossFieldValidations?.Length ?? 0;
 
     protected override void OnInitialized()
     {
@@ -151,6 +183,41 @@
     }
 
     private void OnFieldSelected(string? fieldId) => StateHasChanged();
+
+    // Cross-field validation handlers
+    private void ShowCrossFieldValidation()
+    {
+        _editingValidation = null; // New validation
+        _showCrossFieldModal = true;
+    }
+
+    private void CloseCrossFieldModal()
+    {
+        _showCrossFieldModal = false;
+        _editingValidation = null;
+    }
+
+    private void HandleCrossFieldSaved(FieldSetValidation validation)
+    {
+        if (EditorState.CurrentModule is null) return;
+
+        // Get existing validations or create empty array
+        var existingValidations = EditorState.CurrentModule.CrossFieldValidations?.ToList()
+            ?? new List<FieldSetValidation>();
+
+        // Add new validation
+        existingValidations.Add(validation);
+
+        // Update module with new validations
+        var updatedModule = EditorState.CurrentModule with
+        {
+            CrossFieldValidations = existingValidations.ToArray()
+        };
+        EditorState.UpdateModule(updatedModule);
+
+        _showCrossFieldModal = false;
+        _editingValidation = null;
+    }
 
     public void Dispose()
     {

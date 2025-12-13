@@ -4,7 +4,9 @@
 <div data-theme="@(ThemeService.IsDarkMode ? "dark" : "light")">
     <GlobalNav />
     <div class="main-content">
-        @Body
+        <VisualEditorOpus.Components.Shared.ErrorBoundary @ref="_errorBoundary" ShowDetails="@_showErrorDetails">
+            @Body
+        </VisualEditorOpus.Components.Shared.ErrorBoundary>
     </div>
     <ToastContainer />
 </div>
@@ -12,9 +14,20 @@
 @code {
     [Inject] private IThemeService ThemeService { get; set; } = default!;
 
+    private VisualEditorOpus.Components.Shared.ErrorBoundary? _errorBoundary;
+    private bool _showErrorDetails = false; // Set to true in development
+
     protected override void OnInitialized()
     {
         ThemeService.OnThemeChanged += StateHasChanged;
+    }
+
+    /// <summary>
+    /// Recovers the error boundary when navigating to a new page.
+    /// </summary>
+    protected override void OnParametersSet()
+    {
+        _errorBoundary?.Recover();
     }
 
     public void Dispose()

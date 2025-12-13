@@ -77,10 +77,16 @@ public class JsonImportExportService : IJsonImportExportService
             WriteIndented = options.PrettyPrint && !options.Minify
         };
 
+        // TypeScript export returns raw string, not JSON
+        if (options.Format == ExportFormat.TypeScript)
+        {
+            var typescript = CreateTypeScriptExport(module, options);
+            return Task.FromResult(typescript);
+        }
+
         object exportData = options.Format switch
         {
             ExportFormat.JsonSchema => CreateJsonSchemaExport(module, options),
-            ExportFormat.TypeScript => throw new NotSupportedException("TypeScript export not yet implemented"),
             _ => CreateStandardExport(module, options)
         };
 
@@ -315,6 +321,147 @@ public class JsonImportExportService : IJsonImportExportService
         }
 
         return schema;
+    }
+
+    private string CreateTypeScriptExport(FormModuleSchema module, ExportOptions options)
+    {
+        var sb = new StringBuilder();
+        var indent = options.PrettyPrint && !options.Minify ? "  " : "";
+        var newLine = options.PrettyPrint && !options.Minify ? Environment.NewLine : " ";
+
+        // Header comment
+        sb.AppendLine("/**");
+        sb.AppendLine($" * TypeScript interfaces for: {module.TitleEn}");
+        sb.AppendLine($" * Generated: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC");
+        sb.AppendLine($" * Module ID: {module.Id}");
+        sb.AppendLine($" * Version: {module.Version}");
+        sb.AppendLine(" */");
+        sb.AppendLine();
+
+        // Generate interface name from title
+        var interfaceName = ToPascalCase(module.TitleEn ?? "FormData");
+
+        // Main form data interface
+        sb.AppendLine($"export interface {interfaceName} {{");
+
+        foreach (var field in module.Fields ?? Enumerable.Empty<FormFieldSchema>())
+        {
+            // Skip container fields (sections, dividers)
+            if (field.FieldType is "Section" or "Divider" or "Label")
+                continue;
+
+            var fieldName = ToCamelCase(field.ColumnName ?? field.Id);
+            var tsType = GetTypeScriptType(field);
+            var isOptional = field.Validation?.IsRequired != true;
+            var optionalMarker = isOptional ? "?" : "";
+
+            // Add JSDoc comment
+            if (!string.IsNullOrEmpty(field.LabelEn) || !string.IsNullOrEmpty(field.HelpEn))
+            {
+                sb.AppendLine($"{indent}/**");
+                if (!string.IsNullOrEmpty(field.LabelEn))
+                    sb.AppendLine($"{indent} * {field.LabelEn}");
+                if (!string.IsNullOrEmpty(field.HelpEn))
+                    sb.AppendLine($"{indent} * @description {field.HelpEn}");
+                sb.AppendLine($"{indent} */");
+            }
+
+            sb.AppendLine($"{indent}{fieldName}{optionalMarker}: {tsType};");
+        }
+
+        sb.AppendLine("}");
+        sb.AppendLine();
+
+        // Generate option types for dropdowns/checkboxes
+        var fieldsWithOptions = (module.Fields ?? Enumerable.Empty<FormFieldSchema>())
+            .Where(f => f.Options?.Any() == true)
+            .ToList();
+
+        foreach (var field in fieldsWithOptions)
+        {
+            var typeName = ToPascalCase(field.ColumnName ?? field.Id) + "Option";
+            var values = field.Options!.Select(o => $"\"{o.Value}\"");
+            sb.AppendLine($"export type {typeName} = {string.Join(" | ", values)};");
+        }
+
+        if (fieldsWithOptions.Any())
+            sb.AppendLine();
+
+        // Generate form validation schema type
+        sb.AppendLine($"export interface {interfaceName}Validation {{");
+        foreach (var field in module.Fields ?? Enumerable.Empty<FormFieldSchema>())
+        {
+            if (field.FieldType is "Section" or "Divider" or "Label")
+                continue;
+
+            if (field.Validation == null)
+                continue;
+
+            var fieldName = ToCamelCase(field.ColumnName ?? field.Id);
+            sb.AppendLine($"{indent}{fieldName}?: {{");
+            if (field.Validation.IsRequired)
+                sb.AppendLine($"{indent}{indent}required?: boolean;");
+            if (field.Validation.MinLength.HasValue)
+                sb.AppendLine($"{indent}{indent}minLength?: number;");
+            if (field.Validation.MaxLength.HasValue)
+                sb.AppendLine($"{indent}{indent}maxLength?: number;");
+            if (!string.IsNullOrEmpty(field.Validation.Pattern))
+                sb.AppendLine($"{indent}{indent}pattern?: RegExp;");
+            if (field.Validation.MinValue.HasValue)
+                sb.AppendLine($"{indent}{indent}min?: number;");
+            if (field.Validation.MaxValue.HasValue)
+                sb.AppendLine($"{indent}{indent}max?: number;");
+            sb.AppendLine($"{indent}}};");
+        }
+        sb.AppendLine("}");
+
+        return sb.ToString();
+    }
+
+    private string GetTypeScriptType(FormFieldSchema field)
+    {
+        return field.FieldType?.ToLower() switch
+        {
+            "textbox" or "textarea" or "email" or "phone" or "richtext" => "string",
+            "number" or "currency" => "number",
+            "date" or "datepicker" or "datetime" or "time" => "string", // ISO date string
+            "toggle" or "checkbox" => "boolean",
+            "dropdown" or "select" or "radiogroup" or "radio" =>
+                field.Options?.Any() == true
+                    ? ToPascalCase(field.ColumnName ?? field.Id) + "Option"
+                    : "string",
+            "checkboxlist" or "multiselect" =>
+                field.Options?.Any() == true
+                    ? $"Array<{ToPascalCase(field.ColumnName ?? field.Id)}Option>"
+                    : "string[]",
+            "fileupload" => "File | null",
+            "datagrid" or "repeater" => "Array<Record<string, unknown>>",
+            "autocomplete" => "string | { value: string; label: string }",
+            _ => "unknown"
+        };
+    }
+
+    private static string ToPascalCase(string input)
+    {
+        if (string.IsNullOrEmpty(input)) return "Unknown";
+
+        // Remove special characters and split
+        var words = System.Text.RegularExpressions.Regex.Split(input, @"[\s_\-]+");
+        var result = string.Concat(words.Select(w =>
+            string.IsNullOrEmpty(w) ? "" : char.ToUpper(w[0]) + w[1..].ToLower()));
+
+        // Ensure starts with letter
+        if (!char.IsLetter(result[0]))
+            result = "Form" + result;
+
+        return result;
+    }
+
+    private static string ToCamelCase(string input)
+    {
+        var pascal = ToPascalCase(input);
+        if (string.IsNullOrEmpty(pascal)) return "unknown";
+        return char.ToLower(pascal[0]) + pascal[1..];
     }
 
     private string GenerateFileName(FormModuleSchema module, ExportOptions options)

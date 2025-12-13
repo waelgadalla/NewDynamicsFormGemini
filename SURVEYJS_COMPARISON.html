@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynamicForms vs SurveyJS Feature Comparison</title>
+    <style>
+        /* Reset and Base Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #000;
+            background: #fff;
+            max-width: 8.5in;
+            margin: 0 auto;
+            padding: 0.5in;
+        }
+
+        /* Print Optimization */
+        @media print {
+            body {
+                padding: 0;
+                font-size: 10pt;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+            h1, h2, h3 {
+                page-break-after: avoid;
+            }
+            table {
+                page-break-inside: avoid;
+            }
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 18pt;
+            font-weight: bold;
+            border-bottom: 2px solid #000;
+            padding-bottom: 8px;
+            margin-bottom: 16px;
+        }
+
+        h2 {
+            font-size: 14pt;
+            font-weight: bold;
+            border-bottom: 1px solid #000;
+            padding-bottom: 4px;
+            margin-top: 24px;
+            margin-bottom: 12px;
+        }
+
+        h3 {
+            font-size: 12pt;
+            font-weight: bold;
+            margin-top: 16px;
+            margin-bottom: 8px;
+        }
+
+        h4 {
+            font-size: 11pt;
+            font-weight: bold;
+            margin-top: 12px;
+            margin-bottom: 6px;
+        }
+
+        p {
+            margin-bottom: 8px;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 10pt;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 4px 6px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #e0e0e0;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f5f5f5;
+        }
+
+        /* Priority Labels */
+        .priority-critical {
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .priority-high {
+            font-weight: bold;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin-left: 20px;
+            margin-bottom: 8px;
+        }
+
+        li {
+            margin-bottom: 4px;
+        }
+
+        /* Code */
+        code, pre {
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 9pt;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+        }
+
+        code {
+            padding: 1px 4px;
+        }
+
+        pre {
+            padding: 8px;
+            margin: 8px 0;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+
+        /* Header Info */
+        .doc-info {
+            margin-bottom: 16px;
+            padding: 8px;
+            border: 1px solid #000;
+            background-color: #f9f9f9;
+        }
+
+        .doc-info p {
+            margin: 2px 0;
+        }
+
+        /* Section Box */
+        .section-box {
+            border: 1px solid #000;
+            padding: 12px;
+            margin: 12px 0;
+        }
+
+        /* Checkmark and X */
+        .yes { font-weight: bold; }
+        .no { color: #666; }
+
+        /* Status indicators */
+        .status-parity { }
+        .status-advantage { font-weight: bold; }
+        .status-gap { font-style: italic; }
+
+        /* Summary boxes */
+        .summary-box {
+            border: 2px solid #000;
+            padding: 12px;
+            margin: 16px 0;
+        }
+
+        .summary-box h3 {
+            margin-top: 0;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 24px;
+            padding-top: 12px;
+            border-top: 1px solid #000;
+            font-size: 9pt;
+        }
+    </style>
+</head>
+<body>
+
+<h1>DynamicForms vs SurveyJS Feature Comparison</h1>
+<p style="font-size: 14pt; font-weight: bold;">Comprehensive Analysis for Enterprise &amp; Government Market</p>
+
+<div class="doc-info">
+    <p><strong>Document Version:</strong> 1.0</p>
+    <p><strong>Date:</strong> December 12, 2025</p>
+    <p><strong>Purpose:</strong> Gap analysis between DynamicForms (VisualEditorOpus + Core.V4) and SurveyJS</p>
+    <p><strong>Target Market:</strong> .NET Enterprise and Government applications</p>
+</div>
+
+<h2>Executive Summary</h2>
+
+<table>
+    <tr>
+        <th>Metric</th>
+        <th>DynamicForms</th>
+        <th>SurveyJS</th>
+    </tr>
+    <tr>
+        <td>Field Types</td>
+        <td>17</td>
+        <td>25+</td>
+    </tr>
+    <tr>
+        <td>Multi-Language</td>
+        <td>EN/FR (built-in)</td>
+        <td>50+ languages</td>
+    </tr>
+    <tr>
+        <td>Conditional Logic</td>
+        <td>AND/OR/NOT, cross-module</td>
+        <td>Full expression syntax</td>
+    </tr>
+    <tr>
+        <td>PDF Export</td>
+        <td>Not implemented</td>
+        <td>Yes (licensed)</td>
+    </tr>
+    <tr>
+        <td>Theme Editor</td>
+        <td>Not implemented</td>
+        <td>Yes (GUI)</td>
+    </tr>
+    <tr>
+        <td>Accessibility</td>
+        <td>ARIA config available</td>
+        <td>WCAG 2.1 AA certified</td>
+    </tr>
+    <tr>
+        <td>Platform</td>
+        <td>Blazor/.NET</td>
+        <td>JavaScript (all frameworks)</td>
+    </tr>
+    <tr>
+        <td>Licensing</td>
+        <td>Proprietary</td>
+        <td>MIT (library) + Commercial</td>
+    </tr>
+</table>
+
+<div class="summary-box">
+    <h3>Overall Assessment</h3>
+    <p>DynamicForms covers approximately <strong>70%</strong> of SurveyJS functionality. Critical gaps exist in question types, PDF export, and visual theming. However, DynamicForms has strong advantages in .NET integration, SQL Server persistence, and bilingual government forms.</p>
+</div>
+
+<div class="page-break"></div>
+
+<h2>1. Question/Field Types</h2>
+
+<h3>ENTERPRISE CRITICAL - Missing in DynamicForms</h3>
+
+<table>
+    <tr>
+        <th>Feature</th>
+        <th>SurveyJS</th>
+        <th>DynamicForms</th>
+        <th>Priority</th>
+        <th>Notes</th>
+    </tr>
+    <tr>
+        <td>Signature Pad</td>
+        <td class="yes">Yes</td>
+        <td>Schema only</td>
+        <td class="priority-critical">CRITICAL</td>
+        <td>Required for legal documents, consent forms</td>
+    </tr>
+    <tr>
+        <td>Matrix Single-Select</td>
+        <td class="yes">Yes</td>
+        <td class="no">No</td>
+        <td class="priority-critical">CRITICAL</td>
+        <td>Essential for Likert scales, surveys</td>
+    </tr>
+    <tr>
+        <td>Matrix Multi-Select</td>
+        <td class="yes">Yes</td>
+        <td class="no">No</td>
+        <td class="priority-high">HIGH</td>
+        <td>Complex data collection grids</td>
+    </tr>
+    <tr>
+        <td>Dynamic Matrix</td>
+        <td class="yes">Yes</td>
+        <td class="no">No</td>
+        <td class="priority-high">HIGH</td>
+        <td>Add/remove rows dynamically</td>
+    </tr>
+    <tr>
+        <td>Rating/Stars</td>
+        <td class="yes">Yes</td>
+        <td class="no">No</td>
+        <td class="priority-high">HIGH</td>
+        <td>User satisfaction, feedback</td>
+    </tr>
+    <tr>
+        <td>Ranking (Drag &amp; Drop)</td>
+        <td class="yes">Yes</td>
+        <td class="no">No</td>
+        <td class="priority-high">HIGH</td>
+        <td>Priority ordering, preferences</td>
+    </tr>
+    <tr>
+        <td>Slider</td>
+        <td class="yes">Yes</td>
+        <td class="no">No</td>
+        <td>MEDIUM</td>
+        <td>Numeric ranges, satisfaction scales</td>
+    </tr>
+    <tr>
+        <td>Range Slider</td>
+        <td class="yes">Yes</td>
+        <td class="no">No</td>
+        <td>MEDIUM</td>
+        <td>Min-max selection</td>
+    </tr>
+    <tr>
+        <td>Boolean Toggle</td>
+        <td class="yes">Yes</td>
+        <td>Checkbox only</td>
+        <td>LOW</td>
+        <td>UX preference</td>
+    </tr>
+</table>
+
+<h3>Currently Supported - Parity Exists</h3>
+
+<table>
+    <tr>
+        <th>Feature</th>
+        <th>SurveyJS</th>
+        <th>DynamicForms</th>
+        <th>Status</th>
+    </tr>
+    <tr><td>Text Input</td><td>Yes</td><td>TextBox</td><td>PARITY</td></tr>
+    <tr><td>Text Area</td><td>Yes</td><td>TextArea</td><td>PARITY</td></tr>
+    <tr><td>Number</td><td>Yes</td><td>Number</td><td>PARITY</td></tr>
+    <tr><td>Currency</td><td>No (use Number)</td><td>Currency</td><td class="status-advantage">ADVANTAGE</td></tr>
+    <tr><td>Dropdown</td><td>Yes</td><td>DropDown</td><td>PARITY</td></tr>
+    <tr><td>Radio Group</td><td>Yes</td><td>RadioGroup</td><td>PARITY</td></tr>
+    <tr><td>Checkbox List</td><td>Yes</td><td>CheckboxList</td><td>PARITY</td></tr>
+    <tr><td>Date Picker</td><td>Yes</td><td>DatePicker</td><td>PARITY</td></tr>
+    <tr><td>File Upload</td><td>Yes</td><td>FileUpload</td><td>PARITY</td></tr>
+    <tr><td>Data Grid</td><td>Yes</td><td>DataGrid</td><td>PARITY</td></tr>
+    <tr><td>AutoComplete</td><td>Yes</td><td>AutoComplete</td><td>PARITY</td></tr>
+    <tr><td>Section/Panel</td><td>Yes</td><td>Section, Panel</td><td>PARITY</td></tr>
+    <tr><td>Divider</td><td>No</td><td>Divider</td><td class="status-advantage">ADVANTAGE</td></tr>
+</table>
+
+<div class="page-break"></div>
+
+<h2>2. Validation Capabilities</h2>
+
+<h3>Current DynamicForms Validation</h3>
+<pre>
+FieldValidationConfig:
+- IsRequired + CustomMessage (EN/FR)
+- MinLength, MaxLength
+- Pattern (Regex) + CustomMessage
+- MinValue, MaxValue
+- CustomRuleIds
+
+Cross-Field Validation:
+- AtLeastOne
+- AllOrNone
+- MutuallyExclusive
+</pre>
+
+<h3>SurveyJS Additional Validators - Gaps</h3>
+
+<table>
+    <tr>
+        <th>Feature</th>
+        <th>SurveyJS</th>
+        <th>DynamicForms</th>
+        <th>Priority</th>
+    </tr>
+    <tr>
+        <td>Email Validator</td>
+        <td class="yes">Built-in</td>
+        <td>Via Pattern</td>
+        <td>LOW</td>
+    </tr>
+    <tr>
+        <td>URL Validator</td>
+        <td class="yes">Built-in</td>
+        <td>Via Pattern</td>
+        <td>LOW</td>
+    </tr>
+    <tr>
+        <td>Async Validation</td>
+        <td class="yes">Yes</td>
+        <td class="no">No</td>
+        <td>MEDIUM</td>
+    </tr>
+    <tr>
+        <td>Real-time Validation</td>
+        <td class="yes">onValueChanged</td>
+        <td>On blur only</td>
+        <td>MEDIUM</td>
+    </tr>
+</table>
+
+<h2>3. Localization &amp; Accessibility</h2>
+
+<h3>ENTERPRISE CRITICAL</h3>
+
+<table>
+    <tr>
+        <th>Feature</th>
+        <th>SurveyJS</th>
+        <th>DynamicForms</th>
+        <th>Priority</th>
+    </tr>
+    <tr>
+        <td>UI Languages</td>
+        <td>50+</td>
+        <td>EN only</td>
+        <td class="priority-critical">CRITICAL</td>
+    </tr>
+    <tr>
+        <td>Content Localization</td>
+        <td>Translation tab</td>
+        <td>EN/FR built-in schema</td>
+        <td class="status-advantage">ADVANTAGE</td>
+    </tr>
+    <tr>
+        <td>RTL Support</td>
+        <td class="yes">Yes</td>
+        <td>Not tested</td>
+        <td class="priority-high">HIGH</td>
+    </tr>
+    <tr>
+        <td>WCAG 2.1 AA Certified</td>
+        <td class="yes">v2.1.0+</td>
+        <td class="no">Not certified</td>
+        <td class="priority-critical">CRITICAL</td>
+    </tr>
+    <tr>
+        <td>Section 508 Compliant</td>
+        <td class="yes">Yes</td>
+        <td>Designed for</td>
+        <td class="priority-high">HIGH</td>
+    </tr>
+    <tr>
+        <td>Keyboard Navigation</td>
+        <td class="yes">Full</td>
+        <td>Partial</td>
+        <td class="priority-high">HIGH</td>
+    </tr>
+    <tr>
+        <td>Screen Reader Support</td>
+        <td class="yes">Tested (Axe)</td>
+        <td class="no">Not tested</td>
+        <td class="priority-critical">CRITICAL</td>
+    </tr>
+</table>
+
+<div class="page-break"></div>
+
+<h2>4. Data Integration &amp; Export</h2>
+
+<h3>ENTERPRISE CRITICAL</h3>
+
+<table>
+    <tr>
+        <th>Feature</th>
+        <th>SurveyJS</th>
+        <th>DynamicForms</th>
+        <th>Priority</th>
+    </tr>
+    <tr>
+        <td>JSON Schema Storage</td>
+        <td>JSON files</td>
+        <td>SQL Server</td>
+        <td class="status-advantage">ADVANTAGE</td>
+    </tr>
+    <tr>
+        <td>PDF Export (Blank)</td>
+        <td class="yes">Yes (licensed)</td>
+        <td class="no">No</td>
+        <td class="priority-critical">CRITICAL</td>
+    </tr>
+    <tr>
+        <td>PDF Export (Filled)</td>
+        <td class="yes">Yes (licensed)</td>
+        <td class="no">No</td>
+        <td class="priority-critical">CRITICAL</td>
+    </tr>
+    <tr>
+        <td>Fillable PDF Forms</td>
+        <td class="yes">Yes</td>
+        <td class="no">No</td>
+        <td class="priority-high">HIGH</td>
+    </tr>
+    <tr>
+        <td>TypeScript Export</td>
+        <td>Via API</td>
+        <td class="yes">Implemented</td>
+        <td class="status-advantage">ADVANTAGE</td>
+    </tr>
+    <tr>
+        <td>Database Mapping</td>
+        <td>Manual</td>
+        <td>ColumnName/Type</td>
+        <td class="status-advantage">ADVANTAGE</td>
+    </tr>
+    <tr>
+        <td>Version History</td>
+        <td class="no">No</td>
+        <td class="yes">Version property</td>
+        <td class="status-advantage">ADVANTAGE</td>
+    </tr>
+</table>
+
+<h2>5. Workflow &amp; Multi-Step Forms</h2>
+
+<table>
+    <tr>
+        <th>Feature</th>
+        <th>SurveyJS</th>
+        <th>DynamicForms</th>
+        <th>Priority</th>
+    </tr>
+    <tr>
+        <td>Multi-Page Support</td>
+        <td class="yes">Yes</td>
+        <td>Multi-module</td>
+        <td>PARITY</td>
+    </tr>
+    <tr>
+        <td>Progress Bar</td>
+        <td>Multiple types</td>
+        <td>Basic</td>
+        <td>MEDIUM</td>
+    </tr>
+    <tr>
+        <td>Clickable Step Navigation</td>
+        <td class="yes">Yes</td>
+        <td class="no">No</td>
+        <td>MEDIUM</td>
+    </tr>
+    <tr>
+        <td>Cross-Module References</td>
+        <td class="no">No</td>
+        <td class="yes">Yes</td>
+        <td class="status-advantage">ADVANTAGE</td>
+    </tr>
+    <tr>
+        <td>Module Reuse</td>
+        <td class="no">No</td>
+        <td class="yes">Yes</td>
+        <td class="status-advantage">ADVANTAGE</td>
+    </tr>
+    <tr>
+        <td>Auto-Save</td>
+        <td class="yes">Yes</td>
+        <td class="yes">Yes (configurable)</td>
+        <td>PARITY</td>
+    </tr>
+</table>
+
+<div class="page-break"></div>
+
+<h2>6. Visual Editor Features</h2>
+
+<table>
+    <tr>
+        <th>Feature</th>
+        <th>SurveyJS Creator</th>
+        <th>VisualEditorOpus</th>
+        <th>Priority</th>
+    </tr>
+    <tr>
+        <td>Drag &amp; Drop Fields</td>
+        <td class="yes">Yes</td>
+        <td class="yes">Yes</td>
+        <td>PARITY</td>
+    </tr>
+    <tr>
+        <td>Property Panel</td>
+        <td class="yes">Yes</td>
+        <td class="yes">RightSidebar</td>
+        <td>PARITY</td>
+    </tr>
+    <tr>
+        <td>Field Outline Tree</td>
+        <td class="yes">Yes</td>
+        <td class="yes">Yes</td>
+        <td>PARITY</td>
+    </tr>
+    <tr>
+        <td>Condition Builder GUI</td>
+        <td class="yes">Yes</td>
+        <td class="yes">ConditionBuilderModal</td>
+        <td>PARITY</td>
+    </tr>
+    <tr>
+        <td>Formula Editor</td>
+        <td class="yes">Yes</td>
+        <td class="yes">FormulaEditorModal</td>
+        <td>PARITY</td>
+    </tr>
+    <tr>
+        <td>Theme Editor Tab</td>
+        <td class="yes">Yes</td>
+        <td class="no">No</td>
+        <td>MEDIUM</td>
+    </tr>
+    <tr>
+        <td>Preview Mode</td>
+        <td class="yes">Yes</td>
+        <td class="yes">Yes</td>
+        <td>PARITY</td>
+    </tr>
+    <tr>
+        <td>Undo/Redo</td>
+        <td class="yes">Yes</td>
+        <td class="no">No</td>
+        <td class="priority-high">HIGH</td>
+    </tr>
+    <tr>
+        <td>Field Reorder (Drag)</td>
+        <td class="yes">Yes</td>
+        <td class="yes">Yes</td>
+        <td>PARITY</td>
+    </tr>
+</table>
+
+<h2>7. Enterprise-Specific Features</h2>
+
+<table>
+    <tr>
+        <th>Feature</th>
+        <th>SurveyJS</th>
+        <th>DynamicForms</th>
+        <th>Priority</th>
+    </tr>
+    <tr>
+        <td>Role-Based Access</td>
+        <td class="no">No</td>
+        <td>ExtendedProperties</td>
+        <td class="priority-high">HIGH</td>
+    </tr>
+    <tr>
+        <td>Audit Trail</td>
+        <td class="no">No</td>
+        <td>DateCreated/Updated</td>
+        <td>MEDIUM</td>
+    </tr>
+    <tr>
+        <td>Digital Signatures</td>
+        <td>Signature pad</td>
+        <td>Schema only</td>
+        <td class="priority-critical">CRITICAL</td>
+    </tr>
+    <tr>
+        <td>E-Signature Integration</td>
+        <td class="no">No</td>
+        <td class="no">No</td>
+        <td class="priority-high">HIGH</td>
+    </tr>
+    <tr>
+        <td>Offline Support</td>
+        <td class="no">No</td>
+        <td class="no">No</td>
+        <td>MEDIUM</td>
+    </tr>
+    <tr>
+        <td>Compliance Reporting</td>
+        <td>Dashboard</td>
+        <td class="no">No</td>
+        <td class="priority-high">HIGH</td>
+    </tr>
+</table>
+
+<div class="page-break"></div>
+
+<h2>Priority Recommendations</h2>
+
+<div class="section-box">
+    <h3>CRITICAL (Must Have for Enterprise/Government)</h3>
+    <ol>
+        <li><strong>Signature Pad Implementation</strong> - Legal documents require it</li>
+        <li><strong>PDF Export</strong> - Archival, printing, offline distribution</li>
+        <li><strong>WCAG/508 Certification</strong> - Government contracts require it</li>
+        <li><strong>Matrix Question Types</strong> - Surveys, assessments, evaluations</li>
+        <li><strong>UI Localization</strong> - International enterprise markets</li>
+    </ol>
+</div>
+
+<div class="section-box">
+    <h3>HIGH Priority</h3>
+    <ol>
+        <li><strong>Rating/Stars</strong> - User feedback, satisfaction surveys</li>
+        <li><strong>Ranking Questions</strong> - Priority setting, preference ordering</li>
+        <li><strong>Undo/Redo in Editor</strong> - Essential UX for form designers</li>
+        <li><strong>Real-time Validation</strong> - Better user experience</li>
+        <li><strong>RTL Language Support</strong> - Middle East market expansion</li>
+    </ol>
+</div>
+
+<div class="section-box">
+    <h3>MEDIUM Priority</h3>
+    <ol>
+        <li>Theme Editor GUI</li>
+        <li>Progress Bar Navigation (clickable)</li>
+        <li>Slider Controls</li>
+        <li>Async Validation</li>
+        <li>Copy/Paste Fields</li>
+    </ol>
+</div>
+
+<h2>Competitive Advantages of DynamicForms</h2>
+
+<table>
+    <tr>
+        <th>Feature</th>
+        <th>Advantage Description</th>
+    </tr>
+    <tr>
+        <td>Native .NET Integration</td>
+        <td>No JavaScript bridge, full type safety</td>
+    </tr>
+    <tr>
+        <td>SQL Server Persistence</td>
+        <td>Enterprise-grade data storage with versioning</td>
+    </tr>
+    <tr>
+        <td>Bilingual by Design</td>
+        <td>EN/FR at schema level, not as translation layer</td>
+    </tr>
+    <tr>
+        <td>Cross-Module References</td>
+        <td>Workflow conditions can reference any module</td>
+    </tr>
+    <tr>
+        <td>Module Reuse</td>
+        <td>Same module in multiple workflows</td>
+    </tr>
+    <tr>
+        <td>Currency Field Type</td>
+        <td>Built-in, not workaround</td>
+    </tr>
+    <tr>
+        <td>CodeSet Management</td>
+        <td>Centralized option lists with DB storage</td>
+    </tr>
+    <tr>
+        <td>Server-Side Rendering</td>
+        <td>Blazor Server, no client-side vulnerabilities</td>
+    </tr>
+    <tr>
+        <td>Database Column Mapping</td>
+        <td>Direct SQL column configuration</td>
+    </tr>
+</table>
+
+<h2>Implementation Roadmap Suggestion</h2>
+
+<table>
+    <tr>
+        <th>Phase</th>
+        <th>Focus Area</th>
+        <th>Features</th>
+    </tr>
+    <tr>
+        <td><strong>Phase 1</strong><br>Critical Gaps</td>
+        <td>Enterprise/Government Ready</td>
+        <td>Signature Pad, PDF Export (basic), Matrix Single-Select, WCAG audit</td>
+    </tr>
+    <tr>
+        <td><strong>Phase 2</strong><br>Enhanced</td>
+        <td>Functionality</td>
+        <td>Rating/Stars, Ranking, Undo/Redo, Progress navigation</td>
+    </tr>
+    <tr>
+        <td><strong>Phase 3</strong><br>Polish</td>
+        <td>Differentiation</td>
+        <td>Theme Editor, Additional matrix types, Advanced PDF, Dashboard</td>
+    </tr>
+</table>
+
+<div class="footer">
+    <p><strong>Sources:</strong></p>
+    <ul style="font-size: 8pt;">
+        <li>SurveyJS Documentation: surveyjs.io/form-library/documentation</li>
+        <li>SurveyJS Accessibility Statement: surveyjs.io/accessibility-statement</li>
+        <li>SurveyJS Pricing: surveyjs.io/pricing</li>
+        <li>SurveyJS GitHub: github.com/surveyjs/survey-creator</li>
+    </ul>
+    <p style="margin-top: 12px;"><em>Document generated: December 12, 2025</em></p>
+</div>
+
+</body>
+</html>

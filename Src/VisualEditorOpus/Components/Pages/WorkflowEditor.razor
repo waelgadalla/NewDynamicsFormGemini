@@ -1,6 +1,8 @@
 @page "/workflow"
 @page "/workflow/{WorkflowId:int}"
 @layout MainLayout
+@using VisualEditorOpus.Components.Editor.Modals
+@using DynamicForms.Core.V4.Schemas
 
 <PageTitle>Workflow Designer - DynamicForms Editor</PageTitle>
 
@@ -24,6 +26,7 @@
                 <span class="saving-indicator"><i class="bi bi-arrow-repeat spinning"></i> Saving...</span>
             }
             <Button Variant="outline" Icon="bi-play" Text="Preview" OnClick="Preview" />
+            <Button Variant="outline" Icon="bi-diagram-3" Text="Rules" OnClick="ShowRules" />
             <Button Variant="outline" Icon="bi-gear" Text="Settings" OnClick="ShowSettings" />
             <Button Variant="primary" Icon="bi-check" Text="Save Workflow" OnClick="SaveAsync" Disabled="_isSaving" />
         </div>
@@ -187,6 +190,17 @@
     </div>
 }
 
+@* Workflow Rules Modal *@
+@if (EditorState.CurrentWorkflow is not null)
+{
+    <WorkflowRulesModal @bind-IsOpen="_showRulesModal"
+                        Workflow="EditorState.CurrentWorkflow"
+                        WorkflowModules="_loadedModules"
+                        WorkflowRules="_workflowRules"
+                        OnSave="HandleRulesSaved"
+                        OnCancel="CloseRulesModal" />
+}
+
 @code {
     [Parameter] public int? WorkflowId { get; set; }
 
@@ -201,7 +215,12 @@
     private bool _isLoading;
     private bool _showPreviewModal;
     private bool _showSettingsPanel;
+    private bool _showRulesModal;
     private int _previewCurrentStep = 1;
+
+    // Workflow rules state
+    private List<FormModuleSchema> _loadedModules = new();
+    private List<ConditionalRule> _workflowRules = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -293,6 +312,63 @@
     private void CloseSettings()
     {
         _showSettingsPanel = false;
+    }
+
+    // Workflow rules
+    private async Task ShowRules()
+    {
+        // Load modules for the rules modal
+        await LoadWorkflowModulesAsync();
+
+        // Load existing rules from workflow
+        if (EditorState.CurrentWorkflow?.WorkflowRules != null)
+        {
+            _workflowRules = EditorState.CurrentWorkflow.WorkflowRules.ToList();
+        }
+        else
+        {
+            _workflowRules = new List<ConditionalRule>();
+        }
+
+        _showRulesModal = true;
+    }
+
+    private void CloseRulesModal()
+    {
+        _showRulesModal = false;
+    }
+
+    private async Task LoadWorkflowModulesAsync()
+    {
+        _loadedModules.Clear();
+
+        if (EditorState.CurrentWorkflow?.ModuleIds == null)
+            return;
+
+        foreach (var moduleId in EditorState.CurrentWorkflow.ModuleIds)
+        {
+            var module = await PersistenceService.LoadModuleAsync(moduleId);
+            if (module != null)
+            {
+                _loadedModules.Add(module);
+            }
+        }
+    }
+
+    private void HandleRulesSaved(List<ConditionalRule> rules)
+    {
+        if (EditorState.CurrentWorkflow is null) return;
+
+        // Update workflow with new rules
+        var updated = EditorState.CurrentWorkflow with
+        {
+            WorkflowRules = rules.ToArray()
+        };
+        EditorState.UpdateWorkflow(updated);
+        _workflowRules = rules;
+        _showRulesModal = false;
+
+        ToastService.ShowSuccess($"Saved {rules.Count} workflow rule(s)");
     }
 
     // Preview navigation

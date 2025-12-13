@@ -16,7 +16,9 @@
       "Bash(ls:*)",
       "Bash(grep:*)",
       "Bash(dotnet restore:*)",
-      "Bash(sqlcmd:*)"
+      "Bash(sqlcmd:*)",
+      "WebFetch(domain:surveyjs.io)",
+      "Bash(dir \"C:\\Users\\waelm\\source\\repos\\waelgadalla\\NewDynamicsFormGemini\\SURVEYJS*\")"
     ],
     "deny": [],
     "ask": []

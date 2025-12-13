@@ -24,6 +24,7 @@
             <button class="btn btn-sm btn-ghost @(ActiveView == "json" ? "active" : "")"
                     @onclick="SwitchToJson">JSON</button>
         </div>
+        <Button Variant="ghost" Icon="bi-box-arrow-in-down" OnClick="ShowImportModal" Title="Import JSON" />
         <Button Variant="outline" Icon="bi-info-circle" OnClick="ShowMetadata" />
         <Button Variant="primary" Icon="bi-check" Text="Save Module" OnClick="SaveModule" />
     </div>
@@ -37,6 +38,11 @@
                    OnCancel="HandleMetadataCancel" />
 }
 
+<ImportJsonModal @bind-IsOpen="_showImportModal"
+                 OnImportModule="HandleImportModule"
+                 OnImportWorkflow="HandleImportWorkflow"
+                 OnCancel="HandleImportCancel" />
+
 @code {
     [Inject] private IEditorStateService EditorState { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
@@ -45,6 +51,7 @@
     private string ActiveView { get; set; } = "design";
     private string StepBadge => GetStepBadge();
     private bool _showMetadataModal;
+    private bool _showImportModal;
 
     private string GetStepBadge()
     {
@@ -101,5 +108,61 @@
     private void SaveModule()
     {
         ToastService.ShowSuccess("Module saved successfully");
+    }
+
+    private void ShowImportModal()
+    {
+        _showImportModal = true;
+    }
+
+    private void HandleImportModule(ImportResult<FormModuleSchema> result)
+    {
+        if (result.Mode == Modals.ImportMode.Replace)
+        {
+            // Replace current module entirely
+            EditorState.LoadModule(result.Schema);
+            ToastService.ShowSuccess($"Module '{result.Schema.TitleEn}' imported successfully");
+        }
+        else
+        {
+            // Merge: add new fields to existing module
+            if (EditorState.CurrentModule is not null)
+            {
+                var existingFieldIds = EditorState.CurrentModule.Fields.Select(f => f.Id).ToHashSet();
+                var newFields = result.Schema.Fields.Where(f => !existingFieldIds.Contains(f.Id)).ToArray();
+
+                if (newFields.Length > 0)
+                {
+                    var mergedFields = EditorState.CurrentModule.Fields.Concat(newFields).ToArray();
+                    var merged = EditorState.CurrentModule with { Fields = mergedFields };
+                    EditorState.UpdateModule(merged);
+                    ToastService.ShowSuccess($"Added {newFields.Length} new field(s) from import");
+                }
+                else
+                {
+                    ToastService.ShowInfo("No new fields to merge");
+                }
+            }
+        }
+        _showImportModal = false;
+    }
+
+    private void HandleImportWorkflow(ImportResult<FormWorkflowSchema> result)
+    {
+        if (result.Mode == Modals.ImportMode.Replace)
+        {
+            EditorState.LoadWorkflow(result.Schema);
+            ToastService.ShowSuccess($"Workflow '{result.Schema.TitleEn}' imported successfully");
+        }
+        else
+        {
+            ToastService.ShowInfo("Workflow merge not supported - use Replace mode");
+        }
+        _showImportModal = false;
+    }
+
+    private void HandleImportCancel()
+    {
+        _showImportModal = false;
     }
 }

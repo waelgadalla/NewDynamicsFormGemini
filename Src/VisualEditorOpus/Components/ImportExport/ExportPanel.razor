@@ -20,9 +20,8 @@
                 <div class="option-cards">
                     @foreach (var format in new[] { ExportFormat.Json, ExportFormat.JsonSchema, ExportFormat.TypeScript })
                     {
-                        var isDisabled = format == ExportFormat.TypeScript;
-                        <div class="option-card @(Options.Format == format ? "selected" : "") @(isDisabled ? "disabled" : "")"
-                             @onclick="() => { if (!isDisabled) SelectFormat(format); }">
+                        <div class="option-card @(Options.Format == format ? "selected" : "")"
+                             @onclick="() => SelectFormat(format)">
                             <div class="option-card-icon">
                                 <i class="bi bi-@GetFormatIcon(format)"></i>
                             </div>
@@ -157,7 +156,7 @@
     {
         ExportFormat.Json => "Standard format",
         ExportFormat.JsonSchema => "With validation",
-        ExportFormat.TypeScript => "Coming soon",
+        ExportFormat.TypeScript => "Type definitions",
         _ => ""
     };
 }
