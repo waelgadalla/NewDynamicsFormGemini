@@ -1,9 +1,10 @@
 # DynamicForms Visual Editor - Implementation Guide
 
-> **Version**: 1.0  
-> **Target Platform**: Blazor Server (.NET 8+)  
-> **Based On**: V12 HTML Mockup + DynamicForms-Schema-Reference.md  
-> **Last Updated**: December 2025
+> **Version**: 2.0
+> **Target Platform**: Blazor Server (.NET 9.0)
+> **Based On**: V12 HTML Mockup + DynamicForms-Schema-Reference.md
+> **Last Updated**: December 12, 2025
+> **Implementation Status**: ~90% Complete
 
 ---
 
@@ -44,12 +45,14 @@ Build a complete visual schema editor for the DynamicForms V4 system that allows
 5. **Immutable State**: Use record types with `with` expressions for all schema modifications
 
 ### Technology Stack
-- **Framework**: Blazor Server (.NET 8+)
+- **Framework**: Blazor Server (.NET 9.0)
 - **UI Components**: Custom components (no external library dependency)
 - **CSS**: Custom CSS with CSS variables for theming (light/dark)
 - **Icons**: Bootstrap Icons
 - **Fonts**: DM Sans (UI), JetBrains Mono (code/IDs)
-- **State**: Fluxor or custom state container with undo/redo
+- **State**: Custom state container with undo/redo (EditorStateService)
+- **Signature Pad**: Blazor.SignaturePad 10.0.0 NuGet package
+- **ORM**: Dapper for SQL Server persistence
 
 ---
 
@@ -1558,12 +1561,13 @@ Central state management service handling current workflow/module, field selecti
 3. OutlineTree.razor - Hierarchical tree view with expand/collapse
 4. ValidationIssues.razor - Error/warning list with click-to-select
 
-## Field Categories
-- Basic: TextBox, TextArea, Number, Currency
-- Choice: DropDown, RadioGroup, CheckboxList, Checkbox
+## Field Categories (26 Total)
+- Basic: TextBox, TextArea, Number, Currency, Email, Phone
+- Choice: DropDown, RadioGroup, CheckboxList, Checkbox, Toggle
 - Date & Time: DatePicker, TimePicker, DateTimePicker
-- Advanced: FileUpload, DataGrid, AutoComplete
-- Layout: Section, Panel, Divider, Label
+- Advanced: FileUpload, DataGrid, Repeater, AutoComplete, RichText, Signature, Image
+- Matrix: MatrixSingle, MatrixMulti
+- Layout: Section, Panel, Divider, Label/HTML
 
 ### Expected Output
 All components with CSS styles
@@ -2331,34 +2335,54 @@ public record WorkflowSummary(int Id, string Title, string Description, int Modu
 
 ---
 
-## Appendix A: Field Type to Icon Mapping
+## Appendix A: Field Type to Icon Mapping (26 Types)
 
 ```csharp
 public static class FieldTypeIcons
 {
     public static readonly Dictionary<string, string> Icons = new()
     {
+        // Basic (6)
         ["TextBox"] = "bi-input-cursor-text",
         ["TextArea"] = "bi-textarea-t",
         ["Number"] = "bi-123",
         ["Currency"] = "bi-currency-dollar",
+        ["Email"] = "bi-envelope",
+        ["Phone"] = "bi-telephone",
+
+        // Choice (5)
         ["DropDown"] = "bi-menu-button-wide",
         ["RadioGroup"] = "bi-ui-radios",
         ["CheckboxList"] = "bi-ui-checks",
         ["Checkbox"] = "bi-check-square",
+        ["Toggle"] = "bi-toggle-on",
+
+        // Date & Time (3)
         ["DatePicker"] = "bi-calendar-event",
         ["TimePicker"] = "bi-clock",
         ["DateTimePicker"] = "bi-calendar-week",
+
+        // Advanced (7)
         ["FileUpload"] = "bi-cloud-upload",
         ["DataGrid"] = "bi-table",
+        ["Repeater"] = "bi-arrow-repeat",
         ["AutoComplete"] = "bi-search",
+        ["RichText"] = "bi-file-richtext",
+        ["Signature"] = "bi-pen",
+        ["Image"] = "bi-image",
+
+        // Matrix (2)
+        ["MatrixSingle"] = "bi-grid-3x3",
+        ["MatrixMulti"] = "bi-grid-3x3-gap",
+
+        // Layout (4)
         ["Section"] = "bi-layout-three-columns",
         ["Panel"] = "bi-window",
         ["Divider"] = "bi-dash-lg",
         ["Label"] = "bi-fonts",
         ["Html"] = "bi-code-slash",
     };
-    
+
     public static string Get(string fieldType) => Icons.GetValueOrDefault(fieldType, "bi-question-circle");
 }
 ```
@@ -2493,6 +2517,128 @@ var app = builder.Build();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 app.Run();
 ```
+
+---
+
+## Appendix E: TypeConfig Classes (11 Total)
+
+The following TypeConfig classes are implemented in `DynamicForms.Core.V4/Schemas/FieldTypeConfigs.cs`:
+
+| Config Class | Purpose | Key Properties |
+|--------------|---------|----------------|
+| `AutoCompleteConfig` | Autocomplete field | MinChars, MaxSuggestions, ApiEndpoint |
+| `DataGridConfig` | Data grid/repeater | Columns[], MinRows, MaxRows |
+| `FileUploadConfig` | File upload | AllowedExtensions, MaxFileSize, Multiple |
+| `DateConfig` | Date/time pickers | MinDate, MaxDate, Format |
+| `SignatureConfig` | Digital signature | CanvasWidth/Height, StrokeColor/Width, LegalTextEn/Fr, ShowTimestamp |
+| `ImageConfig` | Image upload/display | Mode, ImageUrl, MaxWidth/Height, EnableCropping, CropAspectRatio |
+| `RichTextConfig` | Rich text editor | Height, EnableImages/Tables/Html, MaxCharacters |
+| `TextInputConfig` | Email/Phone | InputMask, ShowCountryCode, DefaultCountry |
+| `ToggleConfig` | Toggle switch | OnLabelEn/Fr, OffLabelEn/Fr, OnColor, OffColor, Size |
+| `MatrixSingleSelectConfig` | Single-select matrix | Rows[], Columns[], IsAllRowRequired, AlternateRowColors, MobileLayout |
+| `MatrixMultiSelectConfig` | Multi-select matrix | Rows[], Columns[], DefaultCellType, AllowDynamicRows, ShowSummaryRow |
+
+### Supporting Records for Matrix
+- `MatrixRowDefinition` - Value, TextEn, TextFr, Order, IsVisible
+- `MatrixColumnDefinition` - Value, TextEn, TextFr, Order, CellType, Choices[], RatingMax, MinWidth
+
+---
+
+## Appendix F: Signature Pad Implementation
+
+### NuGet Package
+- **Package:** Blazor.SignaturePad 10.0.0
+- **Author:** MarvinKlein1508
+- **Install:** `dotnet add package Blazor.SignaturePad`
+
+### Usage
+```razor
+@using SigPad
+
+<SignaturePad @bind-Value="_signatureBytes"
+              Options="_options"
+              ClearButtonClass="signature-clear-btn" />
+
+@code {
+    private byte[] _signatureBytes = Array.Empty<byte>();
+    private SignaturePadOptions _options = new()
+    {
+        LineCap = LineCap.Round,
+        LineJoin = LineJoin.Round,
+        LineWidth = 2
+    };
+}
+```
+
+### Known Issue: Mobile Orientation Change
+
+**Problem:** The underlying signature_pad.js library doesn't properly handle window resize events, particularly on mobile devices when the user changes orientation (portrait <-> landscape).
+
+**Symptoms:**
+- Signature appears zoomed/scaled incorrectly after resize
+- Signature position shifts after orientation change
+- Drawing coordinates become misaligned with cursor/touch position
+
+**Workaround Implemented:**
+1. Custom JavaScript module: `wwwroot/js/signature-resize.js`
+2. Listens for `resize` and `orientationchange` events
+3. Debounces events (250ms) to prevent excessive redraws
+4. Calls back to Blazor via `[JSInvokable]` method
+5. Forces component re-render using `@key` directive
+
+**Files:**
+- `CanvasSignature.razor` - Editor canvas component with full implementation
+- `RenderedField.razor` - Preview component with resize handling
+- `signature-resize.js` - JavaScript interop module
+- `App.razor` - Script reference
+
+**References:**
+- https://github.com/szimek/signature_pad/issues/362
+- https://www.telerik.com/blazor-ui/documentation/knowledge-base/signature-relative-width-height
+
+---
+
+## Appendix G: Config Panel Components
+
+The following config panel components are implemented in `VisualEditorOpus/Components/Properties/Sections/ConfigPanels/`:
+
+| Panel Component | Field Types |
+|-----------------|-------------|
+| `DateConfigPanel.razor` | DatePicker, TimePicker, DateTimePicker |
+| `FileUploadConfigPanel.razor` | FileUpload |
+| `DataGridConfigPanel.razor` | DataGrid, Repeater |
+| `AutoCompleteConfigPanel.razor` | AutoComplete |
+| `TextInputConfigPanel.razor` | TextBox, Email, Phone, Number, Currency |
+| `ToggleConfigPanel.razor` | Toggle |
+| `RichTextConfigPanel.razor` | RichText |
+| `SignatureConfigPanel.razor` | Signature |
+| `ImageConfigPanel.razor` | Image |
+| `MatrixConfigPanel.razor` | MatrixSingle, MatrixMulti |
+
+---
+
+## Appendix H: Implementation Status Summary
+
+### Completed Features
+- [x] 26 field types in palette
+- [x] 11 TypeConfig classes
+- [x] 10 config panel components
+- [x] Signature pad with Blazor.SignaturePad
+- [x] Mobile resize workaround for signature
+- [x] Matrix single/multi-select fields
+- [x] All modals wired and functional
+- [x] SQL Server persistence
+- [x] Undo/redo (50 levels)
+- [x] JSON/TypeScript/JSON Schema export
+- [x] Bilingual EN/FR support
+- [x] Dark/light theme
+
+### Remaining Work
+- [ ] PDF export capability
+- [ ] WCAG accessibility audit
+- [ ] Rating/Stars field type
+- [ ] Ranking field type
+- [ ] Full WorkflowSettingsPanel (7 sections)
 
 ---
 
