@@ -1,0 +1,147 @@
+@* Matrix question configuration panel *@
+
+<div class="config-panel">
+    <div class="config-info matrix-info">
+        <i class="bi bi-grid-3x3"></i>
+        <span>
+            @if (MatrixType == "single")
+            {
+                <text>Single-Select Matrix: One answer per row (Likert scale, ratings)</text>
+            }
+            else
+            {
+                <text>Multi-Select Matrix: Multiple inputs per row (mixed question types)</text>
+            }
+        </span>
+    </div>
+
+    <div class="config-group">
+        <label class="config-label">Validation</label>
+        <div class="config-toggles">
+            <label class="toggle-option">
+                <input type="checkbox"
+                       checked="@Config.IsAllRowRequired"
+                       @onchange="e => UpdateConfig(c => c.IsAllRowRequired = (bool)(e.Value ?? false))" />
+                <span>Require answer for all rows</span>
+            </label>
+        </div>
+    </div>
+
+    <div class="config-group">
+        <label class="config-label">Display Options</label>
+        <div class="config-toggles">
+            <label class="toggle-option">
+                <input type="checkbox"
+                       checked="@Config.AlternateRowColors"
+                       @onchange="e => UpdateConfig(c => c.AlternateRowColors = (bool)(e.Value ?? true))" />
+                <span>Alternate row colors (zebra stripes)</span>
+            </label>
+        </div>
+    </div>
+
+    <div class="config-group">
+        <label class="config-label">
+            <i class="bi bi-phone"></i>
+            Mobile Layout
+        </label>
+        <select class="config-select"
+                value="@Config.MobileLayout"
+                @onchange="e => UpdateConfig(c => c.MobileLayout = e.Value?.ToString() ?? DefaultMobileLayout)">
+            <option value="stacked">Stacked - One row at a time</option>
+            <option value="scroll">Scroll - Horizontal scroll</option>
+        </select>
+    </div>
+
+    @if (MatrixType == "multi")
+    {
+        <div class="config-group">
+            <label class="config-label">
+                <i class="bi bi-ui-checks"></i>
+                Default Cell Type
+            </label>
+            <select class="config-select"
+                    value="@Config.DefaultCellType"
+                    @onchange="e => UpdateConfig(c => c.DefaultCellType = e.Value?.ToString() ?? DefaultCellType)">
+                <option value="dropdown">Dropdown</option>
+                <option value="radio">Radio buttons</option>
+                <option value="checkbox">Checkboxes</option>
+                <option value="text">Text input</option>
+                <option value="rating">Star rating</option>
+            </select>
+        </div>
+    }
+
+    <div class="config-group matrix-editor-placeholder">
+        <label class="config-label">
+            <i class="bi bi-table"></i>
+            Matrix Structure
+        </label>
+        <div class="placeholder-box">
+            <div class="placeholder-content">
+                <i class="bi bi-pencil-square"></i>
+                <p>@Config.RowCount rows, @Config.ColumnCount columns configured</p>
+                <small>Use the Matrix Editor to add/edit rows and columns</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="config-info">
+        <i class="bi bi-info-circle"></i>
+        <span>
+            @if (MatrixType == "single")
+            {
+                <text>Rows are statements to rate. Columns are the rating scale (e.g., 1-5, Agree-Disagree).</text>
+            }
+            else
+            {
+                <text>Each column can have a different input type. Use for complex surveys with multiple criteria.</text>
+            }
+        </span>
+    </div>
+</div>
+
+<style>
+    .matrix-info {
+        background-color: #e0f2fe;
+        border-color: #0ea5e9;
+    }
+
+    .matrix-editor-placeholder .placeholder-box {
+        border: 2px dashed #cbd5e1;
+        border-radius: 8px;
+        padding: 1.5rem;
+        text-align: center;
+        background-color: #f8fafc;
+    }
+
+    .placeholder-content i {
+        font-size: 2rem;
+        color: #94a3b8;
+        margin-bottom: 0.5rem;
+    }
+
+    .placeholder-content p {
+        margin: 0.5rem 0;
+        color: #475569;
+        font-weight: 500;
+    }
+
+    .placeholder-content small {
+        color: #94a3b8;
+    }
+</style>
+
+@code {
+    [Parameter] public TypeConfigButton.MatrixConfigModel Config { get; set; } = new();
+    [Parameter] public string MatrixType { get; set; } = "single";
+    [Parameter] public EventCallback<TypeConfigButton.MatrixConfigModel> OnChange { get; set; }
+
+    private const string DefaultMobileLayout = "stacked";
+    private const string DefaultCellType = "dropdown";
+
+    private async Task UpdateConfig(Action<TypeConfigButton.MatrixConfigModel> update)
+    {
+        update(Config);
+        await OnChange.InvokeAsync(Config);
+    }
+}

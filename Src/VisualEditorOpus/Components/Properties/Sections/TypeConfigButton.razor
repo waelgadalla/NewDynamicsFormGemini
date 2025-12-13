@@ -62,6 +62,24 @@
                     case "Repeater":
                         <DataGridConfigPanel Config="@DataGridConfig" OnChange="HandleDataGridConfigChange" />
                         break;
+                    case "Toggle":
+                        <ToggleConfigPanel Config="@ToggleConfig" OnChange="HandleToggleConfigChange" />
+                        break;
+                    case "RichText":
+                        <RichTextConfigPanel Config="@RichTextConfig" OnChange="HandleRichTextConfigChange" />
+                        break;
+                    case "Signature":
+                        <SignatureConfigPanel Config="@SignatureConfigValue" OnChange="HandleSignatureConfigChange" />
+                        break;
+                    case "Image":
+                        <ImageConfigPanel Config="@ImageConfig" OnChange="HandleImageConfigChange" />
+                        break;
+                    case "MatrixSingle":
+                        <MatrixConfigPanel Config="@MatrixSingleConfig" MatrixType="single" OnChange="HandleMatrixSingleConfigChange" />
+                        break;
+                    case "MatrixMulti":
+                        <MatrixConfigPanel Config="@MatrixMultiConfig" MatrixType="multi" OnChange="HandleMatrixMultiConfigChange" />
+                        break;
                     default:
                         <div class="config-placeholder">
                             <i class="bi bi-gear"></i>
@@ -90,6 +108,12 @@
     private DateConfigModel DateConfigValue { get; set; } = new();
     private FileConfigModel FileConfig { get; set; } = new();
     private DataGridConfigModel DataGridConfig { get; set; } = new();
+    private ToggleConfigModel ToggleConfig { get; set; } = new();
+    private RichTextConfigModel RichTextConfig { get; set; } = new();
+    private SignatureConfigModel SignatureConfigValue { get; set; } = new();
+    private ImageConfigModel ImageConfig { get; set; } = new();
+    private MatrixConfigModel MatrixSingleConfig { get; set; } = new();
+    private MatrixConfigModel MatrixMultiConfig { get; set; } = new();
 
     private bool IsConfigured => Field?.TypeConfig != null;
 
@@ -104,6 +128,9 @@
         "Signature" => "pen",
         "DataGrid" or "Repeater" => "collection",
         "AutoComplete" => "search",
+        "Toggle" => "toggle-on",
+        "RichText" => "file-richtext",
+        "MatrixSingle" or "MatrixMulti" => "grid-3x3",
         _ => "gear"
     };
 
@@ -122,6 +149,10 @@
         "Signature" => "Signature Options",
         "DataGrid" or "Repeater" => "Data Grid Options",
         "AutoComplete" => "Autocomplete Options",
+        "Toggle" => "Toggle Options",
+        "RichText" => "Rich Text Options",
+        "MatrixSingle" => "Matrix (Single Select) Options",
+        "MatrixMulti" => "Matrix (Multi Select) Options",
         _ => "Type Configuration"
     };
 
@@ -145,9 +176,13 @@
                 "Time" => "Set 12h/24h, step, range",
                 "FileUpload" => "Set allowed types, size limits",
                 "Image" => "Set dimensions, format, crop",
-                "Signature" => "Set canvas size, stroke",
+                "Signature" => "Set canvas size, stroke, legal text",
                 "DataGrid" or "Repeater" => "Set columns, min/max rows",
                 "AutoComplete" => "Set data source, templates",
+                "Toggle" => "Set labels, colors, size",
+                "RichText" => "Set toolbar, height, limits",
+                "MatrixSingle" => "Set rows, columns, layout",
+                "MatrixMulti" => "Set rows, columns, cell types",
                 _ => "Configure type-specific settings"
             };
         }
@@ -165,6 +200,13 @@
                 FileUploadConfig fc => GetFileConfigSummary(fc),
                 DataGridConfig dgc => GetDataGridConfigSummary(dgc),
                 AutoCompleteConfig ac => GetAutoCompleteConfigSummary(ac),
+                ToggleConfig tc => GetToggleConfigSummary(tc),
+                RichTextConfig rtc => GetRichTextConfigSummary(rtc),
+                SignatureConfig sc => GetSignatureConfigSummary(sc),
+                ImageConfig ic => GetImageConfigSummary(ic),
+                MatrixSingleSelectConfig msc => GetMatrixSingleConfigSummary(msc),
+                MatrixMultiSelectConfig mmc => GetMatrixMultiConfigSummary(mmc),
+                TextInputConfig tic => GetTextInputConfigSummary(tic),
                 _ => Enumerable.Empty<string>()
             };
         }
@@ -180,6 +222,13 @@
             FileUploadConfig fc => CountFileConfigSettings(fc),
             DataGridConfig dgc => CountDataGridConfigSettings(dgc),
             AutoCompleteConfig ac => CountAutoCompleteConfigSettings(ac),
+            ToggleConfig tc => CountToggleConfigSettings(tc),
+            RichTextConfig rtc => CountRichTextConfigSettings(rtc),
+            SignatureConfig sc => CountSignatureConfigSettings(sc),
+            ImageConfig ic => CountImageConfigSettings(ic),
+            MatrixSingleSelectConfig msc => CountMatrixSingleConfigSettings(msc),
+            MatrixMultiSelectConfig mmc => CountMatrixMultiConfigSettings(mmc),
+            TextInputConfig tic => CountTextInputConfigSettings(tic),
             _ => 0
         };
     }
@@ -250,6 +299,126 @@
         return count;
     }
 
+    // Toggle config helpers
+    private IEnumerable<string> GetToggleConfigSummary(ToggleConfig config)
+    {
+        yield return config.Size;
+        if (config.ShowLabels) yield return $"{config.OnLabelEn}/{config.OffLabelEn}";
+    }
+
+    private int CountToggleConfigSettings(ToggleConfig config)
+    {
+        int count = 1; // Size always counts
+        if (config.ShowLabels) count++;
+        if (config.OnColor != "#22c55e") count++;
+        if (config.OffColor != "#e5e7eb") count++;
+        return count;
+    }
+
+    // RichText config helpers
+    private IEnumerable<string> GetRichTextConfigSummary(RichTextConfig config)
+    {
+        yield return $"{config.Toolbar.Length} tools";
+        if (config.MaxCharacters.HasValue) yield return $"Max: {config.MaxCharacters}";
+        if (config.AllowImages) yield return "Images";
+    }
+
+    private int CountRichTextConfigSettings(RichTextConfig config)
+    {
+        int count = 1; // Toolbar always counts
+        if (config.MaxCharacters.HasValue) count++;
+        if (config.AllowImages) count++;
+        if (config.AllowTables) count++;
+        if (config.AllowHtmlSource) count++;
+        return count;
+    }
+
+    // Signature config helpers
+    private IEnumerable<string> GetSignatureConfigSummary(SignatureConfig config)
+    {
+        yield return $"{config.CanvasWidth}x{config.CanvasHeight}";
+        yield return config.OutputFormat.ToUpper();
+        if (config.AllowTypedSignature) yield return "Typed allowed";
+    }
+
+    private int CountSignatureConfigSettings(SignatureConfig config)
+    {
+        int count = 2; // Canvas size and format
+        if (config.AllowTypedSignature) count++;
+        if (config.ShowTimestamp) count++;
+        if (!string.IsNullOrEmpty(config.LegalTextEn)) count++;
+        return count;
+    }
+
+    // Image config helpers
+    private IEnumerable<string> GetImageConfigSummary(ImageConfig config)
+    {
+        yield return config.Mode;
+        if (config.MaxWidth.HasValue) yield return $"Max: {config.MaxWidth}px";
+        if (config.AllowCrop) yield return "Crop";
+    }
+
+    private int CountImageConfigSettings(ImageConfig config)
+    {
+        int count = 1; // Mode always counts
+        if (config.MaxWidth.HasValue || config.MaxHeight.HasValue) count++;
+        if (config.AllowCrop) count++;
+        return count;
+    }
+
+    // Matrix Single config helpers
+    private IEnumerable<string> GetMatrixSingleConfigSummary(MatrixSingleSelectConfig config)
+    {
+        yield return $"{config.Rows.Length} rows";
+        yield return $"{config.Columns.Length} columns";
+        if (config.IsAllRowRequired) yield return "Required";
+    }
+
+    private int CountMatrixSingleConfigSettings(MatrixSingleSelectConfig config)
+    {
+        int count = 0;
+        if (config.Rows.Length > 0) count++;
+        if (config.Columns.Length > 0) count++;
+        if (config.IsAllRowRequired) count++;
+        if (config.AlternateRowColors) count++;
+        return count;
+    }
+
+    // Matrix Multi config helpers
+    private IEnumerable<string> GetMatrixMultiConfigSummary(MatrixMultiSelectConfig config)
+    {
+        yield return $"{config.Rows.Length} rows";
+        yield return $"{config.Columns.Length} columns";
+        yield return config.DefaultCellType;
+    }
+
+    private int CountMatrixMultiConfigSettings(MatrixMultiSelectConfig config)
+    {
+        int count = 0;
+        if (config.Rows.Length > 0) count++;
+        if (config.Columns.Length > 0) count++;
+        if (config.IsAllRowRequired) count++;
+        if (config.AllowDynamicRows) count++;
+        return count;
+    }
+
+    // TextInput config helpers
+    private IEnumerable<string> GetTextInputConfigSummary(TextInputConfig config)
+    {
+        yield return config.InputType;
+        if (!string.IsNullOrEmpty(config.InputMask)) yield return "Masked";
+        if (config.ShowCountrySelector) yield return "Country";
+    }
+
+    private int CountTextInputConfigSettings(TextInputConfig config)
+    {
+        int count = 1; // InputType always counts
+        if (!string.IsNullOrEmpty(config.InputMask)) count++;
+        if (!string.IsNullOrEmpty(config.DefaultCountryCode)) count++;
+        if (config.ShowCountrySelector) count++;
+        return count;
+    }
+
     protected override void OnInitialized()
     {
         EditorState.OnFieldSelected += OnFieldSelected;
@@ -271,6 +440,12 @@
             DateConfigValue = new DateConfigModel();
             FileConfig = new FileConfigModel();
             DataGridConfig = new DataGridConfigModel();
+            ToggleConfig = new ToggleConfigModel();
+            RichTextConfig = new RichTextConfigModel();
+            SignatureConfigValue = new SignatureConfigModel();
+            ImageConfig = new ImageConfigModel();
+            MatrixSingleConfig = new MatrixConfigModel();
+            MatrixMultiConfig = new MatrixConfigModel();
             return;
         }
 
@@ -302,6 +477,77 @@
                     AllowDelete = dgc.AllowDelete,
                     MaxRows = dgc.MaxRows,
                     EditorMode = dgc.EditorMode
+                };
+                break;
+            case ToggleConfig tc:
+                ToggleConfig = new ToggleConfigModel
+                {
+                    OnLabelEn = tc.OnLabelEn,
+                    OnLabelFr = tc.OnLabelFr,
+                    OffLabelEn = tc.OffLabelEn,
+                    OffLabelFr = tc.OffLabelFr,
+                    OnColor = tc.OnColor,
+                    OffColor = tc.OffColor,
+                    Size = tc.Size,
+                    ShowLabels = tc.ShowLabels,
+                    DefaultValue = tc.DefaultValue
+                };
+                break;
+            case RichTextConfig rtc:
+                RichTextConfig = new RichTextConfigModel
+                {
+                    EditorHeight = rtc.EditorHeight,
+                    AllowImages = rtc.AllowImages,
+                    AllowTables = rtc.AllowTables,
+                    AllowHtmlSource = rtc.AllowHtmlSource,
+                    MaxCharacters = rtc.MaxCharacters
+                };
+                break;
+            case SignatureConfig sc:
+                SignatureConfigValue = new SignatureConfigModel
+                {
+                    CanvasWidth = sc.CanvasWidth,
+                    CanvasHeight = sc.CanvasHeight,
+                    StrokeColor = sc.StrokeColor,
+                    StrokeWidth = sc.StrokeWidth,
+                    OutputFormat = sc.OutputFormat,
+                    AllowTypedSignature = sc.AllowTypedSignature,
+                    ShowTimestamp = sc.ShowTimestamp,
+                    LegalTextEn = sc.LegalTextEn,
+                    LegalTextFr = sc.LegalTextFr
+                };
+                break;
+            case ImageConfig ic:
+                ImageConfig = new ImageConfigModel
+                {
+                    Mode = ic.Mode,
+                    ImageUrl = ic.ImageUrl,
+                    AltTextEn = ic.AltTextEn,
+                    MaxWidth = ic.MaxWidth,
+                    MaxHeight = ic.MaxHeight,
+                    AllowCrop = ic.AllowCrop,
+                    CropAspectRatio = ic.CropAspectRatio
+                };
+                break;
+            case MatrixSingleSelectConfig msc:
+                MatrixSingleConfig = new MatrixConfigModel
+                {
+                    RowCount = msc.Rows.Length,
+                    ColumnCount = msc.Columns.Length,
+                    IsAllRowRequired = msc.IsAllRowRequired,
+                    AlternateRowColors = msc.AlternateRowColors,
+                    MobileLayout = msc.MobileLayout
+                };
+                break;
+            case MatrixMultiSelectConfig mmc:
+                MatrixMultiConfig = new MatrixConfigModel
+                {
+                    RowCount = mmc.Rows.Length,
+                    ColumnCount = mmc.Columns.Length,
+                    IsAllRowRequired = mmc.IsAllRowRequired,
+                    AlternateRowColors = mmc.AlternateRowColors,
+                    MobileLayout = mmc.MobileLayout,
+                    DefaultCellType = mmc.DefaultCellType
                 };
                 break;
         }
@@ -343,6 +589,36 @@
         DataGridConfig = config;
     }
 
+    private void HandleToggleConfigChange(ToggleConfigModel config)
+    {
+        ToggleConfig = config;
+    }
+
+    private void HandleRichTextConfigChange(RichTextConfigModel config)
+    {
+        RichTextConfig = config;
+    }
+
+    private void HandleSignatureConfigChange(SignatureConfigModel config)
+    {
+        SignatureConfigValue = config;
+    }
+
+    private void HandleImageConfigChange(ImageConfigModel config)
+    {
+        ImageConfig = config;
+    }
+
+    private void HandleMatrixSingleConfigChange(MatrixConfigModel config)
+    {
+        MatrixSingleConfig = config;
+    }
+
+    private void HandleMatrixMultiConfigChange(MatrixConfigModel config)
+    {
+        MatrixMultiConfig = config;
+    }
+
     private void SaveConfig()
     {
         if (Field == null) return;
@@ -371,6 +647,65 @@
                 AllowDelete = DataGridConfig.AllowDelete,
                 MaxRows = DataGridConfig.MaxRows,
                 EditorMode = DataGridConfig.EditorMode
+            },
+            "Toggle" => new ToggleConfig
+            {
+                OnLabelEn = ToggleConfig.OnLabelEn,
+                OnLabelFr = ToggleConfig.OnLabelFr,
+                OffLabelEn = ToggleConfig.OffLabelEn,
+                OffLabelFr = ToggleConfig.OffLabelFr,
+                OnColor = ToggleConfig.OnColor,
+                OffColor = ToggleConfig.OffColor,
+                Size = ToggleConfig.Size,
+                ShowLabels = ToggleConfig.ShowLabels,
+                DefaultValue = ToggleConfig.DefaultValue
+            },
+            "RichText" => new RichTextConfig
+            {
+                EditorHeight = RichTextConfig.EditorHeight,
+                AllowImages = RichTextConfig.AllowImages,
+                AllowTables = RichTextConfig.AllowTables,
+                AllowHtmlSource = RichTextConfig.AllowHtmlSource,
+                MaxCharacters = RichTextConfig.MaxCharacters
+            },
+            "Signature" => new SignatureConfig
+            {
+                CanvasWidth = SignatureConfigValue.CanvasWidth,
+                CanvasHeight = SignatureConfigValue.CanvasHeight,
+                StrokeColor = SignatureConfigValue.StrokeColor,
+                StrokeWidth = SignatureConfigValue.StrokeWidth,
+                OutputFormat = SignatureConfigValue.OutputFormat,
+                AllowTypedSignature = SignatureConfigValue.AllowTypedSignature,
+                ShowTimestamp = SignatureConfigValue.ShowTimestamp,
+                LegalTextEn = SignatureConfigValue.LegalTextEn,
+                LegalTextFr = SignatureConfigValue.LegalTextFr
+            },
+            "Image" => new ImageConfig
+            {
+                Mode = ImageConfig.Mode,
+                ImageUrl = ImageConfig.ImageUrl,
+                AltTextEn = ImageConfig.AltTextEn,
+                MaxWidth = ImageConfig.MaxWidth,
+                MaxHeight = ImageConfig.MaxHeight,
+                AllowCrop = ImageConfig.AllowCrop,
+                CropAspectRatio = ImageConfig.CropAspectRatio
+            },
+            "Email" or "Phone" => new TextInputConfig
+            {
+                InputType = Field.FieldType.ToLower()
+            },
+            "MatrixSingle" => new MatrixSingleSelectConfig
+            {
+                IsAllRowRequired = MatrixSingleConfig.IsAllRowRequired,
+                AlternateRowColors = MatrixSingleConfig.AlternateRowColors,
+                MobileLayout = MatrixSingleConfig.MobileLayout
+            },
+            "MatrixMulti" => new MatrixMultiSelectConfig
+            {
+                IsAllRowRequired = MatrixMultiConfig.IsAllRowRequired,
+                AlternateRowColors = MatrixMultiConfig.AlternateRowColors,
+                MobileLayout = MatrixMultiConfig.MobileLayout,
+                DefaultCellType = MatrixMultiConfig.DefaultCellType ?? "dropdown"
             },
             _ => null
         };
@@ -429,5 +764,61 @@
         public bool AllowDelete { get; set; } = true;
         public int? MaxRows { get; set; }
         public string EditorMode { get; set; } = "Modal";
+    }
+
+    public class ToggleConfigModel
+    {
+        public string OnLabelEn { get; set; } = "Yes";
+        public string OnLabelFr { get; set; } = "Oui";
+        public string OffLabelEn { get; set; } = "No";
+        public string OffLabelFr { get; set; } = "Non";
+        public string OnColor { get; set; } = "#22c55e";
+        public string OffColor { get; set; } = "#e5e7eb";
+        public string Size { get; set; } = "medium";
+        public bool ShowLabels { get; set; } = true;
+        public bool DefaultValue { get; set; } = false;
+    }
+
+    public class RichTextConfigModel
+    {
+        public int EditorHeight { get; set; } = 300;
+        public bool AllowImages { get; set; } = false;
+        public bool AllowTables { get; set; } = false;
+        public bool AllowHtmlSource { get; set; } = false;
+        public int? MaxCharacters { get; set; }
+    }
+
+    public class SignatureConfigModel
+    {
+        public int CanvasWidth { get; set; } = 400;
+        public int CanvasHeight { get; set; } = 200;
+        public string StrokeColor { get; set; } = "#000000";
+        public int StrokeWidth { get; set; } = 2;
+        public string OutputFormat { get; set; } = "png";
+        public bool AllowTypedSignature { get; set; } = false;
+        public bool ShowTimestamp { get; set; } = true;
+        public string? LegalTextEn { get; set; }
+        public string? LegalTextFr { get; set; }
+    }
+
+    public class ImageConfigModel
+    {
+        public string Mode { get; set; } = "Upload";
+        public string? ImageUrl { get; set; }
+        public string? AltTextEn { get; set; }
+        public int? MaxWidth { get; set; }
+        public int? MaxHeight { get; set; }
+        public bool AllowCrop { get; set; } = false;
+        public string? CropAspectRatio { get; set; }
+    }
+
+    public class MatrixConfigModel
+    {
+        public int RowCount { get; set; } = 0;
+        public int ColumnCount { get; set; } = 0;
+        public bool IsAllRowRequired { get; set; } = false;
+        public bool AlternateRowColors { get; set; } = true;
+        public string MobileLayout { get; set; } = "stacked";
+        public string? DefaultCellType { get; set; } = "dropdown";
     }
 }

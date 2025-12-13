@@ -1,0 +1,118 @@
+@* Image field configuration panel *@
+
+<div class="config-panel">
+    <div class="config-group">
+        <label class="config-label">
+            <i class="bi bi-image"></i>
+            Mode
+        </label>
+        <select class="config-select"
+                value="@Config.Mode"
+                @onchange="e => UpdateConfig(c => c.Mode = e.Value?.ToString() ?? DefaultMode)">
+            <option value="Upload">Upload - User uploads an image</option>
+            <option value="Display">Display - Show a static image</option>
+        </select>
+    </div>
+
+    @if (Config.Mode == "Display")
+    {
+        <div class="config-group">
+            <label class="config-label">
+                <i class="bi bi-link-45deg"></i>
+                Image URL
+            </label>
+            <input type="url" class="config-input"
+                   placeholder="https://example.com/image.png"
+                   value="@Config.ImageUrl"
+                   @onchange="e => UpdateConfig(c => c.ImageUrl = e.Value?.ToString())" />
+        </div>
+
+        <div class="config-group">
+            <label class="config-label">
+                <i class="bi bi-chat-left-text"></i>
+                Alt Text (EN)
+            </label>
+            <input type="text" class="config-input"
+                   placeholder="Description for accessibility"
+                   value="@Config.AltTextEn"
+                   @onchange="e => UpdateConfig(c => c.AltTextEn = e.Value?.ToString())" />
+        </div>
+    }
+
+    <div class="config-row">
+        <div class="config-group">
+            <label class="config-label">
+                <i class="bi bi-arrows-angle-expand"></i>
+                Max Width (px)
+            </label>
+            <input type="number" class="config-input"
+                   placeholder="No limit"
+                   value="@Config.MaxWidth"
+                   min="50" max="2000"
+                   @onchange="e => UpdateConfig(c => c.MaxWidth = int.TryParse(e.Value?.ToString(), out var v) && v > 0 ? v : null)" />
+        </div>
+        <div class="config-group">
+            <label class="config-label">
+                <i class="bi bi-arrows-angle-expand"></i>
+                Max Height (px)
+            </label>
+            <input type="number" class="config-input"
+                   placeholder="No limit"
+                   value="@Config.MaxHeight"
+                   min="50" max="2000"
+                   @onchange="e => UpdateConfig(c => c.MaxHeight = int.TryParse(e.Value?.ToString(), out var v) && v > 0 ? v : null)" />
+        </div>
+    </div>
+
+    @if (Config.Mode == "Upload")
+    {
+        <div class="config-group">
+            <label class="config-label">Cropping</label>
+            <div class="config-toggles">
+                <label class="toggle-option">
+                    <input type="checkbox"
+                           checked="@Config.AllowCrop"
+                           @onchange="e => UpdateConfig(c => c.AllowCrop = (bool)(e.Value ?? false))" />
+                    <span>Allow image cropping</span>
+                </label>
+            </div>
+        </div>
+
+        @if (Config.AllowCrop)
+        {
+            <div class="config-group">
+                <label class="config-label">
+                    <i class="bi bi-aspect-ratio"></i>
+                    Crop Aspect Ratio
+                </label>
+                <select class="config-select"
+                        value="@Config.CropAspectRatio"
+                        @onchange="e => UpdateConfig(c => c.CropAspectRatio = e.Value?.ToString())">
+                    <option value="">Free crop</option>
+                    <option value="1:1">1:1 (Square)</option>
+                    <option value="4:3">4:3 (Standard)</option>
+                    <option value="16:9">16:9 (Widescreen)</option>
+                    <option value="3:2">3:2 (Photo)</option>
+                </select>
+            </div>
+        }
+    }
+
+    <div class="config-info">
+        <i class="bi bi-info-circle"></i>
+        <span>Allowed formats: JPG, JPEG, PNG, GIF, WebP. Max file size: 5MB.</span>
+    </div>
+</div>
+
+@code {
+    [Parameter] public TypeConfigButton.ImageConfigModel Config { get; set; } = new();
+    [Parameter] public EventCallback<TypeConfigButton.ImageConfigModel> OnChange { get; set; }
+
+    private const string DefaultMode = "Upload";
+
+    private async Task UpdateConfig(Action<TypeConfigButton.ImageConfigModel> update)
+    {
+        update(Config);
+        await OnChange.InvokeAsync(Config);
+    }
+}

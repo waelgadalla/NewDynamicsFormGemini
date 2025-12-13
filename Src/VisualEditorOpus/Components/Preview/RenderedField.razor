@@ -1,5 +1,6 @@
 @* Renders individual field based on FieldType *@
 @using FieldOption = DynamicForms.Core.V4.Schemas.FieldOption
+@using ImageConfig = DynamicForms.Core.V4.Schemas.ImageConfig
 
 <div class="form-field @(HasErrors ? "has-error" : "")">
     <label class="field-label">
@@ -136,6 +137,154 @@
                 {
                     <span class="file-name">@ValueString</span>
                 }
+            </div>
+            break;
+
+        case "RichText":
+            <div class="richtext-preview">
+                <div class="richtext-toolbar">
+                    <button type="button" class="toolbar-btn" title="Bold"><i class="bi bi-type-bold"></i></button>
+                    <button type="button" class="toolbar-btn" title="Italic"><i class="bi bi-type-italic"></i></button>
+                    <button type="button" class="toolbar-btn" title="Underline"><i class="bi bi-type-underline"></i></button>
+                    <span class="toolbar-divider"></span>
+                    <button type="button" class="toolbar-btn" title="Bullet List"><i class="bi bi-list-ul"></i></button>
+                    <button type="button" class="toolbar-btn" title="Numbered List"><i class="bi bi-list-ol"></i></button>
+                    <span class="toolbar-divider"></span>
+                    <button type="button" class="toolbar-btn" title="Link"><i class="bi bi-link-45deg"></i></button>
+                </div>
+                <div class="richtext-editor" contenteditable="true" @oninput="HandleInput">
+                    @((MarkupString)(ValueString))
+                </div>
+            </div>
+            break;
+
+        case "Signature":
+            <div class="signature-preview">
+                <div class="signature-canvas">
+                    <span class="signature-placeholder">
+                        <i class="bi bi-pen"></i>
+                        @(Language == "fr" ? "Signez ici" : "Sign here")
+                    </span>
+                </div>
+                <div class="signature-actions">
+                    <button type="button" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                        @(Language == "fr" ? "Effacer" : "Clear")
+                    </button>
+                </div>
+            </div>
+            break;
+
+        case "Image":
+            <div class="image-preview">
+                @if (Field.TypeConfig is ImageConfig imgConfig && imgConfig.Mode == "Display" && !string.IsNullOrEmpty(imgConfig.ImageUrl))
+                {
+                    <img src="@imgConfig.ImageUrl" alt="@(imgConfig.AltTextEn ?? "")" class="display-image" />
+                }
+                else
+                {
+                    <div class="image-upload-area">
+                        <i class="bi bi-image"></i>
+                        <span>@(Language == "fr" ? "Cliquez pour télécharger une image" : "Click to upload an image")</span>
+                    </div>
+                }
+            </div>
+            break;
+
+        case "MatrixSingle":
+            <div class="matrix-preview matrix-single">
+                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Strongly Disagree</th>
+                            <th>Disagree</th>
+                            <th>Neutral</th>
+                            <th>Agree</th>
+                            <th>Strongly Agree</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="row-label">Statement 1</td>
+                            @for (int i = 0; i < 5; i++)
+                            {
+                                <td><input type="radio" name="matrix_row1" /></td>
+                            }
+                        </tr>
+                        <tr class="alt-row">
+                            <td class="row-label">Statement 2</td>
+                            @for (int i = 0; i < 5; i++)
+                            {
+                                <td><input type="radio" name="matrix_row2" /></td>
+                            }
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            break;
+
+        case "MatrixMulti":
+            <div class="matrix-preview matrix-multi">
+                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Usage</th>
+                            <th>Experience</th>
+                            <th>Rating</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="row-label">Item 1</td>
+                            <td><select class="matrix-select"><option>Yes</option><option>No</option></select></td>
+                            <td><select class="matrix-select"><option>Beginner</option><option>Advanced</option></select></td>
+                            <td><input type="number" class="matrix-input" min="1" max="5" placeholder="1-5" /></td>
+                        </tr>
+                        <tr class="alt-row">
+                            <td class="row-label">Item 2</td>
+                            <td><select class="matrix-select"><option>Yes</option><option>No</option></select></td>
+                            <td><select class="matrix-select"><option>Beginner</option><option>Advanced</option></select></td>
+                            <td><input type="number" class="matrix-input" min="1" max="5" placeholder="1-5" /></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            break;
+
+        case "DataGrid":
+        case "Repeater":
+            <div class="datagrid-preview">
+                <table class="datagrid-table">
+                    <thead>
+                        <tr>
+                            <th>Column 1</th>
+                            <th>Column 2</th>
+                            <th>Column 3</th>
+                            <th class="action-col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="text" class="grid-input" placeholder="Value" /></td>
+                            <td><input type="text" class="grid-input" placeholder="Value" /></td>
+                            <td><input type="text" class="grid-input" placeholder="Value" /></td>
+                            <td class="action-col">
+                                <button type="button" class="btn-icon" title="Delete"><i class="bi bi-trash"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="4">
+                                <button type="button" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-plus"></i> @(Language == "fr" ? "Ajouter une ligne" : "Add Row")
+                                </button>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
             </div>
             break;
 

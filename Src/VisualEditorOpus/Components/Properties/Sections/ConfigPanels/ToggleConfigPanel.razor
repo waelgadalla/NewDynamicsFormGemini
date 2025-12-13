@@ -1,0 +1,124 @@
+@* Toggle/Switch configuration panel *@
+
+<div class="config-panel">
+    <div class="config-group">
+        <label class="config-label">Toggle Labels</label>
+        <div class="config-toggles">
+            <label class="toggle-option">
+                <input type="checkbox"
+                       checked="@Config.ShowLabels"
+                       @onchange="e => UpdateConfig(c => c.ShowLabels = (bool)(e.Value ?? false))" />
+                <span>Show labels next to toggle</span>
+            </label>
+        </div>
+    </div>
+
+    <div class="config-row">
+        <div class="config-group">
+            <label class="config-label">
+                <i class="bi bi-check-circle"></i>
+                On Label (EN)
+            </label>
+            <input type="text" class="config-input"
+                   value="@Config.OnLabelEn"
+                   @onchange="e => UpdateConfig(c => c.OnLabelEn = e.Value?.ToString() ?? DefaultOnEn)" />
+        </div>
+        <div class="config-group">
+            <label class="config-label">
+                <i class="bi bi-check-circle"></i>
+                On Label (FR)
+            </label>
+            <input type="text" class="config-input"
+                   value="@Config.OnLabelFr"
+                   @onchange="e => UpdateConfig(c => c.OnLabelFr = e.Value?.ToString() ?? DefaultOnFr)" />
+        </div>
+    </div>
+
+    <div class="config-row">
+        <div class="config-group">
+            <label class="config-label">
+                <i class="bi bi-x-circle"></i>
+                Off Label (EN)
+            </label>
+            <input type="text" class="config-input"
+                   value="@Config.OffLabelEn"
+                   @onchange="e => UpdateConfig(c => c.OffLabelEn = e.Value?.ToString() ?? DefaultOffEn)" />
+        </div>
+        <div class="config-group">
+            <label class="config-label">
+                <i class="bi bi-x-circle"></i>
+                Off Label (FR)
+            </label>
+            <input type="text" class="config-input"
+                   value="@Config.OffLabelFr"
+                   @onchange="e => UpdateConfig(c => c.OffLabelFr = e.Value?.ToString() ?? DefaultOffFr)" />
+        </div>
+    </div>
+
+    <div class="config-row">
+        <div class="config-group">
+            <label class="config-label">
+                <i class="bi bi-palette"></i>
+                On Color
+            </label>
+            <input type="color" class="config-color"
+                   value="@Config.OnColor"
+                   @onchange="e => UpdateConfig(c => c.OnColor = e.Value?.ToString() ?? DefaultOnColor)" />
+        </div>
+        <div class="config-group">
+            <label class="config-label">
+                <i class="bi bi-palette"></i>
+                Off Color
+            </label>
+            <input type="color" class="config-color"
+                   value="@Config.OffColor"
+                   @onchange="e => UpdateConfig(c => c.OffColor = e.Value?.ToString() ?? DefaultOffColor)" />
+        </div>
+    </div>
+
+    <div class="config-row">
+        <div class="config-group">
+            <label class="config-label">
+                <i class="bi bi-arrows-angle-expand"></i>
+                Size
+            </label>
+            <select class="config-select"
+                    value="@Config.Size"
+                    @onchange="e => UpdateConfig(c => c.Size = e.Value?.ToString() ?? DefaultSize)">
+                <option value="small">Small</option>
+                <option value="medium">Medium</option>
+                <option value="large">Large</option>
+            </select>
+        </div>
+        <div class="config-group">
+            <label class="config-label">Default Value</label>
+            <div class="config-toggles">
+                <label class="toggle-option">
+                    <input type="checkbox"
+                           checked="@Config.DefaultValue"
+                           @onchange="e => UpdateConfig(c => c.DefaultValue = (bool)(e.Value ?? false))" />
+                    <span>Start in On state</span>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public TypeConfigButton.ToggleConfigModel Config { get; set; } = new();
+    [Parameter] public EventCallback<TypeConfigButton.ToggleConfigModel> OnChange { get; set; }
+
+    private const string DefaultOnEn = "Yes";
+    private const string DefaultOnFr = "Oui";
+    private const string DefaultOffEn = "No";
+    private const string DefaultOffFr = "Non";
+    private const string DefaultOnColor = "#22c55e";
+    private const string DefaultOffColor = "#e5e7eb";
+    private const string DefaultSize = "medium";
+
+    private async Task UpdateConfig(Action<TypeConfigButton.ToggleConfigModel> update)
+    {
+        update(Config);
+        await OnChange.InvokeAsync(Config);
+    }
+}

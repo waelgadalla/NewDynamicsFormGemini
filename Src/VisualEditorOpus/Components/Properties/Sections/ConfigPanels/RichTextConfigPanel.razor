@@ -1,0 +1,66 @@
+@* Rich Text Editor configuration panel *@
+
+<div class="config-panel">
+    <div class="config-group">
+        <label class="config-label">
+            <i class="bi bi-arrows-vertical"></i>
+            Editor Height (px)
+        </label>
+        <input type="number" class="config-input"
+               value="@Config.EditorHeight"
+               min="100" max="1000" step="50"
+               @onchange="e => UpdateConfig(c => c.EditorHeight = int.TryParse(e.Value?.ToString(), out var v) ? v : 300)" />
+    </div>
+
+    <div class="config-group">
+        <label class="config-label">Toolbar Features</label>
+        <div class="config-toggles">
+            <label class="toggle-option">
+                <input type="checkbox"
+                       checked="@Config.AllowImages"
+                       @onchange="e => UpdateConfig(c => c.AllowImages = (bool)(e.Value ?? false))" />
+                <span><i class="bi bi-image"></i> Allow image insertion</span>
+            </label>
+            <label class="toggle-option">
+                <input type="checkbox"
+                       checked="@Config.AllowTables"
+                       @onchange="e => UpdateConfig(c => c.AllowTables = (bool)(e.Value ?? false))" />
+                <span><i class="bi bi-table"></i> Allow table insertion</span>
+            </label>
+            <label class="toggle-option">
+                <input type="checkbox"
+                       checked="@Config.AllowHtmlSource"
+                       @onchange="e => UpdateConfig(c => c.AllowHtmlSource = (bool)(e.Value ?? false))" />
+                <span><i class="bi bi-code-slash"></i> Allow HTML source editing</span>
+            </label>
+        </div>
+    </div>
+
+    <div class="config-group">
+        <label class="config-label">
+            <i class="bi bi-text-left"></i>
+            Maximum Characters
+        </label>
+        <input type="number" class="config-input"
+               value="@Config.MaxCharacters"
+               placeholder="No limit"
+               min="0"
+               @onchange="e => UpdateConfig(c => c.MaxCharacters = int.TryParse(e.Value?.ToString(), out var v) && v > 0 ? v : null)" />
+    </div>
+
+    <div class="config-info">
+        <i class="bi bi-info-circle"></i>
+        <span>The rich text editor provides formatting tools like bold, italic, lists, and links.</span>
+    </div>
+</div>
+
+@code {
+    [Parameter] public TypeConfigButton.RichTextConfigModel Config { get; set; } = new();
+    [Parameter] public EventCallback<TypeConfigButton.RichTextConfigModel> OnChange { get; set; }
+
+    private async Task UpdateConfig(Action<TypeConfigButton.RichTextConfigModel> update)
+    {
+        update(Config);
+        await OnChange.InvokeAsync(Config);
+    }
+}

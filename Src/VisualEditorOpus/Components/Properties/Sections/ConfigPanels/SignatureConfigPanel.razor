@@ -1,0 +1,114 @@
+@* Signature Pad configuration panel *@
+
+<div class="config-panel">
+    <div class="config-row">
+        <div class="config-group">
+            <label class="config-label">
+                <i class="bi bi-aspect-ratio"></i>
+                Canvas Width (px)
+            </label>
+            <input type="number" class="config-input"
+                   value="@Config.CanvasWidth"
+                   min="200" max="800" step="50"
+                   @onchange="e => UpdateConfig(c => c.CanvasWidth = int.TryParse(e.Value?.ToString(), out var v) ? v : 400)" />
+        </div>
+        <div class="config-group">
+            <label class="config-label">
+                <i class="bi bi-aspect-ratio"></i>
+                Canvas Height (px)
+            </label>
+            <input type="number" class="config-input"
+                   value="@Config.CanvasHeight"
+                   min="100" max="400" step="25"
+                   @onchange="e => UpdateConfig(c => c.CanvasHeight = int.TryParse(e.Value?.ToString(), out var v) ? v : 200)" />
+        </div>
+    </div>
+
+    <div class="config-row">
+        <div class="config-group">
+            <label class="config-label">
+                <i class="bi bi-palette"></i>
+                Stroke Color
+            </label>
+            <input type="color" class="config-color"
+                   value="@Config.StrokeColor"
+                   @onchange="e => UpdateConfig(c => c.StrokeColor = e.Value?.ToString() ?? DefaultStrokeColor)" />
+        </div>
+        <div class="config-group">
+            <label class="config-label">
+                <i class="bi bi-pencil"></i>
+                Stroke Width (px)
+            </label>
+            <input type="number" class="config-input"
+                   value="@Config.StrokeWidth"
+                   min="1" max="10"
+                   @onchange="e => UpdateConfig(c => c.StrokeWidth = int.TryParse(e.Value?.ToString(), out var v) ? v : 2)" />
+        </div>
+    </div>
+
+    <div class="config-group">
+        <label class="config-label">
+            <i class="bi bi-file-image"></i>
+            Output Format
+        </label>
+        <select class="config-select"
+                value="@Config.OutputFormat"
+                @onchange="e => UpdateConfig(c => c.OutputFormat = e.Value?.ToString() ?? DefaultFormat)">
+            <option value="png">PNG (transparent background)</option>
+            <option value="jpeg">JPEG (white background)</option>
+            <option value="svg">SVG (vector)</option>
+        </select>
+    </div>
+
+    <div class="config-group">
+        <label class="config-label">Options</label>
+        <div class="config-toggles">
+            <label class="toggle-option">
+                <input type="checkbox"
+                       checked="@Config.AllowTypedSignature"
+                       @onchange="e => UpdateConfig(c => c.AllowTypedSignature = (bool)(e.Value ?? false))" />
+                <span>Allow typed signature as alternative</span>
+            </label>
+            <label class="toggle-option">
+                <input type="checkbox"
+                       checked="@Config.ShowTimestamp"
+                       @onchange="e => UpdateConfig(c => c.ShowTimestamp = (bool)(e.Value ?? true))" />
+                <span>Show timestamp with signature</span>
+            </label>
+        </div>
+    </div>
+
+    <div class="config-group">
+        <label class="config-label">
+            <i class="bi bi-file-text"></i>
+            Legal Text (EN)
+        </label>
+        <textarea class="config-textarea" rows="2"
+                  placeholder="E.g., By signing below, I agree to the terms and conditions..."
+                  @onchange="e => UpdateConfig(c => c.LegalTextEn = e.Value?.ToString())">@Config.LegalTextEn</textarea>
+    </div>
+
+    <div class="config-group">
+        <label class="config-label">
+            <i class="bi bi-file-text"></i>
+            Legal Text (FR)
+        </label>
+        <textarea class="config-textarea" rows="2"
+                  placeholder="French translation of legal text..."
+                  @onchange="e => UpdateConfig(c => c.LegalTextFr = e.Value?.ToString())">@Config.LegalTextFr</textarea>
+    </div>
+</div>
+
+@code {
+    [Parameter] public TypeConfigButton.SignatureConfigModel Config { get; set; } = new();
+    [Parameter] public EventCallback<TypeConfigButton.SignatureConfigModel> OnChange { get; set; }
+
+    private const string DefaultStrokeColor = "#000000";
+    private const string DefaultFormat = "png";
+
+    private async Task UpdateConfig(Action<TypeConfigButton.SignatureConfigModel> update)
+    {
+        update(Config);
+        await OnChange.InvokeAsync(Config);
+    }
+}
