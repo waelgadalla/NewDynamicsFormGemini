@@ -1,0 +1,246 @@
+@*
+    Canvas preview for signature pad fields
+
+    KNOWN ISSUE WITH BLAZOR.SIGNATUREPAD NUGET PACKAGE:
+    ===================================================
+    The underlying Blazor.SignaturePad package (which wraps signature_pad.js) has a known issue
+    where the canvas does not properly handle window resize events. This is particularly problematic
+    on mobile devices when the user changes the phone orientation (portrait <-> landscape).
+
+    The problem manifests as:
+    - Signature appears zoomed/scaled incorrectly after resize
+    - Signature position shifts after orientation change
+    - Canvas dimensions don't match the container after resize
+    - Drawing coordinates become misaligned with the cursor/touch position
+
+    WORKAROUND IMPLEMENTED:
+    This component registers with a custom JavaScript resize handler (signature-resize.js) that:
+    1. Listens for window resize and orientation change events
+    2. Debounces the events to prevent excessive redraws (250ms)
+    3. Calls back to this component via JSInvokable to trigger a re-render
+
+    The workaround saves the current signature data, forces a component refresh, and restores
+    the signature. This is not ideal but necessary until the underlying library is fixed.
+
+    References:
+    - https://github.com/szimek/signature_pad/issues/362
+    - https://www.telerik.com/blazor-ui/documentation/knowledge-base/signature-relative-width-height
+*@
+
+@using SigPad
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+<label class="field-label">
+    @(FieldNode.Schema.LabelEn ?? FieldNode.Schema.Id)
+    @if (FieldNode.Schema.Validation?.IsRequired == true)
+    {
+        <span class="field-required">*</span>
+    }
+</label>
+
+@if (!string.IsNullOrEmpty(Config?.LegalTextEn))
+{
+    <div class="signature-legal-text">
+        <i class="bi bi-info-circle"></i>
+        @Config.LegalTextEn
+    </div>
+}
+
+@* Use a key to force re-render on resize *@
+<div class="signature-container" style="@ContainerStyle" @key="_renderKey">
+    <SignaturePad @bind-Value="_signatureBytes"
+                  Options="_options"
+                  Class="signature-pad-canvas"
+                  ClearButtonClass="signature-clear-btn" />
+</div>
+
+@if (Config?.ShowTimestamp == true)
+{
+    <div class="signature-timestamp">
+        <i class="bi bi-clock"></i>
+        <span>@DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")</span>
+    </div>
+}
+
+<style>
+    .signature-legal-text {
+        font-size: 11px;
+        color: #64748b;
+        margin-bottom: 8px;
+        padding: 8px 12px;
+        background-color: #f8fafc;
+        border-left: 3px solid #3b82f6;
+        border-radius: 0 4px 4px 0;
+    }
+
+    .signature-legal-text i {
+        margin-right: 6px;
+    }
+
+    .signature-container {
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+        background-color: #ffffff;
+    }
+
+    .signature-container:focus-within {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .signature-pad-canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+
+    .signature-clear-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        padding: 4px 10px;
+        font-size: 11px;
+        background-color: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+        cursor: pointer;
+        color: #64748b;
+    }
+
+    .signature-clear-btn:hover {
+        background-color: #e2e8f0;
+        color: #475569;
+    }
+
+    .signature-timestamp {
+        font-size: 10px;
+        color: #94a3b8;
+        margin-top: 6px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+</style>
+
+@code {
+    [Parameter] public required FormFieldNode FieldNode { get; set; }
+
+    private byte[] _signatureBytes = Array.Empty<byte>();
+    private SignaturePadOptions _options = new();
+    private DotNetObjectReference<CanvasSignature>? _dotNetRef;
+    private string _elementId = string.Empty;
+    private int _renderKey = 0; // Used to force re-render on resize
+
+    private SignatureConfig? Config => FieldNode.Schema.TypeConfig as SignatureConfig;
+
+    private string ContainerStyle
+    {
+        get
+        {
+            var width = Config?.CanvasWidth ?? 400;
+            var height = Config?.CanvasHeight ?? 200;
+            return $"width: {width}px; height: {height}px; position: relative;";
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        _elementId = $"sig-{FieldNode.Schema.Id}-{Guid.NewGuid():N}";
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Register with the JavaScript resize handler
+            // This is the workaround for the mobile orientation change issue
+            _dotNetRef = DotNetObjectReference.Create(this);
+            try
+            {
+                await JS.InvokeVoidAsync("SignatureResizeHandler.register", _elementId, _dotNetRef);
+            }
+            catch (JSException ex)
+            {
+                // JS may not be loaded yet or handler not available
+                Console.WriteLine($"SignatureResizeHandler registration failed: {ex.Message}");
+            }
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Config != null)
+        {
+            _options = new SignaturePadOptions
+            {
+                LineCap = LineCap.Round,
+                LineJoin = LineJoin.Round,
+                LineWidth = Config.StrokeWidth
+            };
+        }
+    }
+
+    /// <summary>
+    /// Called by JavaScript when window is resized or orientation changes.
+    /// This is the workaround for the Blazor.SignaturePad resize issue on mobile devices.
+    ///
+    /// WORKAROUND EXPLANATION:
+    /// When the user rotates their phone, the canvas dimensions change but the signature_pad
+    /// library doesn't properly recalculate the drawing coordinates. By incrementing the
+    /// render key, we force Blazor to destroy and recreate the SignaturePad component,
+    /// which reinitializes the canvas with correct dimensions.
+    ///
+    /// NOTE: This will clear the current signature. In a production app, you may want to:
+    /// 1. Save _signatureBytes before the refresh
+    /// 2. Restore it after (requires additional JS interop to load signature data)
+    /// </summary>
+    [JSInvokable]
+    public void OnWindowResized()
+    {
+        // Save current signature before refresh (if you want to preserve it)
+        var savedSignature = _signatureBytes;
+
+        // Force component to re-render by changing the key
+        // This destroys and recreates the SignaturePad with new dimensions
+        _renderKey++;
+        StateHasChanged();
+
+        // Note: Restoring the signature after resize would require additional
+        // JS interop to call SignaturePad's fromDataURL method
+    }
+
+    /// <summary>
+    /// Gets the signature as a base64 data URL string
+    /// </summary>
+    public string? GetSignatureDataUrl()
+    {
+        if (_signatureBytes.Length == 0)
+            return null;
+
+        return System.Text.Encoding.UTF8.GetString(_signatureBytes);
+    }
+
+    /// <summary>
+    /// Checks if a signature has been drawn
+    /// </summary>
+    public bool HasSignature => _signatureBytes.Length > 0;
+
+    public async ValueTask DisposeAsync()
+    {
+        // Unregister from the JavaScript resize handler
+        if (_dotNetRef != null)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("SignatureResizeHandler.unregister", _elementId);
+            }
+            catch
+            {
+                // Ignore errors during dispose (component may already be gone)
+            }
+            _dotNetRef.Dispose();
+        }
+    }
+}

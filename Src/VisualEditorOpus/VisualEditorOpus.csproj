@@ -12,4 +12,8 @@
     <ProjectReference Include="..\DynamicForms.SqlServer\DynamicForms.SqlServer.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Blazor.SignaturePad" Version="10.0.0" />
+  </ItemGroup>
+
 </Project>

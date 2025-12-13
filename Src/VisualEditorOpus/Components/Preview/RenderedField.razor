@@ -1,6 +1,16 @@
-@* Renders individual field based on FieldType *@
+@*
+    Renders individual field based on FieldType
+
+    NOTE ON SIGNATURE PAD RESIZE ISSUE:
+    See CanvasSignature.razor for detailed documentation about the known Blazor.SignaturePad
+    resize issue on mobile devices during orientation changes.
+*@
 @using FieldOption = DynamicForms.Core.V4.Schemas.FieldOption
 @using ImageConfig = DynamicForms.Core.V4.Schemas.ImageConfig
+@using SignatureConfig = DynamicForms.Core.V4.Schemas.SignatureConfig
+@using SigPad
+@implements IAsyncDisposable
+@inject IJSRuntime JS
 
 <div class="form-field @(HasErrors ? "has-error" : "")">
     <label class="field-label">
@@ -159,20 +169,39 @@
             break;
 
         case "Signature":
-            <div class="signature-preview">
-                <div class="signature-canvas">
-                    <span class="signature-placeholder">
-                        <i class="bi bi-pen"></i>
-                        @(Language == "fr" ? "Signez ici" : "Sign here")
-                    </span>
+            @* See CanvasSignature.razor for detailed notes on the resize workaround *@
+            @if (GetSignatureConfig() is SignatureConfig sigConfig)
+            {
+                @if (!string.IsNullOrEmpty(sigConfig.LegalTextEn))
+                {
+                    <div class="signature-legal-text">
+                        <i class="bi bi-info-circle"></i>
+                        @(Language == "fr" && !string.IsNullOrEmpty(sigConfig.LegalTextFr) ? sigConfig.LegalTextFr : sigConfig.LegalTextEn)
+                    </div>
+                }
+                <div class="signature-preview" @key="_signatureRenderKey" style="width: @(sigConfig.CanvasWidth)px; height: @(sigConfig.CanvasHeight)px; border: 2px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+                    <SignaturePad @bind-Value="_signatureBytes"
+                                  Options="_signatureOptions"
+                                  style="width: 100%; height: 100%;"
+                                  ClearButtonClass="signature-clear-btn" />
                 </div>
-                <div class="signature-actions">
-                    <button type="button" class="btn btn-sm btn-outline-secondary">
-                        <i class="bi bi-arrow-counterclockwise"></i>
-                        @(Language == "fr" ? "Effacer" : "Clear")
-                    </button>
+                @if (sigConfig.ShowTimestamp)
+                {
+                    <div class="signature-timestamp">
+                        <i class="bi bi-clock"></i>
+                        <span>@DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")</span>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="signature-preview" @key="_signatureRenderKey" style="width: 400px; height: 200px; border: 2px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+                    <SignaturePad @bind-Value="_signatureBytes"
+                                  Options="_signatureOptions"
+                                  style="width: 100%; height: 100%;"
+                                  ClearButtonClass="signature-clear-btn" />
                 </div>
-            </div>
+            }
             break;
 
         case "Image":
@@ -321,6 +350,19 @@
     [Parameter] public IEnumerable<string> Errors { get; set; } = Enumerable.Empty<string>();
     [Parameter] public EventCallback<object> OnValueChange { get; set; }
 
+    // Signature pad fields - includes resize workaround for mobile orientation changes
+    // See CanvasSignature.razor for detailed documentation on the known Blazor.SignaturePad issue
+    private byte[] _signatureBytes = Array.Empty<byte>();
+    private SignaturePadOptions _signatureOptions = new()
+    {
+        LineCap = LineCap.Round,
+        LineJoin = LineJoin.Round,
+        LineWidth = 2
+    };
+    private DotNetObjectReference<RenderedField>? _dotNetRef;
+    private string _elementId = string.Empty;
+    private int _signatureRenderKey = 0; // Used to force re-render on resize (workaround for mobile orientation)
+
     private bool HasErrors => Errors.Any();
     private string ValueString => Value?.ToString() ?? "";
 
@@ -345,6 +387,8 @@
         "Password" => "password",
         _ => "text"
     };
+
+    private SignatureConfig? GetSignatureConfig() => Field.TypeConfig as SignatureConfig;
 
     private string GetLabel(string? en, string? fr) =>
         Language == "fr" && !string.IsNullOrEmpty(fr) ? fr : en ?? Field.Id;
@@ -394,5 +438,55 @@
             list.Add(value);
 
         await OnValueChange.InvokeAsync(list);
+    }
+
+    // Signature pad resize handling - workaround for mobile orientation change issue
+    protected override void OnInitialized()
+    {
+        _elementId = $"rendered-sig-{Field.Id}-{Guid.NewGuid():N}";
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && Field.FieldType == "Signature")
+        {
+            // Register with the JavaScript resize handler for signature fields only
+            _dotNetRef = DotNetObjectReference.Create(this);
+            try
+            {
+                await JS.InvokeVoidAsync("SignatureResizeHandler.register", _elementId, _dotNetRef);
+            }
+            catch (JSException)
+            {
+                // JS may not be loaded yet or handler not available - gracefully degrade
+            }
+        }
+    }
+
+    /// <summary>
+    /// Called by JavaScript when window is resized or orientation changes.
+    /// Workaround for the Blazor.SignaturePad resize issue on mobile devices.
+    /// </summary>
+    [JSInvokable]
+    public void OnWindowResized()
+    {
+        _signatureRenderKey++;
+        StateHasChanged();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_dotNetRef != null)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("SignatureResizeHandler.unregister", _elementId);
+            }
+            catch
+            {
+                // Ignore errors during dispose
+            }
+            _dotNetRef.Dispose();
+        }
     }
 }
