@@ -9,6 +9,7 @@
     <div class="borders-section">
         @if (Borders is not null)
         {
+            @* Basic Mode: Corner radius slider and presets only *@
             <div class="prop-group">
                 <label class="prop-label">Corner Radius</label>
                 <div class="radius-slider">
@@ -23,53 +24,6 @@
                     <div class="radius-box" style="border-radius: @Borders.RadiusMedium;">M</div>
                     <div class="radius-box" style="border-radius: @Borders.RadiusLarge;">L</div>
                     <div class="radius-box" style="border-radius: @Borders.RadiusXLarge;">XL</div>
-                </div>
-            </div>
-
-            <div class="prop-row">
-                <div class="prop-group">
-                    <label class="prop-label">Border Width</label>
-                    <div class="size-input">
-                        <input type="number" class="prop-input"
-                               value="@ParsePx(Borders.BorderWidth)"
-                               @onchange="HandleBorderWidthChange"
-                               min="0" max="4" step="1" />
-                        <span class="size-unit">px</span>
-                    </div>
-                </div>
-                <div class="prop-group">
-                    <label class="prop-label">Border Style</label>
-                    <SelectInput Value="@Borders.BorderStyle"
-                                 ValueChanged="HandleBorderStyleChange"
-                                 Options="@_borderStyleOptions"
-                                 ShowLabel="false"
-                                 Size="prop" />
-                </div>
-            </div>
-
-            <div class="prop-group">
-                <span class="group-label">Focus Ring</span>
-                <div class="prop-row">
-                    <div class="prop-group">
-                        <label class="prop-label">Width</label>
-                        <div class="size-input">
-                            <input type="number" class="prop-input"
-                                   value="@ParsePx(Borders.FocusRingWidth)"
-                                   @onchange="HandleFocusWidthChange"
-                                   min="1" max="4" step="1" />
-                            <span class="size-unit">px</span>
-                        </div>
-                    </div>
-                    <div class="prop-group">
-                        <label class="prop-label">Offset</label>
-                        <div class="size-input">
-                            <input type="number" class="prop-input"
-                                   value="@ParsePx(Borders.FocusRingOffset)"
-                                   @onchange="HandleFocusOffsetChange"
-                                   min="0" max="4" step="1" />
-                            <span class="size-unit">px</span>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -96,6 +50,56 @@
                     </button>
                 </div>
             </div>
+
+            @if (IsAdvancedMode)
+            {
+                <div class="prop-row">
+                    <div class="prop-group">
+                        <label class="prop-label">Border Width</label>
+                        <div class="size-input">
+                            <input type="number" class="prop-input"
+                                   value="@ParsePx(Borders.BorderWidth)"
+                                   @onchange="HandleBorderWidthChange"
+                                   min="0" max="4" step="1" />
+                            <span class="size-unit">px</span>
+                        </div>
+                    </div>
+                    <div class="prop-group">
+                        <label class="prop-label">Border Style</label>
+                        <SelectInput Value="@Borders.BorderStyle"
+                                     ValueChanged="HandleBorderStyleChange"
+                                     Options="@_borderStyleOptions"
+                                     ShowLabel="false"
+                                     Size="prop" />
+                    </div>
+                </div>
+
+                <div class="prop-group">
+                    <span class="group-label">Focus Ring</span>
+                    <div class="prop-row">
+                        <div class="prop-group">
+                            <label class="prop-label">Width</label>
+                            <div class="size-input">
+                                <input type="number" class="prop-input"
+                                       value="@ParsePx(Borders.FocusRingWidth)"
+                                       @onchange="HandleFocusWidthChange"
+                                       min="1" max="4" step="1" />
+                                <span class="size-unit">px</span>
+                            </div>
+                        </div>
+                        <div class="prop-group">
+                            <label class="prop-label">Offset</label>
+                            <div class="size-input">
+                                <input type="number" class="prop-input"
+                                       value="@ParsePx(Borders.FocusRingOffset)"
+                                       @onchange="HandleFocusOffsetChange"
+                                       min="0" max="4" step="1" />
+                                <span class="size-unit">px</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
         }
     </div>
 </PropertySection>
@@ -104,6 +108,7 @@
     [Inject] private IThemeEditorStateService ThemeState { get; set; } = default!;
 
     private ThemeBorders? Borders => ThemeState.CurrentTheme?.Borders;
+    private bool IsAdvancedMode => ThemeState.IsAdvancedMode;
 
     private bool IsSharpRadius => Borders?.RadiusMedium == "0px";
     private bool IsRoundedRadius => Borders?.RadiusMedium == "8px" || Borders?.RadiusMedium == "6px";
@@ -122,9 +127,15 @@
     protected override void OnInitialized()
     {
         ThemeState.OnThemeChanged += HandleThemeChanged;
+        ThemeState.OnAdvancedModeChanged += HandleAdvancedModeChanged;
     }
 
     private void HandleThemeChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void HandleAdvancedModeChanged(bool _)
     {
         InvokeAsync(StateHasChanged);
     }
@@ -218,5 +229,6 @@
     public void Dispose()
     {
         ThemeState.OnThemeChanged -= HandleThemeChanged;
+        ThemeState.OnAdvancedModeChanged -= HandleAdvancedModeChanged;
     }
 }

@@ -1,0 +1,270 @@
+@* Shadow editor component with offset, blur, spread, and color controls *@
+
+<div class="shadow-editor @CssClass">
+    @if (!string.IsNullOrEmpty(Label))
+    {
+        <span class="shadow-label">@Label</span>
+    }
+
+    <div class="shadow-controls">
+        <div class="control-row">
+            <div class="control-group">
+                <label class="control-label">X</label>
+                <div class="control-input">
+                    <input type="number" class="prop-input"
+                           value="@_offsetX"
+                           @onchange="HandleOffsetXChange"
+                           min="-20" max="20" step="1" />
+                    <span class="unit">px</span>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">Y</label>
+                <div class="control-input">
+                    <input type="number" class="prop-input"
+                           value="@_offsetY"
+                           @onchange="HandleOffsetYChange"
+                           min="-20" max="20" step="1" />
+                    <span class="unit">px</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-row">
+            <div class="control-group">
+                <label class="control-label">Blur</label>
+                <div class="control-input">
+                    <input type="number" class="prop-input"
+                           value="@_blur"
+                           @onchange="HandleBlurChange"
+                           min="0" max="50" step="1" />
+                    <span class="unit">px</span>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">Spread</label>
+                <div class="control-input">
+                    <input type="number" class="prop-input"
+                           value="@_spread"
+                           @onchange="HandleSpreadChange"
+                           min="-20" max="20" step="1" />
+                    <span class="unit">px</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-row">
+            <div class="control-group color-control">
+                <label class="control-label">Color</label>
+                <div class="color-row">
+                    <input type="color" class="color-input"
+                           value="@_color"
+                           @onchange="HandleColorChange" />
+                    <div class="opacity-input">
+                        <input type="number" class="prop-input"
+                               value="@_opacity"
+                               @onchange="HandleOpacityChange"
+                               min="0" max="100" step="5" />
+                        <span class="unit">%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="shadow-preview">
+        <div class="preview-box" style="box-shadow: @ComputedShadow;">
+            <span>Preview</span>
+        </div>
+    </div>
+
+    @if (ShowReset)
+    {
+        <button type="button" class="reset-btn" @onclick="HandleReset" title="Reset to default">
+            <i class="bi bi-arrow-counterclockwise"></i>
+            Reset
+        </button>
+    }
+</div>
+
+@code {
+    [Parameter] public string Value { get; set; } = "0 4px 6px rgba(0, 0, 0, 0.1)";
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? CssClass { get; set; }
+    [Parameter] public string DefaultValue { get; set; } = "0 4px 6px rgba(0, 0, 0, 0.1)";
+    [Parameter] public bool ShowReset { get; set; } = true;
+
+    private int _offsetX;
+    private int _offsetY;
+    private int _blur;
+    private int _spread;
+    private string _color = "#000000";
+    private int _opacity = 10;
+
+    private string ComputedShadow => $"{_offsetX}px {_offsetY}px {_blur}px {_spread}px rgba({HexToRgb(_color)}, {_opacity / 100.0:F2})";
+
+    protected override void OnParametersSet()
+    {
+        ParseShadowValue(Value);
+    }
+
+    private void ParseShadowValue(string shadow)
+    {
+        if (string.IsNullOrEmpty(shadow) || shadow == "none")
+        {
+            _offsetX = 0;
+            _offsetY = 0;
+            _blur = 0;
+            _spread = 0;
+            _color = "#000000";
+            _opacity = 0;
+            return;
+        }
+
+        // Try to parse simple shadow: "0 4px 6px rgba(0, 0, 0, 0.1)"
+        // or "0 4px 6px -1px rgba(0, 0, 0, 0.1)"
+        try
+        {
+            // Extract rgba values first
+            var rgbaStart = shadow.IndexOf("rgba(", StringComparison.OrdinalIgnoreCase);
+            if (rgbaStart == -1)
+            {
+                rgbaStart = shadow.IndexOf("rgb(", StringComparison.OrdinalIgnoreCase);
+            }
+
+            if (rgbaStart >= 0)
+            {
+                var beforeRgba = shadow.Substring(0, rgbaStart).Trim();
+                var parts = beforeRgba.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                if (parts.Length >= 2)
+                {
+                    _offsetX = ParsePxValue(parts[0]);
+                    _offsetY = ParsePxValue(parts[1]);
+                    _blur = parts.Length > 2 ? ParsePxValue(parts[2]) : 0;
+                    _spread = parts.Length > 3 ? ParsePxValue(parts[3]) : 0;
+                }
+
+                // Parse color
+                var rgbaEnd = shadow.IndexOf(')', rgbaStart);
+                if (rgbaEnd > rgbaStart)
+                {
+                    var rgbaContent = shadow.Substring(rgbaStart, rgbaEnd - rgbaStart + 1);
+                    var isRgba = rgbaContent.StartsWith("rgba", StringComparison.OrdinalIgnoreCase);
+                    rgbaContent = rgbaContent.Replace("rgba(", "").Replace("rgb(", "").Replace(")", "");
+                    var colorParts = rgbaContent.Split(',');
+
+                    if (colorParts.Length >= 3)
+                    {
+                        int.TryParse(colorParts[0].Trim(), out var r);
+                        int.TryParse(colorParts[1].Trim(), out var g);
+                        int.TryParse(colorParts[2].Trim(), out var b);
+                        _color = $"#{r:X2}{g:X2}{b:X2}";
+
+                        if (isRgba && colorParts.Length >= 4 && double.TryParse(colorParts[3].Trim(), out var alpha))
+                        {
+                            _opacity = (int)(alpha * 100);
+                        }
+                        else
+                        {
+                            _opacity = 100;
+                        }
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // Default values on parse error
+            _offsetX = 0;
+            _offsetY = 4;
+            _blur = 6;
+            _spread = 0;
+            _color = "#000000";
+            _opacity = 10;
+        }
+    }
+
+    private static int ParsePxValue(string value)
+    {
+        var numeric = value.Replace("px", "").Trim();
+        return int.TryParse(numeric, out var result) ? result : 0;
+    }
+
+    private static string HexToRgb(string hex)
+    {
+        hex = hex.TrimStart('#');
+        if (hex.Length == 6)
+        {
+            var r = Convert.ToInt32(hex.Substring(0, 2), 16);
+            var g = Convert.ToInt32(hex.Substring(2, 2), 16);
+            var b = Convert.ToInt32(hex.Substring(4, 2), 16);
+            return $"{r}, {g}, {b}";
+        }
+        return "0, 0, 0";
+    }
+
+    private async Task UpdateValue()
+    {
+        var shadow = _opacity == 0 ? "none" : ComputedShadow;
+        await ValueChanged.InvokeAsync(shadow);
+    }
+
+    private async Task HandleOffsetXChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+        {
+            _offsetX = value;
+            await UpdateValue();
+        }
+    }
+
+    private async Task HandleOffsetYChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+        {
+            _offsetY = value;
+            await UpdateValue();
+        }
+    }
+
+    private async Task HandleBlurChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+        {
+            _blur = Math.Max(0, value);
+            await UpdateValue();
+        }
+    }
+
+    private async Task HandleSpreadChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+        {
+            _spread = value;
+            await UpdateValue();
+        }
+    }
+
+    private async Task HandleColorChange(ChangeEventArgs e)
+    {
+        _color = e.Value?.ToString() ?? "#000000";
+        await UpdateValue();
+    }
+
+    private async Task HandleOpacityChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+        {
+            _opacity = Math.Clamp(value, 0, 100);
+            await UpdateValue();
+        }
+    }
+
+    private async Task HandleReset()
+    {
+        ParseShadowValue(DefaultValue);
+        await ValueChanged.InvokeAsync(DefaultValue);
+    }
+}

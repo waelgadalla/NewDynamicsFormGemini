@@ -1,0 +1,47 @@
+@* 9-point grid position selector for background/logo positioning *@
+
+<div class="position-selector @CssClass">
+    @if (!string.IsNullOrEmpty(Label))
+    {
+        <label class="position-label">@Label</label>
+    }
+    <div class="position-grid">
+        @foreach (var pos in _positions)
+        {
+            <button type="button"
+                    class="position-btn @(Value == pos.Value ? "active" : "")"
+                    @onclick="@(() => SelectPosition(pos.Value))"
+                    title="@pos.Label">
+                <span class="position-dot"></span>
+            </button>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Value { get; set; } = "center";
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? CssClass { get; set; }
+
+    private static readonly PositionOption[] _positions = new[]
+    {
+        new PositionOption("top-left", "Top Left"),
+        new PositionOption("top", "Top Center"),
+        new PositionOption("top-right", "Top Right"),
+        new PositionOption("left", "Center Left"),
+        new PositionOption("center", "Center"),
+        new PositionOption("right", "Center Right"),
+        new PositionOption("bottom-left", "Bottom Left"),
+        new PositionOption("bottom", "Bottom Center"),
+        new PositionOption("bottom-right", "Bottom Right")
+    };
+
+    private async Task SelectPosition(string position)
+    {
+        Value = position;
+        await ValueChanged.InvokeAsync(position);
+    }
+
+    private record PositionOption(string Value, string Label);
+}

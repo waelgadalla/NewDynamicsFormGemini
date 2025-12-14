@@ -1,0 +1,479 @@
+@* Header customization section with logo, background, and layout controls *@
+@implements IDisposable
+
+@using DynamicForms.Models.Theming
+@using VisualEditorOpus.Services.Theming
+@using VisualEditorOpus.Components.Properties
+@using VisualEditorOpus.Components.Theming.Editor.Controls
+
+<PropertySection Title="Header" Icon="bi-card-heading">
+    <div class="header-section">
+        @if (Header is not null)
+        {
+            @* Enable/Disable Toggle *@
+            <div class="prop-group">
+                <div class="toggle-row">
+                    <span class="toggle-label">Enable Header</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox"
+                               checked="@Header.Enabled"
+                               @onchange="HandleEnabledChange" />
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            @if (Header.Enabled)
+            {
+                @* Logo Settings - Basic Mode *@
+                <div class="prop-group">
+                    <span class="group-label">Logo</span>
+                    <ImageUpload Label="Logo Image"
+                                 Value="@Header.LogoUrl"
+                                 ValueChanged="HandleLogoUrlChange"
+                                 MaxSizeKb="200" />
+                </div>
+
+                @if (!string.IsNullOrEmpty(Header.LogoUrl))
+                {
+                    <div class="prop-row">
+                        <div class="prop-group">
+                            <label class="prop-label">Position</label>
+                            <SelectInput Value="@Header.LogoPosition"
+                                         ValueChanged="HandleLogoPositionChange"
+                                         Options="@_logoPositionOptions"
+                                         ShowLabel="false"
+                                         Size="prop" />
+                        </div>
+                        <div class="prop-group">
+                            <label class="prop-label">Max Height</label>
+                            <div class="size-input">
+                                <input type="number" class="prop-input"
+                                       value="@ParsePx(Header.LogoMaxHeight)"
+                                       @onchange="HandleLogoMaxHeightChange"
+                                       min="24" max="80" step="4" />
+                                <span class="size-unit">px</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @* Background Settings - Basic Mode *@
+                <div class="prop-group">
+                    <span class="group-label">Background</span>
+                    <div class="type-selector">
+                        <button type="button"
+                                class="type-btn @(Header.BackgroundType == "color" ? "active" : "")"
+                                @onclick="@(() => SetBackgroundType("color"))">
+                            <i class="bi bi-palette"></i>
+                            Color
+                        </button>
+                        <button type="button"
+                                class="type-btn @(Header.BackgroundType == "image" ? "active" : "")"
+                                @onclick="@(() => SetBackgroundType("image"))">
+                            <i class="bi bi-image"></i>
+                            Image
+                        </button>
+                        @if (IsAdvancedMode)
+                        {
+                            <button type="button"
+                                    class="type-btn @(Header.BackgroundType == "gradient" ? "active" : "")"
+                                    @onclick="@(() => SetBackgroundType("gradient"))">
+                                <i class="bi bi-rainbow"></i>
+                                Gradient
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                @if (Header.BackgroundType == "color")
+                {
+                    <div class="prop-group">
+                        <ColorInput Label="Background Color"
+                                    Value="@Header.BackgroundColor"
+                                    ValueChanged="HandleBackgroundColorChange" />
+                    </div>
+                }
+                else if (Header.BackgroundType == "image")
+                {
+                    <div class="prop-group">
+                        <ImageUpload Label="Background Image"
+                                     Value="@Header.BackgroundImage"
+                                     ValueChanged="HandleBackgroundImageChange"
+                                     MaxSizeKb="500" />
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Header.BackgroundImage) && IsAdvancedMode)
+                    {
+                        <div class="prop-row">
+                            <div class="prop-group">
+                                <label class="prop-label">Size</label>
+                                <SelectInput Value="@Header.BackgroundSize"
+                                             ValueChanged="HandleBackgroundSizeChange"
+                                             Options="@_backgroundSizeOptions"
+                                             ShowLabel="false"
+                                             Size="prop" />
+                            </div>
+                            <PositionSelector Label="Position"
+                                              Value="@Header.BackgroundPosition"
+                                              ValueChanged="HandleBackgroundPositionChange" />
+                        </div>
+                    }
+                }
+                else if (Header.BackgroundType == "gradient" && IsAdvancedMode)
+                {
+                    <div class="prop-group">
+                        <label class="prop-label">Gradient CSS</label>
+                        <input type="text" class="prop-input gradient-input"
+                               value="@Header.BackgroundGradient"
+                               @onchange="HandleGradientChange"
+                               placeholder="linear-gradient(135deg, #667eea 0%, #764ba2 100%)" />
+                        <span class="prop-hint">Enter a CSS gradient value</span>
+                    </div>
+                    <div class="gradient-preview" style="background: @(string.IsNullOrEmpty(Header.BackgroundGradient) ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" : Header.BackgroundGradient)">
+                        <span>Preview</span>
+                    </div>
+                }
+
+                @if (IsAdvancedMode)
+                {
+                    @* Overlay Settings - Advanced Mode *@
+                    <div class="prop-group">
+                        <span class="group-label">Overlay</span>
+                        <div class="toggle-row">
+                            <span class="toggle-label">Enable Overlay</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox"
+                                       checked="@Header.OverlayEnabled"
+                                       @onchange="HandleOverlayEnabledChange" />
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    @if (Header.OverlayEnabled)
+                    {
+                        <div class="prop-group">
+                            <ColorInput Label="Overlay Color"
+                                        Value="@GetOverlayHexColor()"
+                                        ValueChanged="HandleOverlayColorChange" />
+                            <div class="prop-group" style="margin-top: 8px;">
+                                <label class="prop-label">Opacity</label>
+                                <div class="slider-row">
+                                    <input type="range" class="slider"
+                                           min="0" max="100" step="5"
+                                           value="@GetOverlayOpacity()"
+                                           @onchange="HandleOverlayOpacityChange" />
+                                    <span class="slider-value">@GetOverlayOpacity()%</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @* Layout Settings - Advanced Mode *@
+                    <div class="prop-group">
+                        <span class="group-label">Layout</span>
+                        <div class="prop-row">
+                            <div class="prop-group">
+                                <label class="prop-label">Height</label>
+                                <SelectInput Value="@(_isAutoHeight ? "auto" : "fixed")"
+                                             ValueChanged="HandleHeightModeChange"
+                                             Options="@_heightModeOptions"
+                                             ShowLabel="false"
+                                             Size="prop" />
+                            </div>
+                            @if (!_isAutoHeight)
+                            {
+                                <div class="prop-group">
+                                    <label class="prop-label">Value</label>
+                                    <div class="size-input">
+                                        <input type="number" class="prop-input"
+                                               value="@ParsePx(Header.Height)"
+                                               @onchange="HandleHeightChange"
+                                               min="60" max="400" step="10" />
+                                        <span class="size-unit">px</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="prop-group" style="margin-top: 8px;">
+                            <label class="prop-label">Padding</label>
+                            <div class="size-input">
+                                <input type="number" class="prop-input"
+                                       value="@ParsePx(Header.Padding)"
+                                       @onchange="HandlePaddingChange"
+                                       min="8" max="64" step="4" />
+                                <span class="size-unit">px</span>
+                            </div>
+                        </div>
+
+                        <div class="prop-row" style="margin-top: 8px;">
+                            <div class="prop-group">
+                                <label class="prop-label">H-Align</label>
+                                <SelectInput Value="@Header.ContentAlignment"
+                                             ValueChanged="HandleContentAlignmentChange"
+                                             Options="@_horizontalAlignOptions"
+                                             ShowLabel="false"
+                                             Size="prop" />
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">V-Align</label>
+                                <SelectInput Value="@Header.VerticalAlignment"
+                                             ValueChanged="HandleVerticalAlignmentChange"
+                                             Options="@_verticalAlignOptions"
+                                             ShowLabel="false"
+                                             Size="prop" />
+                            </div>
+                        </div>
+
+                        <div class="toggle-row" style="margin-top: 12px;">
+                            <span class="toggle-label">Full Width</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox"
+                                       checked="@Header.FullWidth"
+                                       @onchange="HandleFullWidthChange" />
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                }
+            }
+        }
+    </div>
+</PropertySection>
+
+@code {
+    [Inject] private IThemeEditorStateService ThemeState { get; set; } = default!;
+
+    private ThemeHeader? Header => ThemeState.CurrentTheme?.Header;
+    private bool IsAdvancedMode => ThemeState.IsAdvancedMode;
+
+    private bool _isAutoHeight => Header?.Height == "auto" || string.IsNullOrEmpty(Header?.Height);
+
+    private static readonly IEnumerable<SelectOption> _logoPositionOptions = new SelectOption[]
+    {
+        new("left", "Left"),
+        new("center", "Center"),
+        new("right", "Right")
+    };
+
+    private static readonly IEnumerable<SelectOption> _backgroundSizeOptions = new SelectOption[]
+    {
+        new("cover", "Cover"),
+        new("contain", "Contain"),
+        new("auto", "Auto")
+    };
+
+    private static readonly IEnumerable<SelectOption> _heightModeOptions = new SelectOption[]
+    {
+        new("auto", "Auto"),
+        new("fixed", "Fixed")
+    };
+
+    private static readonly IEnumerable<SelectOption> _horizontalAlignOptions = new SelectOption[]
+    {
+        new("left", "Left"),
+        new("center", "Center"),
+        new("right", "Right")
+    };
+
+    private static readonly IEnumerable<SelectOption> _verticalAlignOptions = new SelectOption[]
+    {
+        new("top", "Top"),
+        new("center", "Center"),
+        new("bottom", "Bottom")
+    };
+
+    protected override void OnInitialized()
+    {
+        ThemeState.OnThemeChanged += HandleThemeChanged;
+        ThemeState.OnAdvancedModeChanged += HandleAdvancedModeChanged;
+    }
+
+    private void HandleThemeChanged() => InvokeAsync(StateHasChanged);
+    private void HandleAdvancedModeChanged(bool _) => InvokeAsync(StateHasChanged);
+
+    private void HandleEnabledChange(ChangeEventArgs e)
+    {
+        var enabled = e.Value as bool? ?? false;
+        ThemeState.UpdateHeader(h => h.Enabled = enabled);
+    }
+
+    private void HandleLogoUrlChange(string value)
+    {
+        ThemeState.UpdateHeader(h => h.LogoUrl = value);
+    }
+
+    private void HandleLogoPositionChange(string? value)
+    {
+        ThemeState.UpdateHeader(h => h.LogoPosition = value ?? "left");
+    }
+
+    private void HandleLogoMaxHeightChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+        {
+            ThemeState.UpdateHeader(h => h.LogoMaxHeight = value + "px");
+        }
+    }
+
+    private void SetBackgroundType(string type)
+    {
+        ThemeState.UpdateHeader(h => h.BackgroundType = type);
+    }
+
+    private void HandleBackgroundColorChange(string value)
+    {
+        ThemeState.UpdateHeader(h => h.BackgroundColor = value);
+    }
+
+    private void HandleBackgroundImageChange(string value)
+    {
+        ThemeState.UpdateHeader(h => h.BackgroundImage = value);
+    }
+
+    private void HandleBackgroundSizeChange(string? value)
+    {
+        ThemeState.UpdateHeader(h => h.BackgroundSize = value ?? "cover");
+    }
+
+    private void HandleBackgroundPositionChange(string value)
+    {
+        ThemeState.UpdateHeader(h => h.BackgroundPosition = value);
+    }
+
+    private void HandleGradientChange(ChangeEventArgs e)
+    {
+        ThemeState.UpdateHeader(h => h.BackgroundGradient = e.Value?.ToString() ?? "");
+    }
+
+    private void HandleOverlayEnabledChange(ChangeEventArgs e)
+    {
+        var enabled = e.Value as bool? ?? false;
+        ThemeState.UpdateHeader(h => h.OverlayEnabled = enabled);
+    }
+
+    private string GetOverlayHexColor()
+    {
+        var color = Header?.OverlayColor ?? "rgba(0, 0, 0, 0.3)";
+        // If it's already hex, return it
+        if (color.StartsWith("#")) return color.Length > 7 ? color.Substring(0, 7) : color;
+        // Try to extract from rgba
+        if (color.StartsWith("rgba"))
+        {
+            var parts = color.Replace("rgba(", "").Replace(")", "").Split(',');
+            if (parts.Length >= 3)
+            {
+                if (int.TryParse(parts[0].Trim(), out var r) &&
+                    int.TryParse(parts[1].Trim(), out var g) &&
+                    int.TryParse(parts[2].Trim(), out var b))
+                {
+                    return $"#{r:X2}{g:X2}{b:X2}";
+                }
+            }
+        }
+        return "#000000";
+    }
+
+    private int GetOverlayOpacity()
+    {
+        var color = Header?.OverlayColor ?? "rgba(0, 0, 0, 0.3)";
+        if (color.StartsWith("rgba"))
+        {
+            var parts = color.Replace("rgba(", "").Replace(")", "").Split(',');
+            if (parts.Length >= 4 && double.TryParse(parts[3].Trim(), out var alpha))
+            {
+                return (int)(alpha * 100);
+            }
+        }
+        return 30;
+    }
+
+    private void HandleOverlayColorChange(string hexColor)
+    {
+        var opacity = GetOverlayOpacity() / 100.0;
+        var rgba = HexToRgba(hexColor, opacity);
+        ThemeState.UpdateHeader(h => h.OverlayColor = rgba);
+    }
+
+    private void HandleOverlayOpacityChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var percent))
+        {
+            var hexColor = GetOverlayHexColor();
+            var rgba = HexToRgba(hexColor, percent / 100.0);
+            ThemeState.UpdateHeader(h => h.OverlayColor = rgba);
+        }
+    }
+
+    private static string HexToRgba(string hex, double alpha)
+    {
+        hex = hex.TrimStart('#');
+        if (hex.Length == 6)
+        {
+            var r = Convert.ToInt32(hex.Substring(0, 2), 16);
+            var g = Convert.ToInt32(hex.Substring(2, 2), 16);
+            var b = Convert.ToInt32(hex.Substring(4, 2), 16);
+            return $"rgba({r}, {g}, {b}, {alpha:F2})";
+        }
+        return $"rgba(0, 0, 0, {alpha:F2})";
+    }
+
+    private void HandleHeightModeChange(string? value)
+    {
+        if (value == "auto")
+        {
+            ThemeState.UpdateHeader(h => h.Height = "auto");
+        }
+        else
+        {
+            ThemeState.UpdateHeader(h => h.Height = "150px");
+        }
+    }
+
+    private void HandleHeightChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+        {
+            ThemeState.UpdateHeader(h => h.Height = value + "px");
+        }
+    }
+
+    private void HandlePaddingChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+        {
+            ThemeState.UpdateHeader(h => h.Padding = value + "px");
+        }
+    }
+
+    private void HandleContentAlignmentChange(string? value)
+    {
+        ThemeState.UpdateHeader(h => h.ContentAlignment = value ?? "left");
+    }
+
+    private void HandleVerticalAlignmentChange(string? value)
+    {
+        ThemeState.UpdateHeader(h => h.VerticalAlignment = value ?? "center");
+    }
+
+    private void HandleFullWidthChange(ChangeEventArgs e)
+    {
+        var fullWidth = e.Value as bool? ?? false;
+        ThemeState.UpdateHeader(h => h.FullWidth = fullWidth);
+    }
+
+    private static int ParsePx(string? value)
+    {
+        if (string.IsNullOrEmpty(value) || value == "auto") return 0;
+        var numericPart = value.Replace("px", "").Replace("rem", "").Replace("em", "").Trim();
+        return int.TryParse(numericPart, out var result) ? result : 0;
+    }
+
+    public void Dispose()
+    {
+        ThemeState.OnThemeChanged -= HandleThemeChanged;
+        ThemeState.OnAdvancedModeChanged -= HandleAdvancedModeChanged;
+    }
+}

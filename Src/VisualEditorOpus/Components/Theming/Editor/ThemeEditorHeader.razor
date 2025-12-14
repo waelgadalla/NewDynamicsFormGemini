@@ -49,9 +49,37 @@
                 <i class="bi bi-circle-half"></i>
             </button>
         </div>
+
+        @* Basic/Advanced mode toggle *@
+        <div class="editor-mode-toggle">
+            <span class="mode-label @(!ThemeState.IsAdvancedMode ? "active" : "")">Basic</span>
+            <label class="toggle-switch">
+                <input type="checkbox"
+                       checked="@ThemeState.IsAdvancedMode"
+                       @onchange="HandleAdvancedModeToggle" />
+                <span class="toggle-slider"></span>
+            </label>
+            <span class="mode-label @(ThemeState.IsAdvancedMode ? "active" : "")">Advanced</span>
+        </div>
     </div>
 
     <div class="header-actions">
+        @* Undo/Redo buttons *@
+        <div class="undo-redo-group">
+            <button class="btn btn-ghost btn-icon-sm"
+                    @onclick="HandleUndo"
+                    disabled="@(!ThemeState.CanUndo)"
+                    title="Undo (Ctrl+Z)">
+                <i class="bi bi-arrow-counterclockwise"></i>
+            </button>
+            <button class="btn btn-ghost btn-icon-sm"
+                    @onclick="HandleRedo"
+                    disabled="@(!ThemeState.CanRedo)"
+                    title="Redo (Ctrl+Y)">
+                <i class="bi bi-arrow-clockwise"></i>
+            </button>
+        </div>
+
         <div class="dropdown" @onfocusout="CloseActionsMenu">
             <Button Variant="ghost" Icon="bi-three-dots-vertical" OnClick="ToggleActionsMenu" Title="More Actions" />
             @if (_showActionsMenu)
@@ -85,16 +113,19 @@
     [Inject] private IThemeEditorStateService ThemeState { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
     [Inject] private IToastService ToastService { get; set; } = default!;
+    [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
 
     private bool _showActionsMenu;
     private string? _selectedPresetId;
     private IEnumerable<SelectOption> _presetOptions = Array.Empty<SelectOption>();
+    private DotNetObjectReference<ThemeEditorHeader>? _dotNetRef;
 
     private ThemeMode CurrentMode => ThemeState.CurrentTheme?.Mode ?? ThemeMode.Light;
 
     protected override void OnInitialized()
     {
         ThemeState.OnThemeChanged += HandleThemeChanged;
+        ThemeState.OnHistoryChanged += HandleHistoryChanged;
 
         // Build preset options
         var presets = ThemePresets.GetAllPresets()
@@ -106,9 +137,81 @@
             .ToList();
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dotNetRef = DotNetObjectReference.Create(this);
+            await JSRuntime.InvokeVoidAsync("themeEditorShortcuts.register", _dotNetRef);
+
+            // Load advanced mode preference from localStorage
+            try
+            {
+                var savedMode = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "themeEditor.advancedMode");
+                if (savedMode == "true")
+                {
+                    ThemeState.SetAdvancedMode(true);
+                }
+            }
+            catch
+            {
+                // Ignore localStorage errors
+            }
+        }
+    }
+
+    private async Task HandleAdvancedModeToggle(ChangeEventArgs e)
+    {
+        var isAdvanced = e.Value as bool? ?? false;
+        ThemeState.SetAdvancedMode(isAdvanced);
+
+        // Save preference to localStorage
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", "themeEditor.advancedMode", isAdvanced.ToString().ToLower());
+        }
+        catch
+        {
+            // Ignore localStorage errors
+        }
+    }
+
     private void HandleThemeChanged()
     {
         InvokeAsync(StateHasChanged);
+    }
+
+    private void HandleHistoryChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public void OnUndoShortcut()
+    {
+        if (ThemeState.CanUndo)
+        {
+            ThemeState.Undo();
+        }
+    }
+
+    [JSInvokable]
+    public void OnRedoShortcut()
+    {
+        if (ThemeState.CanRedo)
+        {
+            ThemeState.Redo();
+        }
+    }
+
+    private void HandleUndo()
+    {
+        ThemeState.Undo();
+    }
+
+    private void HandleRedo()
+    {
+        ThemeState.Redo();
     }
 
     private void GoBack()
@@ -190,8 +293,21 @@
         ToastService.ShowSuccess("Theme saved successfully");
     }
 
-    public void Dispose()
+    public async void Dispose()
     {
         ThemeState.OnThemeChanged -= HandleThemeChanged;
+        ThemeState.OnHistoryChanged -= HandleHistoryChanged;
+
+        // Unregister keyboard shortcuts
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("themeEditorShortcuts.unregister");
+        }
+        catch
+        {
+            // Ignore errors during disposal (component may already be disposed)
+        }
+
+        _dotNetRef?.Dispose();
     }
 }

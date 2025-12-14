@@ -1,0 +1,416 @@
+@* Background customization section with color, image, and gradient options *@
+@implements IDisposable
+
+@using DynamicForms.Models.Theming
+@using VisualEditorOpus.Services.Theming
+@using VisualEditorOpus.Components.Properties
+@using VisualEditorOpus.Components.Theming.Editor.Controls
+
+<PropertySection Title="Background" Icon="bi-image-fill">
+    <div class="background-section">
+        @if (Background is not null)
+        {
+            @* Type Selector *@
+            <div class="prop-group">
+                <span class="group-label">Background Type</span>
+                <div class="type-selector">
+                    <button type="button"
+                            class="type-btn @(Background.Type == "color" ? "active" : "")"
+                            @onclick="@(() => SetBackgroundType("color"))">
+                        <i class="bi bi-palette"></i>
+                        Color
+                    </button>
+                    <button type="button"
+                            class="type-btn @(Background.Type == "image" ? "active" : "")"
+                            @onclick="@(() => SetBackgroundType("image"))">
+                        <i class="bi bi-image"></i>
+                        Image
+                    </button>
+                    @if (IsAdvancedMode)
+                    {
+                        <button type="button"
+                                class="type-btn @(Background.Type == "gradient" ? "active" : "")"
+                                @onclick="@(() => SetBackgroundType("gradient"))">
+                            <i class="bi bi-rainbow"></i>
+                            Gradient
+                        </button>
+                    }
+                </div>
+            </div>
+
+            @* Color Mode *@
+            @if (Background.Type == "color")
+            {
+                <div class="prop-group">
+                    <ColorInput Label="Background Color"
+                                Value="@Background.Color"
+                                ValueChanged="HandleColorChange" />
+                </div>
+
+                @* Color presets *@
+                <div class="prop-group">
+                    <span class="group-label">Quick Colors</span>
+                    <div class="color-presets">
+                        @foreach (var preset in _colorPresets)
+                        {
+                            <button type="button"
+                                    class="color-preset-btn @(Background.Color.Equals(preset.Value, StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+                                    style="background: @preset.Value;"
+                                    @onclick="@(() => ApplyColorPreset(preset.Value))"
+                                    title="@preset.Name">
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+
+            @* Image Mode *@
+            @if (Background.Type == "image")
+            {
+                <div class="prop-group">
+                    <ImageUpload Label="Background Image"
+                                 Value="@Background.Image"
+                                 ValueChanged="HandleImageChange"
+                                 MaxSizeKb="1000" />
+                </div>
+
+                @if (!string.IsNullOrEmpty(Background.Image))
+                {
+                    <div class="prop-row">
+                        <div class="prop-group">
+                            <label class="prop-label">Size</label>
+                            <SelectInput Value="@Background.ImageSize"
+                                         ValueChanged="HandleImageSizeChange"
+                                         Options="@_imageSizeOptions"
+                                         ShowLabel="false"
+                                         Size="prop" />
+                        </div>
+                        <div class="prop-group">
+                            <label class="prop-label">Repeat</label>
+                            <SelectInput Value="@Background.ImageRepeat"
+                                         ValueChanged="HandleImageRepeatChange"
+                                         Options="@_imageRepeatOptions"
+                                         ShowLabel="false"
+                                         Size="prop" />
+                        </div>
+                    </div>
+
+                    <div class="prop-row">
+                        <PositionSelector Label="Position"
+                                          Value="@Background.ImagePosition"
+                                          ValueChanged="HandleImagePositionChange" />
+                        <div class="prop-group">
+                            <label class="prop-label">Attachment</label>
+                            <SelectInput Value="@Background.ImageAttachment"
+                                         ValueChanged="HandleImageAttachmentChange"
+                                         Options="@_imageAttachmentOptions"
+                                         ShowLabel="false"
+                                         Size="prop" />
+                        </div>
+                    </div>
+
+                    <div class="prop-group">
+                        <label class="prop-label">Opacity</label>
+                        <div class="slider-row">
+                            <input type="range" class="slider"
+                                   min="0" max="100" step="5"
+                                   value="@GetOpacityPercent()"
+                                   @onchange="HandleImageOpacityChange" />
+                            <span class="slider-value">@GetOpacityPercent()%</span>
+                        </div>
+                    </div>
+                }
+            }
+
+            @* Gradient Mode (Advanced Only) *@
+            @if (Background.Type == "gradient" && IsAdvancedMode)
+            {
+                <div class="prop-group">
+                    <span class="group-label">Gradient Type</span>
+                    <div class="type-selector small">
+                        <button type="button"
+                                class="type-btn @(Background.GradientType == "linear" ? "active" : "")"
+                                @onclick="@(() => SetGradientType("linear"))">
+                            Linear
+                        </button>
+                        <button type="button"
+                                class="type-btn @(Background.GradientType == "radial" ? "active" : "")"
+                                @onclick="@(() => SetGradientType("radial"))">
+                            Radial
+                        </button>
+                    </div>
+                </div>
+
+                @if (Background.GradientType == "linear")
+                {
+                    <div class="prop-group">
+                        <label class="prop-label">Angle</label>
+                        <div class="slider-row">
+                            <input type="range" class="slider"
+                                   min="0" max="360" step="15"
+                                   value="@Background.GradientAngle"
+                                   @onchange="HandleGradientAngleChange" />
+                            <span class="slider-value">@Background.GradientAngle°</span>
+                        </div>
+                    </div>
+                }
+
+                @* Gradient Preview *@
+                <div class="gradient-preview" style="background: @Background.ComputedGradient;">
+                    <span>Preview</span>
+                </div>
+
+                @* Color Stops *@
+                <div class="prop-group">
+                    <span class="group-label">Color Stops</span>
+                    <div class="color-stops">
+                        @for (int i = 0; i < Background.GradientStops.Count; i++)
+                        {
+                            var index = i;
+                            var stop = Background.GradientStops[i];
+                            <div class="color-stop">
+                                <ColorInput Value="@stop.Color"
+                                            ValueChanged="@(v => UpdateStopColor(index, v))" />
+                                <div class="stop-position">
+                                    <input type="number" class="prop-input position-input"
+                                           value="@stop.Position"
+                                           @onchange="@(e => UpdateStopPosition(index, e))"
+                                           min="0" max="100" step="5" />
+                                    <span class="size-unit">%</span>
+                                </div>
+                                @if (Background.GradientStops.Count > 2)
+                                {
+                                    <button type="button" class="remove-stop-btn" @onclick="@(() => RemoveStop(index))" title="Remove stop">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                }
+                            </div>
+                        }
+                    </div>
+                    <button type="button" class="add-stop-btn" @onclick="AddStop">
+                        <i class="bi bi-plus"></i>
+                        Add Color Stop
+                    </button>
+                </div>
+
+                @* Gradient Presets *@
+                <div class="prop-group">
+                    <span class="group-label">Presets</span>
+                    <div class="gradient-presets">
+                        @foreach (var preset in _gradientPresets)
+                        {
+                            <button type="button"
+                                    class="gradient-preset-btn"
+                                    style="background: @preset.Gradient;"
+                                    @onclick="@(() => ApplyGradientPreset(preset))"
+                                    title="@preset.Name">
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</PropertySection>
+
+@code {
+    [Inject] private IThemeEditorStateService ThemeState { get; set; } = default!;
+
+    private ThemeBackground? Background => ThemeState.CurrentTheme?.Background;
+    private bool IsAdvancedMode => ThemeState.IsAdvancedMode;
+
+    private static readonly (string Name, string Value)[] _colorPresets = new[]
+    {
+        ("White", "#FFFFFF"),
+        ("Light Gray", "#F8FAFC"),
+        ("Gray", "#F1F5F9"),
+        ("Warm Gray", "#FAF5F0"),
+        ("Cool Gray", "#F0F4F8"),
+        ("Blue Tint", "#EFF6FF"),
+        ("Green Tint", "#F0FDF4"),
+        ("Purple Tint", "#FAF5FF"),
+        ("Slate", "#1E293B"),
+        ("Dark", "#0F172A")
+    };
+
+    private static readonly IEnumerable<SelectOption> _imageSizeOptions = new SelectOption[]
+    {
+        new("cover", "Cover"),
+        new("contain", "Contain"),
+        new("auto", "Auto"),
+        new("100% 100%", "Stretch")
+    };
+
+    private static readonly IEnumerable<SelectOption> _imageRepeatOptions = new SelectOption[]
+    {
+        new("no-repeat", "No Repeat"),
+        new("repeat", "Tile"),
+        new("repeat-x", "Repeat X"),
+        new("repeat-y", "Repeat Y")
+    };
+
+    private static readonly IEnumerable<SelectOption> _imageAttachmentOptions = new SelectOption[]
+    {
+        new("scroll", "Scroll"),
+        new("fixed", "Fixed")
+    };
+
+    private static readonly GradientPreset[] _gradientPresets = new[]
+    {
+        new GradientPreset("Indigo Purple", "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            new[] { ("#667eea", 0), ("#764ba2", 100) }),
+        new GradientPreset("Blue Cyan", "linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%)",
+            new[] { ("#3b82f6", 0), ("#06b6d4", 100) }),
+        new GradientPreset("Green Teal", "linear-gradient(135deg, #10b981 0%, #14b8a6 100%)",
+            new[] { ("#10b981", 0), ("#14b8a6", 100) }),
+        new GradientPreset("Orange Red", "linear-gradient(135deg, #f97316 0%, #ef4444 100%)",
+            new[] { ("#f97316", 0), ("#ef4444", 100) }),
+        new GradientPreset("Pink Purple", "linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)",
+            new[] { ("#ec4899", 0), ("#8b5cf6", 100) }),
+        new GradientPreset("Sunset", "linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #8b5cf6 100%)",
+            new[] { ("#f59e0b", 0), ("#ef4444", 50), ("#8b5cf6", 100) })
+    };
+
+    protected override void OnInitialized()
+    {
+        ThemeState.OnThemeChanged += HandleThemeChanged;
+        ThemeState.OnAdvancedModeChanged += HandleAdvancedModeChanged;
+    }
+
+    private void HandleThemeChanged() => InvokeAsync(StateHasChanged);
+    private void HandleAdvancedModeChanged(bool _) => InvokeAsync(StateHasChanged);
+
+    private void SetBackgroundType(string type)
+    {
+        ThemeState.UpdateBackground(b => b.Type = type);
+    }
+
+    private void HandleColorChange(string value)
+    {
+        ThemeState.UpdateBackground(b => b.Color = value);
+    }
+
+    private void ApplyColorPreset(string color)
+    {
+        ThemeState.UpdateBackground(b => b.Color = color);
+    }
+
+    private void HandleImageChange(string value)
+    {
+        ThemeState.UpdateBackground(b => b.Image = value);
+    }
+
+    private void HandleImageSizeChange(string? value)
+    {
+        ThemeState.UpdateBackground(b => b.ImageSize = value ?? "cover");
+    }
+
+    private void HandleImagePositionChange(string value)
+    {
+        ThemeState.UpdateBackground(b => b.ImagePosition = value);
+    }
+
+    private void HandleImageRepeatChange(string? value)
+    {
+        ThemeState.UpdateBackground(b => b.ImageRepeat = value ?? "no-repeat");
+    }
+
+    private void HandleImageAttachmentChange(string? value)
+    {
+        ThemeState.UpdateBackground(b => b.ImageAttachment = value ?? "scroll");
+    }
+
+    private int GetOpacityPercent()
+    {
+        if (double.TryParse(Background?.ImageOpacity ?? "1", out var value))
+        {
+            return (int)(value * 100);
+        }
+        return 100;
+    }
+
+    private void HandleImageOpacityChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var percent))
+        {
+            ThemeState.UpdateBackground(b => b.ImageOpacity = (percent / 100.0).ToString("F2"));
+        }
+    }
+
+    private void SetGradientType(string type)
+    {
+        ThemeState.UpdateBackground(b => b.GradientType = type);
+    }
+
+    private void HandleGradientAngleChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var angle))
+        {
+            ThemeState.UpdateBackground(b => b.GradientAngle = angle);
+        }
+    }
+
+    private void UpdateStopColor(int index, string color)
+    {
+        ThemeState.UpdateBackground(b =>
+        {
+            if (index >= 0 && index < b.GradientStops.Count)
+            {
+                b.GradientStops[index].Color = color;
+            }
+        });
+    }
+
+    private void UpdateStopPosition(int index, ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var position))
+        {
+            ThemeState.UpdateBackground(b =>
+            {
+                if (index >= 0 && index < b.GradientStops.Count)
+                {
+                    b.GradientStops[index].Position = Math.Clamp(position, 0, 100);
+                }
+            });
+        }
+    }
+
+    private void AddStop()
+    {
+        ThemeState.UpdateBackground(b =>
+        {
+            var lastPosition = b.GradientStops.Count > 0 ? b.GradientStops.Max(s => s.Position) : 0;
+            var newPosition = Math.Min(lastPosition + 25, 100);
+            b.GradientStops.Add(new GradientStop { Color = "#888888", Position = newPosition });
+        });
+    }
+
+    private void RemoveStop(int index)
+    {
+        ThemeState.UpdateBackground(b =>
+        {
+            if (index >= 0 && index < b.GradientStops.Count && b.GradientStops.Count > 2)
+            {
+                b.GradientStops.RemoveAt(index);
+            }
+        });
+    }
+
+    private void ApplyGradientPreset(GradientPreset preset)
+    {
+        ThemeState.UpdateBackground(b =>
+        {
+            b.GradientType = "linear";
+            b.GradientAngle = 135;
+            b.GradientStops = preset.Stops.Select(s => new GradientStop { Color = s.Color, Position = s.Position }).ToList();
+        });
+    }
+
+    public void Dispose()
+    {
+        ThemeState.OnThemeChanged -= HandleThemeChanged;
+        ThemeState.OnAdvancedModeChanged -= HandleAdvancedModeChanged;
+    }
+
+    private record GradientPreset(string Name, string Gradient, (string Color, int Position)[] Stops);
+}

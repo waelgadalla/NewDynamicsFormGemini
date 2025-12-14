@@ -9,6 +9,7 @@
     <div class="typography-section">
         @if (Typography is not null)
         {
+            @* Basic Mode: Font family and Base size *@
             <div class="prop-group">
                 <label class="prop-label">Font Family</label>
                 <SelectInput Value="@Typography.FontFamily"
@@ -19,81 +20,105 @@
             </div>
 
             <div class="prop-group">
-                <label class="prop-label">Heading Font</label>
-                <SelectInput Value="@(Typography.HeadingFontFamily ?? string.Empty)"
-                             ValueChanged="HandleHeadingFontChange"
-                             Options="@_headingFontOptions"
-                             Placeholder="Same as body"
-                             ShowLabel="false"
-                             Size="prop" />
-            </div>
-
-            <div class="prop-row">
-                <div class="prop-group">
-                    <label class="prop-label">Base Size</label>
-                    <div class="size-input">
-                        <input type="number" class="prop-input"
-                               value="@ParsePx(Typography.BaseFontSize)"
-                               @onchange="HandleBaseSizeChange"
-                               min="12" max="24" step="1" />
-                        <span class="size-unit">px</span>
-                    </div>
-                </div>
-                <div class="prop-group">
-                    <label class="prop-label">Title Size</label>
-                    <div class="size-input">
-                        <input type="number" class="prop-input"
-                               value="@ParsePx(Typography.FormTitleSize)"
-                               @onchange="HandleTitleSizeChange"
-                               min="16" max="48" step="1" />
-                        <span class="size-unit">px</span>
-                    </div>
+                <label class="prop-label">Base Size</label>
+                <div class="size-input">
+                    <input type="number" class="prop-input"
+                           value="@ParsePx(Typography.BaseFontSize)"
+                           @onchange="HandleBaseSizeChange"
+                           min="12" max="24" step="1" />
+                    <span class="size-unit">px</span>
                 </div>
             </div>
 
-            <div class="prop-row">
+            @if (IsAdvancedMode)
+            {
                 <div class="prop-group">
-                    <label class="prop-label">Section Size</label>
-                    <div class="size-input">
-                        <input type="number" class="prop-input"
-                               value="@ParsePx(Typography.SectionTitleSize)"
-                               @onchange="HandleSectionSizeChange"
-                               min="14" max="32" step="1" />
-                        <span class="size-unit">px</span>
-                    </div>
+                    <label class="prop-label">Heading Font</label>
+                    <SelectInput Value="@(Typography.HeadingFontFamily ?? string.Empty)"
+                                 ValueChanged="HandleHeadingFontChange"
+                                 Options="@_headingFontOptions"
+                                 Placeholder="Same as body"
+                                 ShowLabel="false"
+                                 Size="prop" />
                 </div>
-                <div class="prop-group">
-                    <label class="prop-label">Question Size</label>
-                    <div class="size-input">
-                        <input type="number" class="prop-input"
-                               value="@ParsePx(Typography.QuestionTitleSize)"
-                               @onchange="HandleQuestionSizeChange"
-                               min="12" max="24" step="1" />
-                        <span class="size-unit">px</span>
-                    </div>
-                </div>
-            </div>
 
-            <div class="prop-group">
-                <label class="prop-label">Font Weight Preset</label>
-                <div class="weight-buttons">
-                    <button class="weight-btn @(IsLightWeight ? "active" : "")"
-                            @onclick="ApplyLightWeights"
-                            title="Light weights">
-                        <span style="font-weight: 300;">Aa</span>
-                    </button>
-                    <button class="weight-btn @(IsNormalWeight ? "active" : "")"
-                            @onclick="ApplyNormalWeights"
-                            title="Normal weights">
-                        <span style="font-weight: 400;">Aa</span>
-                    </button>
-                    <button class="weight-btn @(IsBoldWeight ? "active" : "")"
-                            @onclick="ApplyBoldWeights"
-                            title="Bold weights">
-                        <span style="font-weight: 600;">Aa</span>
-                    </button>
+                <div class="prop-row">
+                    <div class="prop-group">
+                        <label class="prop-label">Title Size</label>
+                        <div class="size-input">
+                            <input type="number" class="prop-input"
+                                   value="@ParsePx(Typography.FormTitleSize)"
+                                   @onchange="HandleTitleSizeChange"
+                                   min="16" max="48" step="1" />
+                            <span class="size-unit">px</span>
+                        </div>
+                    </div>
+                    <div class="prop-group">
+                        <label class="prop-label">Section Size</label>
+                        <div class="size-input">
+                            <input type="number" class="prop-input"
+                                   value="@ParsePx(Typography.SectionTitleSize)"
+                                   @onchange="HandleSectionSizeChange"
+                                   min="14" max="32" step="1" />
+                            <span class="size-unit">px</span>
+                        </div>
+                    </div>
                 </div>
-            </div>
+
+                <div class="prop-row">
+                    <div class="prop-group">
+                        <label class="prop-label">Question Size</label>
+                        <div class="size-input">
+                            <input type="number" class="prop-input"
+                                   value="@ParsePx(Typography.QuestionTitleSize)"
+                                   @onchange="HandleQuestionSizeChange"
+                                   min="12" max="24" step="1" />
+                            <span class="size-unit">px</span>
+                        </div>
+                    </div>
+                    <div class="prop-group">
+                        <label class="prop-label">Description Size</label>
+                        <div class="size-input">
+                            <input type="number" class="prop-input"
+                                   value="@ParsePx(Typography.DescriptionSize)"
+                                   @onchange="HandleDescriptionSizeChange"
+                                   min="12" max="20" step="1" />
+                            <span class="size-unit">px</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="prop-group">
+                    <label class="prop-label">Line Height</label>
+                    <div class="size-input">
+                        <input type="number" class="prop-input"
+                               value="@Typography.LineHeight"
+                               @onchange="HandleLineHeightChange"
+                               min="1" max="2.5" step="0.1" />
+                    </div>
+                </div>
+
+                <div class="prop-group">
+                    <label class="prop-label">Font Weight Preset</label>
+                    <div class="weight-buttons">
+                        <button class="weight-btn @(IsLightWeight ? "active" : "")"
+                                @onclick="ApplyLightWeights"
+                                title="Light weights">
+                            <span style="font-weight: 300;">Aa</span>
+                        </button>
+                        <button class="weight-btn @(IsNormalWeight ? "active" : "")"
+                                @onclick="ApplyNormalWeights"
+                                title="Normal weights">
+                            <span style="font-weight: 400;">Aa</span>
+                        </button>
+                        <button class="weight-btn @(IsBoldWeight ? "active" : "")"
+                                @onclick="ApplyBoldWeights"
+                                title="Bold weights">
+                            <span style="font-weight: 600;">Aa</span>
+                        </button>
+                    </div>
+                </div>
+            }
         }
     </div>
 </PropertySection>
@@ -102,6 +127,7 @@
     [Inject] private IThemeEditorStateService ThemeState { get; set; } = default!;
 
     private ThemeTypography? Typography => ThemeState.CurrentTheme?.Typography;
+    private bool IsAdvancedMode => ThemeState.IsAdvancedMode;
 
     private bool IsLightWeight => Typography?.FontWeightNormal == "300";
     private bool IsNormalWeight => Typography?.FontWeightNormal == "400";
@@ -141,9 +167,15 @@
     protected override void OnInitialized()
     {
         ThemeState.OnThemeChanged += HandleThemeChanged;
+        ThemeState.OnAdvancedModeChanged += HandleAdvancedModeChanged;
     }
 
     private void HandleThemeChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void HandleAdvancedModeChanged(bool _)
     {
         InvokeAsync(StateHasChanged);
     }
@@ -180,6 +212,18 @@
     {
         if (int.TryParse(e.Value?.ToString(), out var value))
             ThemeState.UpdateTypography(t => t.QuestionTitleSize = value + "px");
+    }
+
+    private void HandleDescriptionSizeChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+            ThemeState.UpdateTypography(t => t.DescriptionSize = value + "px");
+    }
+
+    private void HandleLineHeightChange(ChangeEventArgs e)
+    {
+        if (double.TryParse(e.Value?.ToString(), out var value))
+            ThemeState.UpdateTypography(t => t.LineHeight = value.ToString("0.0"));
     }
 
     private void ApplyLightWeights()
@@ -225,5 +269,6 @@
     public void Dispose()
     {
         ThemeState.OnThemeChanged -= HandleThemeChanged;
+        ThemeState.OnAdvancedModeChanged -= HandleAdvancedModeChanged;
     }
 }

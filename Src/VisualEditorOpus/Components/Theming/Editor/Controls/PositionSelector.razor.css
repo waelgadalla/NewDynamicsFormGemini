@@ -1,0 +1,60 @@
+.position-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.position-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.position-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    width: 80px;
+    height: 80px;
+    padding: 4px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+}
+
+.position-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    padding: 0;
+}
+
+.position-btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--border-color);
+}
+
+.position-btn.active {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.position-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--text-tertiary);
+    border-radius: 50%;
+    transition: background-color 0.15s ease;
+}
+
+.position-btn:hover .position-dot {
+    background: var(--text-secondary);
+}
+
+.position-btn.active .position-dot {
+    background: white;
+}

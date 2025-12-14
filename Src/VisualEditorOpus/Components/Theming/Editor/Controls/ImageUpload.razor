@@ -1,0 +1,195 @@
+@* Image upload component with file input and URL mode *@
+@inject IJSRuntime JSRuntime
+
+<div class="image-upload @CssClass">
+    @if (!string.IsNullOrEmpty(Label))
+    {
+        <label class="upload-label">@Label</label>
+    }
+
+    <div class="upload-modes">
+        <button type="button"
+                class="mode-btn @(_mode == UploadMode.File ? "active" : "")"
+                @onclick="SetFileMode">
+            <i class="bi bi-upload"></i>
+            Upload
+        </button>
+        <button type="button"
+                class="mode-btn @(_mode == UploadMode.Url ? "active" : "")"
+                @onclick="SetUrlMode">
+            <i class="bi bi-link-45deg"></i>
+            URL
+        </button>
+    </div>
+
+    @if (_mode == UploadMode.File)
+    {
+        <div class="drop-zone @(_isDragOver ? "drag-over" : "") @(!string.IsNullOrEmpty(Value) ? "has-image" : "")"
+             @ondragenter="HandleDragEnter"
+             @ondragleave="HandleDragLeave"
+             @ondragover="HandleDragOver"
+             @ondrop="HandleDrop">
+            @if (!string.IsNullOrEmpty(Value))
+            {
+                <div class="preview-container">
+                    <img src="@Value" alt="Preview" class="preview-image" />
+                    <button type="button" class="clear-btn" @onclick="ClearImage" title="Remove image">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div class="drop-content">
+                    <i class="bi bi-image"></i>
+                    <span>Drop image here or click to browse</span>
+                    <span class="formats">PNG, JPG, SVG (max @(MaxSizeKb)KB)</span>
+                </div>
+            }
+            <InputFile OnChange="HandleFileSelected" accept="@AcceptedFormats" class="file-input" />
+        </div>
+    }
+    else
+    {
+        <div class="url-input-container">
+            <input type="url"
+                   class="url-input"
+                   placeholder="https://example.com/image.png"
+                   value="@_urlValue"
+                   @oninput="HandleUrlInput"
+                   @onblur="ApplyUrl" />
+            @if (!string.IsNullOrEmpty(Value) && _mode == UploadMode.Url)
+            {
+                <button type="button" class="clear-url-btn" @onclick="ClearImage" title="Clear URL">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            }
+        </div>
+        @if (!string.IsNullOrEmpty(Value))
+        {
+            <div class="url-preview">
+                <img src="@Value" alt="Preview" class="preview-image-small" @onerror="HandleImageError" />
+            </div>
+        }
+    }
+
+    @if (!string.IsNullOrEmpty(_errorMessage))
+    {
+        <div class="error-message">
+            <i class="bi bi-exclamation-triangle"></i>
+            @_errorMessage
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string Value { get; set; } = "";
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? CssClass { get; set; }
+    [Parameter] public int MaxSizeKb { get; set; } = 500;
+    [Parameter] public string AcceptedFormats { get; set; } = "image/png,image/jpeg,image/svg+xml";
+
+    private enum UploadMode { File, Url }
+    private UploadMode _mode = UploadMode.File;
+    private bool _isDragOver;
+    private string _urlValue = "";
+    private string? _errorMessage;
+
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrEmpty(Value) && Value.StartsWith("http"))
+        {
+            _urlValue = Value;
+        }
+    }
+
+    private void SetFileMode() => _mode = UploadMode.File;
+    private void SetUrlMode() => _mode = UploadMode.Url;
+
+    private void HandleDragEnter() => _isDragOver = true;
+    private void HandleDragLeave() => _isDragOver = false;
+    private void HandleDragOver(DragEventArgs e) => _isDragOver = true;
+
+    private void HandleDrop(DragEventArgs e)
+    {
+        _isDragOver = false;
+        // File drop is handled by InputFile component
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        _errorMessage = null;
+        var file = e.File;
+
+        // Validate file size
+        if (file.Size > MaxSizeKb * 1024)
+        {
+            _errorMessage = $"File too large. Maximum size is {MaxSizeKb}KB.";
+            return;
+        }
+
+        // Validate file type
+        var allowedTypes = AcceptedFormats.Split(',').Select(t => t.Trim()).ToArray();
+        if (!allowedTypes.Contains(file.ContentType))
+        {
+            _errorMessage = "Invalid file type. Please use PNG, JPG, or SVG.";
+            return;
+        }
+
+        try
+        {
+            // Read file as base64 data URI
+            using var stream = file.OpenReadStream(MaxSizeKb * 1024);
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            var base64 = Convert.ToBase64String(ms.ToArray());
+            var dataUri = $"data:{file.ContentType};base64,{base64}";
+
+            Value = dataUri;
+            await ValueChanged.InvokeAsync(dataUri);
+        }
+        catch
+        {
+            _errorMessage = "Failed to read file. Please try again.";
+        }
+    }
+
+    private void HandleUrlInput(ChangeEventArgs e)
+    {
+        _urlValue = e.Value?.ToString() ?? "";
+        _errorMessage = null;
+    }
+
+    private async Task ApplyUrl()
+    {
+        if (string.IsNullOrWhiteSpace(_urlValue))
+        {
+            return;
+        }
+
+        // Basic URL validation
+        if (!Uri.TryCreate(_urlValue, UriKind.Absolute, out var uri) ||
+            (uri.Scheme != "http" && uri.Scheme != "https"))
+        {
+            _errorMessage = "Please enter a valid URL starting with http:// or https://";
+            return;
+        }
+
+        Value = _urlValue;
+        await ValueChanged.InvokeAsync(_urlValue);
+    }
+
+    private async Task ClearImage()
+    {
+        Value = "";
+        _urlValue = "";
+        _errorMessage = null;
+        await ValueChanged.InvokeAsync("");
+    }
+
+    private void HandleImageError()
+    {
+        _errorMessage = "Failed to load image. Please check the URL.";
+    }
+}

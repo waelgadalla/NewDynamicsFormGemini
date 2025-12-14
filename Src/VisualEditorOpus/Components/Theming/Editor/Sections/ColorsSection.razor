@@ -9,68 +9,98 @@
     <div class="colors-section">
         @if (Colors is not null)
         {
+            @* Basic Mode: Primary, Background, Text (3 essential controls) *@
             <div class="color-group">
                 <span class="group-label">Primary</span>
                 <div class="color-row">
-                    <ColorInput Label="Base" Value="@Colors.Primary" ValueChanged="v => UpdateColor(c => c.Primary = v)" />
-                    <ColorInput Label="Hover" Value="@Colors.PrimaryHover" ValueChanged="v => UpdateColor(c => c.PrimaryHover = v)" />
-                    <ColorInput Label="Text" Value="@Colors.PrimaryForeground" ValueChanged="v => UpdateColor(c => c.PrimaryForeground = v)" />
+                    <ColorInput Label="Color" Value="@Colors.Primary" ValueChanged="v => UpdateColor(c => c.Primary = v)" />
+                    @if (IsAdvancedMode)
+                    {
+                        <ColorInput Label="Hover" Value="@Colors.PrimaryHover" ValueChanged="v => UpdateColor(c => c.PrimaryHover = v)" />
+                        <ColorInput Label="Text" Value="@Colors.PrimaryForeground" ValueChanged="v => UpdateColor(c => c.PrimaryForeground = v)" />
+                    }
                 </div>
             </div>
 
-            <div class="color-group">
-                <span class="group-label">Secondary</span>
-                <div class="color-row">
-                    <ColorInput Label="Base" Value="@Colors.Secondary" ValueChanged="v => UpdateColor(c => c.Secondary = v)" />
-                    <ColorInput Label="Hover" Value="@Colors.SecondaryHover" ValueChanged="v => UpdateColor(c => c.SecondaryHover = v)" />
-                    <ColorInput Label="Text" Value="@Colors.SecondaryForeground" ValueChanged="v => UpdateColor(c => c.SecondaryForeground = v)" />
+            @if (IsAdvancedMode)
+            {
+                <div class="color-group">
+                    <span class="group-label">Secondary</span>
+                    <div class="color-row">
+                        <ColorInput Label="Base" Value="@Colors.Secondary" ValueChanged="v => UpdateColor(c => c.Secondary = v)" />
+                        <ColorInput Label="Hover" Value="@Colors.SecondaryHover" ValueChanged="v => UpdateColor(c => c.SecondaryHover = v)" />
+                        <ColorInput Label="Text" Value="@Colors.SecondaryForeground" ValueChanged="v => UpdateColor(c => c.SecondaryForeground = v)" />
+                    </div>
                 </div>
-            </div>
+            }
 
             <div class="color-group">
                 <span class="group-label">Background</span>
                 <div class="color-row">
                     <ColorInput Label="Page" Value="@Colors.Background" ValueChanged="v => UpdateColor(c => c.Background = v)" />
-                    <ColorInput Label="Dimmed" Value="@Colors.BackgroundDim" ValueChanged="v => UpdateColor(c => c.BackgroundDim = v)" />
+                    @if (IsAdvancedMode)
+                    {
+                        <ColorInput Label="Dimmed" Value="@Colors.BackgroundDim" ValueChanged="v => UpdateColor(c => c.BackgroundDim = v)" />
+                    }
                 </div>
-                <div class="color-row">
-                    <ColorInput Label="Surface" Value="@Colors.Surface" ValueChanged="v => UpdateColor(c => c.Surface = v)" />
-                    <ColorInput Label="Hover" Value="@Colors.SurfaceHover" ValueChanged="v => UpdateColor(c => c.SurfaceHover = v)" />
-                </div>
+                @if (IsAdvancedMode)
+                {
+                    <div class="color-row">
+                        <ColorInput Label="Surface" Value="@Colors.Surface" ValueChanged="v => UpdateColor(c => c.Surface = v)" />
+                        <ColorInput Label="Hover" Value="@Colors.SurfaceHover" ValueChanged="v => UpdateColor(c => c.SurfaceHover = v)" />
+                    </div>
+                }
             </div>
 
             <div class="color-group">
                 <span class="group-label">Text</span>
                 <div class="color-row">
                     <ColorInput Label="Primary" Value="@Colors.TextPrimary" ValueChanged="v => UpdateColor(c => c.TextPrimary = v)" />
-                    <ColorInput Label="Secondary" Value="@Colors.TextSecondary" ValueChanged="v => UpdateColor(c => c.TextSecondary = v)" />
+                    @if (IsAdvancedMode)
+                    {
+                        <ColorInput Label="Secondary" Value="@Colors.TextSecondary" ValueChanged="v => UpdateColor(c => c.TextSecondary = v)" />
+                    }
                 </div>
-                <div class="color-row">
-                    <ColorInput Label="Disabled" Value="@Colors.TextDisabled" ValueChanged="v => UpdateColor(c => c.TextDisabled = v)" />
-                    <ColorInput Label="Placeholder" Value="@Colors.TextPlaceholder" ValueChanged="v => UpdateColor(c => c.TextPlaceholder = v)" />
-                </div>
+                @if (IsAdvancedMode)
+                {
+                    <div class="color-row">
+                        <ColorInput Label="Disabled" Value="@Colors.TextDisabled" ValueChanged="v => UpdateColor(c => c.TextDisabled = v)" />
+                        <ColorInput Label="Placeholder" Value="@Colors.TextPlaceholder" ValueChanged="v => UpdateColor(c => c.TextPlaceholder = v)" />
+                    </div>
+                }
             </div>
 
-            <div class="color-group">
-                <span class="group-label">Status</span>
-                <div class="color-row">
-                    <ColorInput Label="Error" Value="@Colors.Error" ValueChanged="v => UpdateColor(c => c.Error = v)" />
-                    <ColorInput Label="Success" Value="@Colors.Success" ValueChanged="v => UpdateColor(c => c.Success = v)" />
+            @if (IsAdvancedMode)
+            {
+                <div class="color-group">
+                    <span class="group-label">Status</span>
+                    <div class="color-row">
+                        <ColorInput Label="Error" Value="@Colors.Error" ValueChanged="v => UpdateColor(c => c.Error = v)" />
+                        <ColorInput Label="Success" Value="@Colors.Success" ValueChanged="v => UpdateColor(c => c.Success = v)" />
+                    </div>
+                    <div class="color-row">
+                        <ColorInput Label="Warning" Value="@Colors.Warning" ValueChanged="v => UpdateColor(c => c.Warning = v)" />
+                        <ColorInput Label="Info" Value="@Colors.Info" ValueChanged="v => UpdateColor(c => c.Info = v)" />
+                    </div>
                 </div>
-                <div class="color-row">
-                    <ColorInput Label="Warning" Value="@Colors.Warning" ValueChanged="v => UpdateColor(c => c.Warning = v)" />
-                    <ColorInput Label="Info" Value="@Colors.Info" ValueChanged="v => UpdateColor(c => c.Info = v)" />
-                </div>
-            </div>
 
-            <div class="color-group">
-                <span class="group-label">Borders</span>
-                <div class="color-row">
-                    <ColorInput Label="Default" Value="@Colors.Border" ValueChanged="v => UpdateColor(c => c.Border = v)" />
-                    <ColorInput Label="Hover" Value="@Colors.BorderHover" ValueChanged="v => UpdateColor(c => c.BorderHover = v)" />
-                    <ColorInput Label="Focus" Value="@Colors.BorderFocus" ValueChanged="v => UpdateColor(c => c.BorderFocus = v)" />
+                <div class="color-group">
+                    <span class="group-label">Borders</span>
+                    <div class="color-row">
+                        <ColorInput Label="Default" Value="@Colors.Border" ValueChanged="v => UpdateColor(c => c.Border = v)" />
+                        <ColorInput Label="Hover" Value="@Colors.BorderHover" ValueChanged="v => UpdateColor(c => c.BorderHover = v)" />
+                        <ColorInput Label="Focus" Value="@Colors.BorderFocus" ValueChanged="v => UpdateColor(c => c.BorderFocus = v)" />
+                    </div>
                 </div>
-            </div>
+
+                <div class="color-group">
+                    <span class="group-label">Focus & Selection</span>
+                    <div class="color-row">
+                        <ColorInput Label="Focus Ring" Value="@Colors.FocusRing" ValueChanged="v => UpdateColor(c => c.FocusRing = v)" />
+                        <ColorInput Label="Selection" Value="@Colors.Selection" ValueChanged="v => UpdateColor(c => c.Selection = v)" />
+                    </div>
+                </div>
+            }
         }
     </div>
 </PropertySection>
@@ -79,13 +109,20 @@
     [Inject] private IThemeEditorStateService ThemeState { get; set; } = default!;
 
     private ThemeColors? Colors => ThemeState.CurrentTheme?.Colors;
+    private bool IsAdvancedMode => ThemeState.IsAdvancedMode;
 
     protected override void OnInitialized()
     {
         ThemeState.OnThemeChanged += HandleThemeChanged;
+        ThemeState.OnAdvancedModeChanged += HandleAdvancedModeChanged;
     }
 
     private void HandleThemeChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void HandleAdvancedModeChanged(bool _)
     {
         InvokeAsync(StateHasChanged);
     }
@@ -98,5 +135,6 @@
     public void Dispose()
     {
         ThemeState.OnThemeChanged -= HandleThemeChanged;
+        ThemeState.OnAdvancedModeChanged -= HandleAdvancedModeChanged;
     }
 }

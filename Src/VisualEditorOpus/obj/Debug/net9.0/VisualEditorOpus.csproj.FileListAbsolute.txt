@@ -218,6 +218,14 @@ C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOp
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\scopedcss\Components\Theming\Editor\Modals\ExportThemeModal.razor.rz.scp.css
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\scopedcss\Components\Theming\Editor\Modals\ImportThemeModal.razor.rz.scp.css
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\scopedcss\Components\Theming\Editor\Controls\ColorPicker.razor.rz.scp.css
-C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\t9p6cl12i8-c33yfw0065.gz
-C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\6tvrfg3a0z-tn0h9k4hej.gz
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\ontg1ssez9-j0eaq3ie22.gz
+C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\94xvj1594k-k6s7yp4bn0.gz
+C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\scopedcss\Components\Theming\Editor\Sections\SpacingSection.razor.rz.scp.css
+C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\scopedcss\Components\Theming\Editor\Controls\ImageUpload.razor.rz.scp.css
+C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\scopedcss\Components\Theming\Editor\Controls\PositionSelector.razor.rz.scp.css
+C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\scopedcss\Components\Theming\Editor\Sections\HeaderSection.razor.rz.scp.css
+C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\scopedcss\Components\Theming\Editor\Sections\BackgroundSection.razor.rz.scp.css
+C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\scopedcss\Components\Theming\Editor\Controls\ShadowEditor.razor.rz.scp.css
+C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\scopedcss\Components\Theming\Editor\Sections\ShadowsSection.razor.rz.scp.css
+C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\t9p6cl12i8-u6wz0ebcg2.gz
+C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\6tvrfg3a0z-376c9aaazo.gz

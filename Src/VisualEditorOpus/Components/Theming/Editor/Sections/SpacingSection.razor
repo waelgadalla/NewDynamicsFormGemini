@@ -1,0 +1,362 @@
+@* Spacing section with form, section, and field spacing controls *@
+@implements IDisposable
+
+@using DynamicForms.Models.Theming
+@using VisualEditorOpus.Services.Theming
+@using VisualEditorOpus.Components.Properties
+
+<PropertySection Title="Spacing" Icon="bi-distribute-vertical">
+    <div class="spacing-section">
+        @if (Spacing is not null)
+        {
+            @* Basic Mode: Form padding only *@
+            <div class="prop-group">
+                <label class="prop-label">Form Padding</label>
+                <div class="spacing-slider">
+                    <input type="range" class="slider"
+                           min="16" max="64" step="4"
+                           value="@ParsePx(Spacing.FormPadding)"
+                           @onchange="HandleFormPaddingSlider" />
+                    <span class="slider-value">@Spacing.FormPadding</span>
+                </div>
+            </div>
+
+            <div class="prop-group">
+                <label class="prop-label">Spacing Presets</label>
+                <div class="spacing-presets">
+                    <button class="preset-btn @(IsCompactSpacing ? "active" : "")"
+                            @onclick="ApplyCompactSpacing"
+                            title="Compact spacing">
+                        <div class="preset-icon compact"></div>
+                        <span>Compact</span>
+                    </button>
+                    <button class="preset-btn @(IsComfortableSpacing ? "active" : "")"
+                            @onclick="ApplyComfortableSpacing"
+                            title="Comfortable spacing">
+                        <div class="preset-icon comfortable"></div>
+                        <span>Comfortable</span>
+                    </button>
+                    <button class="preset-btn @(IsRelaxedSpacing ? "active" : "")"
+                            @onclick="ApplyRelaxedSpacing"
+                            title="Relaxed spacing">
+                        <div class="preset-icon relaxed"></div>
+                        <span>Relaxed</span>
+                    </button>
+                </div>
+            </div>
+
+            @if (IsAdvancedMode)
+            {
+                <div class="prop-group">
+                    <span class="group-label">Form Level</span>
+                    <div class="prop-row">
+                        <div class="prop-group">
+                            <label class="prop-label">Form Padding</label>
+                            <div class="size-input">
+                                <input type="number" class="prop-input"
+                                       value="@ParsePx(Spacing.FormPadding)"
+                                       @onchange="HandleFormPaddingChange"
+                                       min="8" max="64" step="4" />
+                                <span class="size-unit">px</span>
+                            </div>
+                        </div>
+                        <div class="prop-group">
+                            <label class="prop-label">Section Spacing</label>
+                            <div class="size-input">
+                                <input type="number" class="prop-input"
+                                       value="@ParsePx(Spacing.SectionSpacing)"
+                                       @onchange="HandleSectionSpacingChange"
+                                       min="8" max="48" step="4" />
+                                <span class="size-unit">px</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="prop-group">
+                    <span class="group-label">Field Level</span>
+                    <div class="prop-row">
+                        <div class="prop-group">
+                            <label class="prop-label">Question Gap</label>
+                            <div class="size-input">
+                                <input type="number" class="prop-input"
+                                       value="@ParsePx(Spacing.QuestionSpacing)"
+                                       @onchange="HandleQuestionSpacingChange"
+                                       min="8" max="48" step="4" />
+                                <span class="size-unit">px</span>
+                            </div>
+                        </div>
+                        <div class="prop-group">
+                            <label class="prop-label">Label Gap</label>
+                            <div class="size-input">
+                                <input type="number" class="prop-input"
+                                       value="@ParsePx(Spacing.LabelSpacing)"
+                                       @onchange="HandleLabelSpacingChange"
+                                       min="2" max="16" step="2" />
+                                <span class="size-unit">px</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="prop-group" style="margin-top: 8px;">
+                        <label class="prop-label">Option Spacing</label>
+                        <div class="size-input">
+                            <input type="number" class="prop-input"
+                                   value="@ParsePx(Spacing.OptionSpacing)"
+                                   @onchange="HandleOptionSpacingChange"
+                                   min="4" max="24" step="2" />
+                            <span class="size-unit">px</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="prop-group">
+                    <span class="group-label">Input Padding</span>
+                    <div class="prop-row">
+                        <div class="prop-group">
+                            <label class="prop-label">Vertical</label>
+                            <div class="size-input">
+                                <input type="number" class="prop-input"
+                                       value="@ParsePx(Spacing.InputPadding)"
+                                       @onchange="HandleInputPaddingChange"
+                                       min="4" max="24" step="2" />
+                                <span class="size-unit">px</span>
+                            </div>
+                        </div>
+                        <div class="prop-group">
+                            <label class="prop-label">Horizontal</label>
+                            <div class="size-input">
+                                <input type="number" class="prop-input"
+                                       value="@ParsePx(Spacing.InputPaddingHorizontal)"
+                                       @onchange="HandleInputPaddingHorizontalChange"
+                                       min="4" max="32" step="2" />
+                                <span class="size-unit">px</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="prop-group">
+                    <span class="group-label">Button Padding</span>
+                    <div class="prop-row">
+                        <div class="prop-group">
+                            <label class="prop-label">Vertical</label>
+                            <div class="size-input">
+                                <input type="number" class="prop-input"
+                                       value="@ParsePx(Spacing.ButtonPaddingVertical)"
+                                       @onchange="HandleButtonPaddingVerticalChange"
+                                       min="4" max="24" step="2" />
+                                <span class="size-unit">px</span>
+                            </div>
+                        </div>
+                        <div class="prop-group">
+                            <label class="prop-label">Horizontal</label>
+                            <div class="size-input">
+                                <input type="number" class="prop-input"
+                                       value="@ParsePx(Spacing.ButtonPaddingHorizontal)"
+                                       @onchange="HandleButtonPaddingHorizontalChange"
+                                       min="8" max="48" step="4" />
+                                <span class="size-unit">px</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="prop-group" style="margin-top: 8px;">
+                        <label class="prop-label">Button Gap</label>
+                        <div class="size-input">
+                            <input type="number" class="prop-input"
+                                   value="@ParsePx(Spacing.ButtonGap)"
+                                   @onchange="HandleButtonGapChange"
+                                   min="4" max="24" step="4" />
+                            <span class="size-unit">px</span>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</PropertySection>
+
+@code {
+    [Inject] private IThemeEditorStateService ThemeState { get; set; } = default!;
+
+    private ThemeSpacing? Spacing => ThemeState.CurrentTheme?.Spacing;
+    private bool IsAdvancedMode => ThemeState.IsAdvancedMode;
+
+    private bool IsCompactSpacing => ParsePx(Spacing?.FormPadding ?? "32px") <= 20;
+    private bool IsComfortableSpacing
+    {
+        get
+        {
+            var padding = ParsePx(Spacing?.FormPadding ?? "32px");
+            return padding > 20 && padding <= 36;
+        }
+    }
+    private bool IsRelaxedSpacing => ParsePx(Spacing?.FormPadding ?? "32px") > 36;
+
+    protected override void OnInitialized()
+    {
+        ThemeState.OnThemeChanged += HandleThemeChanged;
+        ThemeState.OnAdvancedModeChanged += HandleAdvancedModeChanged;
+    }
+
+    private void HandleThemeChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void HandleAdvancedModeChanged(bool _)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void HandleFormPaddingSlider(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+        {
+            ThemeState.UpdateSpacing(s => s.FormPadding = value + "px");
+        }
+    }
+
+    private void HandleFormPaddingChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+        {
+            ThemeState.UpdateSpacing(s => s.FormPadding = value + "px");
+        }
+    }
+
+    private void HandleSectionSpacingChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+        {
+            ThemeState.UpdateSpacing(s => s.SectionSpacing = value + "px");
+        }
+    }
+
+    private void HandleQuestionSpacingChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+        {
+            ThemeState.UpdateSpacing(s => s.QuestionSpacing = value + "px");
+        }
+    }
+
+    private void HandleLabelSpacingChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+        {
+            ThemeState.UpdateSpacing(s => s.LabelSpacing = value + "px");
+        }
+    }
+
+    private void HandleOptionSpacingChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+        {
+            ThemeState.UpdateSpacing(s => s.OptionSpacing = value + "px");
+        }
+    }
+
+    private void HandleInputPaddingChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+        {
+            ThemeState.UpdateSpacing(s => s.InputPadding = value + "px");
+        }
+    }
+
+    private void HandleInputPaddingHorizontalChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+        {
+            ThemeState.UpdateSpacing(s => s.InputPaddingHorizontal = value + "px");
+        }
+    }
+
+    private void HandleButtonPaddingVerticalChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+        {
+            ThemeState.UpdateSpacing(s => s.ButtonPaddingVertical = value + "px");
+        }
+    }
+
+    private void HandleButtonPaddingHorizontalChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+        {
+            ThemeState.UpdateSpacing(s => s.ButtonPaddingHorizontal = value + "px");
+        }
+    }
+
+    private void HandleButtonGapChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+        {
+            ThemeState.UpdateSpacing(s => s.ButtonGap = value + "px");
+        }
+    }
+
+    private void ApplyCompactSpacing()
+    {
+        ThemeState.UpdateSpacing(s =>
+        {
+            s.FormPadding = "16px";
+            s.SectionSpacing = "16px";
+            s.QuestionSpacing = "12px";
+            s.LabelSpacing = "4px";
+            s.OptionSpacing = "6px";
+            s.InputPadding = "8px";
+            s.InputPaddingHorizontal = "10px";
+            s.ButtonPaddingVertical = "8px";
+            s.ButtonPaddingHorizontal = "16px";
+            s.ButtonGap = "8px";
+        });
+    }
+
+    private void ApplyComfortableSpacing()
+    {
+        ThemeState.UpdateSpacing(s =>
+        {
+            s.FormPadding = "32px";
+            s.SectionSpacing = "24px";
+            s.QuestionSpacing = "20px";
+            s.LabelSpacing = "6px";
+            s.OptionSpacing = "8px";
+            s.InputPadding = "12px";
+            s.InputPaddingHorizontal = "14px";
+            s.ButtonPaddingVertical = "10px";
+            s.ButtonPaddingHorizontal = "20px";
+            s.ButtonGap = "12px";
+        });
+    }
+
+    private void ApplyRelaxedSpacing()
+    {
+        ThemeState.UpdateSpacing(s =>
+        {
+            s.FormPadding = "48px";
+            s.SectionSpacing = "32px";
+            s.QuestionSpacing = "28px";
+            s.LabelSpacing = "8px";
+            s.OptionSpacing = "12px";
+            s.InputPadding = "14px";
+            s.InputPaddingHorizontal = "18px";
+            s.ButtonPaddingVertical = "12px";
+            s.ButtonPaddingHorizontal = "28px";
+            s.ButtonGap = "16px";
+        });
+    }
+
+    private static int ParsePx(string value)
+    {
+        if (string.IsNullOrEmpty(value)) return 0;
+        var numericPart = value.Replace("px", "").Replace("rem", "").Replace("em", "").Trim();
+        return int.TryParse(numericPart, out var result) ? result : 0;
+    }
+
+    public void Dispose()
+    {
+        ThemeState.OnThemeChanged -= HandleThemeChanged;
+        ThemeState.OnAdvancedModeChanged -= HandleAdvancedModeChanged;
+    }
+}

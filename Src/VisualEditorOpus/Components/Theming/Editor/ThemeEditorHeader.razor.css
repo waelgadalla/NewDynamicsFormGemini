@@ -98,11 +98,111 @@
     font-size: 14px;
 }
 
+/* Editor Mode Toggle (Basic/Advanced) */
+.editor-mode-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-left: 16px;
+    border-left: 1px solid var(--border-color);
+}
+
+.editor-mode-toggle .mode-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: color 0.2s ease;
+}
+
+.editor-mode-toggle .mode-label.active {
+    color: var(--primary);
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    inset: 0;
+    background-color: var(--bg-tertiary, #d1d5db);
+    border-radius: 20px;
+    transition: background-color 0.2s ease;
+}
+
+.toggle-slider::before {
+    content: '';
+    position: absolute;
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background-color: var(--primary);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(16px);
+}
+
+.toggle-switch input:focus + .toggle-slider {
+    box-shadow: 0 0 0 3px var(--primary-light, rgba(99, 102, 241, 0.2));
+}
+
 .header-actions {
     display: flex;
     align-items: center;
     gap: 8px;
     flex-shrink: 0;
+}
+
+/* Undo/Redo button group */
+.undo-redo-group {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2px;
+    background: var(--bg-secondary);
+    border-radius: 6px;
+}
+
+.undo-redo-group .btn {
+    padding: 6px 8px;
+    border-radius: 4px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    transition: all 0.15s ease;
+}
+
+.undo-redo-group .btn:hover:not(:disabled) {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.undo-redo-group .btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.undo-redo-group .btn i {
+    font-size: 14px;
 }
 
 .dropdown {

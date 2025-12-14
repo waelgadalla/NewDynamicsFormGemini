@@ -1,0 +1,87 @@
+.shadows-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.prop-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.group-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Shadow Presets */
+.shadow-presets {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.shadow-preset-btn {
+    flex: 1;
+    min-width: 70px;
+    max-width: 90px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 8px;
+    background: var(--bg-secondary);
+    border: 2px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.shadow-preset-btn:hover {
+    border-color: var(--border-color);
+    background: var(--bg-hover);
+}
+
+.shadow-preset-btn.active {
+    border-color: var(--primary);
+    background: var(--bg-hover);
+}
+
+.preset-preview {
+    width: 48px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-primary);
+    border-radius: 4px;
+    padding: 4px;
+}
+
+.preset-box {
+    width: 100%;
+    height: 100%;
+    background: white;
+    border-radius: 3px;
+    transition: box-shadow 0.2s ease;
+}
+
+.preset-name {
+    font-size: 10px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.shadow-preset-btn.active .preset-name {
+    color: var(--primary);
+    font-weight: 500;
+}
+
+/* Shadow Editor wrapper styling */
+:deep(.shadow-editor) {
+    margin-top: 4px;
+}
