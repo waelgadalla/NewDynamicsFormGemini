@@ -1,59 +1,27 @@
 @* Rendered form that displays the form as end-user would see it *@
+@using DynamicForms.Models.Theming
+@using VisualEditorOpus.Components.Theming
 
-<div class="rendered-form">
-    <h1 class="form-title">@GetLabel(Module?.TitleEn, Module?.TitleFr)</h1>
-    @if (!string.IsNullOrEmpty(GetLabel(Module?.DescriptionEn, Module?.DescriptionFr)))
-    {
-        <p class="form-description">@GetLabel(Module?.DescriptionEn, Module?.DescriptionFr)</p>
-    }
-
-    @if (Module?.Fields == null || Module.Fields.Length == 0)
-    {
-        <div class="empty-form">
-            <i class="bi bi-inbox"></i>
-            <p>No fields to display. Add fields in Design mode.</p>
+@if (Theme is not null)
+{
+    <ThemeScope Theme="@Theme" CssClass="df-form-container">
+        <div class="df-form rendered-form">
+            @FormContent
         </div>
-    }
-    else
-    {
-        @foreach (var section in GroupedFields)
-        {
-            <div class="form-section">
-                @if (section.Parent != null)
-                {
-                    <h3 class="section-title">@GetLabel(section.Parent.LabelEn, section.Parent.LabelFr)</h3>
-                }
-
-                @foreach (var field in section.Fields)
-                {
-                    @if (!IsLayoutField(field.FieldType))
-                    {
-                        <RenderedField
-                            Field="@field"
-                            Language="@Language"
-                            Value="@GetFieldValue(field.Id)"
-                            Errors="@GetFieldErrors(field.Id)"
-                            OnValueChange="value => SetFieldValue(field.Id, value)" />
-                    }
-                }
-            </div>
-        }
-
-        <div class="form-actions">
-            <button class="btn btn-primary" @onclick="Submit">
-                <i class="bi bi-check-lg"></i>
-                Submit
-            </button>
-            <button class="btn btn-secondary" @onclick="Reset">
-                <i class="bi bi-arrow-counterclockwise"></i>
-                Reset
-            </button>
+    </ThemeScope>
+}
+else
+{
+    <div class="df-form-container df-form-unthemed">
+        <div class="df-form rendered-form">
+            @FormContent
         </div>
-    }
-</div>
+    </div>
+}
 
 @code {
     [Parameter] public FormModuleSchema? Module { get; set; }
+    [Parameter] public FormTheme? Theme { get; set; }
     [Parameter] public string Language { get; set; } = "en";
     [Parameter] public EventCallback<Dictionary<string, object>> OnSubmit { get; set; }
 
@@ -61,6 +29,59 @@
     private Dictionary<string, List<string>> ValidationErrors { get; set; } = new();
 
     private IEnumerable<FieldSection> GroupedFields => GroupFieldsByParent();
+
+    private RenderFragment FormContent => __builder =>
+    {
+        <h1 class="df-form-title">@GetLabel(Module?.TitleEn, Module?.TitleFr)</h1>
+        @if (!string.IsNullOrEmpty(GetLabel(Module?.DescriptionEn, Module?.DescriptionFr)))
+        {
+            <p class="df-form-description">@GetLabel(Module?.DescriptionEn, Module?.DescriptionFr)</p>
+        }
+
+        @if (Module?.Fields == null || Module.Fields.Length == 0)
+        {
+            <div class="df-empty-form">
+                <i class="bi bi-inbox"></i>
+                <p>No fields to display. Add fields in Design mode.</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var section in GroupedFields)
+            {
+                <div class="df-section">
+                    @if (section.Parent != null)
+                    {
+                        <h3 class="df-section-title">@GetLabel(section.Parent.LabelEn, section.Parent.LabelFr)</h3>
+                    }
+
+                    @foreach (var field in section.Fields)
+                    {
+                        @if (!IsLayoutField(field.FieldType))
+                        {
+                            <RenderedField
+                                Field="@field"
+                                Language="@Language"
+                                Value="@GetFieldValue(field.Id)"
+                                Errors="@GetFieldErrors(field.Id)"
+                                OnValueChange="value => SetFieldValue(field.Id, value)" />
+                        }
+                    }
+                </div>
+            }
+
+            <div class="df-form-actions">
+                <button class="df-btn df-btn-primary" @onclick="Submit">
+                    <i class="bi bi-check-lg"></i>
+                    Submit
+                </button>
+                <button class="df-btn df-btn-secondary" @onclick="Reset">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                    Reset
+                </button>
+            </div>
+        }
+    };
 
     private string GetLabel(string? en, string? fr) =>
         Language == "fr" && !string.IsNullOrEmpty(fr) ? fr : en ?? "";

@@ -1,0 +1,343 @@
+.theme-preview-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--bg-secondary);
+}
+
+.preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.preview-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.preview-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.device-switcher {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    background: var(--bg-secondary);
+    border-radius: 6px;
+    padding: 2px;
+}
+
+.device-btn {
+    padding: 6px 10px;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.device-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.device-btn.active {
+    background: var(--bg-primary);
+    color: var(--primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.device-btn i {
+    font-size: 14px;
+}
+
+.preview-container {
+    flex: 1;
+    overflow: auto;
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.preview-frame {
+    background: white;
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    transition: width 0.3s ease;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+.preview-frame.desktop {
+    width: 100%;
+    max-width: 900px;
+}
+
+.preview-frame.tablet {
+    width: 768px;
+}
+
+.preview-frame.mobile {
+    width: 375px;
+}
+
+.preview-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 48px;
+    color: var(--text-tertiary);
+    min-height: 400px;
+}
+
+.preview-empty i {
+    font-size: 48px;
+    opacity: 0.5;
+}
+
+.preview-empty span {
+    font-size: 14px;
+}
+
+/* Form preview styles - will be overridden by ThemeScope CSS variables */
+.preview-frame :deep(.df-form) {
+    padding: var(--df-form-padding, 32px);
+}
+
+.preview-frame :deep(.df-form-card) {
+    background: var(--df-surface, white);
+    border-radius: var(--df-radius-lg, 12px);
+    box-shadow: var(--df-shadow-card, 0 1px 3px rgba(0,0,0,0.1));
+    padding: var(--df-form-padding, 32px);
+}
+
+.preview-frame :deep(.df-form-title) {
+    font-family: var(--df-font-heading, var(--df-font, system-ui));
+    font-size: var(--df-text-title, 28px);
+    font-weight: var(--df-font-bold, 700);
+    color: var(--df-text-primary, #1f2937);
+    margin: 0 0 8px 0;
+}
+
+.preview-frame :deep(.df-form-description) {
+    font-size: var(--df-text-desc, 14px);
+    color: var(--df-text-secondary, #6b7280);
+    margin: 0 0 24px 0;
+}
+
+.preview-frame :deep(.df-section) {
+    margin-bottom: var(--df-section-gap, 32px);
+}
+
+.preview-frame :deep(.df-section-title) {
+    font-family: var(--df-font-heading, var(--df-font, system-ui));
+    font-size: var(--df-text-section, 18px);
+    font-weight: var(--df-font-semibold, 600);
+    color: var(--df-text-primary, #1f2937);
+    margin: 0 0 16px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--df-border-muted, #e5e7eb);
+}
+
+.preview-frame :deep(.df-question) {
+    margin-bottom: var(--df-question-gap, 20px);
+}
+
+.preview-frame :deep(.df-label) {
+    display: block;
+    font-size: var(--df-text-question, 14px);
+    font-weight: var(--df-font-medium, 500);
+    color: var(--df-text-primary, #1f2937);
+    margin-bottom: var(--df-label-gap, 6px);
+}
+
+.preview-frame :deep(.df-required) {
+    color: var(--df-error, #dc2626);
+    margin-left: 2px;
+}
+
+.preview-frame :deep(.df-description) {
+    font-size: var(--df-text-desc, 13px);
+    color: var(--df-text-muted, #9ca3af);
+    margin: 0 0 8px 0;
+}
+
+.preview-frame :deep(.df-input),
+.preview-frame :deep(.df-select),
+.preview-frame :deep(.df-textarea) {
+    width: 100%;
+    padding: var(--df-input-padding-y, 10px) var(--df-input-padding-x, 12px);
+    font-family: var(--df-font, system-ui);
+    font-size: var(--df-text-base, 14px);
+    color: var(--df-text-primary, #1f2937);
+    background: var(--df-surface, white);
+    border: var(--df-border-width, 1px) var(--df-border-style, solid) var(--df-border, #d1d5db);
+    border-radius: var(--df-radius-md, 8px);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.preview-frame :deep(.df-input:focus),
+.preview-frame :deep(.df-select:focus),
+.preview-frame :deep(.df-textarea:focus) {
+    outline: none;
+    border-color: var(--df-primary, #6366f1);
+    box-shadow: 0 0 0 var(--df-focus-width, 3px) var(--df-focus-ring, rgba(99,102,241,0.2));
+}
+
+.preview-frame :deep(.df-input::placeholder),
+.preview-frame :deep(.df-textarea::placeholder) {
+    color: var(--df-text-muted, #9ca3af);
+}
+
+.preview-frame :deep(.df-radio-group),
+.preview-frame :deep(.df-checkbox-group) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--df-option-gap, 10px);
+}
+
+.preview-frame :deep(.df-radio),
+.preview-frame :deep(.df-checkbox) {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: var(--df-text-base, 14px);
+    color: var(--df-text-primary, #1f2937);
+}
+
+.preview-frame :deep(.df-radio input),
+.preview-frame :deep(.df-checkbox input) {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.preview-frame :deep(.df-radio-indicator) {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid var(--df-border, #d1d5db);
+    background: var(--df-surface, white);
+    transition: all 0.2s;
+    position: relative;
+}
+
+.preview-frame :deep(.df-radio input:checked + .df-radio-indicator) {
+    border-color: var(--df-primary, #6366f1);
+}
+
+.preview-frame :deep(.df-radio input:checked + .df-radio-indicator)::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--df-primary, #6366f1);
+}
+
+.preview-frame :deep(.df-checkbox-indicator) {
+    width: 18px;
+    height: 18px;
+    border-radius: var(--df-radius-sm, 4px);
+    border: 2px solid var(--df-border, #d1d5db);
+    background: var(--df-surface, white);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.preview-frame :deep(.df-checkbox input:checked + .df-checkbox-indicator) {
+    background: var(--df-primary, #6366f1);
+    border-color: var(--df-primary, #6366f1);
+}
+
+.preview-frame :deep(.df-checkbox input:checked + .df-checkbox-indicator)::after {
+    content: '';
+    width: 5px;
+    height: 9px;
+    border: 2px solid white;
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg) translateY(-1px);
+}
+
+.preview-frame :deep(.df-form-actions) {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--df-btn-gap, 12px);
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--df-border-muted, #e5e7eb);
+}
+
+.preview-frame :deep(.df-btn) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: var(--df-btn-padding-y, 10px) var(--df-btn-padding-x, 20px);
+    font-family: var(--df-font, system-ui);
+    font-size: var(--df-text-base, 14px);
+    font-weight: var(--df-font-medium, 500);
+    border-radius: var(--df-radius-md, 8px);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.preview-frame :deep(.df-btn-primary) {
+    background: var(--df-primary, #6366f1);
+    color: var(--df-primary-fg, white);
+    border: none;
+}
+
+.preview-frame :deep(.df-btn-primary:hover) {
+    background: var(--df-primary-hover, #4f46e5);
+}
+
+.preview-frame :deep(.df-btn-outline) {
+    background: transparent;
+    color: var(--df-text-primary, #1f2937);
+    border: var(--df-border-width, 1px) var(--df-border-style, solid) var(--df-border, #d1d5db);
+}
+
+.preview-frame :deep(.df-btn-outline:hover) {
+    background: var(--df-bg-dim, #f9fafb);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .preview-frame.tablet {
+        width: 100%;
+        max-width: 768px;
+    }
+}
+
+@media (max-width: 768px) {
+    .preview-container {
+        padding: 16px;
+    }
+
+    .preview-frame.desktop,
+    .preview-frame.tablet {
+        width: 100%;
+    }
+}

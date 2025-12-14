@@ -1,0 +1,29 @@
+.colors-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.color-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.group-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.color-row {
+    display: flex;
+    gap: 8px;
+}
+
+.color-row > :deep(*) {
+    flex: 1;
+    min-width: 0;
+}

@@ -1,0 +1,197 @@
+@* Theme editor header with name input, preset selector, mode toggle, and actions *@
+@implements IDisposable
+
+@using DynamicForms.Models.Theming
+@using VisualEditorOpus.Services.Theming
+
+<div class="theme-editor-header">
+    <div class="header-left">
+        <button class="btn btn-ghost btn-icon-sm" @onclick="GoBack" title="Back to Admin">
+            <i class="bi bi-arrow-left"></i>
+        </button>
+        <div class="header-title">
+            <i class="bi bi-palette"></i>
+            <input type="text" class="title-input"
+                   value="@(ThemeState.CurrentTheme?.Name ?? "New Theme")"
+                   @onchange="HandleNameChange"
+                   placeholder="Theme Name" />
+        </div>
+        @if (ThemeState.IsDirty)
+        {
+            <Badge Variant="warning" Text="Unsaved" />
+        }
+    </div>
+
+    <div class="header-center">
+        <div class="preset-selector">
+            <SelectInput Value="@_selectedPresetId"
+                         ValueChanged="HandlePresetChange"
+                         Options="@_presetOptions"
+                         Placeholder="Select Preset..."
+                         ShowLabel="false"
+                         Size="prop" />
+        </div>
+
+        <div class="mode-toggle">
+            <button class="btn btn-sm @(CurrentMode == ThemeMode.Light ? "active" : "")"
+                    @onclick="() => SetMode(ThemeMode.Light)"
+                    title="Light Mode">
+                <i class="bi bi-sun"></i>
+            </button>
+            <button class="btn btn-sm @(CurrentMode == ThemeMode.Dark ? "active" : "")"
+                    @onclick="() => SetMode(ThemeMode.Dark)"
+                    title="Dark Mode">
+                <i class="bi bi-moon"></i>
+            </button>
+            <button class="btn btn-sm @(CurrentMode == ThemeMode.Auto ? "active" : "")"
+                    @onclick="() => SetMode(ThemeMode.Auto)"
+                    title="Auto (System)">
+                <i class="bi bi-circle-half"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="header-actions">
+        <div class="dropdown" @onfocusout="CloseActionsMenu">
+            <Button Variant="ghost" Icon="bi-three-dots-vertical" OnClick="ToggleActionsMenu" Title="More Actions" />
+            @if (_showActionsMenu)
+            {
+                <div class="dropdown-menu show">
+                    <button class="dropdown-item" @onclick="HandleImport">
+                        <i class="bi bi-box-arrow-in-down"></i>
+                        <span>Import Theme</span>
+                    </button>
+                    <button class="dropdown-item" @onclick="HandleExport">
+                        <i class="bi bi-box-arrow-up"></i>
+                        <span>Export Theme</span>
+                    </button>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item" @onclick="HandleReset" disabled="@(!ThemeState.IsDirty)">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                        <span>Reset Changes</span>
+                    </button>
+                    <button class="dropdown-item text-danger" @onclick="HandleResetToDefault">
+                        <i class="bi bi-arrow-repeat"></i>
+                        <span>Reset to Default</span>
+                    </button>
+                </div>
+            }
+        </div>
+        <Button Variant="primary" Icon="bi-check" Text="Save Theme" OnClick="HandleSave" />
+    </div>
+</div>
+
+@code {
+    [Inject] private IThemeEditorStateService ThemeState { get; set; } = default!;
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+    [Inject] private IToastService ToastService { get; set; } = default!;
+
+    private bool _showActionsMenu;
+    private string? _selectedPresetId;
+    private IEnumerable<SelectOption> _presetOptions = Array.Empty<SelectOption>();
+
+    private ThemeMode CurrentMode => ThemeState.CurrentTheme?.Mode ?? ThemeMode.Light;
+
+    protected override void OnInitialized()
+    {
+        ThemeState.OnThemeChanged += HandleThemeChanged;
+
+        // Build preset options
+        var presets = ThemePresets.GetAllPresets()
+            .Select(p => new SelectOption(p.Id, p.Name))
+            .OrderBy(o => o.Text);
+
+        _presetOptions = new[] { new SelectOption("", "Custom Theme") }
+            .Concat(presets)
+            .ToList();
+    }
+
+    private void HandleThemeChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void GoBack()
+    {
+        if (ThemeState.IsDirty)
+        {
+            // TODO: Show confirmation dialog
+        }
+        Navigation.NavigateTo("/admin");
+    }
+
+    private void HandleNameChange(ChangeEventArgs e)
+    {
+        var newName = e.Value?.ToString() ?? "Untitled Theme";
+        ThemeState.UpdateName(newName);
+    }
+
+    private void HandlePresetChange(string? presetId)
+    {
+        if (string.IsNullOrEmpty(presetId)) return;
+
+        _selectedPresetId = presetId;
+        ThemeState.ApplyPreset(presetId);
+        ToastService.ShowSuccess($"Applied preset: {ThemePresets.GetPresetInfo(presetId)?.Name ?? presetId}");
+    }
+
+    private void SetMode(ThemeMode mode)
+    {
+        ThemeState.UpdateMode(mode);
+    }
+
+    private void ToggleActionsMenu()
+    {
+        _showActionsMenu = !_showActionsMenu;
+    }
+
+    private void CloseActionsMenu()
+    {
+        // Delay to allow click events to fire
+        _ = Task.Delay(200).ContinueWith(_ =>
+        {
+            _showActionsMenu = false;
+            InvokeAsync(StateHasChanged);
+        });
+    }
+
+    private void HandleImport()
+    {
+        _showActionsMenu = false;
+        // TODO: Show import modal
+        ToastService.ShowInfo("Import functionality coming soon");
+    }
+
+    private void HandleExport()
+    {
+        _showActionsMenu = false;
+        // TODO: Show export modal
+        ToastService.ShowInfo("Export functionality coming soon");
+    }
+
+    private void HandleReset()
+    {
+        _showActionsMenu = false;
+        ThemeState.ResetTheme();
+        ToastService.ShowInfo("Theme reset to last saved state");
+    }
+
+    private void HandleResetToDefault()
+    {
+        _showActionsMenu = false;
+        ThemeState.ApplyPreset("default");
+        ToastService.ShowInfo("Theme reset to default");
+    }
+
+    private void HandleSave()
+    {
+        // TODO: Implement save via persistence service
+        ThemeState.MarkClean();
+        ToastService.ShowSuccess("Theme saved successfully");
+    }
+
+    public void Dispose()
+    {
+        ThemeState.OnThemeChanged -= HandleThemeChanged;
+    }
+}

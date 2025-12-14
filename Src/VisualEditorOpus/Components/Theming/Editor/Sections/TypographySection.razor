@@ -1,0 +1,229 @@
+@* Typography section with font family selection and size controls *@
+@implements IDisposable
+
+@using DynamicForms.Models.Theming
+@using VisualEditorOpus.Services.Theming
+@using VisualEditorOpus.Components.Properties
+
+<PropertySection Title="Typography" Icon="bi-fonts">
+    <div class="typography-section">
+        @if (Typography is not null)
+        {
+            <div class="prop-group">
+                <label class="prop-label">Font Family</label>
+                <SelectInput Value="@Typography.FontFamily"
+                             ValueChanged="HandleFontFamilyChange"
+                             Options="@_fontOptions"
+                             ShowLabel="false"
+                             Size="prop" />
+            </div>
+
+            <div class="prop-group">
+                <label class="prop-label">Heading Font</label>
+                <SelectInput Value="@(Typography.HeadingFontFamily ?? string.Empty)"
+                             ValueChanged="HandleHeadingFontChange"
+                             Options="@_headingFontOptions"
+                             Placeholder="Same as body"
+                             ShowLabel="false"
+                             Size="prop" />
+            </div>
+
+            <div class="prop-row">
+                <div class="prop-group">
+                    <label class="prop-label">Base Size</label>
+                    <div class="size-input">
+                        <input type="number" class="prop-input"
+                               value="@ParsePx(Typography.BaseFontSize)"
+                               @onchange="HandleBaseSizeChange"
+                               min="12" max="24" step="1" />
+                        <span class="size-unit">px</span>
+                    </div>
+                </div>
+                <div class="prop-group">
+                    <label class="prop-label">Title Size</label>
+                    <div class="size-input">
+                        <input type="number" class="prop-input"
+                               value="@ParsePx(Typography.FormTitleSize)"
+                               @onchange="HandleTitleSizeChange"
+                               min="16" max="48" step="1" />
+                        <span class="size-unit">px</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="prop-row">
+                <div class="prop-group">
+                    <label class="prop-label">Section Size</label>
+                    <div class="size-input">
+                        <input type="number" class="prop-input"
+                               value="@ParsePx(Typography.SectionTitleSize)"
+                               @onchange="HandleSectionSizeChange"
+                               min="14" max="32" step="1" />
+                        <span class="size-unit">px</span>
+                    </div>
+                </div>
+                <div class="prop-group">
+                    <label class="prop-label">Question Size</label>
+                    <div class="size-input">
+                        <input type="number" class="prop-input"
+                               value="@ParsePx(Typography.QuestionTitleSize)"
+                               @onchange="HandleQuestionSizeChange"
+                               min="12" max="24" step="1" />
+                        <span class="size-unit">px</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="prop-group">
+                <label class="prop-label">Font Weight Preset</label>
+                <div class="weight-buttons">
+                    <button class="weight-btn @(IsLightWeight ? "active" : "")"
+                            @onclick="ApplyLightWeights"
+                            title="Light weights">
+                        <span style="font-weight: 300;">Aa</span>
+                    </button>
+                    <button class="weight-btn @(IsNormalWeight ? "active" : "")"
+                            @onclick="ApplyNormalWeights"
+                            title="Normal weights">
+                        <span style="font-weight: 400;">Aa</span>
+                    </button>
+                    <button class="weight-btn @(IsBoldWeight ? "active" : "")"
+                            @onclick="ApplyBoldWeights"
+                            title="Bold weights">
+                        <span style="font-weight: 600;">Aa</span>
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</PropertySection>
+
+@code {
+    [Inject] private IThemeEditorStateService ThemeState { get; set; } = default!;
+
+    private ThemeTypography? Typography => ThemeState.CurrentTheme?.Typography;
+
+    private bool IsLightWeight => Typography?.FontWeightNormal == "300";
+    private bool IsNormalWeight => Typography?.FontWeightNormal == "400";
+    private bool IsBoldWeight => Typography?.FontWeightNormal == "500";
+
+    private static readonly string DefaultFont = "'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+
+    private static readonly IEnumerable<SelectOption> _fontOptions = new SelectOption[]
+    {
+        new("system-ui, -apple-system, sans-serif", "System Default"),
+        new("'DM Sans', -apple-system, sans-serif", "DM Sans"),
+        new("Inter, sans-serif", "Inter"),
+        new("Roboto, sans-serif", "Roboto"),
+        new("'Open Sans', sans-serif", "Open Sans"),
+        new("'Source Sans Pro', sans-serif", "Source Sans Pro"),
+        new("'Public Sans', sans-serif", "Public Sans (USWDS)"),
+        new("'Noto Sans', sans-serif", "Noto Sans"),
+        new("Arial, sans-serif", "Arial"),
+        new("'Segoe UI', sans-serif", "Segoe UI"),
+        new("Georgia, serif", "Georgia"),
+        new("'Times New Roman', serif", "Times New Roman"),
+    };
+
+    private static readonly IEnumerable<SelectOption> _headingFontOptions = new SelectOption[]
+    {
+        new("", "Same as body"),
+        new("system-ui, -apple-system, sans-serif", "System Default"),
+        new("'DM Sans', -apple-system, sans-serif", "DM Sans"),
+        new("Inter, sans-serif", "Inter"),
+        new("Roboto, sans-serif", "Roboto"),
+        new("'Open Sans', sans-serif", "Open Sans"),
+        new("Merriweather, serif", "Merriweather"),
+        new("'Playfair Display', serif", "Playfair Display"),
+        new("Georgia, serif", "Georgia"),
+    };
+
+    protected override void OnInitialized()
+    {
+        ThemeState.OnThemeChanged += HandleThemeChanged;
+    }
+
+    private void HandleThemeChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void HandleFontFamilyChange(string? value)
+    {
+        ThemeState.UpdateTypography(t => t.FontFamily = value ?? DefaultFont);
+    }
+
+    private void HandleHeadingFontChange(string? value)
+    {
+        ThemeState.UpdateTypography(t => t.HeadingFontFamily = string.IsNullOrEmpty(value) ? "" : value);
+    }
+
+    private void HandleBaseSizeChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+            ThemeState.UpdateTypography(t => t.BaseFontSize = value + "px");
+    }
+
+    private void HandleTitleSizeChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+            ThemeState.UpdateTypography(t => t.FormTitleSize = value + "px");
+    }
+
+    private void HandleSectionSizeChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+            ThemeState.UpdateTypography(t => t.SectionTitleSize = value + "px");
+    }
+
+    private void HandleQuestionSizeChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+            ThemeState.UpdateTypography(t => t.QuestionTitleSize = value + "px");
+    }
+
+    private void ApplyLightWeights()
+    {
+        ThemeState.UpdateTypography(t =>
+        {
+            t.FontWeightNormal = "300";
+            t.FontWeightMedium = "400";
+            t.FontWeightSemibold = "500";
+            t.FontWeightBold = "600";
+        });
+    }
+
+    private void ApplyNormalWeights()
+    {
+        ThemeState.UpdateTypography(t =>
+        {
+            t.FontWeightNormal = "400";
+            t.FontWeightMedium = "500";
+            t.FontWeightSemibold = "600";
+            t.FontWeightBold = "700";
+        });
+    }
+
+    private void ApplyBoldWeights()
+    {
+        ThemeState.UpdateTypography(t =>
+        {
+            t.FontWeightNormal = "500";
+            t.FontWeightMedium = "600";
+            t.FontWeightSemibold = "700";
+            t.FontWeightBold = "800";
+        });
+    }
+
+    private static int ParsePx(string value)
+    {
+        if (string.IsNullOrEmpty(value)) return 16;
+        var numericPart = value.Replace("px", "").Replace("rem", "").Replace("em", "").Trim();
+        return int.TryParse(numericPart, out var result) ? result : 16;
+    }
+
+    public void Dispose()
+    {
+        ThemeState.OnThemeChanged -= HandleThemeChanged;
+    }
+}

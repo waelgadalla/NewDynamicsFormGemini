@@ -1,5 +1,6 @@
 using VisualEditorOpus.Components;
 using VisualEditorOpus.Services;
+using VisualEditorOpus.Services.Theming;
 using DynamicForms.Core.V4.Services;
 using DynamicForms.SqlServer.Extensions;
 
@@ -26,6 +27,12 @@ builder.Services.AddScoped<IUndoRedoService, UndoRedoService>();
 builder.Services.AddScoped<ISchemaValidationService, SchemaValidationService>();
 builder.Services.AddScoped<IEditorStateService, EditorStateService>();
 builder.Services.AddScoped<IJsonImportExportService, JsonImportExportService>();
+
+// Register Theme Editor services
+builder.Services.AddScoped<IThemeEditorStateService, ThemeEditorStateService>();
+builder.Services.AddSingleton<IThemeCssGeneratorService, ThemeCssGeneratorService>();
+builder.Services.AddScoped<IThemeImportExportService, ThemeImportExportService>();
+builder.Services.AddScoped<IThemePersistenceService, ThemePersistenceService>();
 
 // Register CodeSet management services
 builder.Services.AddScoped<ICodeSetCache, CodeSetCache>();

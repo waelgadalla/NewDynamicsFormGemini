@@ -1,0 +1,329 @@
+@using DynamicForms.Models.Theming
+@using VisualEditorOpus.Services.Theming
+
+@inject IThemeCssGeneratorService CssGenerator
+
+@*
+    ThemeScope Component
+    ====================
+    Wraps content and applies theme CSS variables.
+    Use this component to apply a FormTheme to any form content.
+
+    Usage:
+    <ThemeScope Theme="@myTheme">
+        <div class="df-form">
+            <!-- Form content here -->
+        </div>
+    </ThemeScope>
+*@
+
+<div class="df-theme-scope @CssClass @GetModeClass()"
+     style="@GetCssVariables()"
+     data-theme="@GetThemeMode()"
+     @attributes="AdditionalAttributes">
+
+    @* Background Layer (for image/gradient backgrounds) *@
+    @if (ShouldRenderBackground())
+    {
+        <div class="df-theme-background" style="@GetBackgroundStyles()">
+            @if (Theme.Background.OverlayEnabled)
+            {
+                <div class="df-background-overlay" style="background-color: @Theme.Background.OverlayColor;"></div>
+            }
+        </div>
+    }
+
+    @* Header Section *@
+    @if (ShouldRenderHeader())
+    {
+        <header class="df-form-header @GetHeaderClasses()" style="@GetHeaderStyles()">
+            @* Header Background Overlay *@
+            @if (Theme.Header.OverlayEnabled)
+            {
+                <div class="df-header-overlay" style="background-color: @Theme.Header.OverlayColor;"></div>
+            }
+
+            @* Header Content *@
+            <div class="df-header-content" style="@GetHeaderContentStyles()">
+                @if (!string.IsNullOrEmpty(Theme.Header.LogoUrl))
+                {
+                    <img src="@Theme.Header.LogoUrl"
+                         alt="@Theme.Header.LogoAltText"
+                         class="df-logo"
+                         style="@GetLogoStyles()" />
+                }
+
+                @if (HeaderContent != null)
+                {
+                    @HeaderContent
+                }
+            </div>
+        </header>
+    }
+
+    @* Main Content *@
+    <div class="df-theme-content @(Theme.IsPanelless ? "df-panelless" : "")">
+        @ChildContent
+    </div>
+</div>
+
+@code {
+    #region Parameters
+
+    /// <summary>
+    /// The theme configuration to apply.
+    /// </summary>
+    [Parameter]
+    public FormTheme Theme { get; set; } = new();
+
+    /// <summary>
+    /// The content to render inside the theme scope.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>
+    /// Optional content to render in the header area (title, description, etc.).
+    /// </summary>
+    [Parameter]
+    public RenderFragment? HeaderContent { get; set; }
+
+    /// <summary>
+    /// Additional CSS classes to apply to the root element.
+    /// </summary>
+    [Parameter]
+    public string CssClass { get; set; } = "";
+
+    /// <summary>
+    /// Whether to render the header even if no logo is set.
+    /// Set to true if using HeaderContent.
+    /// </summary>
+    [Parameter]
+    public bool ForceShowHeader { get; set; } = false;
+
+    /// <summary>
+    /// Whether to render the background layer.
+    /// Set to false if you want to handle background separately.
+    /// </summary>
+    [Parameter]
+    public bool EnableBackground { get; set; } = true;
+
+    /// <summary>
+    /// Additional HTML attributes to apply to the root element.
+    /// </summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    #endregion
+
+    #region CSS Variables
+
+    private string GetCssVariables()
+    {
+        return CssGenerator.GenerateCssVariables(Theme);
+    }
+
+    #endregion
+
+    #region Theme Mode
+
+    private string GetThemeMode()
+    {
+        return Theme.Mode switch
+        {
+            ThemeMode.Dark => "dark",
+            ThemeMode.Auto => "auto",
+            _ => "light"
+        };
+    }
+
+    private string GetModeClass()
+    {
+        return Theme.Mode switch
+        {
+            ThemeMode.Dark => "df-dark",
+            ThemeMode.Auto => "df-auto",
+            _ => "df-light"
+        };
+    }
+
+    #endregion
+
+    #region Background
+
+    private bool ShouldRenderBackground()
+    {
+        if (!EnableBackground)
+            return false;
+
+        return Theme.Background.Type switch
+        {
+            "image" => !string.IsNullOrEmpty(Theme.Background.Image),
+            "gradient" => !string.IsNullOrEmpty(Theme.Background.Gradient) ||
+                         (Theme.Background.GradientStops?.Count >= 2),
+            _ => false // Color backgrounds are handled by CSS variable
+        };
+    }
+
+    private string GetBackgroundStyles()
+    {
+        var styles = new List<string>();
+
+        switch (Theme.Background.Type)
+        {
+            case "image":
+                if (!string.IsNullOrEmpty(Theme.Background.Image))
+                {
+                    styles.Add($"background-image: url('{Theme.Background.Image}')");
+                    styles.Add($"background-size: {Theme.Background.ImageSize}");
+                    styles.Add($"background-position: {Theme.Background.ImagePosition}");
+                    styles.Add($"background-repeat: {Theme.Background.ImageRepeat}");
+                    styles.Add($"background-attachment: {Theme.Background.ImageAttachment}");
+
+                    if (Theme.Background.ImageOpacity != "1")
+                    {
+                        styles.Add($"opacity: {Theme.Background.ImageOpacity}");
+                    }
+                }
+                break;
+
+            case "gradient":
+                var gradient = !string.IsNullOrEmpty(Theme.Background.Gradient)
+                    ? Theme.Background.Gradient
+                    : Theme.Background.ComputedGradient;
+
+                if (!string.IsNullOrEmpty(gradient))
+                {
+                    styles.Add($"background: {gradient}");
+                }
+                break;
+        }
+
+        return string.Join("; ", styles);
+    }
+
+    #endregion
+
+    #region Header
+
+    private bool ShouldRenderHeader()
+    {
+        if (!Theme.Header.Enabled)
+            return false;
+
+        return ForceShowHeader ||
+               !string.IsNullOrEmpty(Theme.Header.LogoUrl) ||
+               HeaderContent != null;
+    }
+
+    private string GetHeaderClasses()
+    {
+        var classes = new List<string>();
+
+        if (Theme.Header.FullWidth)
+            classes.Add("df-header-fullwidth");
+
+        if (Theme.Header.OverlapContent)
+            classes.Add("df-header-overlap");
+
+        classes.Add($"df-header-align-{Theme.Header.ContentAlignment}");
+        classes.Add($"df-header-valign-{Theme.Header.VerticalAlignment}");
+
+        return string.Join(" ", classes);
+    }
+
+    private string GetHeaderStyles()
+    {
+        var styles = new List<string>();
+
+        // Height
+        if (Theme.Header.Height != "auto")
+        {
+            styles.Add($"height: {Theme.Header.Height}");
+            styles.Add("min-height: unset");
+        }
+
+        // Padding
+        styles.Add($"padding: {Theme.Header.Padding}");
+
+        // Background
+        switch (Theme.Header.BackgroundType)
+        {
+            case "color":
+                styles.Add($"background-color: {Theme.Header.BackgroundColor}");
+                break;
+
+            case "image":
+                if (!string.IsNullOrEmpty(Theme.Header.BackgroundImage))
+                {
+                    styles.Add($"background-image: url('{Theme.Header.BackgroundImage}')");
+                    styles.Add($"background-size: {Theme.Header.BackgroundSize}");
+                    styles.Add($"background-position: {Theme.Header.BackgroundPosition}");
+                    styles.Add("background-repeat: no-repeat");
+                }
+                break;
+
+            case "gradient":
+                if (!string.IsNullOrEmpty(Theme.Header.BackgroundGradient))
+                {
+                    styles.Add($"background: {Theme.Header.BackgroundGradient}");
+                }
+                break;
+        }
+
+        // Overlap
+        if (Theme.Header.OverlapContent)
+        {
+            styles.Add($"margin-bottom: -{Theme.Header.OverlapAmount}");
+        }
+
+        return string.Join("; ", styles);
+    }
+
+    private string GetHeaderContentStyles()
+    {
+        var styles = new List<string>();
+
+        // Horizontal alignment
+        var justifyContent = Theme.Header.ContentAlignment switch
+        {
+            "left" => "flex-start",
+            "right" => "flex-end",
+            _ => "center"
+        };
+        styles.Add($"justify-content: {justifyContent}");
+
+        // Vertical alignment
+        var alignItems = Theme.Header.VerticalAlignment switch
+        {
+            "top" => "flex-start",
+            "bottom" => "flex-end",
+            _ => "center"
+        };
+        styles.Add($"align-items: {alignItems}");
+
+        return string.Join("; ", styles);
+    }
+
+    private string GetLogoStyles()
+    {
+        var styles = new List<string>
+        {
+            $"max-height: {Theme.Header.LogoMaxHeight}"
+        };
+
+        // Logo position within header
+        if (Theme.Header.LogoPosition == "center")
+        {
+            styles.Add("margin: 0 auto");
+        }
+        else if (Theme.Header.LogoPosition == "right")
+        {
+            styles.Add("margin-left: auto");
+        }
+
+        return string.Join("; ", styles);
+    }
+
+    #endregion
+}

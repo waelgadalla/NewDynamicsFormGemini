@@ -1,0 +1,283 @@
+@* Export Theme Modal - allows exporting themes to JSON or CSS formats *@
+@using DynamicForms.Models.Theming
+@using VisualEditorOpus.Services.Theming
+@using VisualEditorOpus.Models
+@inject IJSRuntime JSRuntime
+
+<ModalBase @bind-IsOpen="IsOpen"
+           Title="Export Theme"
+           Icon="bi-download"
+           Size="ModalSize.Medium"
+           OnClose="HandleClose">
+    <ChildContent>
+    <div class="export-theme-modal">
+        @if (Theme is not null)
+        {
+            @* Theme Info *@
+            <div class="theme-info-card">
+                <div class="theme-swatch" style="background-color: @Theme.Colors.Primary;"></div>
+                <div class="theme-details">
+                    <span class="theme-name">@Theme.Name</span>
+                    <span class="theme-meta">@Theme.Mode Mode</span>
+                </div>
+            </div>
+
+            @* Export Format Selection *@
+            <div class="export-formats">
+                <label class="format-label">Export Format</label>
+                <div class="format-options">
+                    <button class="format-option @(_selectedFormat == ExportFormat.Json ? "active" : "")"
+                            @onclick="() => SelectFormat(ExportFormat.Json)">
+                        <i class="bi bi-braces"></i>
+                        <div class="format-info">
+                            <span class="format-name">JSON</span>
+                            <span class="format-desc">Complete theme data</span>
+                        </div>
+                    </button>
+                    <button class="format-option @(_selectedFormat == ExportFormat.Css ? "active" : "")"
+                            @onclick="() => SelectFormat(ExportFormat.Css)">
+                        <i class="bi bi-filetype-css"></i>
+                        <div class="format-info">
+                            <span class="format-name">CSS</span>
+                            <span class="format-desc">Stylesheet with variables</span>
+                        </div>
+                    </button>
+                    <button class="format-option @(_selectedFormat == ExportFormat.CssMinified ? "active" : "")"
+                            @onclick="() => SelectFormat(ExportFormat.CssMinified)">
+                        <i class="bi bi-file-zip"></i>
+                        <div class="format-info">
+                            <span class="format-name">CSS (Minified)</span>
+                            <span class="format-desc">Production-ready</span>
+                        </div>
+                    </button>
+                    <button class="format-option @(_selectedFormat == ExportFormat.Variables ? "active" : "")"
+                            @onclick="() => SelectFormat(ExportFormat.Variables)">
+                        <i class="bi bi-code-slash"></i>
+                        <div class="format-info">
+                            <span class="format-name">CSS Variables</span>
+                            <span class="format-desc">Just the :root block</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            @* Preview *@
+            <div class="preview-section">
+                <div class="preview-header">
+                    <label class="preview-label">Preview</label>
+                    <button class="btn-copy" @onclick="CopyToClipboard" disabled="@_isCopying">
+                        <i class="bi @(_copySuccess ? "bi-check-lg" : "bi-clipboard")"></i>
+                        @(_copySuccess ? "Copied!" : "Copy")
+                    </button>
+                </div>
+                <div class="preview-content">
+                    <pre class="preview-code">@_previewContent</pre>
+                </div>
+            </div>
+
+            @* File Info *@
+            <div class="file-info">
+                <i class="bi bi-file-earmark"></i>
+                <span class="file-name">@_exportFilename</span>
+                <span class="file-size">~@FormatSize(_previewContent.Length) bytes</span>
+            </div>
+        }
+        else
+        {
+            <div class="no-theme-message">
+                <i class="bi bi-exclamation-circle"></i>
+                <span>No theme selected for export.</span>
+            </div>
+        }
+    </div>
+    </ChildContent>
+
+    <FooterContent>
+        <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+        <button class="btn btn-primary"
+                @onclick="Download"
+                disabled="@(Theme is null || _isDownloading)">
+            <i class="bi @(_isDownloading ? "bi-hourglass-split" : "bi-download")"></i>
+            @(_isDownloading ? "Downloading..." : "Download")
+        </button>
+    </FooterContent>
+</ModalBase>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public FormTheme? Theme { get; set; }
+
+    [Inject] private IThemeImportExportService ImportExportService { get; set; } = default!;
+    [Inject] private IToastService ToastService { get; set; } = default!;
+
+    private enum ExportFormat { Json, Css, CssMinified, Variables }
+
+    private ExportFormat _selectedFormat = ExportFormat.Json;
+    private string _previewContent = string.Empty;
+    private string _exportFilename = string.Empty;
+    private bool _isCopying;
+    private bool _copySuccess;
+    private bool _isDownloading;
+
+    protected override void OnParametersSet()
+    {
+        if (Theme is not null && IsOpen)
+        {
+            UpdatePreview();
+        }
+    }
+
+    private void SelectFormat(ExportFormat format)
+    {
+        _selectedFormat = format;
+        UpdatePreview();
+    }
+
+    private void UpdatePreview()
+    {
+        if (Theme is null) return;
+
+        var content = _selectedFormat switch
+        {
+            ExportFormat.Json => ImportExportService.ExportToJson(Theme, prettyPrint: true),
+            ExportFormat.Css => ImportExportService.ExportToCss(Theme),
+            ExportFormat.CssMinified => System.Text.Encoding.UTF8.GetString(ImportExportService.ExportToMinifiedCssBytes(Theme)),
+            ExportFormat.Variables => ImportExportService.GetCssVariablesForClipboard(Theme),
+            _ => string.Empty
+        };
+
+        // Truncate for preview
+        if (content.Length > 2000)
+        {
+            _previewContent = content[..2000] + "\n\n/* ... truncated for preview ... */";
+        }
+        else
+        {
+            _previewContent = content;
+        }
+
+        // Update filename
+        var extension = _selectedFormat switch
+        {
+            ExportFormat.Json => "json",
+            ExportFormat.CssMinified => "min.css",
+            _ => "css"
+        };
+        _exportFilename = ImportExportService.GetExportFilename(Theme, extension);
+    }
+
+    private async Task CopyToClipboard()
+    {
+        if (Theme is null) return;
+
+        _isCopying = true;
+        StateHasChanged();
+
+        try
+        {
+            var content = _selectedFormat switch
+            {
+                ExportFormat.Json => ImportExportService.ExportToJson(Theme, prettyPrint: true),
+                ExportFormat.Css => ImportExportService.ExportToCss(Theme),
+                ExportFormat.CssMinified => System.Text.Encoding.UTF8.GetString(ImportExportService.ExportToMinifiedCssBytes(Theme)),
+                ExportFormat.Variables => ImportExportService.GetCssVariablesForClipboard(Theme),
+                _ => string.Empty
+            };
+
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", content);
+            _copySuccess = true;
+            ToastService.ShowSuccess("Copied to clipboard!");
+
+            // Reset copy success after delay
+            await Task.Delay(2000);
+            _copySuccess = false;
+        }
+        catch
+        {
+            ToastService.ShowError("Failed to copy to clipboard.");
+        }
+        finally
+        {
+            _isCopying = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task Download()
+    {
+        if (Theme is null) return;
+
+        _isDownloading = true;
+        StateHasChanged();
+
+        try
+        {
+            byte[] data;
+            string filename;
+            string mimeType;
+
+            switch (_selectedFormat)
+            {
+                case ExportFormat.Json:
+                    data = ImportExportService.ExportToJsonBytes(Theme);
+                    filename = ImportExportService.GetExportFilename(Theme, "json");
+                    mimeType = "application/json";
+                    break;
+                case ExportFormat.Css:
+                    data = ImportExportService.ExportToCssBytes(Theme);
+                    filename = ImportExportService.GetExportFilename(Theme, "css");
+                    mimeType = "text/css";
+                    break;
+                case ExportFormat.CssMinified:
+                    data = ImportExportService.ExportToMinifiedCssBytes(Theme);
+                    filename = ImportExportService.GetExportFilename(Theme, "min.css");
+                    mimeType = "text/css";
+                    break;
+                case ExportFormat.Variables:
+                    data = System.Text.Encoding.UTF8.GetBytes(ImportExportService.GetCssVariablesForClipboard(Theme));
+                    filename = ImportExportService.GetExportFilename(Theme, "variables.css");
+                    mimeType = "text/css";
+                    break;
+                default:
+                    return;
+            }
+
+            var base64 = Convert.ToBase64String(data);
+            await JSRuntime.InvokeVoidAsync("downloadFileFromBase64", filename, base64, mimeType);
+
+            ToastService.ShowSuccess($"Theme exported as {filename}");
+            await Close();
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Export failed: {ex.Message}");
+        }
+        finally
+        {
+            _isDownloading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task Cancel() => await Close();
+
+    private async Task Close()
+    {
+        IsOpen = false;
+        await IsOpenChanged.InvokeAsync(false);
+    }
+
+    private void HandleClose()
+    {
+        _selectedFormat = ExportFormat.Json;
+        _copySuccess = false;
+    }
+
+    private static string FormatSize(int bytes)
+    {
+        if (bytes < 1024) return bytes.ToString();
+        if (bytes < 1024 * 1024) return $"{bytes / 1024.0:F1}K";
+        return $"{bytes / (1024.0 * 1024.0):F1}M";
+    }
+}

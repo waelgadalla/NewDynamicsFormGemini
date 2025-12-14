@@ -1,0 +1,60 @@
+.color-input {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.color-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.color-picker-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+}
+
+.color-preview {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    flex-shrink: 0;
+    cursor: pointer;
+    position: relative;
+}
+
+.color-picker {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 24px;
+    height: 24px;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.color-text {
+    flex: 1;
+    min-width: 0;
+    padding: 4px 6px;
+    font-size: 11px;
+    font-family: monospace;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+    text-transform: uppercase;
+}
+
+.color-text:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.color-text::placeholder {
+    color: var(--text-tertiary);
+    text-transform: none;
+}

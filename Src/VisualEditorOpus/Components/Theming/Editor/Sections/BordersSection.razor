@@ -1,0 +1,222 @@
+@* Borders section with radius sliders and style options *@
+@implements IDisposable
+
+@using DynamicForms.Models.Theming
+@using VisualEditorOpus.Services.Theming
+@using VisualEditorOpus.Components.Properties
+
+<PropertySection Title="Borders & Corners" Icon="bi-bounding-box">
+    <div class="borders-section">
+        @if (Borders is not null)
+        {
+            <div class="prop-group">
+                <label class="prop-label">Corner Radius</label>
+                <div class="radius-slider">
+                    <input type="range" class="slider"
+                           min="0" max="24" step="1"
+                           value="@ParsePx(Borders.RadiusMedium)"
+                           @onchange="HandleRadiusChange" />
+                    <span class="slider-value">@Borders.RadiusMedium</span>
+                </div>
+                <div class="radius-preview">
+                    <div class="radius-box" style="border-radius: @Borders.RadiusSmall;">S</div>
+                    <div class="radius-box" style="border-radius: @Borders.RadiusMedium;">M</div>
+                    <div class="radius-box" style="border-radius: @Borders.RadiusLarge;">L</div>
+                    <div class="radius-box" style="border-radius: @Borders.RadiusXLarge;">XL</div>
+                </div>
+            </div>
+
+            <div class="prop-row">
+                <div class="prop-group">
+                    <label class="prop-label">Border Width</label>
+                    <div class="size-input">
+                        <input type="number" class="prop-input"
+                               value="@ParsePx(Borders.BorderWidth)"
+                               @onchange="HandleBorderWidthChange"
+                               min="0" max="4" step="1" />
+                        <span class="size-unit">px</span>
+                    </div>
+                </div>
+                <div class="prop-group">
+                    <label class="prop-label">Border Style</label>
+                    <SelectInput Value="@Borders.BorderStyle"
+                                 ValueChanged="HandleBorderStyleChange"
+                                 Options="@_borderStyleOptions"
+                                 ShowLabel="false"
+                                 Size="prop" />
+                </div>
+            </div>
+
+            <div class="prop-group">
+                <span class="group-label">Focus Ring</span>
+                <div class="prop-row">
+                    <div class="prop-group">
+                        <label class="prop-label">Width</label>
+                        <div class="size-input">
+                            <input type="number" class="prop-input"
+                                   value="@ParsePx(Borders.FocusRingWidth)"
+                                   @onchange="HandleFocusWidthChange"
+                                   min="1" max="4" step="1" />
+                            <span class="size-unit">px</span>
+                        </div>
+                    </div>
+                    <div class="prop-group">
+                        <label class="prop-label">Offset</label>
+                        <div class="size-input">
+                            <input type="number" class="prop-input"
+                                   value="@ParsePx(Borders.FocusRingOffset)"
+                                   @onchange="HandleFocusOffsetChange"
+                                   min="0" max="4" step="1" />
+                            <span class="size-unit">px</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="prop-group">
+                <label class="prop-label">Radius Presets</label>
+                <div class="radius-presets">
+                    <button class="preset-btn @(IsSharpRadius ? "active" : "")"
+                            @onclick="ApplySharpRadius"
+                            title="Sharp corners (0px)">
+                        <div class="preset-icon sharp"></div>
+                        <span>Sharp</span>
+                    </button>
+                    <button class="preset-btn @(IsRoundedRadius ? "active" : "")"
+                            @onclick="ApplyRoundedRadius"
+                            title="Rounded corners (8px)">
+                        <div class="preset-icon rounded"></div>
+                        <span>Rounded</span>
+                    </button>
+                    <button class="preset-btn @(IsPillRadius ? "active" : "")"
+                            @onclick="ApplyPillRadius"
+                            title="Pill shape (999px)">
+                        <div class="preset-icon pill"></div>
+                        <span>Pill</span>
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</PropertySection>
+
+@code {
+    [Inject] private IThemeEditorStateService ThemeState { get; set; } = default!;
+
+    private ThemeBorders? Borders => ThemeState.CurrentTheme?.Borders;
+
+    private bool IsSharpRadius => Borders?.RadiusMedium == "0px";
+    private bool IsRoundedRadius => Borders?.RadiusMedium == "8px" || Borders?.RadiusMedium == "6px";
+    private bool IsPillRadius => Borders?.RadiusMedium == "9999px";
+
+    private static readonly string DefaultBorderStyle = "solid";
+
+    private static readonly IEnumerable<SelectOption> _borderStyleOptions = new SelectOption[]
+    {
+        new("solid", "Solid"),
+        new("dashed", "Dashed"),
+        new("dotted", "Dotted"),
+        new("none", "None"),
+    };
+
+    protected override void OnInitialized()
+    {
+        ThemeState.OnThemeChanged += HandleThemeChanged;
+    }
+
+    private void HandleThemeChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void HandleBorderStyleChange(string? value)
+    {
+        ThemeState.UpdateBorders(b => b.BorderStyle = value ?? DefaultBorderStyle);
+    }
+
+    private void HandleRadiusChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var baseRadius))
+        {
+            ThemeState.UpdateBorders(b =>
+            {
+                b.RadiusSmall = Math.Max(0, baseRadius - 4) + "px";
+                b.RadiusMedium = baseRadius + "px";
+                b.RadiusLarge = (baseRadius + 4) + "px";
+                b.RadiusXLarge = (baseRadius + 8) + "px";
+            });
+        }
+    }
+
+    private void HandleBorderWidthChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+        {
+            ThemeState.UpdateBorders(b => b.BorderWidth = value + "px");
+        }
+    }
+
+    private void HandleFocusWidthChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+        {
+            ThemeState.UpdateBorders(b => b.FocusRingWidth = value + "px");
+        }
+    }
+
+    private void HandleFocusOffsetChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+        {
+            ThemeState.UpdateBorders(b => b.FocusRingOffset = value + "px");
+        }
+    }
+
+    private void ApplySharpRadius()
+    {
+        ThemeState.UpdateBorders(b =>
+        {
+            b.RadiusSmall = "0px";
+            b.RadiusMedium = "0px";
+            b.RadiusLarge = "0px";
+            b.RadiusXLarge = "0px";
+            b.RadiusFull = "0px";
+        });
+    }
+
+    private void ApplyRoundedRadius()
+    {
+        ThemeState.UpdateBorders(b =>
+        {
+            b.RadiusSmall = "4px";
+            b.RadiusMedium = "8px";
+            b.RadiusLarge = "12px";
+            b.RadiusXLarge = "16px";
+            b.RadiusFull = "9999px";
+        });
+    }
+
+    private void ApplyPillRadius()
+    {
+        ThemeState.UpdateBorders(b =>
+        {
+            b.RadiusSmall = "9999px";
+            b.RadiusMedium = "9999px";
+            b.RadiusLarge = "9999px";
+            b.RadiusXLarge = "9999px";
+            b.RadiusFull = "9999px";
+        });
+    }
+
+    private static int ParsePx(string value)
+    {
+        if (string.IsNullOrEmpty(value)) return 0;
+        var numericPart = value.Replace("px", "").Replace("rem", "").Replace("em", "").Trim();
+        return int.TryParse(numericPart, out var result) ? result : 0;
+    }
+
+    public void Dispose()
+    {
+        ThemeState.OnThemeChanged -= HandleThemeChanged;
+    }
+}

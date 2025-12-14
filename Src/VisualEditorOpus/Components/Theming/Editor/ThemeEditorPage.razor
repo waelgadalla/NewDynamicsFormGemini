@@ -1,0 +1,93 @@
+@page "/admin/theme-editor"
+@page "/admin/theme-editor/{ThemeId}"
+@layout EditorLayout
+@implements IDisposable
+
+@using DynamicForms.Models.Theming
+@using VisualEditorOpus.Services.Theming
+@using VisualEditorOpus.Components.Theming.Editor.Sections
+
+<div class="theme-editor">
+    <ThemeEditorHeader />
+
+    <div class="theme-editor-body">
+        <ThemeEditorSidebar />
+
+        <div class="theme-editor-main">
+            <ThemePreviewPanel />
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? ThemeId { get; set; }
+
+    [Inject] private IThemeEditorStateService ThemeState { get; set; } = default!;
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+    [Inject] private IToastService ToastService { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        ThemeState.OnThemeChanged += HandleThemeChanged;
+        ThemeState.OnLoadingChanged += HandleLoadingChanged;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!string.IsNullOrEmpty(ThemeId))
+        {
+            await LoadThemeAsync(ThemeId);
+        }
+        else if (ThemeState.CurrentTheme is null)
+        {
+            // Create new theme if none loaded
+            ThemeState.CreateNewTheme("New Theme");
+        }
+    }
+
+    private async Task LoadThemeAsync(string themeId)
+    {
+        ThemeState.SetLoading(true);
+
+        try
+        {
+            // TODO: Load theme from persistence service when implemented
+            // For now, try to load from presets or create new
+            if (ThemePresets.TryGetPreset(themeId, out var preset) && preset is not null)
+            {
+                ThemeState.LoadTheme(preset);
+            }
+            else
+            {
+                ThemeState.CreateNewTheme("New Theme");
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Failed to load theme: {ex.Message}");
+            ThemeState.CreateNewTheme("New Theme");
+        }
+        finally
+        {
+            ThemeState.SetLoading(false);
+        }
+
+        await Task.CompletedTask;
+    }
+
+    private void HandleThemeChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void HandleLoadingChanged(bool isLoading)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        ThemeState.OnThemeChanged -= HandleThemeChanged;
+        ThemeState.OnLoadingChanged -= HandleLoadingChanged;
+    }
+}

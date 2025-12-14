@@ -1,0 +1,109 @@
+@* Preset selection section with category tabs and preset cards *@
+@implements IDisposable
+
+@using DynamicForms.Models.Theming
+@using VisualEditorOpus.Services.Theming
+@using VisualEditorOpus.Components.Properties
+
+<PropertySection Title="Presets" Icon="bi-grid-3x3-gap">
+    <div class="preset-section">
+        <div class="preset-categories">
+            <button class="category-tab @GetCategoryClass(AllCategory)"
+                    @onclick="SelectAllCategory">
+                All
+            </button>
+            @foreach (var category in _categories)
+            {
+                <button class="category-tab @GetCategoryClass(category)"
+                        @onclick="@(() => SelectCategory(category))">
+                    @FormatCategoryName(category)
+                </button>
+            }
+        </div>
+
+        <div class="preset-grid">
+            @foreach (var preset in FilteredPresets)
+            {
+                <div class="preset-card @(IsSelected(preset.Id) ? "selected" : "")"
+                     @onclick="@(() => SelectPreset(preset.Id))"
+                     title="@preset.Description">
+                    <div class="preset-preview" style="background-color: @preset.PreviewColor;"></div>
+                    <div class="preset-info">
+                        <span class="preset-name">@preset.Name</span>
+                        @if (preset.Mode == ThemeMode.Dark)
+                        {
+                            <i class="bi bi-moon-fill preset-mode-icon" title="Dark Mode"></i>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</PropertySection>
+
+@code {
+    [Inject] private IThemeEditorStateService ThemeState { get; set; } = default!;
+    [Inject] private IToastService ToastService { get; set; } = default!;
+
+    private const string AllCategory = "all";
+
+    private string _selectedCategory = AllCategory;
+    private IReadOnlyList<string> _categories = Array.Empty<string>();
+    private IReadOnlyList<ThemePresetInfo> _allPresets = Array.Empty<ThemePresetInfo>();
+
+    private IEnumerable<ThemePresetInfo> FilteredPresets => _selectedCategory == AllCategory
+        ? _allPresets
+        : _allPresets.Where(p => p.Category == _selectedCategory);
+
+    protected override void OnInitialized()
+    {
+        ThemeState.OnThemeChanged += HandleThemeChanged;
+
+        _categories = ThemePresets.GetCategories();
+        _allPresets = ThemePresets.PresetInfos;
+    }
+
+    private void HandleThemeChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void SelectAllCategory() => _selectedCategory = AllCategory;
+
+    private void SelectCategory(string category)
+    {
+        _selectedCategory = category;
+    }
+
+    private void SelectPreset(string presetId)
+    {
+        ThemeState.ApplyPreset(presetId);
+
+        var presetInfo = ThemePresets.GetPresetInfo(presetId);
+        ToastService.ShowSuccess($"Applied preset: {presetInfo?.Name ?? presetId}");
+    }
+
+    private bool IsSelected(string presetId)
+    {
+        return false;
+    }
+
+    private string GetCategoryClass(string category) =>
+        _selectedCategory == category ? "active" : "";
+
+    private string FormatCategoryName(string category) => category switch
+    {
+        ThemePresets.CategoryProfessional => "Professional",
+        ThemePresets.CategoryGovernment => "Government",
+        ThemePresets.CategoryDark => "Dark",
+        ThemePresets.CategoryAccessibility => "Accessibility",
+        ThemePresets.CategoryIndustry => "Industry",
+        ThemePresets.CategoryMinimal => "Minimal",
+        _ => category
+    };
+
+    public void Dispose()
+    {
+        ThemeState.OnThemeChanged -= HandleThemeChanged;
+    }
+}

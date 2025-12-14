@@ -178,6 +178,11 @@ public static class ServiceCollectionExtensions
                 connectionString,
                 provider.GetRequiredService<ILogger<SqlServerCodeSetRepository>>()));
 
+        services.AddScoped<IThemeRepository>(provider =>
+            new SqlServerThemeRepository(
+                connectionString,
+                provider.GetRequiredService<ILogger<SqlServerThemeRepository>>()));
+
         return services;
     }
 

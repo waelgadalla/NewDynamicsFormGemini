@@ -1,0 +1,87 @@
+.typography-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.prop-row {
+    display: flex;
+    gap: 12px;
+}
+
+.prop-row > .prop-group {
+    flex: 1;
+    min-width: 0;
+}
+
+.prop-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.prop-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.prop-input {
+    width: 100%;
+    padding: 6px 8px;
+    font-size: 13px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+}
+
+.prop-input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.size-input {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.size-input .prop-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.size-unit {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    flex-shrink: 0;
+}
+
+.weight-buttons {
+    display: flex;
+    gap: 4px;
+}
+
+.weight-btn {
+    flex: 1;
+    padding: 8px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.weight-btn:hover {
+    background: var(--bg-hover);
+}
+
+.weight-btn.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.weight-btn span {
+    font-size: 14px;
+}

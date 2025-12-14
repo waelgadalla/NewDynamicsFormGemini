@@ -1,0 +1,246 @@
+@* Professional Color Picker component with presets and optional opacity *@
+
+<div class="df-color-picker @(Compact ? "compact" : "")" title="@Tooltip">
+    @if (!string.IsNullOrEmpty(Label))
+    {
+        <label class="df-color-label">@Label</label>
+    }
+
+    <div class="df-color-input-row">
+        @* Color swatch that triggers the hidden color input *@
+        <div class="df-color-swatch-container">
+            <button type="button"
+                    class="df-color-swatch"
+                    style="background-color: @DisplayColor;"
+                    @onclick="TriggerColorInput"
+                    title="Click to choose color">
+            </button>
+            <input type="color"
+                   @ref="_colorInputRef"
+                   class="df-color-native-input"
+                   value="@HexColor"
+                   @onchange="HandleNativeColorChange" />
+        </div>
+
+        @* Hex text input *@
+        <input type="text"
+               class="df-color-text-input @(HasError ? "error" : "")"
+               value="@HexColor"
+               @oninput="HandleTextInput"
+               @onblur="HandleTextBlur"
+               placeholder="#RRGGBB"
+               maxlength="7" />
+
+        @* Opacity slider (optional) *@
+        @if (ShowOpacity)
+        {
+            <div class="df-color-opacity">
+                <input type="range"
+                       class="df-opacity-slider"
+                       min="0" max="100" step="1"
+                       value="@_opacity"
+                       @oninput="HandleOpacityChange" />
+                <span class="df-opacity-value">@_opacity%</span>
+            </div>
+        }
+    </div>
+
+    @* Preset colors *@
+    @if (ShowPresets)
+    {
+        <div class="df-color-presets">
+            @foreach (var preset in ActivePresets)
+            {
+                <button type="button"
+                        class="df-color-preset @(IsActivePreset(preset) ? "active" : "")"
+                        style="background-color: @preset;"
+                        @onclick="() => SelectPreset(preset)"
+                        title="@preset">
+                </button>
+            }
+        </div>
+    }
+
+    @if (HasError)
+    {
+        <span class="df-color-error">Invalid hex color format</span>
+    }
+</div>
+
+@code {
+    private ElementReference _colorInputRef;
+    private string _textValue = string.Empty;
+    private int _opacity = 100;
+    private bool _hasError;
+
+    [Parameter] public string Value { get; set; } = "#6366F1";
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Tooltip { get; set; }
+    [Parameter] public bool ShowPresets { get; set; } = true;
+    [Parameter] public string[]? Presets { get; set; }
+    [Parameter] public bool Compact { get; set; }
+    [Parameter] public bool ShowOpacity { get; set; }
+
+    [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
+
+    private static readonly string[] DefaultPresets = new[]
+    {
+        "#6366F1", "#8B5CF6", "#EC4899", "#EF4444", "#F59E0B",
+        "#10B981", "#14B8A6", "#3B82F6", "#1E40AF", "#0F172A",
+        "#FFFFFF", "#F8FAFC", "#E2E8F0", "#64748B", "#1E293B"
+    };
+
+    private string[] ActivePresets => Presets ?? DefaultPresets;
+
+    private bool HasError => _hasError;
+
+    private string HexColor => ExtractHexColor(Value);
+
+    private string DisplayColor => ShowOpacity && _opacity < 100
+        ? $"{HexColor}{OpacityToHex(_opacity)}"
+        : HexColor;
+
+    protected override void OnParametersSet()
+    {
+        _textValue = HexColor;
+        if (ShowOpacity)
+        {
+            _opacity = ExtractOpacity(Value);
+        }
+    }
+
+    private async Task TriggerColorInput()
+    {
+        await JSRuntime.InvokeVoidAsync("eval", $"document.querySelector('[_bl_{_colorInputRef.Id}]')?.click()");
+    }
+
+    private async Task HandleNativeColorChange(ChangeEventArgs e)
+    {
+        var newColor = e.Value?.ToString() ?? "#000000";
+        _textValue = newColor;
+        _hasError = false;
+        await UpdateValue(newColor);
+    }
+
+    private void HandleTextInput(ChangeEventArgs e)
+    {
+        _textValue = e.Value?.ToString() ?? string.Empty;
+        _hasError = !string.IsNullOrEmpty(_textValue) && !IsValidHexColor(_textValue);
+    }
+
+    private async Task HandleTextBlur(FocusEventArgs e)
+    {
+        if (IsValidHexColor(_textValue))
+        {
+            var normalizedColor = NormalizeHexColor(_textValue);
+            _textValue = normalizedColor;
+            _hasError = false;
+            await UpdateValue(normalizedColor);
+        }
+        else if (!string.IsNullOrEmpty(_textValue))
+        {
+            _hasError = true;
+        }
+    }
+
+    private async Task HandleOpacityChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var opacity))
+        {
+            _opacity = Math.Clamp(opacity, 0, 100);
+            await UpdateValue(HexColor);
+        }
+    }
+
+    private async Task SelectPreset(string preset)
+    {
+        _textValue = preset;
+        _hasError = false;
+        await UpdateValue(preset);
+    }
+
+    private async Task UpdateValue(string hexColor)
+    {
+        var finalValue = ShowOpacity && _opacity < 100
+            ? $"{hexColor}{OpacityToHex(_opacity)}"
+            : hexColor;
+
+        if (Value != finalValue)
+        {
+            Value = finalValue;
+            await ValueChanged.InvokeAsync(finalValue);
+        }
+    }
+
+    private bool IsActivePreset(string preset)
+    {
+        return string.Equals(HexColor, preset, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsValidHexColor(string color)
+    {
+        if (string.IsNullOrEmpty(color)) return false;
+        if (!color.StartsWith('#')) return false;
+
+        var hex = color[1..];
+        return (hex.Length == 3 || hex.Length == 6 || hex.Length == 8) &&
+               hex.All(c => char.IsDigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'));
+    }
+
+    private static string NormalizeHexColor(string color)
+    {
+        if (string.IsNullOrEmpty(color) || !color.StartsWith('#')) return "#000000";
+
+        var hex = color[1..].ToUpperInvariant();
+
+        // Expand 3-digit hex to 6-digit
+        if (hex.Length == 3)
+        {
+            hex = $"{hex[0]}{hex[0]}{hex[1]}{hex[1]}{hex[2]}{hex[2]}";
+        }
+
+        return $"#{hex[..6]}";
+    }
+
+    private static string ExtractHexColor(string value)
+    {
+        if (string.IsNullOrEmpty(value)) return "#000000";
+        if (!value.StartsWith('#')) return "#000000";
+
+        var hex = value[1..];
+        if (hex.Length >= 6)
+        {
+            return $"#{hex[..6].ToUpperInvariant()}";
+        }
+        if (hex.Length == 3)
+        {
+            return $"#{hex[0]}{hex[0]}{hex[1]}{hex[1]}{hex[2]}{hex[2]}".ToUpperInvariant();
+        }
+
+        return "#000000";
+    }
+
+    private static int ExtractOpacity(string value)
+    {
+        if (string.IsNullOrEmpty(value) || !value.StartsWith('#')) return 100;
+
+        var hex = value[1..];
+        if (hex.Length == 8)
+        {
+            var alphaHex = hex[6..8];
+            if (int.TryParse(alphaHex, System.Globalization.NumberStyles.HexNumber, null, out var alpha))
+            {
+                return (int)Math.Round(alpha / 255.0 * 100);
+            }
+        }
+
+        return 100;
+    }
+
+    private static string OpacityToHex(int opacity)
+    {
+        var alpha = (int)Math.Round(opacity / 100.0 * 255);
+        return alpha.ToString("X2");
+    }
+}

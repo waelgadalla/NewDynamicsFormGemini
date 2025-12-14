@@ -1,0 +1,172 @@
+@* Theme preview panel with sample form showing live theme application *@
+@implements IDisposable
+
+@using DynamicForms.Models.Theming
+@using VisualEditorOpus.Services.Theming
+@using VisualEditorOpus.Components.Theming
+
+<div class="theme-preview-panel">
+    <div class="preview-header">
+        <span class="preview-title">Preview</span>
+        <div class="preview-controls">
+            <div class="device-switcher">
+                <button class="device-btn @GetDeviceClass(Desktop)"
+                        @onclick="SetDesktop"
+                        title="Desktop">
+                    <i class="bi bi-display"></i>
+                </button>
+                <button class="device-btn @GetDeviceClass(Tablet)"
+                        @onclick="SetTablet"
+                        title="Tablet">
+                    <i class="bi bi-tablet"></i>
+                </button>
+                <button class="device-btn @GetDeviceClass(Mobile)"
+                        @onclick="SetMobile"
+                        title="Mobile">
+                    <i class="bi bi-phone"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="preview-container">
+        <div class="preview-frame @_previewDevice">
+            @if (ThemeState.CurrentTheme is not null)
+            {
+                <ThemeScope Theme="@ThemeState.CurrentTheme" EnableBackground="true">
+                    <div class="df-form">
+                        <div class="df-form-card">
+                            <h1 class="df-form-title">Sample Form</h1>
+                            <p class="df-form-description">
+                                This is a preview of your theme settings. Make changes in the sidebar to see them reflected here.
+                            </p>
+
+                            <div class="df-section">
+                                <h2 class="df-section-title">Personal Information</h2>
+
+                                <div class="df-question">
+                                    <label class="df-label">
+                                        Full Name
+                                        <span class="df-required">*</span>
+                                    </label>
+                                    <input type="text" class="df-input" placeholder="Enter your full name" />
+                                </div>
+
+                                <div class="df-question">
+                                    <label class="df-label">Email Address</label>
+                                    <p class="df-description">We'll never share your email with anyone else.</p>
+                                    <input type="email" class="df-input" placeholder="name@example.com" />
+                                </div>
+
+                                <div class="df-question">
+                                    <label class="df-label">Department</label>
+                                    <select class="df-select">
+                                        <option value="">Select a department...</option>
+                                        <option value="engineering">Engineering</option>
+                                        <option value="design">Design</option>
+                                        <option value="marketing">Marketing</option>
+                                        <option value="sales">Sales</option>
+                                    </select>
+                                </div>
+
+                                <div class="df-question">
+                                    <label class="df-label">Comments</label>
+                                    <textarea class="df-textarea" rows="3" placeholder="Enter any additional comments..."></textarea>
+                                </div>
+                            </div>
+
+                            <div class="df-section">
+                                <h2 class="df-section-title">Preferences</h2>
+
+                                <div class="df-question">
+                                    <label class="df-label">Contact Method</label>
+                                    <div class="df-radio-group">
+                                        <label class="df-radio">
+                                            <input type="radio" name="contact" value="email" checked />
+                                            <span class="df-radio-indicator"></span>
+                                            <span>Email</span>
+                                        </label>
+                                        <label class="df-radio">
+                                            <input type="radio" name="contact" value="phone" />
+                                            <span class="df-radio-indicator"></span>
+                                            <span>Phone</span>
+                                        </label>
+                                        <label class="df-radio">
+                                            <input type="radio" name="contact" value="mail" />
+                                            <span class="df-radio-indicator"></span>
+                                            <span>Mail</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="df-question">
+                                    <label class="df-label">Notifications</label>
+                                    <div class="df-checkbox-group">
+                                        <label class="df-checkbox">
+                                            <input type="checkbox" checked />
+                                            <span class="df-checkbox-indicator"></span>
+                                            <span>Email notifications</span>
+                                        </label>
+                                        <label class="df-checkbox">
+                                            <input type="checkbox" />
+                                            <span class="df-checkbox-indicator"></span>
+                                            <span>SMS notifications</span>
+                                        </label>
+                                        <label class="df-checkbox">
+                                            <input type="checkbox" checked />
+                                            <span class="df-checkbox-indicator"></span>
+                                            <span>Newsletter subscription</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="df-form-actions">
+                                <button type="button" class="df-btn df-btn-outline">Cancel</button>
+                                <button type="submit" class="df-btn df-btn-primary">Submit Form</button>
+                            </div>
+                        </div>
+                    </div>
+                </ThemeScope>
+            }
+            else
+            {
+                <div class="preview-empty">
+                    <i class="bi bi-palette"></i>
+                    <span>No theme loaded</span>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Inject] private IThemeEditorStateService ThemeState { get; set; } = default!;
+
+    private const string Desktop = "desktop";
+    private const string Tablet = "tablet";
+    private const string Mobile = "mobile";
+
+    private string _previewDevice = Desktop;
+
+    protected override void OnInitialized()
+    {
+        ThemeState.OnThemeChanged += HandleThemeChanged;
+    }
+
+    private void HandleThemeChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void SetDesktop() => _previewDevice = Desktop;
+    private void SetTablet() => _previewDevice = Tablet;
+    private void SetMobile() => _previewDevice = Mobile;
+
+    private string GetDeviceClass(string device) => _previewDevice == device ? "active" : "";
+
+    public void Dispose()
+    {
+        ThemeState.OnThemeChanged -= HandleThemeChanged;
+    }
+}

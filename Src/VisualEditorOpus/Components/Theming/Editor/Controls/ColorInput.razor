@@ -1,0 +1,53 @@
+@* Color picker input with label and preview *@
+
+<div class="color-input">
+    @if (!string.IsNullOrEmpty(Label))
+    {
+        <label class="color-label">@Label</label>
+    }
+    <div class="color-picker-wrapper">
+        <div class="color-preview" style="background-color: @Value;"></div>
+        <input type="color" class="color-picker"
+               value="@Value"
+               @onchange="HandleChange" />
+        <input type="text" class="color-text"
+               value="@Value"
+               @onchange="HandleTextChange"
+               placeholder="#000000" />
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string Value { get; set; } = "#000000";
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+
+    private async Task HandleChange(ChangeEventArgs e)
+    {
+        var newValue = e.Value?.ToString() ?? "#000000";
+        Value = newValue;
+        await ValueChanged.InvokeAsync(newValue);
+    }
+
+    private async Task HandleTextChange(ChangeEventArgs e)
+    {
+        var newValue = e.Value?.ToString() ?? "#000000";
+
+        // Validate hex color format
+        if (IsValidHexColor(newValue))
+        {
+            Value = newValue;
+            await ValueChanged.InvokeAsync(newValue);
+        }
+    }
+
+    private static bool IsValidHexColor(string color)
+    {
+        if (string.IsNullOrEmpty(color)) return false;
+        if (!color.StartsWith('#')) return false;
+
+        var hex = color[1..];
+        return (hex.Length == 3 || hex.Length == 6) &&
+               hex.All(c => char.IsDigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'));
+    }
+}

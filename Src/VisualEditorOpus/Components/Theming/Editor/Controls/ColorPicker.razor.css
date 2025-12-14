@@ -1,0 +1,228 @@
+/* Color Picker Component Styles */
+
+.df-color-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.df-color-picker.compact {
+    gap: 4px;
+}
+
+.df-color-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.df-color-picker.compact .df-color-label {
+    font-size: 12px;
+}
+
+/* Input Row */
+.df-color-input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.df-color-picker.compact .df-color-input-row {
+    gap: 6px;
+}
+
+/* Color Swatch */
+.df-color-swatch-container {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.df-color-swatch {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 2px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background-position: center;
+    background-size: cover;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.df-color-picker.compact .df-color-swatch {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+}
+
+.df-color-swatch:hover {
+    border-color: var(--primary);
+    transform: scale(1.05);
+}
+
+.df-color-swatch:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+/* Hidden native color input */
+.df-color-native-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+/* Text Input */
+.df-color-text-input {
+    flex: 1;
+    min-width: 80px;
+    max-width: 100px;
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 13px;
+    color: var(--text-primary);
+    background: white;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+}
+
+.df-color-picker.compact .df-color-text-input {
+    padding: 6px 8px;
+    font-size: 12px;
+    max-width: 85px;
+}
+
+.df-color-text-input:hover {
+    border-color: var(--border-hover);
+}
+
+.df-color-text-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.df-color-text-input.error {
+    border-color: var(--error);
+    background: var(--error-light);
+}
+
+.df-color-text-input::placeholder {
+    color: var(--text-secondary);
+    text-transform: none;
+}
+
+/* Opacity Slider */
+.df-color-opacity {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.df-opacity-slider {
+    width: 60px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--gray-200);
+    appearance: none;
+    cursor: pointer;
+}
+
+.df-opacity-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.df-opacity-slider::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.df-opacity-value {
+    font-size: 12px;
+    color: var(--text-secondary);
+    min-width: 32px;
+    text-align: right;
+}
+
+/* Preset Colors */
+.df-color-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-top: 4px;
+}
+
+.df-color-picker.compact .df-color-presets {
+    gap: 4px;
+}
+
+.df-color-preset {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.df-color-picker.compact .df-color-preset {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+}
+
+.df-color-preset:hover {
+    transform: scale(1.15);
+    z-index: 1;
+}
+
+.df-color-preset.active {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary-light), inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.df-color-preset:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+/* Error Message */
+.df-color-error {
+    font-size: 11px;
+    color: var(--error);
+    margin-top: -4px;
+}
+
+/* Transparency Checkerboard Pattern (for colors with alpha) */
+.df-color-swatch::before {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    border-radius: inherit;
+    background-image:
+        linear-gradient(45deg, #ccc 25%, transparent 25%),
+        linear-gradient(-45deg, #ccc 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #ccc 75%),
+        linear-gradient(-45deg, transparent 75%, #ccc 75%);
+    background-size: 8px 8px;
+    background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
+    z-index: -1;
+}

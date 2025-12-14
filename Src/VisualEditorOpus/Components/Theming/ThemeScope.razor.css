@@ -1,0 +1,292 @@
+/*
+ * ThemeScope Component Styles
+ * ===========================
+ * Scoped styles for the ThemeScope wrapper component.
+ * These styles provide the structural foundation for themed forms.
+ */
+
+/* ============================================
+   Theme Scope Container
+   ============================================ */
+
+.df-theme-scope {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    width: 100%;
+    isolation: isolate; /* Create stacking context */
+}
+
+/* Background inherits from CSS variables */
+.df-theme-scope.df-light {
+    background-color: var(--df-bg, #ffffff);
+    color: var(--df-text, #0f172a);
+}
+
+.df-theme-scope.df-dark {
+    background-color: var(--df-bg, #0f172a);
+    color: var(--df-text, #f1f5f9);
+}
+
+.df-theme-scope.df-auto {
+    background-color: var(--df-bg);
+    color: var(--df-text);
+}
+
+/* ============================================
+   Background Layer
+   ============================================ */
+
+.df-theme-background {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.df-background-overlay {
+    position: absolute;
+    inset: 0;
+}
+
+/* ============================================
+   Theme Content
+   ============================================ */
+
+.df-theme-content {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Panelless mode removes card backgrounds */
+.df-theme-content.df-panelless :deep(.df-form-card) {
+    background-color: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+}
+
+/* ============================================
+   Form Header
+   ============================================ */
+
+.df-form-header {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 80px;
+    padding: 24px;
+    overflow: hidden;
+    z-index: 2;
+}
+
+/* Full width header extends beyond container */
+.df-form-header.df-header-fullwidth {
+    margin-left: calc(var(--df-form-padding, 32px) * -1);
+    margin-right: calc(var(--df-form-padding, 32px) * -1);
+    margin-top: calc(var(--df-form-padding, 32px) * -1);
+    width: calc(100% + var(--df-form-padding, 32px) * 2);
+}
+
+/* Overlap header extends into content */
+.df-form-header.df-header-overlap {
+    position: relative;
+    z-index: 3;
+}
+
+.df-form-header.df-header-overlap + .df-theme-content {
+    position: relative;
+    z-index: 2;
+}
+
+/* ============================================
+   Header Overlay
+   ============================================ */
+
+.df-header-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* ============================================
+   Header Content
+   ============================================ */
+
+.df-header-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    gap: 12px;
+}
+
+/* Horizontal alignment */
+.df-header-align-left .df-header-content {
+    align-items: flex-start;
+    text-align: left;
+}
+
+.df-header-align-center .df-header-content {
+    align-items: center;
+    text-align: center;
+}
+
+.df-header-align-right .df-header-content {
+    align-items: flex-end;
+    text-align: right;
+}
+
+/* Vertical alignment */
+.df-header-valign-top .df-header-content {
+    justify-content: flex-start;
+}
+
+.df-header-valign-center .df-header-content {
+    justify-content: center;
+}
+
+.df-header-valign-bottom .df-header-content {
+    justify-content: flex-end;
+}
+
+/* ============================================
+   Logo
+   ============================================ */
+
+.df-logo {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+/* Logo positioning */
+.df-header-align-left .df-logo {
+    margin-right: auto;
+}
+
+.df-header-align-center .df-logo {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.df-header-align-right .df-logo {
+    margin-left: auto;
+}
+
+/* ============================================
+   Header Title & Description (for HeaderContent)
+   ============================================ */
+
+.df-form-header :deep(.df-form-title) {
+    font-family: var(--df-font-heading, inherit);
+    font-size: var(--df-text-title, 24px);
+    font-weight: var(--df-font-bold, 700);
+    color: inherit;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.df-form-header :deep(.df-form-description) {
+    font-size: var(--df-text-desc, 14px);
+    opacity: 0.9;
+    margin: 0;
+    max-width: 600px;
+}
+
+/* ============================================
+   Responsive Adjustments
+   ============================================ */
+
+@media (max-width: 640px) {
+    .df-form-header {
+        min-height: 60px;
+        padding: 16px;
+    }
+
+    .df-form-header.df-header-fullwidth {
+        margin-left: calc(var(--df-form-padding, 24px) * -0.75 * -1);
+        margin-right: calc(var(--df-form-padding, 24px) * -0.75 * -1);
+        margin-top: calc(var(--df-form-padding, 24px) * -0.75 * -1);
+        width: calc(100% + var(--df-form-padding, 24px) * 0.75 * 2);
+    }
+
+    .df-logo {
+        max-height: 40px !important;
+    }
+
+    .df-header-content {
+        gap: 8px;
+    }
+}
+
+/* ============================================
+   Print Styles
+   ============================================ */
+
+@media print {
+    .df-theme-scope {
+        background-color: white !important;
+        color: black !important;
+    }
+
+    .df-theme-background,
+    .df-header-overlay,
+    .df-background-overlay {
+        display: none !important;
+    }
+
+    .df-form-header {
+        background: none !important;
+        min-height: auto;
+        padding: 0 0 16px 0;
+        border-bottom: 1px solid #ccc;
+        margin-bottom: 16px;
+    }
+
+    .df-logo {
+        max-height: 32px !important;
+        filter: grayscale(100%);
+    }
+}
+
+/* ============================================
+   Accessibility: Reduced Motion
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .df-theme-scope,
+    .df-theme-scope * {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* ============================================
+   High Contrast Mode Support
+   ============================================ */
+
+@media (forced-colors: active) {
+    .df-theme-scope {
+        border: 1px solid CanvasText;
+    }
+
+    .df-form-header {
+        border-bottom: 1px solid CanvasText;
+    }
+
+    .df-header-overlay,
+    .df-background-overlay {
+        display: none;
+    }
+}

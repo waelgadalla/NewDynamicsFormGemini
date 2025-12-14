@@ -1,5 +1,6 @@
 @* Form Preview - renders form as end-user would see it *@
 @implements IDisposable
+@using DynamicForms.Models.Theming
 
 <div class="preview-container">
     <PreviewToolbar
@@ -25,6 +26,7 @@
                 </div>
                 <RenderedForm
                     Module="@Module"
+                    Theme="@PreviewTheme"
                     Language="@CurrentLanguage"
                     OnSubmit="HandleSubmit" />
             </div>
@@ -36,7 +38,13 @@
     [Inject] private IEditorStateService EditorState { get; set; } = default!;
     [Inject] private IToastService ToastService { get; set; } = default!;
 
+    /// <summary>
+    /// Optional theme to apply to the form preview.
+    /// </summary>
+    [Parameter] public FormTheme? Theme { get; set; }
+
     private FormModuleSchema? Module => EditorState.CurrentModule;
+    private FormTheme? PreviewTheme => Theme;
 
     private PreviewDevice CurrentDevice { get; set; } = PreviewDevice.Desktop;
     private string CurrentLanguage { get; set; } = "en";

@@ -1,0 +1,319 @@
+@* Import Theme Modal - allows importing themes from JSON files or pasted JSON *@
+@using DynamicForms.Models.Theming
+@using VisualEditorOpus.Services.Theming
+@using VisualEditorOpus.Models
+
+<ModalBase @bind-IsOpen="IsOpen"
+           Title="Import Theme"
+           Icon="bi-upload"
+           Size="ModalSize.Medium"
+           IsLoading="_isLoading"
+           OnClose="HandleClose">
+    <ChildContent>
+    <div class="import-theme-modal">
+        @* Input Method Tabs *@
+        <div class="import-tabs">
+            <button class="import-tab @(_inputMethod == ImportMethod.File ? "active" : "")"
+                    @onclick="() => SetInputMethod(ImportMethod.File)">
+                <i class="bi bi-file-earmark-arrow-up"></i>
+                Upload File
+            </button>
+            <button class="import-tab @(_inputMethod == ImportMethod.Paste ? "active" : "")"
+                    @onclick="() => SetInputMethod(ImportMethod.Paste)">
+                <i class="bi bi-clipboard"></i>
+                Paste JSON
+            </button>
+        </div>
+
+        @* File Upload Area *@
+        @if (_inputMethod == ImportMethod.File)
+        {
+            <div class="file-drop-zone @(_isDragOver ? "drag-over" : "") @(HasFile ? "has-file" : "")"
+                 @ondragenter="HandleDragEnter"
+                 @ondragleave="HandleDragLeave"
+                 @ondragover:preventDefault="true"
+                 @ondrop="HandleFileDrop"
+                 @ondrop:preventDefault="true">
+                <InputFile OnChange="HandleFileSelected"
+                           accept=".json"
+                           class="file-input" />
+
+                @if (HasFile)
+                {
+                    <div class="file-preview">
+                        <i class="bi bi-file-earmark-code file-icon"></i>
+                        <div class="file-info">
+                            <span class="file-name">@_fileName</span>
+                            <span class="file-size">@FormatFileSize(_fileSize)</span>
+                        </div>
+                        <button class="btn-remove-file" @onclick="ClearFile" @onclick:stopPropagation="true">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <div class="drop-prompt">
+                        <i class="bi bi-cloud-arrow-up"></i>
+                        <span class="drop-text">Drop JSON file here or click to browse</span>
+                        <span class="drop-hint">Accepts .json files up to 1MB</span>
+                    </div>
+                }
+            </div>
+        }
+
+        @* Paste JSON Area *@
+        @if (_inputMethod == ImportMethod.Paste)
+        {
+            <div class="paste-area">
+                <textarea class="json-input @(HasValidationErrors ? "has-errors" : "")"
+                          @bind="_jsonContent"
+                          @bind:event="oninput"
+                          placeholder="Paste your theme JSON here..."
+                          rows="12"></textarea>
+                @if (!string.IsNullOrWhiteSpace(_jsonContent))
+                {
+                    <button class="btn-clear-text" @onclick="ClearJsonContent">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                }
+            </div>
+        }
+
+        @* Validation Results *@
+        @if (_validationErrors.Count > 0)
+        {
+            <div class="validation-section validation-errors">
+                <div class="validation-header">
+                    <i class="bi bi-x-circle"></i>
+                    <span>Validation Errors</span>
+                </div>
+                <ul class="validation-list">
+                    @foreach (var error in _validationErrors)
+                    {
+                        <li>@error</li>
+                    }
+                </ul>
+            </div>
+        }
+
+        @if (_validationWarnings.Count > 0)
+        {
+            <div class="validation-section validation-warnings">
+                <div class="validation-header">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <span>Warnings</span>
+                </div>
+                <ul class="validation-list">
+                    @foreach (var warning in _validationWarnings)
+                    {
+                        <li>@warning</li>
+                    }
+                </ul>
+            </div>
+        }
+
+        @* Theme Preview (after successful parse) *@
+        @if (_previewTheme is not null)
+        {
+            <div class="theme-preview-section">
+                <div class="preview-header">
+                    <i class="bi bi-check-circle"></i>
+                    <span>Theme Preview</span>
+                </div>
+                <div class="theme-preview-card">
+                    <div class="preview-color-swatch" style="background-color: @_previewTheme.Colors.Primary;"></div>
+                    <div class="preview-info">
+                        <span class="preview-name">@_previewTheme.Name</span>
+                        <span class="preview-mode">@_previewTheme.Mode Mode</span>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    </ChildContent>
+
+    <FooterContent>
+        <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+        <button class="btn btn-primary"
+                @onclick="Import"
+                disabled="@(!CanImport)">
+            <i class="bi bi-check-lg"></i>
+            Import Theme
+        </button>
+    </FooterContent>
+</ModalBase>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public EventCallback<FormTheme> OnImport { get; set; }
+
+    [Inject] private IThemeImportExportService ImportExportService { get; set; } = default!;
+    [Inject] private IToastService ToastService { get; set; } = default!;
+
+    private enum ImportMethod { File, Paste }
+
+    private ImportMethod _inputMethod = ImportMethod.File;
+    private bool _isLoading;
+    private bool _isDragOver;
+    private string? _fileName;
+    private long _fileSize;
+    private string _jsonContent = string.Empty;
+    private byte[]? _fileContent;
+    private FormTheme? _previewTheme;
+    private List<string> _validationErrors = new();
+    private List<string> _validationWarnings = new();
+
+    private bool HasFile => _fileContent is not null;
+    private bool HasJsonContent => !string.IsNullOrWhiteSpace(_jsonContent);
+    private bool HasValidationErrors => _validationErrors.Count > 0;
+    private bool CanImport => _previewTheme is not null && !HasValidationErrors && !_isLoading;
+
+    private void SetInputMethod(ImportMethod method)
+    {
+        _inputMethod = method;
+        ClearValidation();
+    }
+
+    private void ClearValidation()
+    {
+        _validationErrors.Clear();
+        _validationWarnings.Clear();
+        _previewTheme = null;
+    }
+
+    private void HandleDragEnter() => _isDragOver = true;
+    private void HandleDragLeave() => _isDragOver = false;
+
+    private void HandleFileDrop(Microsoft.AspNetCore.Components.Web.DragEventArgs e)
+    {
+        _isDragOver = false;
+        // Note: Browser file drop handling is limited - use InputFile component
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file is null) return;
+
+        if (file.Size > 1024 * 1024) // 1MB limit
+        {
+            _validationErrors.Add("File size exceeds 1MB limit.");
+            return;
+        }
+
+        _isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            _fileName = file.Name;
+            _fileSize = file.Size;
+
+            using var stream = file.OpenReadStream(maxAllowedSize: 1024 * 1024);
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            _fileContent = ms.ToArray();
+
+            // Parse and validate
+            var json = System.Text.Encoding.UTF8.GetString(_fileContent);
+            ValidateAndPreview(json);
+        }
+        catch (Exception ex)
+        {
+            _validationErrors.Add($"Failed to read file: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void ClearFile()
+    {
+        _fileContent = null;
+        _fileName = null;
+        _fileSize = 0;
+        ClearValidation();
+    }
+
+    private void ClearJsonContent()
+    {
+        _jsonContent = string.Empty;
+        ClearValidation();
+    }
+
+    private void ValidateAndPreview(string json)
+    {
+        ClearValidation();
+
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            _validationErrors.Add("No content to import.");
+            return;
+        }
+
+        // First validate structure
+        var errors = ImportExportService.ValidateJson(json);
+        if (errors.Count > 0)
+        {
+            _validationErrors.AddRange(errors);
+            return;
+        }
+
+        // Try to import
+        var result = ImportExportService.ImportFromJson(json);
+
+        if (!result.Success)
+        {
+            _validationErrors.AddRange(result.Errors);
+            _validationWarnings.AddRange(result.Warnings);
+            return;
+        }
+
+        _previewTheme = result.Theme;
+        _validationWarnings.AddRange(result.Warnings);
+    }
+
+    private async Task Import()
+    {
+        if (_previewTheme is null) return;
+
+        await OnImport.InvokeAsync(_previewTheme);
+        ToastService.ShowSuccess($"Theme \"{_previewTheme.Name}\" imported successfully.");
+        await Close();
+    }
+
+    private async Task Cancel() => await Close();
+
+    private async Task Close()
+    {
+        ClearFile();
+        ClearJsonContent();
+        IsOpen = false;
+        await IsOpenChanged.InvokeAsync(false);
+    }
+
+    private void HandleClose()
+    {
+        ClearFile();
+        ClearJsonContent();
+    }
+
+    private static string FormatFileSize(long bytes)
+    {
+        if (bytes < 1024) return $"{bytes} bytes";
+        if (bytes < 1024 * 1024) return $"{bytes / 1024.0:F1} KB";
+        return $"{bytes / (1024.0 * 1024.0):F1} MB";
+    }
+
+    protected override void OnParametersSet()
+    {
+        // When modal opens with paste method, auto-validate content
+        if (IsOpen && _inputMethod == ImportMethod.Paste && HasJsonContent && _previewTheme is null)
+        {
+            ValidateAndPreview(_jsonContent);
+        }
+    }
+}
