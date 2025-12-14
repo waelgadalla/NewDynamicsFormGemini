@@ -1,0 +1,575 @@
+/* ===== FORM PREVIEW STYLES (Global) ===== */
+/* These styles need to be global to reach nested child components */
+
+/* ===== RICH TEXT EDITOR ===== */
+.richtext-preview {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.richtext-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 12px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.toolbar-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.15s;
+}
+
+.toolbar-btn:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.toolbar-divider {
+    width: 1px;
+    height: 20px;
+    background: var(--border-color);
+    margin: 0 4px;
+}
+
+.richtext-editor {
+    min-height: 150px;
+    padding: 12px;
+    font-size: 14px;
+    line-height: 1.6;
+    outline: none;
+    background: var(--bg-primary);
+}
+
+.richtext-editor:focus {
+    box-shadow: inset 0 0 0 2px var(--primary-light);
+}
+
+/* ===== SIGNATURE PAD ===== */
+.signature-preview {
+    background: white;
+    position: relative;
+}
+
+.signature-legal-text {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    padding: 8px 12px;
+    background: var(--bg-secondary);
+    border-left: 3px solid var(--primary);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.signature-timestamp {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.signature-clear-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px 12px;
+    font-size: 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.15s;
+}
+
+.signature-clear-btn:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+/* ===== IMAGE FIELD ===== */
+.image-preview {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--bg-secondary);
+}
+
+.image-upload-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.image-upload-area:hover {
+    background: var(--bg-tertiary);
+    color: var(--primary);
+}
+
+.image-upload-area i {
+    font-size: 48px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+.image-upload-area span {
+    font-size: 14px;
+}
+
+.display-image {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* ===== MATRIX FIELDS ===== */
+.matrix-preview {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    overflow-x: auto;
+}
+
+.matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.matrix-table th,
+.matrix-table td {
+    padding: 10px 12px;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.matrix-table th {
+    background: var(--bg-secondary);
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.matrix-table th:first-child,
+.matrix-table td.row-label {
+    text-align: left;
+    font-weight: 500;
+    background: var(--bg-secondary);
+    position: sticky;
+    left: 0;
+    min-width: 150px;
+}
+
+.matrix-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.matrix-table .alt-row {
+    background: var(--bg-secondary);
+}
+
+.matrix-table .alt-row td.row-label {
+    background: var(--bg-tertiary);
+}
+
+.matrix-table input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--primary);
+}
+
+.matrix-select {
+    padding: 6px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    background: var(--bg-primary);
+    cursor: pointer;
+    min-width: 100px;
+}
+
+.matrix-select:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.matrix-input {
+    width: 60px;
+    padding: 6px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    text-align: center;
+}
+
+.matrix-input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+/* ===== DATA GRID / REPEATER ===== */
+.datagrid-preview {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.datagrid-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.datagrid-table th,
+.datagrid-table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.datagrid-table th {
+    background: var(--bg-secondary);
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 12px;
+}
+
+.datagrid-table .action-col {
+    width: 50px;
+    text-align: center;
+}
+
+.datagrid-table tbody tr:hover {
+    background: var(--bg-secondary);
+}
+
+.datagrid-table tfoot td {
+    background: var(--bg-secondary);
+    border-bottom: none;
+}
+
+.grid-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    background: var(--bg-primary);
+}
+
+.grid-input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+/* ===== FORM FIELD STYLES ===== */
+/* Global styles for RenderedField component */
+.form-field {
+    margin-bottom: 20px;
+}
+
+.form-field.has-error .field-input {
+    border-color: var(--danger);
+}
+
+.field-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: var(--text-primary);
+}
+
+.field-label .required {
+    color: var(--danger);
+    margin-left: 2px;
+}
+
+.field-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    color: var(--text-primary);
+    background: var(--bg-primary);
+    transition: all 0.15s;
+}
+
+.field-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.field-input.error {
+    border-color: var(--danger);
+}
+
+.field-input.error:focus {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.field-textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.field-help {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.field-error {
+    font-size: 12px;
+    color: var(--danger);
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Select */
+.form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%236B7280' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    padding-right: 36px;
+    cursor: pointer;
+}
+
+/* Radio & Checkbox Groups */
+.checkbox-group,
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.checkbox-item,
+.radio-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.checkbox-item input,
+.radio-item input {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--primary);
+}
+
+.single-checkbox {
+    margin-top: 4px;
+}
+
+/* Toggle Switch */
+.toggle-field {
+    padding-top: 4px;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    cursor: pointer;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    transition: all 0.2s;
+}
+
+.toggle-slider::before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 2px;
+    bottom: 2px;
+    background: white;
+    border-radius: 50%;
+    transition: all 0.2s;
+    box-shadow: var(--shadow-sm);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(20px);
+}
+
+/* File Upload */
+.file-upload-field {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.file-input {
+    display: none;
+}
+
+.file-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.file-label:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-light);
+}
+
+.file-name {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+/* Rendered Form Container */
+.rendered-form {
+    padding: 32px;
+}
+
+.form-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.form-description {
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    font-size: 14px;
+}
+
+.empty-form {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+}
+
+.empty-form i {
+    font-size: 48px;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.empty-form p {
+    font-size: 14px;
+}
+
+.form-section {
+    margin-bottom: 24px;
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Button styles for preview */
+.btn-icon {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-icon:hover {
+    background: var(--danger-light);
+    color: var(--danger);
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+.btn-outline-primary {
+    background: transparent;
+    color: var(--primary);
+    border: 1px solid var(--primary);
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary);
+    color: white;
+}

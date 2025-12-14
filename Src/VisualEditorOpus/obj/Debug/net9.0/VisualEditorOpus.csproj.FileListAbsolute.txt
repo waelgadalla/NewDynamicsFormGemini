@@ -187,7 +187,6 @@ C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOp
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\bin\Debug\net9.0\DynamicForms.Core.xml
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\t379d7n0fg-mmq7phdd82.gz
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\9sllqwngf0-0vtbnczuht.gz
-C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\6tvrfg3a0z-0u69m8ryd7.gz
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\57vpsgixxw-yq0fk8pje5.gz
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\bin\Debug\net9.0\SignaturePad.dll
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\bin\Debug\net9.0\Microsoft.AspNetCore.Authorization.dll
@@ -204,5 +203,8 @@ C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOp
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\t8am31tcro-2f7dzq6edw.gz
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\4ulkfrwt35-4zg1xjhwl9.gz
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\pyy3amz7kq-g22u5lm4z9.gz
-C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\t9p6cl12i8-t8ec0e7ssb.gz
 C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\l1ahwxx1zs-r0icij1pqw.gz
+C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt
+C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\aw2tz084xg-h4kwjzc3sj.gz
+C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\t9p6cl12i8-a5spjlpn1e.gz
+C:\Users\waelm\source\repos\waelgadalla\NewDynamicsFormGemini\Src\VisualEditorOpus\obj\Debug\net9.0\compressed\6tvrfg3a0z-fki1g7xg5c.gz

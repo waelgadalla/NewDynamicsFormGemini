@@ -498,3 +498,6 @@
     border-color: var(--primary);
     color: var(--primary);
 }
+
+/* NOTE: Form field styles for RenderedField are now in global css/form-preview.css
+   because ::deep doesn't work for grandchild components (FormPreview > RenderedForm > RenderedField) */
