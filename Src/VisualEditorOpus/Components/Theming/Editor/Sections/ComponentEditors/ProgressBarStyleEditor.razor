@@ -1,0 +1,135 @@
+@* Progress Bar style editor *@
+
+@using DynamicForms.Models.Theming
+@using VisualEditorOpus.Components.Theming.Editor.Controls
+
+<div class="style-editor">
+    <div class="editor-section">
+        <span class="section-label">Colors</span>
+        <div class="control-grid">
+            <ColorInput Label="Track BG" Value="@GetValue(Styles?.TrackBackground)" ValueChanged="HandleTrackBgChange" />
+            <ColorInput Label="Fill BG" Value="@GetValue(Styles?.FillBackground)" ValueChanged="HandleFillBgChange" />
+            <ColorInput Label="Text" Value="@GetValue(Styles?.TextColor)" ValueChanged="HandleTextColorChange" />
+        </div>
+    </div>
+
+    <div class="editor-section">
+        <span class="section-label">Dimensions</span>
+        <div class="prop-row">
+            <div class="prop-group">
+                <label class="prop-label">Height</label>
+                <div class="size-input">
+                    <input type="number" class="prop-input"
+                           value="@ParsePx(Styles?.Height)"
+                           @onchange="HandleHeightChange"
+                           min="4" max="24" step="2" />
+                    <span class="unit">px</span>
+                </div>
+            </div>
+            <div class="prop-group">
+                <label class="prop-label">Border Radius</label>
+                <div class="size-input">
+                    <input type="number" class="prop-input"
+                           value="@ParsePx(Styles?.BorderRadius)"
+                           @onchange="HandleBorderRadiusChange"
+                           min="0" max="12" step="2" />
+                    <span class="unit">px</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="editor-section">
+        <span class="section-label">Options</span>
+        <div class="toggle-row">
+            <span class="toggle-label">Show Percentage</span>
+            <label class="toggle-switch">
+                <input type="checkbox"
+                       checked="@(Styles?.ShowPercentage ?? true)"
+                       @onchange="HandleShowPercentageChange" />
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <div class="preview-section">
+        <span class="section-label">Preview</span>
+        <div class="progress-preview">
+            <div class="progress-bar-container">
+                <div class="progress-track" style="@GetTrackStyle()">
+                    <div class="progress-fill" style="@GetFillStyle()"></div>
+                </div>
+                @if (Styles?.ShowPercentage ?? true)
+                {
+                    <span class="progress-text" style="@GetTextStyle()">65%</span>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public ProgressBarStyles? Styles { get; set; }
+    [Parameter] public EventCallback<ProgressBarStyles> OnChange { get; set; }
+
+    private const string EmptyString = "";
+    private const string DefaultColor = "#000000";
+
+    private string GetValue(string? value) => string.IsNullOrEmpty(value) ? DefaultColor : value;
+
+    private void Update(Action<ProgressBarStyles> action)
+    {
+        var styles = Styles?.Clone() ?? new ProgressBarStyles();
+        action(styles);
+        OnChange.InvokeAsync(styles);
+    }
+
+    // Color handlers
+    private void HandleTrackBgChange(string v) => Update(s => s.TrackBackground = v);
+    private void HandleFillBgChange(string v) => Update(s => s.FillBackground = v);
+    private void HandleTextColorChange(string v) => Update(s => s.TextColor = v);
+
+    // Input handlers
+    private void HandleHeightChange(ChangeEventArgs e) => Update(s => s.Height = ToPx(e));
+    private void HandleBorderRadiusChange(ChangeEventArgs e) => Update(s => s.BorderRadius = ToPx(e));
+
+    private void HandleShowPercentageChange(ChangeEventArgs e)
+    {
+        var show = e.Value as bool? ?? true;
+        Update(s => s.ShowPercentage = show);
+    }
+
+    private static int ParsePx(string? value)
+    {
+        if (string.IsNullOrEmpty(value)) return 0;
+        var numeric = value.Replace("px", EmptyString).Trim();
+        return int.TryParse(numeric, out var result) ? result : 0;
+    }
+
+    private static string ToPx(ChangeEventArgs e)
+    {
+        return int.TryParse(e.Value?.ToString(), out var v) && v > 0 ? v + "px" : EmptyString;
+    }
+
+    private string GetTrackStyle()
+    {
+        var style = new List<string>();
+        if (!string.IsNullOrEmpty(Styles?.TrackBackground)) style.Add($"background: {Styles.TrackBackground}");
+        if (!string.IsNullOrEmpty(Styles?.Height)) style.Add($"height: {Styles.Height}");
+        if (!string.IsNullOrEmpty(Styles?.BorderRadius)) style.Add($"border-radius: {Styles.BorderRadius}");
+        return string.Join("; ", style);
+    }
+
+    private string GetFillStyle()
+    {
+        var style = new List<string> { "width: 65%" };
+        if (!string.IsNullOrEmpty(Styles?.FillBackground)) style.Add($"background: {Styles.FillBackground}");
+        if (!string.IsNullOrEmpty(Styles?.BorderRadius)) style.Add($"border-radius: {Styles.BorderRadius}");
+        return string.Join("; ", style);
+    }
+
+    private string GetTextStyle()
+    {
+        return !string.IsNullOrEmpty(Styles?.TextColor) ? $"color: {Styles.TextColor}" : EmptyString;
+    }
+}

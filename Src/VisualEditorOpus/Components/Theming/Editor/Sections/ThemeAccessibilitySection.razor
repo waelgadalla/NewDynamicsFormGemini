@@ -1,0 +1,309 @@
+@* Accessibility settings section *@
+@implements IDisposable
+
+@using DynamicForms.Models.Theming
+@using VisualEditorOpus.Services.Theming
+@using VisualEditorOpus.Components.Properties
+@using VisualEditorOpus.Components.Theming.Editor.Controls
+
+<PropertySection Title="Accessibility" Icon="bi-universal-access" DefaultCollapsed="false">
+    <div class="accessibility-section">
+        @if (Accessibility is not null)
+        {
+            <div class="setting-group">
+                <span class="group-label">Scale Factor</span>
+                <div class="slider-row">
+                    <span class="slider-value">@Accessibility.ScaleFactor</span>
+                    <input type="range"
+                           class="scale-slider"
+                           min="80"
+                           max="150"
+                           step="5"
+                           value="@GetScaleValue()"
+                           @oninput="HandleScaleChange" />
+                </div>
+                <div class="scale-presets">
+                    <button type="button" class="preset-btn @GetScaleActiveClass(80)" @onclick="SetScale80">80%</button>
+                    <button type="button" class="preset-btn @GetScaleActiveClass(100)" @onclick="SetScale100">100%</button>
+                    <button type="button" class="preset-btn @GetScaleActiveClass(125)" @onclick="SetScale125">125%</button>
+                    <button type="button" class="preset-btn @GetScaleActiveClass(150)" @onclick="SetScale150">150%</button>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <span class="group-label">Focus Indicators</span>
+                <div class="focus-style-selector">
+                    <button type="button" class="style-btn @GetFocusActiveClass(RingStyle)" @onclick="SetFocusRing">
+                        <span class="style-preview ring"></span>
+                        Ring
+                    </button>
+                    <button type="button" class="style-btn @GetFocusActiveClass(OutlineStyle)" @onclick="SetFocusOutline">
+                        <span class="style-preview outline"></span>
+                        Outline
+                    </button>
+                    <button type="button" class="style-btn @GetFocusActiveClass(UnderlineStyle)" @onclick="SetFocusUnderline">
+                        <span class="style-preview underline"></span>
+                        Underline
+                    </button>
+                </div>
+                <div class="toggle-row" style="margin-top: 8px;">
+                    <span class="toggle-label">Always show focus (not just keyboard)</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox"
+                               checked="@Accessibility.AlwaysShowFocusIndicator"
+                               @onchange="HandleAlwaysShowFocusChange" />
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <span class="group-label">Contrast Checker</span>
+                <div class="contrast-checks">
+                    @foreach (var check in GetContrastChecks())
+                    {
+                        <div class="contrast-row">
+                            <div class="color-pair">
+                                <span class="color-swatch" style="background: @check.Foreground"></span>
+                                <span class="pair-separator">/</span>
+                                <span class="color-swatch" style="background: @check.Background"></span>
+                            </div>
+                            <span class="pair-label">@check.Label</span>
+                            <ContrastBadge Result="@check.Result" />
+                        </div>
+                    }
+                </div>
+                <div class="contrast-target">
+                    <span class="target-label">Target Level:</span>
+                    <div class="target-selector">
+                        <button type="button" class="target-btn @GetTargetActiveClass(AATarget)" @onclick="SetTargetAA">AA (4.5:1)</button>
+                        <button type="button" class="target-btn @GetTargetActiveClass(AAATarget)" @onclick="SetTargetAAA">AAA (7:1)</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <span class="group-label">Additional Options</span>
+                <div class="toggle-row">
+                    <span class="toggle-label">Reduce motion (disable animations)</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox"
+                               checked="@Accessibility.ReduceMotion"
+                               @onchange="HandleReduceMotionChange" />
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="toggle-row">
+                    <span class="toggle-label">High contrast mode</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox"
+                               checked="@Accessibility.HighContrastMode"
+                               @onchange="HandleHighContrastChange" />
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="min-font-row">
+                    <label class="prop-label">Minimum font size</label>
+                    <div class="size-input">
+                        <input type="number"
+                               class="prop-input"
+                               value="@ParsePx(Accessibility.MinFontSize)"
+                               @onchange="HandleMinFontSizeChange"
+                               min="12"
+                               max="18"
+                               step="1" />
+                        <span class="unit">px</span>
+                    </div>
+                </div>
+            </div>
+
+            @if (Issues.Count > 0)
+            {
+                <div class="issues-section">
+                    <span class="group-label">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Issues Found (@Issues.Count)
+                    </span>
+                    <div class="issues-list">
+                        @foreach (var issue in Issues.Take(5))
+                        {
+                            <div class="issue-item @GetIssueSeverityClass(issue.Severity)">
+                                <span class="issue-icon">
+                                    @if (issue.Severity == AccessibilityIssueSeverity.Error)
+                                    {
+                                        <i class="bi bi-x-circle"></i>
+                                    }
+                                    else if (issue.Severity == AccessibilityIssueSeverity.Warning)
+                                    {
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-info-circle"></i>
+                                    }
+                                </span>
+                                <div class="issue-content">
+                                    <span class="issue-name">@issue.PropertyName</span>
+                                    <span class="issue-desc">@issue.Description</span>
+                                </div>
+                            </div>
+                        }
+                        @if (Issues.Count > 5)
+                        {
+                            <div class="more-issues">+ @(Issues.Count - 5) more issues</div>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</PropertySection>
+
+@code {
+    [Inject] private IThemeEditorStateService ThemeState { get; set; } = default!;
+    [Inject] private IThemeValidatorService Validator { get; set; } = default!;
+
+    private ThemeAccessibility? Accessibility => ThemeState.CurrentTheme?.Accessibility;
+    private ThemeColors? Colors => ThemeState.CurrentTheme?.Colors;
+    private List<AccessibilityIssue> Issues { get; set; } = new();
+
+    private const string EmptyString = "";
+    private const string ActiveClass = "active";
+    private const string RingStyle = "ring";
+    private const string OutlineStyle = "outline";
+    private const string UnderlineStyle = "underline";
+    private const string AATarget = "aa";
+    private const string AAATarget = "aaa";
+
+    protected override void OnInitialized()
+    {
+        ThemeState.OnThemeChanged += HandleThemeChanged;
+        ValidateTheme();
+    }
+
+    private void HandleThemeChanged()
+    {
+        ValidateTheme();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void ValidateTheme()
+    {
+        if (ThemeState.CurrentTheme is not null)
+        {
+            Issues = Validator.ValidateTheme(ThemeState.CurrentTheme);
+        }
+    }
+
+    private void Update(Action<ThemeAccessibility> action)
+    {
+        ThemeState.UpdateAccessibility(action);
+    }
+
+    // Scale handlers
+    private int GetScaleValue()
+    {
+        var value = Accessibility?.ScaleFactor?.TrimEnd('%') ?? "100";
+        return int.TryParse(value, out var result) ? result : 100;
+    }
+
+    private string GetScaleActiveClass(int value) => GetScaleValue() == value ? ActiveClass : EmptyString;
+
+    private void HandleScaleChange(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString() ?? "100";
+        Update(a => a.ScaleFactor = value + "%");
+    }
+
+    private void SetScale80() => Update(a => a.ScaleFactor = "80%");
+    private void SetScale100() => Update(a => a.ScaleFactor = "100%");
+    private void SetScale125() => Update(a => a.ScaleFactor = "125%");
+    private void SetScale150() => Update(a => a.ScaleFactor = "150%");
+
+    // Focus indicator handlers
+    private string GetCurrentFocusStyle() => Accessibility?.FocusIndicatorStyle ?? RingStyle;
+    private string GetFocusActiveClass(string style) => GetCurrentFocusStyle() == style ? ActiveClass : EmptyString;
+
+    private void SetFocusRing() => Update(a => a.FocusIndicatorStyle = RingStyle);
+    private void SetFocusOutline() => Update(a => a.FocusIndicatorStyle = OutlineStyle);
+    private void SetFocusUnderline() => Update(a => a.FocusIndicatorStyle = UnderlineStyle);
+
+    private void HandleAlwaysShowFocusChange(ChangeEventArgs e)
+    {
+        var show = e.Value as bool? ?? false;
+        Update(a => a.AlwaysShowFocusIndicator = show);
+    }
+
+    // Contrast target handlers
+    private string GetCurrentTarget() => Accessibility?.ContrastTarget ?? AATarget;
+    private string GetTargetActiveClass(string target) => GetCurrentTarget() == target ? ActiveClass : EmptyString;
+
+    private void SetTargetAA() => Update(a => a.ContrastTarget = AATarget);
+    private void SetTargetAAA() => Update(a => a.ContrastTarget = AAATarget);
+
+    // Additional options handlers
+    private void HandleReduceMotionChange(ChangeEventArgs e)
+    {
+        var reduce = e.Value as bool? ?? false;
+        Update(a => a.ReduceMotion = reduce);
+    }
+
+    private void HandleHighContrastChange(ChangeEventArgs e)
+    {
+        var high = e.Value as bool? ?? false;
+        Update(a => a.HighContrastMode = high);
+    }
+
+    private void HandleMinFontSizeChange(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString() ?? "12";
+        if (int.TryParse(value, out var px) && px >= 12 && px <= 18)
+        {
+            Update(a => a.MinFontSize = px + "px");
+        }
+    }
+
+    private static int ParsePx(string? value)
+    {
+        if (string.IsNullOrEmpty(value)) return 12;
+        var numeric = value.Replace("px", EmptyString).Trim();
+        return int.TryParse(numeric, out var result) ? result : 12;
+    }
+
+    // Contrast checks
+    private List<ContrastCheck> GetContrastChecks()
+    {
+        var checks = new List<ContrastCheck>();
+        if (Colors is null) return checks;
+
+        AddCheck(checks, "Primary Text", Colors.TextPrimary, Colors.Background);
+        AddCheck(checks, "Secondary Text", Colors.TextSecondary, Colors.Background);
+        AddCheck(checks, "Primary on BG", Colors.Primary, Colors.Background);
+        AddCheck(checks, "Error Text", Colors.Error, Colors.Background);
+
+        return checks;
+    }
+
+    private void AddCheck(List<ContrastCheck> checks, string label, string fg, string bg)
+    {
+        if (string.IsNullOrEmpty(fg) || string.IsNullOrEmpty(bg)) return;
+        checks.Add(new ContrastCheck(label, fg, bg, Validator.CheckContrast(fg, bg)));
+    }
+
+    private static string GetIssueSeverityClass(AccessibilityIssueSeverity severity)
+    {
+        return severity switch
+        {
+            AccessibilityIssueSeverity.Error => "severity-error",
+            AccessibilityIssueSeverity.Warning => "severity-warning",
+            _ => "severity-info"
+        };
+    }
+
+    public void Dispose()
+    {
+        ThemeState.OnThemeChanged -= HandleThemeChanged;
+    }
+
+    private record ContrastCheck(string Label, string Foreground, string Background, ContrastCheckResult Result);
+}

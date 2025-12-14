@@ -1,0 +1,83 @@
+.contrast-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: help;
+    white-space: nowrap;
+}
+
+.ratio {
+    font-family: var(--font-mono, monospace);
+}
+
+.level {
+    text-transform: uppercase;
+    font-size: 10px;
+}
+
+/* Pass AAA - Green */
+.badge-pass-aaa {
+    background: rgba(16, 185, 129, 0.15);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* Pass AA - Blue/Green */
+.badge-pass-aa {
+    background: rgba(59, 130, 246, 0.15);
+    color: #2563eb;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* Warning - Yellow/Orange */
+.badge-warn {
+    background: rgba(245, 158, 11, 0.15);
+    color: #d97706;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+/* Fail - Red */
+.badge-fail {
+    background: rgba(239, 68, 68, 0.15);
+    color: #dc2626;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Compact mode */
+.compact {
+    padding: 1px 6px;
+    font-size: 10px;
+}
+
+.compact .ratio {
+    display: none;
+}
+
+.compact .level {
+    font-size: 9px;
+}
+
+/* Dark mode adjustments */
+:global([data-theme="dark"]) .badge-pass-aaa {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+}
+
+:global([data-theme="dark"]) .badge-pass-aa {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+}
+
+:global([data-theme="dark"]) .badge-warn {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+}
+
+:global([data-theme="dark"]) .badge-fail {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+}

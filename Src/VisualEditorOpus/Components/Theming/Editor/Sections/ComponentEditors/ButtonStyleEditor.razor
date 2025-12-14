@@ -1,0 +1,156 @@
+@* Button style editor with primary and secondary button controls *@
+
+@using DynamicForms.Models.Theming
+@using VisualEditorOpus.Components.Theming.Editor.Controls
+
+<div class="style-editor">
+    <div class="editor-section">
+        <span class="section-label">Primary Button</span>
+        <div class="control-grid">
+            <ColorInput Label="Background" Value="@GetValue(Styles?.PrimaryBackground)" ValueChanged="HandlePrimaryBackgroundChange" />
+            <ColorInput Label="Text" Value="@GetValue(Styles?.PrimaryText)" ValueChanged="HandlePrimaryTextChange" />
+            <ColorInput Label="Border" Value="@GetValue(Styles?.PrimaryBorder)" ValueChanged="HandlePrimaryBorderChange" />
+            <ColorInput Label="Hover BG" Value="@GetValue(Styles?.PrimaryHoverBackground)" ValueChanged="HandlePrimaryHoverChange" />
+        </div>
+    </div>
+
+    <div class="editor-section">
+        <span class="section-label">Secondary Button</span>
+        <div class="control-grid">
+            <ColorInput Label="Background" Value="@GetValue(Styles?.SecondaryBackground)" ValueChanged="HandleSecondaryBackgroundChange" />
+            <ColorInput Label="Text" Value="@GetValue(Styles?.SecondaryText)" ValueChanged="HandleSecondaryTextChange" />
+            <ColorInput Label="Border" Value="@GetValue(Styles?.SecondaryBorder)" ValueChanged="HandleSecondaryBorderChange" />
+        </div>
+    </div>
+
+    <div class="editor-section">
+        <span class="section-label">Common Settings</span>
+        <div class="prop-row">
+            <div class="prop-group">
+                <label class="prop-label">Border Radius</label>
+                <div class="size-input">
+                    <input type="number" class="prop-input"
+                           value="@ParsePx(Styles?.BorderRadius)"
+                           @onchange="HandleBorderRadiusChange"
+                           min="0" max="24" step="2" />
+                    <span class="unit">px</span>
+                </div>
+            </div>
+            <div class="prop-group">
+                <label class="prop-label">Padding</label>
+                <input type="text" class="prop-input"
+                       value="@(Styles?.Padding ?? EmptyString)"
+                       @onchange="HandlePaddingChange"
+                       placeholder="10px 20px" />
+            </div>
+        </div>
+        <div class="prop-row">
+            <div class="prop-group">
+                <label class="prop-label">Font Size</label>
+                <div class="size-input">
+                    <input type="number" class="prop-input"
+                           value="@ParsePx(Styles?.FontSize)"
+                           @onchange="HandleFontSizeChange"
+                           min="12" max="20" step="1" />
+                    <span class="unit">px</span>
+                </div>
+            </div>
+            <div class="prop-group">
+                <label class="prop-label">Font Weight</label>
+                <select class="prop-input" value="@(Styles?.FontWeight ?? EmptyString)" @onchange="HandleFontWeightChange">
+                    <option value="">Default</option>
+                    <option value="400">Normal (400)</option>
+                    <option value="500">Medium (500)</option>
+                    <option value="600">Semibold (600)</option>
+                    <option value="700">Bold (700)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="preview-section">
+        <span class="section-label">Preview</span>
+        <div class="button-preview">
+            <button type="button" class="preview-btn primary" style="@GetPrimaryButtonStyle()">
+                Primary Button
+            </button>
+            <button type="button" class="preview-btn secondary" style="@GetSecondaryButtonStyle()">
+                Secondary Button
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public ButtonStyles? Styles { get; set; }
+    [Parameter] public EventCallback<ButtonStyles> OnChange { get; set; }
+
+    private const string EmptyString = "";
+    private const string DefaultColor = "#000000";
+
+    private string GetValue(string? value) => string.IsNullOrEmpty(value) ? DefaultColor : value;
+
+    private void Update(Action<ButtonStyles> action)
+    {
+        var styles = Styles?.Clone() ?? new ButtonStyles();
+        action(styles);
+        OnChange.InvokeAsync(styles);
+    }
+
+    // Primary button handlers
+    private void HandlePrimaryBackgroundChange(string v) => Update(s => s.PrimaryBackground = v);
+    private void HandlePrimaryTextChange(string v) => Update(s => s.PrimaryText = v);
+    private void HandlePrimaryBorderChange(string v) => Update(s => s.PrimaryBorder = v);
+    private void HandlePrimaryHoverChange(string v) => Update(s => s.PrimaryHoverBackground = v);
+
+    // Secondary button handlers
+    private void HandleSecondaryBackgroundChange(string v) => Update(s => s.SecondaryBackground = v);
+    private void HandleSecondaryTextChange(string v) => Update(s => s.SecondaryText = v);
+    private void HandleSecondaryBorderChange(string v) => Update(s => s.SecondaryBorder = v);
+
+    // Common settings handlers
+    private void HandleBorderRadiusChange(ChangeEventArgs e) => Update(s => s.BorderRadius = ToPx(e));
+    private void HandlePaddingChange(ChangeEventArgs e) => Update(s => s.Padding = GetStringValue(e));
+    private void HandleFontSizeChange(ChangeEventArgs e) => Update(s => s.FontSize = ToPx(e));
+    private void HandleFontWeightChange(ChangeEventArgs e) => Update(s => s.FontWeight = GetStringValue(e));
+
+    private static string GetStringValue(ChangeEventArgs e) => e.Value?.ToString() ?? EmptyString;
+
+    private static int ParsePx(string? value)
+    {
+        if (string.IsNullOrEmpty(value)) return 0;
+        var numeric = value.Replace("px", EmptyString).Trim();
+        return int.TryParse(numeric, out var result) ? result : 0;
+    }
+
+    private static string ToPx(ChangeEventArgs e)
+    {
+        return int.TryParse(e.Value?.ToString(), out var v) && v > 0 ? v + "px" : EmptyString;
+    }
+
+    private string GetPrimaryButtonStyle()
+    {
+        var style = new List<string>();
+        if (!string.IsNullOrEmpty(Styles?.PrimaryBackground)) style.Add($"background: {Styles.PrimaryBackground}");
+        if (!string.IsNullOrEmpty(Styles?.PrimaryText)) style.Add($"color: {Styles.PrimaryText}");
+        if (!string.IsNullOrEmpty(Styles?.PrimaryBorder)) style.Add($"border-color: {Styles.PrimaryBorder}");
+        if (!string.IsNullOrEmpty(Styles?.BorderRadius)) style.Add($"border-radius: {Styles.BorderRadius}");
+        if (!string.IsNullOrEmpty(Styles?.Padding)) style.Add($"padding: {Styles.Padding}");
+        if (!string.IsNullOrEmpty(Styles?.FontSize)) style.Add($"font-size: {Styles.FontSize}");
+        if (!string.IsNullOrEmpty(Styles?.FontWeight)) style.Add($"font-weight: {Styles.FontWeight}");
+        return string.Join("; ", style);
+    }
+
+    private string GetSecondaryButtonStyle()
+    {
+        var style = new List<string>();
+        if (!string.IsNullOrEmpty(Styles?.SecondaryBackground)) style.Add($"background: {Styles.SecondaryBackground}");
+        if (!string.IsNullOrEmpty(Styles?.SecondaryText)) style.Add($"color: {Styles.SecondaryText}");
+        if (!string.IsNullOrEmpty(Styles?.SecondaryBorder)) style.Add($"border-color: {Styles.SecondaryBorder}");
+        if (!string.IsNullOrEmpty(Styles?.BorderRadius)) style.Add($"border-radius: {Styles.BorderRadius}");
+        if (!string.IsNullOrEmpty(Styles?.Padding)) style.Add($"padding: {Styles.Padding}");
+        if (!string.IsNullOrEmpty(Styles?.FontSize)) style.Add($"font-size: {Styles.FontSize}");
+        if (!string.IsNullOrEmpty(Styles?.FontWeight)) style.Add($"font-weight: {Styles.FontWeight}");
+        return string.Join("; ", style);
+    }
+}

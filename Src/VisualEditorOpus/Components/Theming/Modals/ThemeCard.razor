@@ -1,0 +1,104 @@
+@* Reusable theme preview card for library grid and list views *@
+@using DynamicForms.Models.Theming
+@using VisualEditorOpus.Services.Theming
+
+<div class="theme-card @(IsSelected ? "selected" : "")" @onclick="HandleSelect">
+    <div class="card-preview" style="background: @GetPreviewColor();">
+        <div class="preview-stripe"></div>
+    </div>
+
+    <div class="card-content">
+        <div class="card-header-row">
+            <span class="card-title">@Theme.Name</span>
+            <span class="mode-icon" title="@GetModeTooltip()">
+                @if (Theme.Mode == ThemeMode.Light)
+                {
+                    <i class="bi bi-sun"></i>
+                }
+                else if (Theme.Mode == ThemeMode.Dark)
+                {
+                    <i class="bi bi-moon"></i>
+                }
+                else
+                {
+                    <i class="bi bi-circle-half"></i>
+                }
+            </span>
+        </div>
+
+        @if (Theme.IsDefault)
+        {
+            <span class="default-badge">Default</span>
+        }
+
+        <span class="card-date">@FormatDate(Theme.ModifiedAt)</span>
+    </div>
+
+    <div class="card-actions">
+        <button type="button" class="action-btn" title="Edit" @onclick="HandleEdit" @onclick:stopPropagation="true">
+            <i class="bi bi-pencil"></i>
+        </button>
+        <button type="button" class="action-btn" title="Duplicate" @onclick="HandleDuplicate" @onclick:stopPropagation="true">
+            <i class="bi bi-copy"></i>
+        </button>
+        @if (!Theme.IsDefault)
+        {
+            <button type="button" class="action-btn" title="Set as Default" @onclick="HandleSetDefault" @onclick:stopPropagation="true">
+                <i class="bi bi-star"></i>
+            </button>
+        }
+        <button type="button" class="action-btn" title="Export" @onclick="HandleExport" @onclick:stopPropagation="true">
+            <i class="bi bi-download"></i>
+        </button>
+        @if (!Theme.IsLocked)
+        {
+            <button type="button" class="action-btn action-danger" title="Delete" @onclick="HandleDelete" @onclick:stopPropagation="true">
+                <i class="bi bi-trash"></i>
+            </button>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public ThemeSummary Theme { get; set; } = default!;
+    [Parameter] public bool IsSelected { get; set; }
+    [Parameter] public EventCallback<ThemeSummary> OnSelect { get; set; }
+    [Parameter] public EventCallback<ThemeSummary> OnEdit { get; set; }
+    [Parameter] public EventCallback<ThemeSummary> OnDuplicate { get; set; }
+    [Parameter] public EventCallback<ThemeSummary> OnSetDefault { get; set; }
+    [Parameter] public EventCallback<ThemeSummary> OnExport { get; set; }
+    [Parameter] public EventCallback<ThemeSummary> OnDelete { get; set; }
+
+    private const string DefaultPreviewColor = "#3B82F6";
+
+    private string GetPreviewColor() => Theme.PreviewColor ?? DefaultPreviewColor;
+
+    private string GetModeTooltip()
+    {
+        return Theme.Mode switch
+        {
+            ThemeMode.Light => "Light Mode",
+            ThemeMode.Dark => "Dark Mode",
+            _ => "Auto Mode"
+        };
+    }
+
+    private static string FormatDate(DateTime date)
+    {
+        var diff = DateTime.UtcNow - date;
+
+        if (diff.TotalMinutes < 1) return "Just now";
+        if (diff.TotalHours < 1) return $"{(int)diff.TotalMinutes}m ago";
+        if (diff.TotalDays < 1) return $"{(int)diff.TotalHours}h ago";
+        if (diff.TotalDays < 7) return $"{(int)diff.TotalDays}d ago";
+
+        return date.ToString("MMM d, yyyy");
+    }
+
+    private Task HandleSelect() => OnSelect.InvokeAsync(Theme);
+    private Task HandleEdit() => OnEdit.InvokeAsync(Theme);
+    private Task HandleDuplicate() => OnDuplicate.InvokeAsync(Theme);
+    private Task HandleSetDefault() => OnSetDefault.InvokeAsync(Theme);
+    private Task HandleExport() => OnExport.InvokeAsync(Theme);
+    private Task HandleDelete() => OnDelete.InvokeAsync(Theme);
+}

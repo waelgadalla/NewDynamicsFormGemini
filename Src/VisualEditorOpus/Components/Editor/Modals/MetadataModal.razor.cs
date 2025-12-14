@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using DynamicForms.Core.V4.Schemas;
+using VisualEditorOpus.Services.Theming;
 
 namespace VisualEditorOpus.Components.Editor.Modals;
 
@@ -9,7 +10,11 @@ namespace VisualEditorOpus.Components.Editor.Modals;
 /// </summary>
 public partial class MetadataModal : ComponentBase
 {
+    [Inject] private IThemePersistenceService ThemePersistence { get; set; } = default!;
+
     private EditModel model = new();
+    private List<ThemeSummary> _availableThemes = new();
+    private bool _themesLoaded;
 
     /// <summary>
     /// Gets or sets whether the modal is open.
@@ -44,11 +49,12 @@ public partial class MetadataModal : ComponentBase
     private bool IsValid => !string.IsNullOrWhiteSpace(model.TitleEn);
 
     /// <inheritdoc />
-    protected override void OnParametersSet()
+    protected override async Task OnParametersSetAsync()
     {
         if (IsOpen && Module != null)
         {
             Initialize();
+            await LoadThemesAsync();
         }
     }
 
@@ -63,8 +69,24 @@ public partial class MetadataModal : ComponentBase
             InstructionsEn = Module.InstructionsEn,
             InstructionsFr = Module.InstructionsFr,
             TableName = Module.TableName,
-            SchemaName = Module.SchemaName ?? "dbo"
+            SchemaName = Module.SchemaName ?? "dbo",
+            ThemeId = Module.ThemeId
         };
+    }
+
+    private async Task LoadThemesAsync()
+    {
+        if (_themesLoaded) return;
+
+        try
+        {
+            _availableThemes = (await ThemePersistence.ListThemesAsync()).ToList();
+            _themesLoaded = true;
+        }
+        catch
+        {
+            _availableThemes = new List<ThemeSummary>();
+        }
     }
 
     private async Task HandleSave()
@@ -81,6 +103,7 @@ public partial class MetadataModal : ComponentBase
             InstructionsFr = string.IsNullOrWhiteSpace(model.InstructionsFr) ? null : model.InstructionsFr,
             TableName = string.IsNullOrWhiteSpace(model.TableName) ? null : model.TableName,
             SchemaName = model.SchemaName,
+            ThemeId = string.IsNullOrWhiteSpace(model.ThemeId) ? null : model.ThemeId,
             DateUpdated = DateTime.UtcNow
         };
 
@@ -112,5 +135,6 @@ public partial class MetadataModal : ComponentBase
         public string? InstructionsFr { get; set; }
         public string? TableName { get; set; }
         public string SchemaName { get; set; } = "dbo";
+        public string? ThemeId { get; set; }
     }
 }

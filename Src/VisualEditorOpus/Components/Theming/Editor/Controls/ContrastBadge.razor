@@ -1,0 +1,68 @@
+@* Contrast badge showing WCAG compliance level *@
+
+@using VisualEditorOpus.Services.Theming
+
+<span class="contrast-badge @GetBadgeClass()" title="@GetTooltip()">
+    <span class="ratio">@Result.RatioDisplay</span>
+    <span class="level">@GetLevelText()</span>
+</span>
+
+@code {
+    [Parameter] public ContrastCheckResult Result { get; set; } = default!;
+    [Parameter] public bool Compact { get; set; } = false;
+
+    private string GetBadgeClass()
+    {
+        var classes = new List<string>();
+
+        classes.Add(Result.Level switch
+        {
+            WcagLevel.AAA => "badge-pass-aaa",
+            WcagLevel.AAALarge or WcagLevel.AA => "badge-pass-aa",
+            WcagLevel.AALarge => "badge-warn",
+            _ => "badge-fail"
+        });
+
+        if (Compact) classes.Add("compact");
+
+        return string.Join(" ", classes);
+    }
+
+    private string GetLevelText()
+    {
+        return Result.Level switch
+        {
+            WcagLevel.AAA => "AAA",
+            WcagLevel.AAALarge => "AA",
+            WcagLevel.AA => "AA",
+            WcagLevel.AALarge => "AA*",
+            _ => "Fail"
+        };
+    }
+
+    private string GetTooltip()
+    {
+        var lines = new List<string>
+        {
+            $"Contrast Ratio: {Result.RatioDisplay}",
+            string.Empty
+        };
+
+        lines.Add(Result.PassesAAA
+            ? "Passes AAA (7:1) - Excellent"
+            : Result.PassesAA
+                ? "Passes AA (4.5:1) - Good"
+                : Result.PassesAALarge
+                    ? "Passes AA for large text only (3:1)"
+                    : "Does not meet WCAG requirements");
+
+        lines.Add(string.Empty);
+        lines.Add("Requirements:");
+        lines.Add("- AA Normal: 4.5:1");
+        lines.Add("- AA Large: 3:1");
+        lines.Add("- AAA Normal: 7:1");
+        lines.Add("- AAA Large: 4.5:1");
+
+        return string.Join("\n", lines);
+    }
+}

@@ -1,0 +1,133 @@
+@* Panel/Card style editor *@
+
+@using DynamicForms.Models.Theming
+@using VisualEditorOpus.Components.Theming.Editor.Controls
+
+<div class="style-editor">
+    <div class="editor-section">
+        <span class="section-label">Panel Colors</span>
+        <div class="control-grid">
+            <ColorInput Label="Background" Value="@GetValue(Styles?.Background)" ValueChanged="HandleBackgroundChange" />
+            <ColorInput Label="Border" Value="@GetValue(Styles?.Border)" ValueChanged="HandleBorderChange" />
+            <ColorInput Label="Header BG" Value="@GetValue(Styles?.HeaderBackground)" ValueChanged="HandleHeaderBgChange" />
+            <ColorInput Label="Header Text" Value="@GetValue(Styles?.HeaderText)" ValueChanged="HandleHeaderTextChange" />
+        </div>
+    </div>
+
+    <div class="editor-section">
+        <span class="section-label">Borders & Spacing</span>
+        <div class="prop-row">
+            <div class="prop-group">
+                <label class="prop-label">Border Radius</label>
+                <div class="size-input">
+                    <input type="number" class="prop-input"
+                           value="@ParsePx(Styles?.BorderRadius)"
+                           @onchange="HandleBorderRadiusChange"
+                           min="0" max="24" step="2" />
+                    <span class="unit">px</span>
+                </div>
+            </div>
+            <div class="prop-group">
+                <label class="prop-label">Padding</label>
+                <input type="text" class="prop-input"
+                       value="@(Styles?.Padding ?? EmptyString)"
+                       @onchange="HandlePaddingChange"
+                       placeholder="24px" />
+            </div>
+        </div>
+        <div class="prop-group" style="margin-top: 8px;">
+            <label class="prop-label">Shadow</label>
+            <input type="text" class="prop-input"
+                   value="@(Styles?.Shadow ?? EmptyString)"
+                   @onchange="HandleShadowChange"
+                   placeholder="0 1px 3px rgba(0, 0, 0, 0.1)" />
+        </div>
+    </div>
+
+    <div class="editor-section">
+        <span class="section-label">Collapse Icon</span>
+        <ColorInput Label="Icon Color" Value="@GetValue(Styles?.CollapseIconColor)" ValueChanged="HandleCollapseIconChange" />
+    </div>
+
+    <div class="preview-section">
+        <span class="section-label">Preview</span>
+        <div class="panel-preview">
+            <div class="preview-panel" style="@GetPanelStyle()">
+                <div class="panel-header" style="@GetHeaderStyle()">
+                    <span>Panel Header</span>
+                    <i class="bi bi-chevron-down" style="@GetIconStyle()"></i>
+                </div>
+                <div class="panel-content">
+                    Panel content goes here. This is a preview of how panels will look with the current style settings.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public PanelStyles? Styles { get; set; }
+    [Parameter] public EventCallback<PanelStyles> OnChange { get; set; }
+
+    private const string EmptyString = "";
+    private const string DefaultColor = "#000000";
+
+    private string GetValue(string? value) => string.IsNullOrEmpty(value) ? DefaultColor : value;
+
+    private void Update(Action<PanelStyles> action)
+    {
+        var styles = Styles?.Clone() ?? new PanelStyles();
+        action(styles);
+        OnChange.InvokeAsync(styles);
+    }
+
+    // Color handlers
+    private void HandleBackgroundChange(string v) => Update(s => s.Background = v);
+    private void HandleBorderChange(string v) => Update(s => s.Border = v);
+    private void HandleHeaderBgChange(string v) => Update(s => s.HeaderBackground = v);
+    private void HandleHeaderTextChange(string v) => Update(s => s.HeaderText = v);
+    private void HandleCollapseIconChange(string v) => Update(s => s.CollapseIconColor = v);
+
+    // Input handlers
+    private void HandleBorderRadiusChange(ChangeEventArgs e) => Update(s => s.BorderRadius = ToPx(e));
+    private void HandlePaddingChange(ChangeEventArgs e) => Update(s => s.Padding = GetStringValue(e));
+    private void HandleShadowChange(ChangeEventArgs e) => Update(s => s.Shadow = GetStringValue(e));
+
+    private static string GetStringValue(ChangeEventArgs e) => e.Value?.ToString() ?? EmptyString;
+
+    private static int ParsePx(string? value)
+    {
+        if (string.IsNullOrEmpty(value)) return 0;
+        var numeric = value.Replace("px", EmptyString).Trim();
+        return int.TryParse(numeric, out var result) ? result : 0;
+    }
+
+    private static string ToPx(ChangeEventArgs e)
+    {
+        return int.TryParse(e.Value?.ToString(), out var v) && v > 0 ? v + "px" : EmptyString;
+    }
+
+    private string GetPanelStyle()
+    {
+        var style = new List<string>();
+        if (!string.IsNullOrEmpty(Styles?.Background)) style.Add($"background: {Styles.Background}");
+        if (!string.IsNullOrEmpty(Styles?.Border)) style.Add($"border-color: {Styles.Border}");
+        if (!string.IsNullOrEmpty(Styles?.BorderRadius)) style.Add($"border-radius: {Styles.BorderRadius}");
+        if (!string.IsNullOrEmpty(Styles?.Shadow)) style.Add($"box-shadow: {Styles.Shadow}");
+        if (!string.IsNullOrEmpty(Styles?.Padding)) style.Add($"--panel-padding: {Styles.Padding}");
+        return string.Join("; ", style);
+    }
+
+    private string GetHeaderStyle()
+    {
+        var style = new List<string>();
+        if (!string.IsNullOrEmpty(Styles?.HeaderBackground)) style.Add($"background: {Styles.HeaderBackground}");
+        if (!string.IsNullOrEmpty(Styles?.HeaderText)) style.Add($"color: {Styles.HeaderText}");
+        return string.Join("; ", style);
+    }
+
+    private string GetIconStyle()
+    {
+        return !string.IsNullOrEmpty(Styles?.CollapseIconColor) ? $"color: {Styles.CollapseIconColor}" : EmptyString;
+    }
+}

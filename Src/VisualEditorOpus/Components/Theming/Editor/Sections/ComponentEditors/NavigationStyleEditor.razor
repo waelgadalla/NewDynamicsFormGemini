@@ -1,0 +1,194 @@
+@* Navigation buttons style editor *@
+
+@using DynamicForms.Models.Theming
+
+<div class="style-editor">
+    <div class="editor-section">
+        <span class="section-label">Button Style</span>
+        <div class="button-style-selector">
+            <button type="button"
+                    class="style-btn @GetStyleActiveClass(PrimaryStyle)"
+                    @onclick="SetStylePrimary">
+                Primary
+            </button>
+            <button type="button"
+                    class="style-btn @GetStyleActiveClass(SecondaryStyle)"
+                    @onclick="SetStyleSecondary">
+                Secondary
+            </button>
+            <button type="button"
+                    class="style-btn @GetStyleActiveClass(TextStyle)"
+                    @onclick="SetStyleText">
+                Text
+            </button>
+        </div>
+    </div>
+
+    <div class="editor-section">
+        <span class="section-label">Alignment</span>
+        <div class="alignment-selector">
+            <button type="button"
+                    class="align-btn @GetAlignActiveClass(LeftAlign)"
+                    @onclick="SetAlignLeft"
+                    title="Left">
+                <i class="bi bi-align-start"></i>
+            </button>
+            <button type="button"
+                    class="align-btn @GetAlignActiveClass(CenterAlign)"
+                    @onclick="SetAlignCenter"
+                    title="Center">
+                <i class="bi bi-align-center"></i>
+            </button>
+            <button type="button"
+                    class="align-btn @GetAlignActiveClass(RightAlign)"
+                    @onclick="SetAlignRight"
+                    title="Right">
+                <i class="bi bi-align-end"></i>
+            </button>
+            <button type="button"
+                    class="align-btn @GetAlignActiveClass(SpaceBetweenAlign)"
+                    @onclick="SetAlignSpaceBetween"
+                    title="Space Between">
+                <i class="bi bi-distribute-horizontal"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="editor-section">
+        <span class="section-label">Button Labels</span>
+        <div class="prop-row">
+            <div class="prop-group">
+                <label class="prop-label">Previous</label>
+                <input type="text" class="prop-input"
+                       value="@(Styles?.PreviousButtonText ?? EmptyString)"
+                       @onchange="HandlePreviousTextChange"
+                       placeholder="Previous" />
+            </div>
+            <div class="prop-group">
+                <label class="prop-label">Next</label>
+                <input type="text" class="prop-input"
+                       value="@(Styles?.NextButtonText ?? EmptyString)"
+                       @onchange="HandleNextTextChange"
+                       placeholder="Next" />
+            </div>
+        </div>
+        <div class="prop-group" style="margin-top: 8px;">
+            <label class="prop-label">Submit</label>
+            <input type="text" class="prop-input"
+                   value="@(Styles?.SubmitButtonText ?? EmptyString)"
+                   @onchange="HandleSubmitTextChange"
+                   placeholder="Submit" />
+        </div>
+    </div>
+
+    <div class="editor-section">
+        <span class="section-label">Options</span>
+        <div class="toggle-row">
+            <span class="toggle-label">Show Icons</span>
+            <label class="toggle-switch">
+                <input type="checkbox"
+                       checked="@(Styles?.ShowIcons ?? true)"
+                       @onchange="HandleShowIconsChange" />
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <div class="preview-section">
+        <span class="section-label">Preview</span>
+        <div class="nav-preview">
+            <div class="nav-buttons" style="@GetAlignmentStyle()">
+                <button type="button" class="nav-btn prev @GetButtonStyleClass()">
+                    @if (Styles?.ShowIcons ?? true)
+                    {
+                        <i class="bi bi-arrow-left"></i>
+                    }
+                    @GetPreviousText()
+                </button>
+                <button type="button" class="nav-btn next @GetButtonStyleClass()">
+                    @GetNextText()
+                    @if (Styles?.ShowIcons ?? true)
+                    {
+                        <i class="bi bi-arrow-right"></i>
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public NavigationStyles? Styles { get; set; }
+    [Parameter] public EventCallback<NavigationStyles> OnChange { get; set; }
+
+    private const string EmptyString = "";
+    private const string PrimaryStyle = "primary";
+    private const string SecondaryStyle = "secondary";
+    private const string TextStyle = "text";
+    private const string LeftAlign = "left";
+    private const string CenterAlign = "center";
+    private const string RightAlign = "right";
+    private const string SpaceBetweenAlign = "space-between";
+    private const string ActiveClass = "active";
+
+    private void Update(Action<NavigationStyles> action)
+    {
+        var styles = Styles?.Clone() ?? new NavigationStyles();
+        action(styles);
+        OnChange.InvokeAsync(styles);
+    }
+
+    private string GetCurrentStyle() => string.IsNullOrEmpty(Styles?.ButtonStyle) ? PrimaryStyle : Styles.ButtonStyle;
+    private string GetCurrentAlignment() => string.IsNullOrEmpty(Styles?.Alignment) ? RightAlign : Styles.Alignment;
+
+    private string GetStyleActiveClass(string style) => GetCurrentStyle() == style ? ActiveClass : EmptyString;
+    private string GetAlignActiveClass(string align) => GetCurrentAlignment() == align ? ActiveClass : EmptyString;
+
+    // Style handlers
+    private void SetStylePrimary() => Update(s => s.ButtonStyle = PrimaryStyle);
+    private void SetStyleSecondary() => Update(s => s.ButtonStyle = SecondaryStyle);
+    private void SetStyleText() => Update(s => s.ButtonStyle = TextStyle);
+
+    // Alignment handlers
+    private void SetAlignLeft() => Update(s => s.Alignment = LeftAlign);
+    private void SetAlignCenter() => Update(s => s.Alignment = CenterAlign);
+    private void SetAlignRight() => Update(s => s.Alignment = RightAlign);
+    private void SetAlignSpaceBetween() => Update(s => s.Alignment = SpaceBetweenAlign);
+
+    // Text handlers
+    private void HandlePreviousTextChange(ChangeEventArgs e) => Update(s => s.PreviousButtonText = GetStringValue(e));
+    private void HandleNextTextChange(ChangeEventArgs e) => Update(s => s.NextButtonText = GetStringValue(e));
+    private void HandleSubmitTextChange(ChangeEventArgs e) => Update(s => s.SubmitButtonText = GetStringValue(e));
+
+    private void HandleShowIconsChange(ChangeEventArgs e)
+    {
+        var show = e.Value as bool? ?? true;
+        Update(s => s.ShowIcons = show);
+    }
+
+    private static string GetStringValue(ChangeEventArgs e) => e.Value?.ToString() ?? EmptyString;
+
+    private string GetPreviousText() => string.IsNullOrEmpty(Styles?.PreviousButtonText) ? "Previous" : Styles.PreviousButtonText;
+    private string GetNextText() => string.IsNullOrEmpty(Styles?.NextButtonText) ? "Next" : Styles.NextButtonText;
+
+    private string GetAlignmentStyle()
+    {
+        return GetCurrentAlignment() switch
+        {
+            LeftAlign => "justify-content: flex-start",
+            CenterAlign => "justify-content: center",
+            SpaceBetweenAlign => "justify-content: space-between",
+            _ => "justify-content: flex-end"
+        };
+    }
+
+    private string GetButtonStyleClass()
+    {
+        return GetCurrentStyle() switch
+        {
+            SecondaryStyle => "secondary",
+            TextStyle => "text-btn",
+            _ => "primary"
+        };
+    }
+}

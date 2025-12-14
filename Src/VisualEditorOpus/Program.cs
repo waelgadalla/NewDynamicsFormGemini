@@ -33,6 +33,7 @@ builder.Services.AddScoped<IThemeEditorStateService, ThemeEditorStateService>();
 builder.Services.AddSingleton<IThemeCssGeneratorService, ThemeCssGeneratorService>();
 builder.Services.AddScoped<IThemeImportExportService, ThemeImportExportService>();
 builder.Services.AddScoped<IThemePersistenceService, ThemePersistenceService>();
+builder.Services.AddSingleton<IThemeValidatorService, ThemeValidatorService>();
 
 // Register CodeSet management services
 builder.Services.AddScoped<ICodeSetCache, CodeSetCache>();

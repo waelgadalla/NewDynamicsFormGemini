@@ -1,0 +1,164 @@
+@* Input style editor with background, border, and focus controls *@
+
+@using DynamicForms.Models.Theming
+@using VisualEditorOpus.Components.Theming.Editor.Controls
+
+<div class="style-editor">
+    <div class="editor-section">
+        <span class="section-label">Colors</span>
+        <div class="control-grid">
+            <ColorInput Label="Background" Value="@GetValue(Styles?.Background)" ValueChanged="HandleBackgroundChange" />
+            <ColorInput Label="Text" Value="@GetValue(Styles?.Text)" ValueChanged="HandleTextChange" />
+            <ColorInput Label="Border" Value="@GetValue(Styles?.Border)" ValueChanged="HandleBorderChange" />
+            <ColorInput Label="Placeholder" Value="@GetValue(Styles?.PlaceholderColor)" ValueChanged="HandlePlaceholderChange" />
+        </div>
+    </div>
+
+    <div class="editor-section">
+        <span class="section-label">Borders & Spacing</span>
+        <div class="prop-row">
+            <div class="prop-group">
+                <label class="prop-label">Border Width</label>
+                <div class="size-input">
+                    <input type="number" class="prop-input"
+                           value="@ParsePx(Styles?.BorderWidth)"
+                           @onchange="HandleBorderWidthChange"
+                           min="0" max="4" step="1" />
+                    <span class="unit">px</span>
+                </div>
+            </div>
+            <div class="prop-group">
+                <label class="prop-label">Border Radius</label>
+                <div class="size-input">
+                    <input type="number" class="prop-input"
+                           value="@ParsePx(Styles?.BorderRadius)"
+                           @onchange="HandleBorderRadiusChange"
+                           min="0" max="24" step="2" />
+                    <span class="unit">px</span>
+                </div>
+            </div>
+        </div>
+        <div class="prop-group" style="margin-top: 8px;">
+            <label class="prop-label">Padding</label>
+            <input type="text" class="prop-input"
+                   value="@(Styles?.Padding ?? EmptyString)"
+                   @onchange="HandlePaddingChange"
+                   placeholder="12px 14px" />
+        </div>
+    </div>
+
+    <div class="editor-section">
+        <span class="section-label">Focus State</span>
+        <div class="control-grid">
+            <ColorInput Label="Focus Border" Value="@GetValue(Styles?.FocusBorder)" ValueChanged="HandleFocusBorderChange" />
+        </div>
+        <div class="prop-group" style="margin-top: 8px;">
+            <label class="prop-label">Focus Shadow</label>
+            <input type="text" class="prop-input"
+                   value="@(Styles?.FocusShadow ?? EmptyString)"
+                   @onchange="HandleFocusShadowChange"
+                   placeholder="0 0 0 3px rgba(99, 102, 241, 0.15)" />
+        </div>
+    </div>
+
+    <div class="editor-section">
+        <span class="section-label">Disabled State</span>
+        <div class="control-grid">
+            <ColorInput Label="Background" Value="@GetValue(Styles?.DisabledBackground)" ValueChanged="HandleDisabledBackgroundChange" />
+            <ColorInput Label="Text" Value="@GetValue(Styles?.DisabledText)" ValueChanged="HandleDisabledTextChange" />
+        </div>
+    </div>
+
+    <div class="preview-section">
+        <span class="section-label">Preview</span>
+        <div class="input-preview">
+            <div class="preview-group">
+                <label class="preview-label">Normal</label>
+                <input type="text" class="preview-input" style="@GetInputStyle()" value="Sample text" readonly />
+            </div>
+            <div class="preview-group">
+                <label class="preview-label">Focus</label>
+                <input type="text" class="preview-input focused" style="@GetFocusStyle()" value="Focused input" readonly />
+            </div>
+            <div class="preview-group">
+                <label class="preview-label">Disabled</label>
+                <input type="text" class="preview-input disabled" style="@GetDisabledStyle()" value="Disabled" disabled readonly />
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public InputStyles? Styles { get; set; }
+    [Parameter] public EventCallback<InputStyles> OnChange { get; set; }
+
+    private const string EmptyString = "";
+    private const string DefaultColor = "#000000";
+
+    private string GetValue(string? value) => string.IsNullOrEmpty(value) ? DefaultColor : value;
+
+    private void Update(Action<InputStyles> action)
+    {
+        var styles = Styles?.Clone() ?? new InputStyles();
+        action(styles);
+        OnChange.InvokeAsync(styles);
+    }
+
+    // Color handlers
+    private void HandleBackgroundChange(string v) => Update(s => s.Background = v);
+    private void HandleTextChange(string v) => Update(s => s.Text = v);
+    private void HandleBorderChange(string v) => Update(s => s.Border = v);
+    private void HandlePlaceholderChange(string v) => Update(s => s.PlaceholderColor = v);
+    private void HandleFocusBorderChange(string v) => Update(s => s.FocusBorder = v);
+    private void HandleDisabledBackgroundChange(string v) => Update(s => s.DisabledBackground = v);
+    private void HandleDisabledTextChange(string v) => Update(s => s.DisabledText = v);
+
+    // Input handlers
+    private void HandleBorderWidthChange(ChangeEventArgs e) => Update(s => s.BorderWidth = ToPx(e));
+    private void HandleBorderRadiusChange(ChangeEventArgs e) => Update(s => s.BorderRadius = ToPx(e));
+    private void HandlePaddingChange(ChangeEventArgs e) => Update(s => s.Padding = GetStringValue(e));
+    private void HandleFocusShadowChange(ChangeEventArgs e) => Update(s => s.FocusShadow = GetStringValue(e));
+
+    private static string GetStringValue(ChangeEventArgs e) => e.Value?.ToString() ?? EmptyString;
+
+    private static int ParsePx(string? value)
+    {
+        if (string.IsNullOrEmpty(value)) return 0;
+        var numeric = value.Replace("px", EmptyString).Trim();
+        return int.TryParse(numeric, out var result) ? result : 0;
+    }
+
+    private static string ToPx(ChangeEventArgs e)
+    {
+        return int.TryParse(e.Value?.ToString(), out var v) && v > 0 ? v + "px" : EmptyString;
+    }
+
+    private string GetInputStyle()
+    {
+        var style = new List<string>();
+        if (!string.IsNullOrEmpty(Styles?.Background)) style.Add($"background: {Styles.Background}");
+        if (!string.IsNullOrEmpty(Styles?.Text)) style.Add($"color: {Styles.Text}");
+        if (!string.IsNullOrEmpty(Styles?.Border)) style.Add($"border-color: {Styles.Border}");
+        if (!string.IsNullOrEmpty(Styles?.BorderWidth)) style.Add($"border-width: {Styles.BorderWidth}");
+        if (!string.IsNullOrEmpty(Styles?.BorderRadius)) style.Add($"border-radius: {Styles.BorderRadius}");
+        if (!string.IsNullOrEmpty(Styles?.Padding)) style.Add($"padding: {Styles.Padding}");
+        return string.Join("; ", style);
+    }
+
+    private string GetFocusStyle()
+    {
+        var parts = GetInputStyle().Split("; ", StringSplitOptions.RemoveEmptyEntries).ToList();
+        if (!string.IsNullOrEmpty(Styles?.FocusBorder)) parts.Add($"border-color: {Styles.FocusBorder}");
+        if (!string.IsNullOrEmpty(Styles?.FocusShadow)) parts.Add($"box-shadow: {Styles.FocusShadow}");
+        return string.Join("; ", parts);
+    }
+
+    private string GetDisabledStyle()
+    {
+        var style = new List<string>();
+        if (!string.IsNullOrEmpty(Styles?.DisabledBackground)) style.Add($"background: {Styles.DisabledBackground}");
+        if (!string.IsNullOrEmpty(Styles?.DisabledText)) style.Add($"color: {Styles.DisabledText}");
+        if (!string.IsNullOrEmpty(Styles?.BorderRadius)) style.Add($"border-radius: {Styles.BorderRadius}");
+        return string.Join("; ", style);
+    }
+}

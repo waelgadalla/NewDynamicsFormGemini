@@ -1,7 +1,9 @@
 @* Modal for editing module-level metadata *@
 @using VisualEditorOpus.Models
 @using VisualEditorOpus.Components.Shared
+@using VisualEditorOpus.Services.Theming
 @using DynamicForms.Core.V4.Schemas
+@using DynamicForms.Models.Theming
 
 <ModalBase @bind-IsOpen="IsOpen"
            Title="Module Metadata"
@@ -135,6 +137,51 @@
                 </select>
                 <p class="form-hint">Database schema</p>
             </div>
+        </div>
+
+        @* Theme Section *@
+        <div class="section-title">
+            <i class="bi bi-palette"></i> Theme
+        </div>
+        <div class="form-group">
+            <label class="form-label">Form Theme</label>
+            <div class="theme-selector">
+                <select class="form-select" @bind="model.ThemeId">
+                    <option value="">Default Theme</option>
+                    @foreach (var theme in _availableThemes)
+                    {
+                        <option value="@theme.Id">
+                            @theme.Name
+                            @if (theme.IsDefault) { <text> (System Default)</text> }
+                        </option>
+                    }
+                </select>
+                @if (!string.IsNullOrEmpty(model.ThemeId))
+                {
+                    var selectedTheme = _availableThemes.FirstOrDefault(t => t.Id == model.ThemeId);
+                    @if (selectedTheme != null)
+                    {
+                        <div class="theme-preview">
+                            <span class="color-swatch" style="background: @(selectedTheme.PreviewColor ?? "#3B82F6")"></span>
+                            <span class="theme-mode">
+                                @if (selectedTheme.Mode == ThemeMode.Light)
+                                {
+                                    <i class="bi bi-sun" title="Light Mode"></i>
+                                }
+                                else if (selectedTheme.Mode == ThemeMode.Dark)
+                                {
+                                    <i class="bi bi-moon" title="Dark Mode"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-circle-half" title="Auto Mode"></i>
+                                }
+                            </span>
+                        </div>
+                    }
+                }
+            </div>
+            <p class="form-hint">Apply a custom theme to this form. Leave empty for default.</p>
         </div>
     </div>
     </ChildContent>

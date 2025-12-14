@@ -8,10 +8,14 @@
 @using VisualEditorOpus.Components.Theming.Editor.Sections
 
 <div class="theme-editor">
-    <ThemeEditorHeader />
+    <ThemeEditorHeader OnMenuToggle="ToggleSidebar" />
 
     <div class="theme-editor-body">
-        <ThemeEditorSidebar />
+        @if (_sidebarOpen)
+        {
+            <div class="sidebar-backdrop mobile-only" @onclick="CloseSidebar"></div>
+        }
+        <ThemeEditorSidebar @bind-IsOpen="_sidebarOpen" />
 
         <div class="theme-editor-main">
             <ThemePreviewPanel />
@@ -25,6 +29,11 @@
     [Inject] private IThemeEditorStateService ThemeState { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
     [Inject] private IToastService ToastService { get; set; } = default!;
+
+    private bool _sidebarOpen = true;
+
+    private void ToggleSidebar() => _sidebarOpen = !_sidebarOpen;
+    private void CloseSidebar() => _sidebarOpen = false;
 
     protected override void OnInitialized()
     {

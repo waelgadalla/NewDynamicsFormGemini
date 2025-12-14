@@ -1,0 +1,128 @@
+@* Dropdown/Select style editor *@
+
+@using DynamicForms.Models.Theming
+@using VisualEditorOpus.Components.Theming.Editor.Controls
+
+<div class="style-editor">
+    <div class="editor-section">
+        <span class="section-label">Select Input</span>
+        <div class="control-grid">
+            <ColorInput Label="Background" Value="@GetValue(Styles?.Background)" ValueChanged="HandleBackgroundChange" />
+            <ColorInput Label="Text" Value="@GetValue(Styles?.Text)" ValueChanged="HandleTextChange" />
+            <ColorInput Label="Border" Value="@GetValue(Styles?.Border)" ValueChanged="HandleBorderChange" />
+            <ColorInput Label="Arrow" Value="@GetValue(Styles?.ArrowColor)" ValueChanged="HandleArrowChange" />
+        </div>
+        <div class="prop-group" style="margin-top: 8px;">
+            <label class="prop-label">Border Radius</label>
+            <div class="size-input">
+                <input type="number" class="prop-input"
+                       value="@ParsePx(Styles?.BorderRadius)"
+                       @onchange="HandleBorderRadiusChange"
+                       min="0" max="24" step="2" />
+                <span class="unit">px</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="editor-section">
+        <span class="section-label">Dropdown Options</span>
+        <div class="control-grid">
+            <ColorInput Label="Hover BG" Value="@GetValue(Styles?.OptionHoverBackground)" ValueChanged="HandleHoverBgChange" />
+            <ColorInput Label="Selected BG" Value="@GetValue(Styles?.OptionSelectedBackground)" ValueChanged="HandleSelectedBgChange" />
+        </div>
+        <div class="prop-group" style="margin-top: 8px;">
+            <label class="prop-label">Dropdown Shadow</label>
+            <input type="text" class="prop-input"
+                   value="@(Styles?.DropdownShadow ?? EmptyString)"
+                   @onchange="HandleDropdownShadowChange"
+                   placeholder="0 4px 6px rgba(0, 0, 0, 0.1)" />
+        </div>
+    </div>
+
+    <div class="preview-section">
+        <span class="section-label">Preview</span>
+        <div class="dropdown-preview">
+            <select class="preview-select" style="@GetSelectStyle()">
+                <option>Select an option...</option>
+                <option>Option 1</option>
+                <option>Option 2</option>
+            </select>
+            <div class="preview-dropdown" style="@GetDropdownStyle()">
+                <div class="dropdown-option">Option 1</div>
+                <div class="dropdown-option hover" style="@GetHoverStyle()">Option 2 (hover)</div>
+                <div class="dropdown-option selected" style="@GetSelectedStyle()">Option 3 (selected)</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public DropdownStyles? Styles { get; set; }
+    [Parameter] public EventCallback<DropdownStyles> OnChange { get; set; }
+
+    private const string EmptyString = "";
+    private const string DefaultColor = "#000000";
+
+    private string GetValue(string? value) => string.IsNullOrEmpty(value) ? DefaultColor : value;
+
+    private void Update(Action<DropdownStyles> action)
+    {
+        var styles = Styles?.Clone() ?? new DropdownStyles();
+        action(styles);
+        OnChange.InvokeAsync(styles);
+    }
+
+    // Color handlers
+    private void HandleBackgroundChange(string v) => Update(s => s.Background = v);
+    private void HandleTextChange(string v) => Update(s => s.Text = v);
+    private void HandleBorderChange(string v) => Update(s => s.Border = v);
+    private void HandleArrowChange(string v) => Update(s => s.ArrowColor = v);
+    private void HandleHoverBgChange(string v) => Update(s => s.OptionHoverBackground = v);
+    private void HandleSelectedBgChange(string v) => Update(s => s.OptionSelectedBackground = v);
+
+    // Input handlers
+    private void HandleBorderRadiusChange(ChangeEventArgs e) => Update(s => s.BorderRadius = ToPx(e));
+    private void HandleDropdownShadowChange(ChangeEventArgs e) => Update(s => s.DropdownShadow = GetStringValue(e));
+
+    private static string GetStringValue(ChangeEventArgs e) => e.Value?.ToString() ?? EmptyString;
+
+    private static int ParsePx(string? value)
+    {
+        if (string.IsNullOrEmpty(value)) return 0;
+        var numeric = value.Replace("px", EmptyString).Trim();
+        return int.TryParse(numeric, out var result) ? result : 0;
+    }
+
+    private static string ToPx(ChangeEventArgs e)
+    {
+        return int.TryParse(e.Value?.ToString(), out var v) && v > 0 ? v + "px" : EmptyString;
+    }
+
+    private string GetSelectStyle()
+    {
+        var style = new List<string>();
+        if (!string.IsNullOrEmpty(Styles?.Background)) style.Add($"background: {Styles.Background}");
+        if (!string.IsNullOrEmpty(Styles?.Text)) style.Add($"color: {Styles.Text}");
+        if (!string.IsNullOrEmpty(Styles?.Border)) style.Add($"border-color: {Styles.Border}");
+        if (!string.IsNullOrEmpty(Styles?.BorderRadius)) style.Add($"border-radius: {Styles.BorderRadius}");
+        return string.Join("; ", style);
+    }
+
+    private string GetDropdownStyle()
+    {
+        var style = new List<string>();
+        if (!string.IsNullOrEmpty(Styles?.DropdownShadow)) style.Add($"box-shadow: {Styles.DropdownShadow}");
+        if (!string.IsNullOrEmpty(Styles?.BorderRadius)) style.Add($"border-radius: {Styles.BorderRadius}");
+        return string.Join("; ", style);
+    }
+
+    private string GetHoverStyle()
+    {
+        return !string.IsNullOrEmpty(Styles?.OptionHoverBackground) ? $"background: {Styles.OptionHoverBackground}" : EmptyString;
+    }
+
+    private string GetSelectedStyle()
+    {
+        return !string.IsNullOrEmpty(Styles?.OptionSelectedBackground) ? $"background: {Styles.OptionSelectedBackground}" : EmptyString;
+    }
+}

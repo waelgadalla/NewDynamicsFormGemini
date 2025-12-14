@@ -114,6 +114,15 @@ public record FormModuleSchema
 
     #endregion
 
+    #region Theming
+
+    /// <summary>
+    /// Theme ID to apply to this module (null = use default theme)
+    /// </summary>
+    public string? ThemeId { get; init; }
+
+    #endregion
+
     #region Extensibility
 
     /// <summary>

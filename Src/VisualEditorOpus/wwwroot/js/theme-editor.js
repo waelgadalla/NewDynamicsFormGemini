@@ -30,10 +30,10 @@ window.themeEditorShortcuts = {
                     this._dotNetRef.invokeMethodAsync('OnRedoShortcut');
                 }
             }
-            // Ctrl+S - Save (prevent default browser save)
+            // Ctrl+S - Save
             else if (e.ctrlKey && e.key === 's') {
                 e.preventDefault();
-                // Optional: Could invoke save method
+                this._dotNetRef.invokeMethodAsync('OnSaveShortcut');
             }
         };
 

@@ -1,0 +1,511 @@
+@* Theme library management modal with search, filter, and grid/list views *@
+@using DynamicForms.Models.Theming
+@using VisualEditorOpus.Services.Theming
+@using VisualEditorOpus.Components.Shared
+
+<ModalBase @bind-IsOpen="IsOpen"
+           Title="Theme Library"
+           Icon="bi-collection"
+           Badge="@GetThemeCount()"
+           Size="ModalSize.ExtraLarge"
+           OnClose="HandleClose">
+    <HeaderExtra>
+        <div class="library-header-controls">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text"
+                       class="search-input"
+                       placeholder="Search themes..."
+                       value="@_searchTerm"
+                       @oninput="HandleSearchInput" />
+                @if (!string.IsNullOrEmpty(_searchTerm))
+                {
+                    <button type="button" class="clear-search" @onclick="ClearSearch">
+                        <i class="bi bi-x"></i>
+                    </button>
+                }
+            </div>
+
+            <select class="filter-select" value="@_selectedFilter" @onchange="HandleFilterChange">
+                <option value="all">All Themes</option>
+                <option value="light">Light Mode</option>
+                <option value="dark">Dark Mode</option>
+                <option value="auto">Auto Mode</option>
+                <option value="default">Default Only</option>
+            </select>
+
+            <div class="view-toggle">
+                <button type="button"
+                        class="view-btn @(_viewMode == ViewMode.Grid ? "active" : "")"
+                        title="Grid View"
+                        @onclick="SetGridView">
+                    <i class="bi bi-grid-3x3-gap"></i>
+                </button>
+                <button type="button"
+                        class="view-btn @(_viewMode == ViewMode.List ? "active" : "")"
+                        title="List View"
+                        @onclick="SetListView">
+                    <i class="bi bi-list-ul"></i>
+                </button>
+            </div>
+        </div>
+    </HeaderExtra>
+
+    <ChildContent>
+        <div class="library-content">
+        @if (_isLoading)
+        {
+            <div class="theme-grid">
+                @for (var i = 0; i < 6; i++)
+                {
+                    <ThemeCardSkeleton />
+                }
+            </div>
+        }
+        else if (_filteredThemes.Count == 0)
+        {
+            <div class="empty-state">
+                <i class="bi bi-palette2"></i>
+                <span class="empty-title">
+                    @if (!string.IsNullOrEmpty(_searchTerm))
+                    {
+                        <text>No themes match "@_searchTerm"</text>
+                    }
+                    else
+                    {
+                        <text>No themes found</text>
+                    }
+                </span>
+                <span class="empty-desc">Create a new theme or import an existing one to get started.</span>
+            </div>
+        }
+        else if (_viewMode == ViewMode.Grid)
+        {
+            <div class="theme-grid">
+                @foreach (var theme in _filteredThemes)
+                {
+                    <ThemeCard Theme="@theme"
+                               IsSelected="@(_selectedTheme?.Id == theme.Id)"
+                               OnSelect="HandleThemeSelect"
+                               OnEdit="HandleEdit"
+                               OnDuplicate="HandleDuplicate"
+                               OnSetDefault="HandleSetDefault"
+                               OnExport="HandleExport"
+                               OnDelete="HandleDelete" />
+                }
+            </div>
+        }
+        else
+        {
+            <div class="theme-list">
+                <div class="list-header">
+                    <span class="col-preview">Preview</span>
+                    <button type="button" class="col-name sortable @GetSortClass("name")" @onclick="() => SetSort(SortField.Name)">
+                        Name
+                        <i class="bi bi-chevron-expand"></i>
+                    </button>
+                    <span class="col-description">Description</span>
+                    <button type="button" class="col-mode sortable @GetSortClass("mode")" @onclick="() => SetSort(SortField.Mode)">
+                        Mode
+                        <i class="bi bi-chevron-expand"></i>
+                    </button>
+                    <button type="button" class="col-modified sortable @GetSortClass("modified")" @onclick="() => SetSort(SortField.Modified)">
+                        Modified
+                        <i class="bi bi-chevron-expand"></i>
+                    </button>
+                    <span class="col-actions">Actions</span>
+                </div>
+                <div class="list-body">
+                    @foreach (var theme in _filteredThemes)
+                    {
+                        <div class="list-row @(_selectedTheme?.Id == theme.Id ? "selected" : "")"
+                             @onclick="() => HandleThemeSelect(theme)">
+                            <span class="col-preview">
+                                <span class="color-swatch" style="background: @(theme.PreviewColor ?? "#3B82F6")"></span>
+                            </span>
+                            <span class="col-name">
+                                @theme.Name
+                                @if (theme.IsDefault)
+                                {
+                                    <span class="default-badge">Default</span>
+                                }
+                            </span>
+                            <span class="col-description">@(theme.Description ?? "-")</span>
+                            <span class="col-mode">
+                                @if (theme.Mode == ThemeMode.Light)
+                                {
+                                    <i class="bi bi-sun" title="Light"></i>
+                                }
+                                else if (theme.Mode == ThemeMode.Dark)
+                                {
+                                    <i class="bi bi-moon" title="Dark"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-circle-half" title="Auto"></i>
+                                }
+                            </span>
+                            <span class="col-modified">@FormatDate(theme.ModifiedAt)</span>
+                            <span class="col-actions">
+                                <button type="button" class="action-btn" title="Edit" @onclick="() => HandleEdit(theme)" @onclick:stopPropagation="true">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button type="button" class="action-btn" title="Duplicate" @onclick="() => HandleDuplicate(theme)" @onclick:stopPropagation="true">
+                                    <i class="bi bi-copy"></i>
+                                </button>
+                                @if (!theme.IsDefault)
+                                {
+                                    <button type="button" class="action-btn" title="Set Default" @onclick="() => HandleSetDefault(theme)" @onclick:stopPropagation="true">
+                                        <i class="bi bi-star"></i>
+                                    </button>
+                                }
+                                <button type="button" class="action-btn" title="Export" @onclick="() => HandleExport(theme)" @onclick:stopPropagation="true">
+                                    <i class="bi bi-download"></i>
+                                </button>
+                                @if (!theme.IsLocked)
+                                {
+                                    <button type="button" class="action-btn action-danger" title="Delete" @onclick="() => HandleDelete(theme)" @onclick:stopPropagation="true">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                }
+                            </span>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+    </ChildContent>
+
+    <FooterContent>
+        <div class="library-footer">
+            <div class="footer-left">
+                <Button Variant="primary" Icon="bi-plus-lg" Text="Create New Theme" OnClick="HandleCreateNew" />
+                <Button Variant="secondary" Icon="bi-upload" Text="Import Theme" OnClick="HandleImport" />
+            </div>
+            <div class="footer-right">
+                <Button Variant="ghost" Text="Close" OnClick="HandleClose" />
+            </div>
+        </div>
+    </FooterContent>
+</ModalBase>
+
+@* Delete confirmation modal *@
+<ModalBase @bind-IsOpen="_showDeleteConfirm"
+           Title="Delete Theme"
+           Icon="bi-exclamation-triangle"
+           Size="ModalSize.Small">
+    <ChildContent>
+        <div class="delete-confirm-content">
+            <p>Are you sure you want to delete "<strong>@_themeToDelete?.Name</strong>"?</p>
+            <p class="warning-text">This action cannot be undone.</p>
+        </div>
+    </ChildContent>
+    <FooterContent>
+        <Button Variant="ghost" Text="Cancel" OnClick="CancelDelete" />
+        <Button Variant="danger" Icon="bi-trash" Text="Delete" OnClick="ConfirmDelete" />
+    </FooterContent>
+</ModalBase>
+
+@code {
+    [Inject] private IThemePersistenceService PersistenceService { get; set; } = default!;
+    [Inject] private IThemeImportExportService ImportExportService { get; set; } = default!;
+    [Inject] private IToastService ToastService { get; set; } = default!;
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback<string> OnThemeSelected { get; set; }
+
+    private List<ThemeSummary> _allThemes = new();
+    private List<ThemeSummary> _filteredThemes = new();
+    private ThemeSummary? _selectedTheme;
+    private ThemeSummary? _themeToDelete;
+
+    private string _searchTerm = string.Empty;
+    private string _selectedFilter = "all";
+    private ViewMode _viewMode = ViewMode.Grid;
+    private SortField _sortField = SortField.Modified;
+    private bool _sortDescending = true;
+
+    private bool _isLoading;
+    private bool _showDeleteConfirm;
+
+    private const string EmptyString = "";
+    private const string AllFilter = "all";
+    private const string LightFilter = "light";
+    private const string DarkFilter = "dark";
+    private const string AutoFilter = "auto";
+    private const string DefaultFilter = "default";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (IsOpen && _allThemes.Count == 0)
+        {
+            await LoadThemes();
+        }
+    }
+
+    private async Task LoadThemes()
+    {
+        _isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            _allThemes = (await PersistenceService.ListThemesAsync()).ToList();
+            ApplyFiltersAndSort();
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Failed to load themes: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void ApplyFiltersAndSort()
+    {
+        var filtered = _allThemes.AsEnumerable();
+
+        // Apply search filter
+        if (!string.IsNullOrWhiteSpace(_searchTerm))
+        {
+            var search = _searchTerm.ToLowerInvariant();
+            filtered = filtered.Where(t =>
+                t.Name.ToLowerInvariant().Contains(search) ||
+                (t.Description?.ToLowerInvariant().Contains(search) ?? false));
+        }
+
+        // Apply mode filter
+        filtered = _selectedFilter switch
+        {
+            LightFilter => filtered.Where(t => t.Mode == ThemeMode.Light),
+            DarkFilter => filtered.Where(t => t.Mode == ThemeMode.Dark),
+            AutoFilter => filtered.Where(t => t.Mode == ThemeMode.Auto),
+            DefaultFilter => filtered.Where(t => t.IsDefault),
+            _ => filtered
+        };
+
+        // Apply sort
+        filtered = (_sortField, _sortDescending) switch
+        {
+            (SortField.Name, true) => filtered.OrderByDescending(t => t.Name),
+            (SortField.Name, false) => filtered.OrderBy(t => t.Name),
+            (SortField.Mode, true) => filtered.OrderByDescending(t => t.Mode),
+            (SortField.Mode, false) => filtered.OrderBy(t => t.Mode),
+            (SortField.Modified, true) => filtered.OrderByDescending(t => t.ModifiedAt),
+            (SortField.Modified, false) => filtered.OrderBy(t => t.ModifiedAt),
+            _ => filtered.OrderByDescending(t => t.ModifiedAt)
+        };
+
+        _filteredThemes = filtered.ToList();
+    }
+
+    private string GetThemeCount() => _allThemes.Count.ToString();
+
+    private void HandleSearchInput(ChangeEventArgs e)
+    {
+        _searchTerm = e.Value?.ToString() ?? EmptyString;
+        ApplyFiltersAndSort();
+    }
+
+    private void ClearSearch()
+    {
+        _searchTerm = EmptyString;
+        ApplyFiltersAndSort();
+    }
+
+    private void HandleFilterChange(ChangeEventArgs e)
+    {
+        _selectedFilter = e.Value?.ToString() ?? AllFilter;
+        ApplyFiltersAndSort();
+    }
+
+    private void SetGridView() => _viewMode = ViewMode.Grid;
+    private void SetListView() => _viewMode = ViewMode.List;
+
+    private void SetSort(SortField field)
+    {
+        if (_sortField == field)
+        {
+            _sortDescending = !_sortDescending;
+        }
+        else
+        {
+            _sortField = field;
+            _sortDescending = true;
+        }
+        ApplyFiltersAndSort();
+    }
+
+    private string GetSortClass(string field)
+    {
+        var targetField = field switch
+        {
+            "name" => SortField.Name,
+            "mode" => SortField.Mode,
+            "modified" => SortField.Modified,
+            _ => SortField.Modified
+        };
+
+        if (_sortField != targetField) return EmptyString;
+        return _sortDescending ? "sort-desc" : "sort-asc";
+    }
+
+    private void HandleThemeSelect(ThemeSummary theme)
+    {
+        _selectedTheme = _selectedTheme?.Id == theme.Id ? null : theme;
+    }
+
+    private async Task HandleEdit(ThemeSummary theme)
+    {
+        await CloseModal();
+        Navigation.NavigateTo($"/admin/theme-editor/{theme.Id}");
+    }
+
+    private async Task HandleDuplicate(ThemeSummary theme)
+    {
+        try
+        {
+            var newName = $"{theme.Name} (Copy)";
+            var duplicated = await PersistenceService.DuplicateThemeAsync(theme.Id, newName);
+
+            if (duplicated != null)
+            {
+                ToastService.ShowSuccess($"Theme duplicated as \"{newName}\"");
+                await LoadThemes();
+            }
+            else
+            {
+                ToastService.ShowError("Failed to duplicate theme");
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Failed to duplicate: {ex.Message}");
+        }
+    }
+
+    private async Task HandleSetDefault(ThemeSummary theme)
+    {
+        try
+        {
+            var success = await PersistenceService.SetDefaultThemeAsync(theme.Id);
+
+            if (success)
+            {
+                ToastService.ShowSuccess($"\"{theme.Name}\" set as default theme");
+                await LoadThemes();
+            }
+            else
+            {
+                ToastService.ShowError("Failed to set default theme");
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Failed to set default: {ex.Message}");
+        }
+    }
+
+    private async Task HandleExport(ThemeSummary theme)
+    {
+        try
+        {
+            var fullTheme = await PersistenceService.GetThemeAsync(theme.Id);
+            if (fullTheme == null)
+            {
+                ToastService.ShowError("Theme not found");
+                return;
+            }
+
+            var json = ImportExportService.ExportToJson(fullTheme);
+            // TODO: Trigger file download via JS interop
+            ToastService.ShowSuccess($"Theme \"{theme.Name}\" exported");
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Failed to export: {ex.Message}");
+        }
+    }
+
+    private void HandleDelete(ThemeSummary theme)
+    {
+        _themeToDelete = theme;
+        _showDeleteConfirm = true;
+    }
+
+    private void CancelDelete()
+    {
+        _themeToDelete = null;
+        _showDeleteConfirm = false;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        if (_themeToDelete == null) return;
+
+        try
+        {
+            var success = await PersistenceService.DeleteThemeAsync(_themeToDelete.Id);
+
+            if (success)
+            {
+                ToastService.ShowSuccess($"Theme \"{_themeToDelete.Name}\" deleted");
+                _themeToDelete = null;
+                _showDeleteConfirm = false;
+                await LoadThemes();
+            }
+            else
+            {
+                ToastService.ShowError("Failed to delete theme");
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Failed to delete: {ex.Message}");
+        }
+    }
+
+    private async Task HandleCreateNew()
+    {
+        await CloseModal();
+        Navigation.NavigateTo("/admin/theme-editor/new");
+    }
+
+    private void HandleImport()
+    {
+        // TODO: Implement import modal/file picker
+        ToastService.ShowInfo("Import functionality coming soon");
+    }
+
+    private async Task HandleClose()
+    {
+        await CloseModal();
+    }
+
+    private async Task CloseModal()
+    {
+        await IsOpenChanged.InvokeAsync(false);
+        await OnClose.InvokeAsync();
+    }
+
+    private static string FormatDate(DateTime date)
+    {
+        var diff = DateTime.UtcNow - date;
+
+        if (diff.TotalMinutes < 1) return "Just now";
+        if (diff.TotalHours < 1) return $"{(int)diff.TotalMinutes}m ago";
+        if (diff.TotalDays < 1) return $"{(int)diff.TotalHours}h ago";
+        if (diff.TotalDays < 7) return $"{(int)diff.TotalDays}d ago";
+
+        return date.ToString("MMM d, yyyy");
+    }
+
+    private enum ViewMode { Grid, List }
+    private enum SortField { Name, Mode, Modified }
+}

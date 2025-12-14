@@ -1,0 +1,138 @@
+@* Component-level styling section - Advanced Mode only *@
+@implements IDisposable
+
+@using DynamicForms.Models.Theming
+@using VisualEditorOpus.Services.Theming
+@using VisualEditorOpus.Components.Properties
+
+@if (IsAdvancedMode)
+{
+    <PropertySection Title="Component Styles" Icon="bi-puzzle" DefaultCollapsed="true">
+        <div class="components-section">
+            @if (Components is not null)
+            {
+                <div class="component-tabs">
+                    @foreach (var tab in _tabs)
+                    {
+                        <button type="button"
+                                class="tab-btn @(_activeTab == tab.Id ? "active" : "")"
+                                @onclick="@(() => SetActiveTab(tab.Id))">
+                            <i class="bi @tab.Icon"></i>
+                            <span>@tab.Label</span>
+                        </button>
+                    }
+                </div>
+
+                <div class="component-content">
+                    @switch (_activeTab)
+                    {
+                        case "buttons":
+                            <ButtonStyleEditor Styles="Components.Buttons" OnChange="HandleButtonsChange" />
+                            break;
+                        case "inputs":
+                            <InputStyleEditor Styles="Components.Inputs" OnChange="HandleInputsChange" />
+                            break;
+                        case "dropdowns":
+                            <DropdownStyleEditor Styles="Components.Dropdowns" OnChange="HandleDropdownsChange" />
+                            break;
+                        case "checkboxes":
+                            <CheckboxRadioStyleEditor
+                                CheckboxStyles="Components.Checkboxes"
+                                RadioStyles="Components.RadioButtons"
+                                OnCheckboxChange="HandleCheckboxesChange"
+                                OnRadioChange="HandleRadiosChange" />
+                            break;
+                        case "panels":
+                            <PanelStyleEditor Styles="Components.Panels" OnChange="HandlePanelsChange" />
+                            break;
+                        case "progress":
+                            <ProgressBarStyleEditor Styles="Components.ProgressBar" OnChange="HandleProgressChange" />
+                            break;
+                        case "navigation":
+                            <NavigationStyleEditor Styles="Components.Navigation" OnChange="HandleNavigationChange" />
+                            break;
+                    }
+                </div>
+            }
+        </div>
+    </PropertySection>
+}
+
+@code {
+    [Inject] private IThemeEditorStateService ThemeState { get; set; } = default!;
+
+    private ThemeComponentStyles? Components => ThemeState.CurrentTheme?.Components;
+    private bool IsAdvancedMode => ThemeState.IsAdvancedMode;
+
+    private string _activeTab = "buttons";
+
+    private static readonly TabInfo[] _tabs = new[]
+    {
+        new TabInfo("buttons", "Buttons", "bi-hand-index"),
+        new TabInfo("inputs", "Inputs", "bi-input-cursor-text"),
+        new TabInfo("dropdowns", "Dropdowns", "bi-chevron-down"),
+        new TabInfo("checkboxes", "Checkboxes", "bi-check-square"),
+        new TabInfo("panels", "Panels", "bi-window"),
+        new TabInfo("progress", "Progress", "bi-bar-chart-steps"),
+        new TabInfo("navigation", "Navigation", "bi-arrow-left-right")
+    };
+
+    protected override void OnInitialized()
+    {
+        ThemeState.OnThemeChanged += HandleThemeChanged;
+        ThemeState.OnAdvancedModeChanged += HandleAdvancedModeChanged;
+    }
+
+    private void HandleThemeChanged() => InvokeAsync(StateHasChanged);
+    private void HandleAdvancedModeChanged(bool _) => InvokeAsync(StateHasChanged);
+
+    private void SetActiveTab(string tabId) => _activeTab = tabId;
+
+    private void HandleButtonsChange(ButtonStyles styles)
+    {
+        ThemeState.UpdateComponentStyles(c => c.Buttons = styles);
+    }
+
+    private void HandleInputsChange(InputStyles styles)
+    {
+        ThemeState.UpdateComponentStyles(c => c.Inputs = styles);
+    }
+
+    private void HandleDropdownsChange(DropdownStyles styles)
+    {
+        ThemeState.UpdateComponentStyles(c => c.Dropdowns = styles);
+    }
+
+    private void HandleCheckboxesChange(CheckboxStyles styles)
+    {
+        ThemeState.UpdateComponentStyles(c => c.Checkboxes = styles);
+    }
+
+    private void HandleRadiosChange(RadioStyles styles)
+    {
+        ThemeState.UpdateComponentStyles(c => c.RadioButtons = styles);
+    }
+
+    private void HandlePanelsChange(PanelStyles styles)
+    {
+        ThemeState.UpdateComponentStyles(c => c.Panels = styles);
+    }
+
+    private void HandleProgressChange(ProgressBarStyles styles)
+    {
+        ThemeState.UpdateComponentStyles(c => c.ProgressBar = styles);
+    }
+
+    private void HandleNavigationChange(NavigationStyles styles)
+    {
+        ThemeState.UpdateComponentStyles(c => c.Navigation = styles);
+    }
+
+    public void Dispose()
+    {
+        ThemeState.OnThemeChanged -= HandleThemeChanged;
+        ThemeState.OnAdvancedModeChanged -= HandleAdvancedModeChanged;
+    }
+
+    private record TabInfo(string Id, string Label, string Icon);
+}

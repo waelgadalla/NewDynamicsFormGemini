@@ -1,0 +1,229 @@
+@* Checkbox and Radio button style editor *@
+
+@using DynamicForms.Models.Theming
+@using VisualEditorOpus.Components.Theming.Editor.Controls
+
+<div class="style-editor">
+    <div class="editor-section">
+        <span class="section-label">Checkbox</span>
+        <div class="control-grid">
+            <ColorInput Label="Border" Value="@GetValue(CheckboxStyles?.BorderColor)" ValueChanged="HandleCheckboxBorderChange" />
+            <ColorInput Label="Checked BG" Value="@GetValue(CheckboxStyles?.CheckedBackground)" ValueChanged="HandleCheckboxCheckedBgChange" />
+            <ColorInput Label="Check Mark" Value="@GetValue(CheckboxStyles?.CheckMarkColor)" ValueChanged="HandleCheckboxCheckMarkChange" />
+        </div>
+        <div class="prop-row" style="margin-top: 8px;">
+            <div class="prop-group">
+                <label class="prop-label">Size</label>
+                <div class="size-input">
+                    <input type="number" class="prop-input"
+                           value="@ParsePx(CheckboxStyles?.Size)"
+                           @onchange="HandleCheckboxSizeChange"
+                           min="14" max="24" step="2" />
+                    <span class="unit">px</span>
+                </div>
+            </div>
+            <div class="prop-group">
+                <label class="prop-label">Border Radius</label>
+                <div class="size-input">
+                    <input type="number" class="prop-input"
+                           value="@ParsePx(CheckboxStyles?.BorderRadius)"
+                           @onchange="HandleCheckboxRadiusChange"
+                           min="0" max="8" step="1" />
+                    <span class="unit">px</span>
+                </div>
+            </div>
+            <div class="prop-group">
+                <label class="prop-label">Label Gap</label>
+                <div class="size-input">
+                    <input type="number" class="prop-input"
+                           value="@ParsePx(CheckboxStyles?.LabelSpacing)"
+                           @onchange="HandleCheckboxLabelGapChange"
+                           min="4" max="16" step="2" />
+                    <span class="unit">px</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="editor-section">
+        <span class="section-label">Radio Button</span>
+        <div class="control-grid">
+            <ColorInput Label="Border" Value="@GetValue(RadioStyles?.BorderColor)" ValueChanged="HandleRadioBorderChange" />
+            <ColorInput Label="Selected BG" Value="@GetValue(RadioStyles?.SelectedBackground)" ValueChanged="HandleRadioSelectedBgChange" />
+            <ColorInput Label="Dot Color" Value="@GetValue(RadioStyles?.DotColor)" ValueChanged="HandleRadioDotColorChange" />
+        </div>
+        <div class="prop-row" style="margin-top: 8px;">
+            <div class="prop-group">
+                <label class="prop-label">Size</label>
+                <div class="size-input">
+                    <input type="number" class="prop-input"
+                           value="@ParsePx(RadioStyles?.Size)"
+                           @onchange="HandleRadioSizeChange"
+                           min="14" max="24" step="2" />
+                    <span class="unit">px</span>
+                </div>
+            </div>
+            <div class="prop-group">
+                <label class="prop-label">Dot Size</label>
+                <div class="size-input">
+                    <input type="number" class="prop-input"
+                           value="@ParsePx(RadioStyles?.DotSize)"
+                           @onchange="HandleRadioDotSizeChange"
+                           min="4" max="12" step="2" />
+                    <span class="unit">px</span>
+                </div>
+            </div>
+            <div class="prop-group">
+                <label class="prop-label">Label Gap</label>
+                <div class="size-input">
+                    <input type="number" class="prop-input"
+                           value="@ParsePx(RadioStyles?.LabelSpacing)"
+                           @onchange="HandleRadioLabelGapChange"
+                           min="4" max="16" step="2" />
+                    <span class="unit">px</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="preview-section">
+        <span class="section-label">Preview</span>
+        <div class="checkbox-radio-preview">
+            <div class="preview-row">
+                <label class="preview-checkbox" style="@GetCheckboxContainerStyle()">
+                    <span class="checkbox-box" style="@GetCheckboxStyle()"></span>
+                    <span>Unchecked</span>
+                </label>
+                <label class="preview-checkbox" style="@GetCheckboxContainerStyle()">
+                    <span class="checkbox-box checked" style="@GetCheckedCheckboxStyle()">
+                        <i class="bi bi-check" style="@GetCheckMarkStyle()"></i>
+                    </span>
+                    <span>Checked</span>
+                </label>
+            </div>
+            <div class="preview-row">
+                <label class="preview-radio" style="@GetRadioContainerStyle()">
+                    <span class="radio-circle" style="@GetRadioStyle()"></span>
+                    <span>Unselected</span>
+                </label>
+                <label class="preview-radio" style="@GetRadioContainerStyle()">
+                    <span class="radio-circle selected" style="@GetSelectedRadioStyle()">
+                        <span class="radio-dot" style="@GetDotStyle()"></span>
+                    </span>
+                    <span>Selected</span>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public CheckboxStyles? CheckboxStyles { get; set; }
+    [Parameter] public RadioStyles? RadioStyles { get; set; }
+    [Parameter] public EventCallback<CheckboxStyles> OnCheckboxChange { get; set; }
+    [Parameter] public EventCallback<RadioStyles> OnRadioChange { get; set; }
+
+    private const string EmptyString = "";
+    private const string DefaultColor = "#000000";
+
+    private string GetValue(string? value) => string.IsNullOrEmpty(value) ? DefaultColor : value;
+
+    private void UpdateCheckbox(Action<CheckboxStyles> action)
+    {
+        var styles = CheckboxStyles?.Clone() ?? new CheckboxStyles();
+        action(styles);
+        OnCheckboxChange.InvokeAsync(styles);
+    }
+
+    private void UpdateRadio(Action<RadioStyles> action)
+    {
+        var styles = RadioStyles?.Clone() ?? new RadioStyles();
+        action(styles);
+        OnRadioChange.InvokeAsync(styles);
+    }
+
+    // Checkbox handlers
+    private void HandleCheckboxBorderChange(string v) => UpdateCheckbox(s => s.BorderColor = v);
+    private void HandleCheckboxCheckedBgChange(string v) => UpdateCheckbox(s => s.CheckedBackground = v);
+    private void HandleCheckboxCheckMarkChange(string v) => UpdateCheckbox(s => s.CheckMarkColor = v);
+    private void HandleCheckboxSizeChange(ChangeEventArgs e) => UpdateCheckbox(s => s.Size = ToPx(e));
+    private void HandleCheckboxRadiusChange(ChangeEventArgs e) => UpdateCheckbox(s => s.BorderRadius = ToPx(e));
+    private void HandleCheckboxLabelGapChange(ChangeEventArgs e) => UpdateCheckbox(s => s.LabelSpacing = ToPx(e));
+
+    // Radio handlers
+    private void HandleRadioBorderChange(string v) => UpdateRadio(s => s.BorderColor = v);
+    private void HandleRadioSelectedBgChange(string v) => UpdateRadio(s => s.SelectedBackground = v);
+    private void HandleRadioDotColorChange(string v) => UpdateRadio(s => s.DotColor = v);
+    private void HandleRadioSizeChange(ChangeEventArgs e) => UpdateRadio(s => s.Size = ToPx(e));
+    private void HandleRadioDotSizeChange(ChangeEventArgs e) => UpdateRadio(s => s.DotSize = ToPx(e));
+    private void HandleRadioLabelGapChange(ChangeEventArgs e) => UpdateRadio(s => s.LabelSpacing = ToPx(e));
+
+    private static int ParsePx(string? value)
+    {
+        if (string.IsNullOrEmpty(value)) return 0;
+        var numeric = value.Replace("px", EmptyString).Trim();
+        return int.TryParse(numeric, out var result) ? result : 0;
+    }
+
+    private static string ToPx(ChangeEventArgs e)
+    {
+        return int.TryParse(e.Value?.ToString(), out var v) && v > 0 ? v + "px" : EmptyString;
+    }
+
+    private string GetCheckboxContainerStyle()
+    {
+        return !string.IsNullOrEmpty(CheckboxStyles?.LabelSpacing) ? $"gap: {CheckboxStyles.LabelSpacing}" : EmptyString;
+    }
+
+    private string GetCheckboxStyle()
+    {
+        var style = new List<string>();
+        if (!string.IsNullOrEmpty(CheckboxStyles?.Size)) style.Add($"width: {CheckboxStyles.Size}; height: {CheckboxStyles.Size}");
+        if (!string.IsNullOrEmpty(CheckboxStyles?.BorderColor)) style.Add($"border-color: {CheckboxStyles.BorderColor}");
+        if (!string.IsNullOrEmpty(CheckboxStyles?.BorderRadius)) style.Add($"border-radius: {CheckboxStyles.BorderRadius}");
+        return string.Join("; ", style);
+    }
+
+    private string GetCheckedCheckboxStyle()
+    {
+        var style = new List<string>();
+        if (!string.IsNullOrEmpty(CheckboxStyles?.Size)) style.Add($"width: {CheckboxStyles.Size}; height: {CheckboxStyles.Size}");
+        if (!string.IsNullOrEmpty(CheckboxStyles?.CheckedBackground)) style.Add($"background: {CheckboxStyles.CheckedBackground}; border-color: {CheckboxStyles.CheckedBackground}");
+        if (!string.IsNullOrEmpty(CheckboxStyles?.BorderRadius)) style.Add($"border-radius: {CheckboxStyles.BorderRadius}");
+        return string.Join("; ", style);
+    }
+
+    private string GetCheckMarkStyle()
+    {
+        return !string.IsNullOrEmpty(CheckboxStyles?.CheckMarkColor) ? $"color: {CheckboxStyles.CheckMarkColor}" : EmptyString;
+    }
+
+    private string GetRadioContainerStyle()
+    {
+        return !string.IsNullOrEmpty(RadioStyles?.LabelSpacing) ? $"gap: {RadioStyles.LabelSpacing}" : EmptyString;
+    }
+
+    private string GetRadioStyle()
+    {
+        var style = new List<string>();
+        if (!string.IsNullOrEmpty(RadioStyles?.Size)) style.Add($"width: {RadioStyles.Size}; height: {RadioStyles.Size}");
+        if (!string.IsNullOrEmpty(RadioStyles?.BorderColor)) style.Add($"border-color: {RadioStyles.BorderColor}");
+        return string.Join("; ", style);
+    }
+
+    private string GetSelectedRadioStyle()
+    {
+        var style = new List<string>();
+        if (!string.IsNullOrEmpty(RadioStyles?.Size)) style.Add($"width: {RadioStyles.Size}; height: {RadioStyles.Size}");
+        if (!string.IsNullOrEmpty(RadioStyles?.SelectedBackground)) style.Add($"border-color: {RadioStyles.SelectedBackground}");
+        return string.Join("; ", style);
+    }
+
+    private string GetDotStyle()
+    {
+        var style = new List<string>();
+        if (!string.IsNullOrEmpty(RadioStyles?.DotSize)) style.Add($"width: {RadioStyles.DotSize}; height: {RadioStyles.DotSize}");
+        if (!string.IsNullOrEmpty(RadioStyles?.DotColor)) style.Add($"background: {RadioStyles.DotColor}");
+        return string.Join("; ", style);
+    }
+}

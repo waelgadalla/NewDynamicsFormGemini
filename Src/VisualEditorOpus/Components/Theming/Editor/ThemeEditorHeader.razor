@@ -3,10 +3,14 @@
 
 @using DynamicForms.Models.Theming
 @using VisualEditorOpus.Services.Theming
+@using VisualEditorOpus.Components.Theming.Modals
 
 <div class="theme-editor-header">
     <div class="header-left">
-        <button class="btn btn-ghost btn-icon-sm" @onclick="GoBack" title="Back to Admin">
+        <button class="btn btn-ghost btn-icon-sm mobile-menu-btn" @onclick="HandleMenuToggle" title="Toggle Sidebar">
+            <i class="bi bi-list"></i>
+        </button>
+        <button class="btn btn-ghost btn-icon-sm desktop-only" @onclick="GoBack" title="Back to Admin">
             <i class="bi bi-arrow-left"></i>
         </button>
         <div class="header-title">
@@ -64,6 +68,16 @@
     </div>
 
     <div class="header-actions">
+        @* Theme Library button *@
+        <button class="btn btn-ghost library-btn" @onclick="OpenLibrary" title="Theme Library">
+            <i class="bi bi-collection"></i>
+            <span>Library</span>
+            @if (_themeCount > 0)
+            {
+                <span class="library-badge">@_themeCount</span>
+            }
+        </button>
+
         @* Undo/Redo buttons *@
         <div class="undo-redo-group">
             <button class="btn btn-ghost btn-icon-sm"
@@ -109,20 +123,27 @@
     </div>
 </div>
 
+<ThemeLibraryModal @bind-IsOpen="_showLibraryModal" OnClose="HandleLibraryClosed" />
+
 @code {
     [Inject] private IThemeEditorStateService ThemeState { get; set; } = default!;
+    [Inject] private IThemePersistenceService PersistenceService { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
     [Inject] private IToastService ToastService { get; set; } = default!;
     [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
 
+    [Parameter] public EventCallback OnMenuToggle { get; set; }
+
     private bool _showActionsMenu;
+    private bool _showLibraryModal;
+    private int _themeCount;
     private string? _selectedPresetId;
     private IEnumerable<SelectOption> _presetOptions = Array.Empty<SelectOption>();
     private DotNetObjectReference<ThemeEditorHeader>? _dotNetRef;
 
     private ThemeMode CurrentMode => ThemeState.CurrentTheme?.Mode ?? ThemeMode.Light;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         ThemeState.OnThemeChanged += HandleThemeChanged;
         ThemeState.OnHistoryChanged += HandleHistoryChanged;
@@ -135,6 +156,33 @@
         _presetOptions = new[] { new SelectOption("", "Custom Theme") }
             .Concat(presets)
             .ToList();
+
+        // Load theme count for badge
+        await LoadThemeCount();
+    }
+
+    private async Task LoadThemeCount()
+    {
+        try
+        {
+            var themes = await PersistenceService.ListThemesAsync();
+            _themeCount = themes.Count;
+        }
+        catch
+        {
+            _themeCount = 0;
+        }
+    }
+
+    private void OpenLibrary()
+    {
+        _showLibraryModal = true;
+    }
+
+    private async Task HandleLibraryClosed()
+    {
+        _showLibraryModal = false;
+        await LoadThemeCount();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -204,6 +252,12 @@
         }
     }
 
+    [JSInvokable]
+    public void OnSaveShortcut()
+    {
+        HandleSave();
+    }
+
     private void HandleUndo()
     {
         ThemeState.Undo();
@@ -212,6 +266,11 @@
     private void HandleRedo()
     {
         ThemeState.Redo();
+    }
+
+    private async Task HandleMenuToggle()
+    {
+        await OnMenuToggle.InvokeAsync();
     }
 
     private void GoBack()

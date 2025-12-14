@@ -4,9 +4,12 @@
 @using VisualEditorOpus.Services.Theming
 @using VisualEditorOpus.Components.Theming.Editor.Sections
 
-<div class="theme-editor-sidebar">
+<div class="theme-editor-sidebar @(IsOpen ? "open" : "")">
     <div class="sidebar-header">
         <span class="sidebar-title">Theme Settings</span>
+        <button type="button" class="sidebar-close mobile-only" @onclick="HandleClose" title="Close Sidebar">
+            <i class="bi bi-x-lg"></i>
+        </button>
     </div>
 
     <div class="sidebar-content">
@@ -27,12 +30,17 @@
             <ShadowsSection />
             <HeaderSection />
             <BackgroundSection />
+            <ComponentsSection />
+            <ThemeAccessibilitySection />
         }
     </div>
 </div>
 
 @code {
     [Inject] private IThemeEditorStateService ThemeState { get; set; } = default!;
+
+    [Parameter] public bool IsOpen { get; set; } = true;
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
 
     protected override void OnInitialized()
     {
@@ -42,6 +50,11 @@
     private void HandleThemeChanged()
     {
         InvokeAsync(StateHasChanged);
+    }
+
+    private async Task HandleClose()
+    {
+        await IsOpenChanged.InvokeAsync(false);
     }
 
     public void Dispose()
